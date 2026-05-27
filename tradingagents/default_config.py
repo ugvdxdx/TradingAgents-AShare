@@ -30,13 +30,14 @@ DEFAULT_CONFIG = {
     # Provider routing trace logs
     "provider_trace": os.getenv("TA_TRACE", "1").lower() in ("1", "true", "yes", "on"),
     
-    # Data vendor configuration
+    # Data vendor configuration — cn_astock (direct HTTP/TCP) is primary
     "data_vendors": {
-        "core_stock_apis": "cn_akshare,cn_baostock,yfinance",
-        "technical_indicators": "cn_akshare,cn_baostock,yfinance",
-        "fundamental_data": "cn_akshare,cn_baostock,yfinance",
-        "news_data": "cn_akshare,cn_baostock,yfinance",
-        "realtime_data": "cn_akshare",
+        "core_stock_apis": "cn_astock,cn_akshare,cn_baostock,yfinance",
+        "technical_indicators": "cn_astock,cn_akshare,cn_baostock,yfinance",
+        "fundamental_data": "cn_astock,cn_akshare,cn_baostock,yfinance",
+        "news_data": "cn_astock,cn_akshare,cn_baostock,yfinance",
+        "realtime_data": "cn_astock,cn_akshare",
+        "cn_market_data": "cn_astock,cn_akshare",
     },
     "tool_vendors": {},
 }

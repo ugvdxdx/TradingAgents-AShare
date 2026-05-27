@@ -66,13 +66,12 @@ def _create_tracked_task(coro, *, label: str = "Background task") -> asyncio.Tas
 from api.database import (
     ScheduledAnalysisDB,
     ReportDB,
-    UserDB,
     init_db,
     get_db_ctx,
+    DEFAULT_USER_ID,
 )
 from api.job_store import get_job_store as _new_job_store
 from api.services import (
-    auth_service,
     report_service,
     scheduled_service,
 )
@@ -127,42 +126,23 @@ async def _concurrency_slot(job_id: str, symbol: str):
 async def _send_scheduled_report_notifications(
     user_id: str, report_id: str, symbol: str
 ) -> None:
-    """Send configured scheduled report notifications (email & WeCom)."""
+    """Send configured scheduled report notifications (WeCom only, email deferred)."""
     try:
-        from api.services.email_report_service import send_report_email_with_retry
         from api.services.wecom_notification_service import send_report_message_with_retry
 
-        def _load_notification_targets():
-            email_user = None
-            report_to_send = None
-            webhook_url = None
-            wecom_report_enabled = True
+        # In single-user mode, read notification config from env vars
+        webhook_url = os.getenv("TA_WECOM_WEBHOOK_URL", "")
+        wecom_report_enabled = os.getenv("TA_WECOM_REPORT_ENABLED", "1").lower() in ("1", "true", "yes", "on")
+
+        def _load_report():
             with get_db_ctx() as db:
-                user = db.query(UserDB).filter(UserDB.id == user_id).first()
                 report = db.query(ReportDB).filter(ReportDB.id == report_id).first()
-                user_cfg = auth_service.get_user_llm_config(db, user_id)
-                webhook_url = auth_service.decrypt_secret(
-                    getattr(user_cfg, "wecom_webhook_encrypted", None)
-                )
                 if report:
                     db.expunge(report)
-                    report_to_send = report
-                if user:
-                    wecom_report_enabled = getattr(user, "wecom_report_enabled", True)
-                    if getattr(user, "email_report_enabled", True):
-                        db.expunge(user)
-                        email_user = user
-            return email_user, report_to_send, webhook_url, wecom_report_enabled
+                return report
 
-        email_user, report_to_send, webhook_url, wecom_report_enabled = (
-            await asyncio.to_thread(_load_notification_targets)
-        )
-        if email_user and report_to_send:
-            _log(f"[Scheduler] Sending email report for {symbol} to {email_user.email}")
-            _create_tracked_task(
-                send_report_email_with_retry(email_user, report_to_send),
-                label=f"Email notification task ({symbol})",
-            )
+        report_to_send = await asyncio.to_thread(_load_report)
+
         if report_to_send and webhook_url and wecom_report_enabled:
             _log(f"[Scheduler] Sending WeCom report for {symbol}")
             _create_tracked_task(
@@ -420,9 +400,9 @@ async def _startup():
     _log("Trade calendar pre-loaded.")
 
     # Pre-load stock + ETF name map
-    from api.main import _load_cn_stock_map
+    from tradingagents.stock_utils import load_cn_stock_map
 
-    await asyncio.to_thread(_load_cn_stock_map)
+    await asyncio.to_thread(load_cn_stock_map)
     _log("Stock map pre-loaded on startup.")
 
     # Run the scheduler loop (blocks until cancelled)

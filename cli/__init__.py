@@ -1,0 +1,1 @@
+"""TradingAgents CLI — command-line interface for stock analysis."""

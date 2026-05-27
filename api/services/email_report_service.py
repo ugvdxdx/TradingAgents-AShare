@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, List, Optional
 import markdown as _md
 
 if TYPE_CHECKING:
-    from api.database import ReportDB, UserDB
+    from api.database import ReportDB
 
 logger = logging.getLogger(__name__)
 
@@ -405,11 +405,20 @@ def render_report_html(report: "ReportDB", frontend_url: str = "", stock_name: s
 # SMTP sending
 # ---------------------------------------------------------------------------
 
-def send_report_email(user: "UserDB", report: "ReportDB", stock_name: str = "") -> bool:
+def send_report_email(user_or_email, report: "ReportDB", stock_name: str = "") -> bool:
     """Send the rendered report email via SMTP.
 
+    Args:
+        user_or_email: Either a UserDB-like object with .email attribute, or a plain email string.
     Returns True on success, False on failure.  Never raises.
     """
+    email_address = getattr(user_or_email, "email", None) or user_or_email or os.getenv("TA_EMAIL_REPORT_TO", "")
+    if isinstance(email_address, str):
+        email_address = email_address.strip()
+    if not email_address:
+        logger.info("[email_report] No email recipient configured, skipping send")
+        return False
+
     smtp_host = _get_env_alias(["MAIL_HOST", "MAIL_SERVER", "SMTP_HOST"]).strip()
     if not smtp_host:
         logger.info("[email_report] SMTP not configured, skipping send")
@@ -439,7 +448,7 @@ def send_report_email(user: "UserDB", report: "ReportDB", stock_name: str = "") 
     msg = EmailMessage()
     msg["Subject"] = f"TradingAgents 投研报告 - {display_name} ({trade_date})"
     msg["From"] = smtp_from
-    msg["To"] = user.email
+    msg["To"] = email_address
 
     # text/plain fallback
     plain = f"TradingAgents 投研报告\n{display_name} {trade_date}\n决策: {report.decision or '-'}\n方向: {report.direction or '-'}\n置信度: {report.confidence or '-'}%{report_link}\n\n请使用支持 HTML 的邮件客户端查看完整报告。"
@@ -447,7 +456,7 @@ def send_report_email(user: "UserDB", report: "ReportDB", stock_name: str = "") 
     msg.add_alternative(html_body, subtype="html")
 
     try:
-        logger.info(f"[email_report] sending to {user.email} via {smtp_host}:{smtp_port}")
+        logger.info(f"[email_report] sending to {email_address} via {smtp_host}:{smtp_port}")
         smtp_cls = smtplib.SMTP_SSL if smtp_ssl_tls else smtplib.SMTP
         with smtp_cls(smtp_host, smtp_port, timeout=20) as server:
             if smtp_starttls and not smtp_ssl_tls:
@@ -455,10 +464,10 @@ def send_report_email(user: "UserDB", report: "ReportDB", stock_name: str = "") 
             if smtp_user:
                 server.login(smtp_user, smtp_password)
             server.send_message(msg)
-        logger.info(f"[email_report] sent OK to {user.email}")
+        logger.info(f"[email_report] sent OK to {email_address}")
         return True
     except Exception as e:
-        logger.error(f"[email_report] failed to send to {user.email}: {e}")
+        logger.error(f"[email_report] failed to send to {email_address}: {e}")
         return False
 
 
@@ -466,18 +475,18 @@ def send_report_email(user: "UserDB", report: "ReportDB", stock_name: str = "") 
 # Async wrapper with retry
 # ---------------------------------------------------------------------------
 
-async def send_report_email_with_retry(user: "UserDB", report: "ReportDB", stock_name: str = "") -> bool:
+async def send_report_email_with_retry(user_or_email, report: "ReportDB", stock_name: str = "") -> bool:
     """Send report email asynchronously, retrying once on failure after 180 s."""
     ok = await asyncio.to_thread(send_report_email, user, report, stock_name)
     if ok:
-        logger.info(f"[email_report] first attempt succeeded for {user.email}")
+        logger.info(f"[email_report] first attempt succeeded for {email_address}")
         return True
 
-    logger.warning(f"[email_report] first attempt failed for {user.email}, retrying in 180s")
+    logger.warning(f"[email_report] first attempt failed for {email_address}, retrying in 180s")
     await asyncio.sleep(180)
     ok = await asyncio.to_thread(send_report_email, user, report, stock_name)
     if ok:
-        logger.info(f"[email_report] retry succeeded for {user.email}")
+        logger.info(f"[email_report] retry succeeded for {email_address}")
     else:
-        logger.error(f"[email_report] retry also failed for {user.email}")
+        logger.error(f"[email_report] retry also failed for {email_address}")
     return ok

@@ -1,8 +1,25 @@
+import contextvars
 import os
 
 from .alpha_vantage_common import AlphaVantageRateLimitError
 from .config import get_config
 from .providers import build_default_registry
+
+# ── Provider Trace Collector ──────────────────────────────────
+# ContextVar so each async context (job) has its own trace list.
+_trace_collector_var: contextvars.ContextVar = contextvars.ContextVar(
+    "trace_collector", default=None
+)
+
+
+def set_trace_collector(collector: list | None) -> None:
+    """Set the trace collector list for the current async context."""
+    _trace_collector_var.set(collector)
+
+
+def get_trace_collector() -> list | None:
+    """Get the trace collector list for the current async context."""
+    return _trace_collector_var.get()
 
 # Tools organized by category
 TOOLS_CATEGORIES = {
@@ -64,6 +81,10 @@ def _is_trace_enabled() -> bool:
 def _trace(msg: str) -> None:
     if _is_trace_enabled():
         print(f"[provider-trace] {msg}", flush=True)
+    # Also record into the context-local collector if one is set
+    collector = _trace_collector_var.get()
+    if collector is not None:
+        collector.append(msg)
 
 
 _TRACE_KEYS = ("symbol", "ticker", "start_date", "end_date", "curr_date", "indicator")

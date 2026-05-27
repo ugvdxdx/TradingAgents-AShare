@@ -1,200 +1,207 @@
-# TradingAgents-AShare：A股智能投研多智能体系统
+# J-TradingAgents
 
-本项目是基于多智能体协作的 A 股深度分析系统，模拟顶级投研机构的决策闭环，通过 14 名专业 Agent 的多空辩论与风控博弈，为投资者提供结构化的交易建议。
+量化多 Agent 分析框架 — 使用 LangGraph 编排 14 个专业 Agent 对 A 股/美股/港股进行综合投研分析。
 
-[在线体验](https://app.510168.xyz) | [Releases](https://github.com/KylinMountain/TradingAgents-AShare/releases) | [OpenClaw 技能](https://clawhub.ai/kylinmountain/tradingagents-analysis)
+## 架构概览
 
-<div align="center">
-  <img src="assets/web/analysis.png" width="100%" alt="智能分析"/>
-  <p><em>14 名智能体实时协作，左侧对话驱动，右侧可视化全流程</em></p>
-</div>
-
-> TradingAgents-AShare 已正式上线 OpenClaw！您只需通过 `tradingagents-analysis` 技能，即可让您的 AI助手具备专业的 A 股深度投研能力。
-
-## 功能特性
-
-### 辩论对战可视化
-
-点击 Agent 卡片即可打开辩论 Drawer，实时观看多空对抗与风控三方辩论。垂直时间线按 Round 分组，Token 级流式呈现每位 Agent 的发言，裁决卡片独立高亮展示。
-
-<div align="center">
-  <img src="assets/web/debate_drawer.png" width="80%" alt="辩论对战可视化"/>
-</div>
-
-### 意图驱动的自然语言交互
-
-直接输入"调研茅台短线"即可自动识别标的、解析投资周期，支持短线与中线双周期分析，无需填写表单。
-
-### 自选股与定时分析
-
-数据库持久化自选列表，支持批量加入股票、自定义周期与触发时间，并可在前端批量更新、删除或手动测试定时任务。定时分析会自动复用持仓上下文，连续失败自动停用，无需人工干预。
-
-<div align="center">
-  <img src="assets/web/timer_analysis.png" width="80%" alt="定时分析"/>
-</div>
-
-### 持仓追踪与跟踪看板
-
-支持导入持仓数据，自动记录持仓、成本价与仓位占比，并可一键将持仓标的补齐到定时分析列表。控制台会展示跟踪看板摘要，完整看板页支持查看实时价格、当日区间、持仓盈亏与上一交易日报告区间，方便盘中快速跟踪。
-
-### 结构化研报管理
-
-分析结果结构化存储，支持按标的、日期检索历史研报，决策卡片一目了然地展示方向、置信度、目标价与止损价。
-
-<div align="center">
-  <table style="width: 100%">
-    <tr>
-      <td width="50%"><img src="assets/web/reports.png" alt="历史报告"/><br><em>研报历史</em></td>
-      <td width="50%"><img src="assets/web/detail.png" alt="研报详情"/><br><em>深度详情</em></td>
-    </tr>
-  </table>
-</div>
-
-### 多模型厂商支持
-
-OpenAI、Anthropic、Google Gemini、DeepSeek、Moonshot、智谱、硅基流动等，用户可在前端自由切换模型厂商与具体模型；保存配置后会自动执行模型 warmup，也可以在设置页手动发送“你好”查看模型原始返回，便于排查接入问题。
-
-<div align="center">
-  <img src="assets/web/settings.png" width="80%" alt="定时分析"/>
-</div>
-
-## 核心架构
-
-TradingAgents 模拟真实交易机构的部门协作，将复杂任务拆解为专业的智能体角色：
-
-<p align="center">
-  <img src="assets/schema.png" style="width: 100%; height: auto;">
-</p>
-
-*图中仅展示核心节点，完整流程包含 14 名智能体。
-
-### 分析师团队
-基本面、情绪、新闻、技术、宏观、主力资金 6 大维度同步作业，对市场数据进行深度提取与初步评估。
-
-<p align="center">
-  <img src="assets/analyst.png" width="90%">
-</p>
-
-### 研究员团队
-多头与空头研究员针对分析师结论开展 Claim 驱动的结构化辩论（红蓝对抗），研究总监综合裁决形成投资计划。
-
-<p align="center">
-  <img src="assets/researcher.png" width="80%">
-</p>
-
-### 决策与风控
-交易员将研究结论转化为可执行方案，激进/稳健/中性三方风控辩论审查，组合经理最终裁决。
-
-<p align="center">
-  <img src="assets/risk.png" width="80%">
-</p>
-
-## 快速上手
-
-### Docker 一键部署 (推荐)
-
-```bash
-docker pull ghcr.io/kylinmountain/tradingagents-ashare:latest
-
-mkdir -p $(pwd)/data
-export TA_APP_SECRET_KEY=$(openssl rand -base64 32)
-
-docker run -d -p 8000:8000 \
-  --name tradingagents \
-  -v $(pwd)/data:/app/data \
-  -e DATABASE_URL="sqlite:///./data/tradingagents.db" \
-  -e TA_APP_SECRET_KEY="${TA_APP_SECRET_KEY}" \
-  ghcr.io/kylinmountain/tradingagents-ashare:latest
+```
+┌─────────────────────────────────────────────────────┐
+│                   LangGraph 编排                     │
+├──────────┬──────────┬──────────┬──────────┬─────────┤
+│ 7 位分析师 │ 牛熊辩论   │ 3 位风险   │  Trader  │ PM     │
+│ ──────── │ ──────── │ ──────── │ ──────── │ ────── │
+│ Market   │ Bull     │ Aggressive│          │        │
+│ Social   │ Bear     │ Neutral  │  交易建议  │ 组合   │
+│ News     │ Manager  │ Conservative│         │ 管理   │
+│ Fundamentals│       │          │          │        │
+│ Macro    │          │          │          │        │
+│ SmartMoney│          │          │          │        │
+│ VolumePrice│          │          │          │        │
+├──────────┴──────────┴──────────┴──────────┴─────────┤
+│              数据供应商路由 (fallback 链)              │
+│  cn_astock → cn_akshare → cn_baostock → yfinance    │
+└─────────────────────────────────────────────────────┘
 ```
 
-访问 `http://localhost:8000` 即可使用。
+## 快速开始
 
-> **`TA_APP_SECRET_KEY`**：用于加密用户 LLM API Key 和签发登录 JWT。不设置时使用内置默认密钥（仅适合本地开发）。生产环境务必设置，且不可更改。
-
-> **LLM 配置**：启动后在前端"设置"页面配置模型厂商、API Key 和模型名称即可，无需环境变量预设。
-
-> **邮箱验证码**：未配置 SMTP（`MAIL_HOST` 等）时，验证码会在前端登录页直接显示为 `开发环境验证码：xxxxxx`，本地使用无需配置邮件服务器。如果需要真实邮件投递，参考 `.env.example` 配置 `MAIL_HOST` / `MAIL_USER` / `MAIL_PASS` 等并通过 `-e` 注入容器。
-
-### 源码安装
+### 安装
 
 ```bash
+# 克隆项目
 git clone https://github.com/KylinMountain/TradingAgents-AShare.git
 cd TradingAgents-AShare
 
-# 后端（Python 3.10+）
+# 安装依赖 (推荐 uv)
 uv sync
 
-# 前端（Node.js 18+）
-cd frontend
-npm install
-npm run build
-cd ..
+# 或 pip
+pip install -e .
 ```
 
-复制 `.env.example` 到 `.env` 并按需修改，然后：
+### 配置
 
 ```bash
-# 启动后端
-uv run python -m uvicorn api.main:app --port 8000
+# 复制配置模板
+cp .env.example .env
+
+# 编辑 .env，填入 LLM API Key
+# TA_API_KEY=sk-your-api-key
+# TA_BASE_URL=https://api.openai.com/v1
+# TA_LLM_PROVIDER=openai
 ```
 
-访问 `http://localhost:8000` 即可开始 AI 投研之旅。
+支持的环境变量见 [.env.example](.env.example)。
 
-## API 集成
-
-系统提供标准 REST API，方便集成到自定义脚本、交易机器人或第三方看板：
-
-| 操作 | 接口 |
-|------|------|
-| 触发分析 | `POST /v1/analyze` → 返回 `job_id` |
-| 状态追踪 | `GET /v1/jobs/{job_id}` |
-| 获取结果 | `GET /v1/jobs/{job_id}/result` |
-| 历史检索 | `GET /v1/reports` |
-| 批量获取最新报告 | `POST /v1/reports/latest-by-symbols` |
-| 持仓导入 | `GET/POST/DELETE /v1/portfolio/imports` |
-| 跟踪看板摘要/明细 | `GET /v1/dashboard/tracking-board` |
-| 批量定时任务操作 | `PATCH /v1/scheduled/batch`、`POST /v1/scheduled/batch/delete`、`POST /v1/scheduled/batch/trigger` |
-| 模型 warmup | `POST /v1/config/warmup` |
-
-认证：Web 端登录后在"设置 / API Token"生成密钥，通过 `Authorization: Bearer <TOKEN>` 传入。
+### 使用
 
 ```bash
-curl -X POST 'https://app.510168.xyz/v1/analyze' \
-  -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer <YOUR_API_TOKEN>' \
-  -d '{"symbol": "分析一下600519.SH短期趋势", "trade_date": "2026-03-28"}'
+# CLI — 单只股票分析
+tradingagents analyze 600519.SH --date 2026-05-26
+tradingagents analyze 贵州茅台
+tradingagents analyze 600519 --horizon short --quick
+
+# CLI — 自选股管理
+tradingagents watchlist list
+tradingagents watchlist add 600519.SH
+tradingagents watchlist remove <item_id>
+
+# CLI — 定时任务
+tradingagents scheduled list
+tradingagents scheduled add 600519.SH --time 20:00
+tradingagents scheduled remove <item_id>
+
+# API 服务 (供外部程序调用)
+tradingagents-api
+
+# 定时调度器 (独立进程)
+tradingagents-scheduler
 ```
 
-## 集成 OpenClaw
+也可以通过 Python API 直接调用：
 
-1. 在本站生成 API Key
-2. 在 OpenClaw 中安装技能 `tradingagents-analysis`
+```python
+from tradingagents.graph.trading_graph import TradingAgentsGraph
+from tradingagents.default_config import DEFAULT_CONFIG
 
-示例任务："分析 002594.SZ 今天是否适合介入，给我结论、置信度、目标价、止损价和核心风险。"
+graph = TradingAgentsGraph(DEFAULT_CONFIG)
+result = graph.run("600519.SH", "2026-05-26")
+print(result["final_trade_decision"])
+```
 
-## Project Status
-![Alt](https://repobeats.axiom.co/api/embed/85d68d13f5eee2bf53404a2efa28f9ccef1c2c3f.svg "Repobeats analytics image")
+## 14 个 Agent
 
-## 特别鸣谢
+| 角色 | Agent | 说明 |
+|------|-------|------|
+| 分析师 | Market Analyst | 技术面分析（均线/MACD/KDJ/布林带） |
+| 分析师 | Social Media Analyst | 社交媒体情绪分析 |
+| 分析师 | News Analyst | 新闻舆情分析 |
+| 分析师 | Fundamentals Analyst | 基本面分析（财务报表/估值） |
+| 分析师 | Macro Analyst | 宏观经济分析 |
+| 分析师 | Smart Money Analyst | 资金流向分析（主力/北向/龙虎榜） |
+| 分析师 | Volume Price Analyst | 量价关系分析 |
+| 研究员 | Bull Researcher | 看多研究员（辩论正方） |
+| 研究员 | Bear Researcher | 看空研究员（辩论反方） |
+| 研究员 | Research Manager | 辩论裁判，综合牛熊观点 |
+| 风险 | Aggressive Debator | 激进风险视角 |
+| 风险 | Neutral Debator | 中性风险视角 |
+| 风险 | Conservative Debator | 保守风险视角 |
+| 交易 | Trader | 最终交易决策与仓位建议 |
 
-本项目核心架构灵感与部分基础逻辑源自 [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)。感谢原作者及团队在多智能体交易领域做出的卓越探索与开源贡献。
+## 数据源
 
-## 许可说明
-- 本项目基于 [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) (Apache 2.0) 二次开发。
-- 新增模块 (`api/`, `frontend/`) 及对核心逻辑的深度修改采用 `PolyForm Noncommercial 1.0.0` 协议。
-- 详情请参阅根目录下的 [LICENSE](./LICENSE) 文件。
+采用供应商路由 + fallback 机制，优先使用直接 HTTP/TCP 数据源：
 
-## 重要声明
-- **仅供学习研究**：本项目仅用于学术研究、技术演示及学习交流目的，不构成任何形式的投资建议。
-- **实盘风险**：证券市场有风险，投资需谨慎。基于本系统生成的任何观点、建议或计划，仅代表算法博弈结果，不对实际投资损益负责。
-- **数据延迟**：分析所依赖的数据源可能存在延迟或偏差，请以交易所实时公告为准。
+| 优先级 | 供应商 | 数据通道 | 说明 |
+|--------|--------|----------|------|
+| 1 | cn_astock | mootdx TCP 7709 / 腾讯 HTTP / 东方财富 / 同花顺 / 百度 / 新浪 / 财联社 | 直接接口，最鲁棒 |
+| 2 | cn_akshare | akshare Python 库 | A 股 fallback |
+| 3 | cn_baostock | baostock Python 库 | 历史 K 线 fallback |
+| 4 | yfinance | yfinance Python 库 | 美股/港股 |
 
-<div align="center">
-<a href="https://www.star-history.com/#KylinMountain/TradingAgents-AShare&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=KylinMountain/TradingAgents-AShare&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=KylinMountain/TradingAgents-AShare&type=Date" />
-   <img alt="TradingAgents Star History" src="https://api.star-history.com/svg?repos=KylinMountain/TradingAgents-AShare&type=Date" style="width: 80%; height: auto;" />
- </picture>
-</a>
-</div>
+配置优先级链在 [default_config.py](tradingagents/default_config.py) 的 `data_vendors` 中定义。
+
+## 项目结构
+
+```
+tradingagents/              # 核心包
+  agents/                   # 14 个 Agent 实现
+    analysts/               # 7 位分析师
+    researchers/            # 牛熊研究员 + Research Manager
+    risk_mgmt/              # 3 位风险 Debator
+    trader/                 # Trader
+    managers/               # Risk Manager
+    utils/                  # 共享工具
+  graph/                    # LangGraph 编排 (TradingAgentsGraph)
+    trading_graph.py        # 主图定义
+    data_collector.py       # 数据收集器
+    intent_parser.py        # 自然语言意图解析
+  dataflows/                # 数据流 + 供应商路由
+    interface.py            # route_to_vendor() 路由 + fallback
+    config.py               # set_config() 全局配置
+    providers/              # 数据供应商实现
+      astock_provider.py    # ★ 直接 HTTP/TCP 数据源 (首选)
+      cn_akshare_provider.py
+      cn_baostock_provider.py
+      yfinance_provider.py
+      alpha_vantage_provider.py
+  llm_clients/              # LLM 适配层 (OpenAI/Anthropic/Google)
+  prompts/                  # 提示词模板 (支持 zh/en/auto)
+  default_config.py         # 默认配置 + 环境变量映射
+
+api/                        # FastAPI 服务端
+  main.py                   # REST API (analyze/jobs/reports/watchlist/scheduled/config)
+  database.py               # SQLite/PostgreSQL 模型 (单用户模式)
+  services/                 # 业务逻辑层
+  job_store.py              # 内存/Redis 任务队列
+
+scheduler/                  # 定时调度器 (独立进程)
+  main.py                   # asyncio 循环 + concurrency 控制
+
+cli/                        # typer CLI 入口
+  main.py                   # analyze/watchlist/scheduled 命令
+
+a-stock-data/               # SKILL.md — 数据端点参考文档
+```
+
+## API 端点
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/v1/analyze` | POST | 提交分析任务 |
+| `/v1/jobs/{id}` | GET | 查询任务状态 |
+| `/v1/jobs/{id}/result` | GET | 获取分析结果 |
+| `/v1/jobs/{id}/events` | GET (SSE) | 实时分析流 |
+| `/v1/chat/completions` | POST | OpenAI 兼容接口 |
+| `/v1/reports` | GET/POST | 报告列表/创建 |
+| `/v1/reports/{id}` | GET/DELETE | 单条报告 |
+| `/v1/watchlist` | GET/POST | 自选股 |
+| `/v1/scheduled` | GET/POST | 定时任务 |
+| `/v1/config` | GET/PATCH | 运行时配置 |
+| `/v1/portfolio/imports` | POST | 持仓导入 |
+| `/v1/market/*` | GET | 市场数据/搜索 |
+| `/v1/backtest` | POST | 回测 |
+| `/healthz` | GET | 健康检查 |
+
+所有端点无需认证（单用户模式）。
+
+## 通知
+
+定时分析完成后可自动推送：
+
+- **企业微信**: 设置 `TA_WECOM_WEBHOOK_URL`
+- **邮件**: 设置 `TA_EMAIL_REPORT_TO` + SMTP 环境变量（暂搁置）
+
+## 开发
+
+```bash
+# 运行测试
+pytest tests/ -v
+
+# 本地 API 开发
+uvicorn api.main:app --reload --port 8000
+```
+
+## License
+
+MIT

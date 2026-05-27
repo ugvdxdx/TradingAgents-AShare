@@ -92,7 +92,6 @@ def init_db() -> None:
     """Initialize database tables."""
     Base.metadata.create_all(bind=engine)
     _ensure_report_schema()
-    _ensure_user_schema()
 
 
 def _ensure_report_schema() -> None:
@@ -120,123 +119,7 @@ def _ensure_report_schema() -> None:
         logger.error("Failed to ensure report schema: %s", e)
 
 
-def _ensure_user_schema() -> None:
-    """Add columns to users table for existing SQLite deployments without migrations."""
-    try:
-        with engine.begin() as conn:
-            columns = {row[1] for row in conn.execute(text("PRAGMA table_info(users)"))}
-            if "last_login_ip" not in columns:
-                conn.execute(text("ALTER TABLE users ADD COLUMN last_login_ip VARCHAR(45)"))
-            if "email_report_enabled" not in columns:
-                conn.execute(text("ALTER TABLE users ADD COLUMN email_report_enabled BOOLEAN NOT NULL DEFAULT 1"))
-            if "wecom_report_enabled" not in columns:
-                conn.execute(text("ALTER TABLE users ADD COLUMN wecom_report_enabled BOOLEAN NOT NULL DEFAULT 1"))
-            llm_columns = {row[1] for row in conn.execute(text("PRAGMA table_info(user_llm_configs)"))}
-            if "wecom_webhook_encrypted" not in llm_columns:
-                conn.execute(text("ALTER TABLE user_llm_configs ADD COLUMN wecom_webhook_encrypted TEXT"))
-            if "default_analysts" not in llm_columns:
-                conn.execute(text("ALTER TABLE user_llm_configs ADD COLUMN default_analysts TEXT"))
-    except Exception as e:
-        logger.error("Failed to ensure user schema: %s", e)
-
-    _migrate_tokens_to_hashed()
-    _migrate_api_keys_reencrypt()
-
-
-def _migrate_tokens_to_hashed() -> None:
-    """Migrate plaintext API tokens to HMAC-SHA256 hashed storage."""
-    import hashlib, hmac
-    try:
-        with engine.begin() as conn:
-            # Add token_hint column if missing
-            token_cols = {row[1] for row in conn.execute(text("PRAGMA table_info(user_tokens)"))}
-            if "token_hint" not in token_cols:
-                conn.execute(text("ALTER TABLE user_tokens ADD COLUMN token_hint VARCHAR(8)"))
-
-            # Detect un-migrated rows: plaintext tokens start with "ta-sk-"
-            rows = conn.execute(text("SELECT id, token FROM user_tokens WHERE token LIKE 'ta-sk-%'")).fetchall()
-            if not rows:
-                return
-            from api.services.auth_service import _secret_key
-            key = _secret_key().encode("utf-8")
-            for row_id, plaintext in rows:
-                token_hash = hmac.new(key, plaintext.encode("utf-8"), hashlib.sha256).hexdigest()
-                hint = plaintext[-4:]
-                conn.execute(
-                    text("UPDATE user_tokens SET token = :hash, token_hint = :hint WHERE id = :id"),
-                    {"hash": token_hash, "hint": hint, "id": row_id},
-                )
-            logger.info("[security] Migrated %s API tokens from plaintext to hashed storage.", len(rows))
-    except Exception as e:
-        logger.error("Token hash migration failed: %s", e)
-
-
-def _migrate_api_keys_reencrypt() -> None:
-    """Re-encrypt user secrets when TA_APP_SECRET_KEY changes.
-
-    On startup, if a custom secret is configured, tries to decrypt each secret
-    with the current secret. If that fails, tries the default secret (old data).
-    If the default key works, re-encrypts with the current key and writes back.
-    """
-    from api.services.auth_service import (
-        is_custom_secret_configured, decrypt_secret,
-        decrypt_secret_with_fallback, encrypt_secret,
-    )
-    if not is_custom_secret_configured():
-        return
-    try:
-        with engine.begin() as conn:
-            rows = conn.execute(
-                text(
-                    """
-                    SELECT user_id, api_key_encrypted, wecom_webhook_encrypted
-                    FROM user_llm_configs
-                    WHERE api_key_encrypted IS NOT NULL OR wecom_webhook_encrypted IS NOT NULL
-                    """
-                )
-            ).fetchall()
-            if not rows:
-                return
-            # Quick check: if the first row decrypts fine, likely all are OK already.
-            _, first_api_key, first_wecom_webhook = rows[0]
-            first_secret = first_api_key or first_wecom_webhook
-            if first_secret and decrypt_secret(first_secret) is not None and len(rows) < 50:
-                # Small dataset, still verify all — but for large sets, skip if first is OK
-                pass
-            migrated = 0
-            for user_id, encrypted_api_key, encrypted_wecom_webhook in rows:
-                for column_name, encrypted_value in (
-                    ("api_key_encrypted", encrypted_api_key),
-                    ("wecom_webhook_encrypted", encrypted_wecom_webhook),
-                ):
-                    if not encrypted_value:
-                        continue
-                    if decrypt_secret(encrypted_value) is not None:
-                        continue
-                    plaintext = decrypt_secret_with_fallback(encrypted_value)
-                    if plaintext is None:
-                        logger.warning(
-                            "[security] Cannot decrypt %s for user %s with any known key. Skipping.",
-                            column_name,
-                            user_id,
-                        )
-                        continue
-                    new_encrypted = encrypt_secret(plaintext)
-                    if column_name == "api_key_encrypted":
-                        conn.execute(
-                            text("UPDATE user_llm_configs SET api_key_encrypted = :enc WHERE user_id = :uid"),
-                            {"enc": new_encrypted, "uid": user_id},
-                        )
-                    elif column_name == "wecom_webhook_encrypted":
-                        conn.execute(
-                            text("UPDATE user_llm_configs SET wecom_webhook_encrypted = :enc WHERE user_id = :uid"),
-                            {"enc": new_encrypted, "uid": user_id},
-                        )
-                    migrated += 1
-            if migrated:
-                logger.info("[security] Re-encrypted %s user secret(s) with new TA_APP_SECRET_KEY.", migrated)
-    except Exception as e:
-        logger.error("User secret re-encryption migration failed: %s", e)
+DEFAULT_USER_ID = "default"
 
 
 # Report Model
@@ -246,7 +129,7 @@ class ReportDB(Base):
     __tablename__ = "reports"
     
     id = Column(String(36), primary_key=True, index=True)
-    user_id = Column(String(64), index=True, nullable=True)  # For future multi-user support
+    user_id = Column(String(64), index=True, nullable=True, default=DEFAULT_USER_ID)
     symbol = Column(String(20), index=True, nullable=False)
     trade_date = Column(String(10), nullable=False)
     
@@ -318,60 +201,6 @@ class ReportDB(Base):
         }
 
 
-class UserDB(Base):
-    __tablename__ = "users"
-
-    id = Column(String(36), primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-    last_login_at = Column(DateTime, nullable=True)
-    last_login_ip = Column(String(45), nullable=True)
-    email_report_enabled = Column(Boolean, default=True, nullable=False, server_default="1")
-    wecom_report_enabled = Column(Boolean, default=True, nullable=False, server_default="1")
-
-
-class EmailVerificationCodeDB(Base):
-    __tablename__ = "email_verification_codes"
-
-    id = Column(String(36), primary_key=True, index=True)
-    email = Column(String(255), index=True, nullable=False)
-    code_hash = Column(String(255), nullable=False)
-    purpose = Column(String(50), default="login", nullable=False)
-    expires_at = Column(DateTime, nullable=False)
-    consumed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
-
-class UserLLMConfigDB(Base):
-    __tablename__ = "user_llm_configs"
-
-    user_id = Column(String(36), primary_key=True, index=True)
-    llm_provider = Column(String(50), nullable=True)
-    backend_url = Column(String(500), nullable=True)
-    quick_think_llm = Column(String(255), nullable=True)
-    deep_think_llm = Column(String(255), nullable=True)
-    max_debate_rounds = Column(Integer, nullable=True)
-    max_risk_discuss_rounds = Column(Integer, nullable=True)
-    api_key_encrypted = Column(Text, nullable=True)
-    wecom_webhook_encrypted = Column(Text, nullable=True)
-    default_analysts = Column(Text, nullable=True)  # JSON list, e.g. '["market","social",...]'
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-
-
-class UserTokenDB(Base):
-    __tablename__ = "user_tokens"
-
-    id = Column(String(36), primary_key=True, index=True)
-    user_id = Column(String(36), index=True, nullable=False)
-    name = Column(String(50), nullable=False)
-    token = Column(String(128), unique=True, index=True, nullable=False)
-    token_hint = Column(String(8), nullable=True)
-    is_active = Column(Boolean, default=True, nullable=False)
-    last_used_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class VersionStatsDB(Base):
@@ -389,7 +218,7 @@ class WatchlistItemDB(Base):
     __tablename__ = "watchlist_items"
 
     id = Column(String(36), primary_key=True)
-    user_id = Column(String(64), index=True, nullable=False)
+    user_id = Column(String(64), index=True, nullable=False, default=DEFAULT_USER_ID)
     symbol = Column(String(20), nullable=False)
     sort_order = Column(Integer, default=0)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -402,7 +231,7 @@ class ScheduledAnalysisDB(Base):
     __tablename__ = "scheduled_analyses"
 
     id = Column(String(36), primary_key=True)
-    user_id = Column(String(64), index=True, nullable=False)
+    user_id = Column(String(64), index=True, nullable=False, default=DEFAULT_USER_ID)
     symbol = Column(String(20), nullable=False)
     horizon = Column(String(10), default="short")
     trigger_time = Column(String(5), default="20:00")
@@ -417,48 +246,13 @@ class ScheduledAnalysisDB(Base):
     __table_args__ = (UniqueConstraint('user_id', 'symbol', name='uq_scheduled_user_symbol'),)
 
 
-class SponsorDB(Base):
-    """Sponsor records managed by admin project."""
-    __tablename__ = "sponsors"
-
-    id = Column(String(36), primary_key=True, index=True)
-    sponsor_type = Column(String(20), nullable=False, index=True)  # money | token
-    name = Column(String(100), nullable=False)
-    github = Column(String(100), nullable=True)
-    avatar = Column(String(500), nullable=True)
-    email = Column(String(255), nullable=True)
-    provider = Column(String(100), nullable=True)       # token sponsor: provider name
-    amount = Column(Float, nullable=True)                # admin-only, NOT exposed in public API
-    date = Column(String(10), nullable=False)
-    sort_order = Column(Integer, default=0)
-    is_visible = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-
-
-class FeedbackDB(Base):
-    """User feedback / message board."""
-    __tablename__ = "feedbacks"
-
-    id = Column(String(36), primary_key=True, index=True)
-    user_id = Column(String(64), index=True, nullable=False)
-    user_email = Column(String(255), nullable=False)
-    subject = Column(String(200), nullable=False)
-    content = Column(Text, nullable=False)
-    admin_reply = Column(Text, nullable=True)
-    replied_at = Column(DateTime, nullable=True)
-    is_read = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
-
-
 class ImportedPortfolioPositionDB(Base):
     """Imported current holdings snapshot plus recent trade points for a symbol."""
 
     __tablename__ = "imported_portfolio_positions"
 
     id = Column(String(36), primary_key=True)
-    user_id = Column(String(64), index=True, nullable=False)
+    user_id = Column(String(64), index=True, nullable=False, default=DEFAULT_USER_ID)
     source = Column(String(32), default="manual", nullable=False)
     symbol = Column(String(20), nullable=False)
     security_name = Column(String(80), nullable=True)

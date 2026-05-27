@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from api.database import Base, UserDB
+from api.database import Base
 from api.services import scheduled_service
 
 
@@ -22,28 +22,6 @@ def db():
     session.close()
 
 
-def _auth_unique(client: TestClient) -> str:
-    from api.database import get_db_ctx, init_db
-    from api.services import auth_service
-
-    init_db()
-    email = auth_service.normalize_email(f"portfolio-import-{uuid4().hex[:8]}@test.com")
-    now = datetime.now(timezone.utc)
-    with get_db_ctx() as db:
-        user = auth_service.get_user_by_email(db, email)
-        if not user:
-            user = UserDB(
-                id=str(uuid4()),
-                email=email,
-                is_active=True,
-                created_at=now,
-                updated_at=now,
-                last_login_at=now,
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-    return auth_service.create_access_token(user)
 
 
 class TestPortfolioImportService:
@@ -213,12 +191,9 @@ class TestPortfolioImportApi:
         from api.main import app
 
         client = TestClient(app, raise_server_exceptions=False)
-        token = _auth_unique(client)
-        headers = {"Authorization": f"Bearer {token}"}
 
         response = client.post(
             "/v1/portfolio/imports",
-            headers=headers,
             json={
                 "positions": [
                     {"symbol": "600519.SH", "name": "贵州茅台", "current_position": 500, "average_cost": 1700.0},
@@ -232,7 +207,7 @@ class TestPortfolioImportApi:
         assert body["summary"]["positions"] == 2
         assert any(item["symbol"] == "600519.SH" for item in body["positions"])
 
-        scheduled = client.get("/v1/scheduled", headers=headers)
+        scheduled = client.get("/v1/scheduled")
         assert scheduled.status_code == 200
         scheduled_symbols = [item["symbol"] for item in scheduled.json()["items"]]
         assert scheduled_symbols == ["600519.SH", "300750.SZ"]

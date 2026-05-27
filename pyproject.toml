@@ -25,15 +25,15 @@ dependencies = [
     "yfinance>=0.2.63",
     "akshare>=1.16.80",
     "baostock>=0.9.1",
+    "mootdx>=0.4.21",
     "fastapi>=0.116.1",
     "python-multipart>=0.0.18",
     "uvicorn>=0.35.0",
     "sqlalchemy>=2.0.48",
-    "PyJWT>=2.11.0",
-    "cryptography>=45.0.3",
     "json-repair>=0.44.0",
     "markdown>=3.7",
     "redis[hiredis]>=5.0.0",
+    "typer>=0.15.0",
 ]
 
 [project.scripts]

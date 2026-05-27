@@ -3,6 +3,7 @@
 import asyncio
 import os
 import re
+import time
 from pathlib import Path
 import json
 from datetime import date
@@ -46,6 +47,7 @@ from .setup import GraphSetup
 from .propagation import Propagator
 from .reflection import Reflector
 from .signal_processing import SignalProcessor
+from .report_archiver import ReportArchiver
 
 
 class TradingAgentsGraph:
@@ -141,6 +143,9 @@ class TradingAgentsGraph:
         )
         self.reflector = Reflector(self.quick_thinking_llm)
         self.signal_processor = SignalProcessor(self.quick_thinking_llm)
+
+        # Report archiver — persists each stage into a file tree
+        self.report_archiver = ReportArchiver(results_dir=self.config.get("results_dir", "./results"))
 
         # State tracking
         self.curr_state = None
@@ -334,7 +339,21 @@ class TradingAgentsGraph:
         state = self.propagator.create_initial_state(
             ticker, trade_date, user_intent=user_intent, horizon="short"
         )
+
+        start_time = time.time()
         final_state = await self.graph.ainvoke(state, **graph_args)
+        duration = time.time() - start_time
+
+        # Archive before eviction (data_pool still in memory)
+        data_pool = self.data_collector.get(ticker, trade_date)
+        try:
+            self.archive_report(
+                ticker, trade_date, final_state,
+                duration_seconds=duration,
+                data_pool=data_pool,
+            )
+        except Exception as e:
+            print(f"[ReportArchiver] Archive failed (non-fatal): {e}")
 
         # Evict cached data to free memory
         self.data_collector.evict(ticker, trade_date)
@@ -372,6 +391,53 @@ class TradingAgentsGraph:
     def _safe_ticker(ticker: str) -> str:
         """Sanitize ticker for use in filesystem paths."""
         return re.sub(r"[^A-Za-z0-9._-]", "_", ticker) or "unknown"
+
+    def archive_report(
+        self,
+        ticker: str,
+        trade_date: str,
+        final_state: Dict[str, Any],
+        *,
+        duration_seconds: Optional[float] = None,
+        data_pool: Optional[Dict[str, Any]] = None,
+        status: str = "completed",
+    ) -> Path:
+        """Archive analysis results into a structured file tree.
+
+        Called from CLI, API, and propagate_async paths after analysis completes.
+
+        Args:
+            ticker: Stock symbol.
+            trade_date: YYYY-MM-DD.
+            final_state: Completed graph state dict.
+            duration_seconds: Wall-clock time.
+            data_pool: DataCollector cache (must be called before evict).
+            status: "completed" or "failed".
+
+        Returns:
+            Root path of the archive directory.
+        """
+        from tradingagents.dataflows.interface import get_trace_collector
+
+        provider_traces = get_trace_collector()
+
+        result_path = self.report_archiver.archive(
+            ticker=ticker,
+            trade_date=trade_date,
+            final_state=final_state,
+            duration_seconds=duration_seconds,
+            provider_traces=provider_traces,
+            data_pool=data_pool,
+            config=self.config,
+            status=status,
+        )
+
+        # Clear trace collector after archiving
+        from tradingagents.dataflows.interface import set_trace_collector
+        set_trace_collector(None)
+
+        print(f"[ReportArchiver] Saved to {result_path}")
+        return result_path
 
     def _log_state_dual(
         self,

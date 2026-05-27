@@ -1,13 +1,4 @@
-# Stage 1: Build Frontend (始终在原生架构运行以提速)
-FROM --platform=$BUILDPLATFORM node:25-slim AS frontend-builder
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-# 开启缓存挂载，加速 npm 安装
-RUN --mount=type=cache,target=/root/.npm npm install
-COPY frontend/ ./
-RUN npm run build
-
-# Stage 2: Final Image (多架构目标镜像)
+# Final Image (多架构目标镜像)
 FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim AS runtime
 WORKDIR /app
 
@@ -26,13 +17,11 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY api/ ./api/
 COPY tradingagents/ ./tradingagents/
 COPY scheduler/ ./scheduler/
+COPY cli/ ./cli/
 
 # 安装项目本身，避免 uv run 启动时重复安装
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
-
-# 拷贝在 Stage 1 中快速构建好的前端产物
-COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # 暴露端口
 EXPOSE 8000

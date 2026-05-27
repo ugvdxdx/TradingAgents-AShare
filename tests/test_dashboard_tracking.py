@@ -3,29 +3,8 @@ from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
-from api.database import ImportedPortfolioPositionDB, ReportDB, UserDB, get_db_ctx, init_db
-from api.services import auth_service, report_service
-
-
-def _auth_with_user(client: TestClient) -> tuple[str, str]:
-    init_db()
-    email = auth_service.normalize_email(f"dashboard-{uuid4().hex[:8]}@test.com")
-    now = datetime.now(timezone.utc)
-    with get_db_ctx() as db:
-        user = auth_service.get_user_by_email(db, email)
-        if not user:
-            user = UserDB(
-                id=str(uuid4()),
-                email=email,
-                is_active=True,
-                created_at=now,
-                updated_at=now,
-                last_login_at=now,
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-    return user.id, auth_service.create_access_token(user)
+from api.database import ImportedPortfolioPositionDB, ReportDB, DEFAULT_USER_ID, get_db_ctx, init_db
+from api.services import report_service
 
 
 class TestDashboardTrackingApi:
@@ -33,8 +12,7 @@ class TestDashboardTrackingApi:
         from api.main import app
 
         client = TestClient(app, raise_server_exceptions=False)
-        user_id, token = _auth_with_user(client)
-        headers = {"Authorization": f"Bearer {token}"}
+        user_id = DEFAULT_USER_ID
         now = datetime.now(timezone.utc)
 
         with get_db_ctx() as db:
@@ -132,7 +110,7 @@ class TestDashboardTrackingApi:
             },
         )
 
-        response = client.get("/v1/dashboard/tracking-board", headers=headers)
+        response = client.get("/v1/dashboard/tracking-board")
 
         assert response.status_code == 200
         body = response.json()
@@ -166,8 +144,7 @@ class TestDashboardTrackingApi:
         from api.main import app
 
         client = TestClient(app, raise_server_exceptions=False)
-        user_id, token = _auth_with_user(client)
-        headers = {"Authorization": f"Bearer {token}"}
+        user_id = DEFAULT_USER_ID
         now = datetime.now(timezone.utc)
 
         with get_db_ctx() as db:
@@ -194,7 +171,7 @@ class TestDashboardTrackingApi:
         monkeypatch.setattr("api.services.tracking_board_service.previous_cn_trading_day", lambda _: "2026-03-30")
         monkeypatch.setattr("api.services.tracking_board_service._fetch_live_quotes", lambda symbols, **kwargs: {})
 
-        response = client.get("/v1/dashboard/tracking-board", headers=headers)
+        response = client.get("/v1/dashboard/tracking-board")
 
         assert response.status_code == 200
         body = response.json()
