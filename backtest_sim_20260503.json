@@ -1,0 +1,1064 @@
+{
+  "sim_date": "2026-05-03",
+  "cutoff_date": "2026-04-30",
+  "generated_at": "2026-06-03T20:35:58.227331",
+  "pipeline": "Top100 → 辩论1(50) → 辩论2(30) → 辩论3(20) → 辩论4(10)",
+  "rounds_summary": [
+    {
+      "round": 1,
+      "kept": 46,
+      "eliminated": 54,
+      "bear_surr": 4,
+      "bull_surr": 1
+    },
+    {
+      "round": 2,
+      "kept": 30,
+      "eliminated": 16,
+      "bear_surr": 3,
+      "bull_surr": 1
+    },
+    {
+      "round": 3,
+      "kept": 20,
+      "eliminated": 10,
+      "bear_surr": 8,
+      "bull_surr": 0
+    },
+    {
+      "round": 4,
+      "kept": 10,
+      "eliminated": 10,
+      "bear_surr": 6,
+      "bull_surr": 0
+    }
+  ],
+  "top10": [
+    {
+      "code": "300502",
+      "name": "新易盛",
+      "judge_score": 57.264,
+      "bull_score": 92.79,
+      "bear_score": 40.75,
+      "total_score": 72.15,
+      "know_score": 33,
+      "tech_total": 50.5,
+      "pe_ttm": 65.51,
+      "industries": [
+        "光通信"
+      ],
+      "bear_surrendered": false,
+      "bull_surrendered": false,
+      "judge_verdict": "Bull优势明显(净权重+52)[Bull被反驳4条,Bear被反驳8条]",
+      "return_pct": 48.78,
+      "max_return": 48.78,
+      "max_drawdown": -0.63,
+      "close_start": 525.79,
+      "close_end": 782.25,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "中等护城河",
+          "evidence": "护城河等级为'中'，具备一定竞争壁垒",
+          "weight": 6
+        },
+        {
+          "point": "竞争优势1",
+          "evidence": "高速光模块国内领先：400G/800G光模块出货量国内前三，深度绑定英伟达/谷歌/亚马逊",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "技术路线领先：LPO（线性驱动可插拔光学）技术全球领先，功耗降低50%+",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "产能扩张迅速：成都/泰国双基地，2025年800G光模块产能将达月产百万只",
+          "weight": 4
+        },
+        {
+          "point": "财务健康",
+          "evidence": "财务健康评级'健康'，ROE=13.642801903448841%",
+          "weight": 7
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率33.3%，盈利能力强",
+          "weight": 6
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "护城河一般",
+          "evidence": "护城河等级为'中'，壁垒不够坚固",
+          "weight": 4
+        },
+        {
+          "point": "竞争劣势1",
+          "evidence": "客户集中度极高：北美前三大云厂商占营收超70%，单客户依赖风险",
+          "weight": 6
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "光芯片依赖进口：EML/CW激光器以日本/美国供应商为主，供应链安全风险",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "研发投入压力大：1.6T/3.2T光模块研发持续高投入，锁定未来竞争",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风1",
+          "evidence": "光模块需求周期性波动：北美云厂商资本开支节奏影响光模块采购节奏",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风2",
+          "evidence": "行业竞争加剧：中际旭创/天孚通信/Coherent等国内外厂商产能扩张导致价格战",
+          "weight": 3
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）竞争优势2（实据）：技术路线领先：LPO（线性驱动可插拔光学）技术全球领先，功耗降低50%+；2）财务健康（实据）：财务健康评级'健康'，ROE=13.642801903448841%；3）增长驱动1（实据）：AI算力引爆光模块需求：800G光模块需求2025年翻倍，1.6T光模块2026年量产；4）增长驱动3（实据）：硅光技术突破：硅光光模块自研芯片比例提升，成本下降，毛利提升；5",
+          "bear_rebuttal": "实据压制：竞争劣势1→中等护城河,竞争优势1,竞争优势33项  |  权重压制：增长逆风1→行业地缘机遇1",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）竞争劣势1（实据）：客户集中度极高：北美前三大云厂商占营收超70%，单客户依赖风险；2）行业劣势1（实据）：客户集中度极高：北美前三大云厂商占营收超70%，单客户依赖风险；3）护城河一般（定性）：护城河等级为'中'，壁垒不够坚固；4）行业劣势2（定性）：光芯片依赖进口：EML/CW激光器以日本/美国供应商为主，供应链安全风险；5）行业劣势3（定性）：研发投入压力大：1.6T/3.2T",
+          "bull_rebuttal": "实据压制：竞争优势2→护城河一般,竞争劣势2,竞争劣势3等8项"
+        }
+      ]
+    },
+    {
+      "code": "300308",
+      "name": "中际旭创",
+      "judge_score": 57.87500000000001,
+      "bull_score": 91.67,
+      "bear_score": 38.24,
+      "total_score": 71.45,
+      "know_score": 36,
+      "tech_total": 51.5,
+      "pe_ttm": 86.5,
+      "industries": [
+        "光通信"
+      ],
+      "bear_surrendered": false,
+      "bull_surrendered": false,
+      "judge_verdict": "Bull优势明显(净权重+53)[Bull被反驳2条,Bear被反驳8条]",
+      "return_pct": 48.69,
+      "max_return": 48.69,
+      "max_drawdown": -0.17,
+      "close_start": 857.5,
+      "close_end": 1275.0,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "宽护城河",
+          "evidence": "护城河等级为'宽'，竞争优势难以复制",
+          "weight": 9
+        },
+        {
+          "point": "竞争优势1",
+          "evidence": "全球光模块龙头：市占率约15%，中国第一、全球前三",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "高速光模块技术领先：800G产品已量产，1.6T研发中",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "深度绑定谷歌、亚马逊、微软等云厂商，客户优质",
+          "weight": 4
+        },
+        {
+          "point": "财务健康",
+          "evidence": "财务健康评级'健康'，ROE=16.113992296108034%",
+          "weight": 7
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率29.4%，盈利能力强",
+          "weight": 6
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "竞争劣势1",
+          "evidence": "对北美大客户依赖度高，客户集中度风险",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "核心芯片仍依赖进口，供应链安全风险",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "行业竞争加剧，中际旭创、新易盛、剑桥科技等竞争",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风1",
+          "evidence": "北美云厂商资本开支放缓，需求波动风险",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风2",
+          "evidence": "行业竞争加剧，价格战风险",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风3",
+          "evidence": "技术迭代快，研发投入压力大",
+          "weight": 3
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）宽护城河（定性）：护城河等级为'宽'，竞争优势难以复制；2）竞争优势1（实据）：全球光模块龙头：市占率约15%，中国第一、全球前三；3）财务健康（实据）：财务健康评级'健康'，ROE=16.113992296108034%；4）增长驱动1（实据）：AI大模型训练推动数据中心建设，光模块需求爆发式增长；5）增长驱动2（实据）：800G光模块大规模放量，产品结构升级带动毛利率提升；6）行",
+          "bear_rebuttal": "权重压制：增长逆风1→行业地缘机遇1  |  实据压制：估值偏高→创业板溢价",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）行业劣势1（定性）：对北美大客户依赖度高，客户集中度风险；2）行业劣势2（定性）：核心芯片仍依赖进口，供应链安全风险；3）行业劣势3（定性）：行业竞争加剧，中际旭创、新易盛、剑桥科技等竞争；4）竞争劣势1（定性）：对北美大客户依赖度高，客户集中度风险；5）竞争劣势2（定性）：核心芯片仍依赖进口，供应链安全风险；6）竞争劣势3（定性）：行业竞争加剧，中际旭创、新易盛、剑桥科技等竞争。",
+          "bull_rebuttal": "实据压制：竞争优势1→竞争劣势1,竞争劣势2,竞争劣势33项  |  实据压制：增长驱动1→增长逆风1,增长逆风2,增长逆风3等5项"
+        }
+      ]
+    },
+    {
+      "code": "688072",
+      "name": "拓荆科技",
+      "judge_score": 53.463,
+      "bull_score": 95.65,
+      "bear_score": 50.74,
+      "total_score": 68.95,
+      "know_score": 22,
+      "tech_total": 76.5,
+      "pe_ttm": 107.97,
+      "industries": [
+        "AI芯片",
+        "半导体材料"
+      ],
+      "bear_surrendered": false,
+      "bull_surrendered": false,
+      "judge_verdict": "Bull优势明显(净权重+45)[Bull被反驳4条,Bear被反驳9条]",
+      "return_pct": 38.31,
+      "max_return": 68.54,
+      "max_drawdown": 4.06,
+      "close_start": 445.0,
+      "close_end": 615.49,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "竞争优势1",
+          "evidence": "PECVD设备国内龙头：薄膜沉积设备国产化率从5%提升至20%+，拓荆是唯一能量产12英寸PECVD的国产厂商",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "进入中芯国际/长江存储/长鑫存储供应链：已批量供货国内三大晶圆厂，验证壁垒极高",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "ALD原子层沉积设备突破：14nm以下制程必需的ALD设备已经进入客户验证阶段",
+          "weight": 4
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率51.3%，盈利能力强",
+          "weight": 6
+        },
+        {
+          "point": "高毛利率",
+          "evidence": "毛利率41.7%，定价能力强",
+          "weight": 5
+        },
+        {
+          "point": "增长驱动1",
+          "evidence": "中国晶圆厂大规模扩产：中芯/华虹/长存/长鑫未来3年资本开支超5000亿元",
+          "weight": 7
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "护城河窄",
+          "evidence": "护城河等级为'窄'，竞争优势容易被侵蚀",
+          "weight": 8
+        },
+        {
+          "point": "竞争劣势1",
+          "evidence": "收入体量小：年营收仅30亿，远低于应用材料（200亿美元+）和泛林（150亿美元+）",
+          "weight": 6
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "设备稳定性与大厂有差距：MTBF（平均无故障时间）和颗粒控制不如美日巨头",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "严重依赖国内晶圆厂扩产节奏：中芯/长存/长鑫的资本开支决定业绩",
+          "weight": 3
+        },
+        {
+          "point": "财务一般",
+          "evidence": "财务健康评级'一般'，无突出优势",
+          "weight": 4
+        },
+        {
+          "point": "高负债",
+          "evidence": "负债率61%，财务杠杆风险",
+          "weight": 5
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）多头强势（实据）：趋势得分32/35，均线多头排列；2）竞争优势1（实据）：PECVD设备国内龙头：薄膜沉积设备国产化率从5%提升至20%+，拓荆是唯一能量产12英寸PECVD的国产厂商；3）增长驱动1（实据）：中国晶圆厂大规模扩产：中芯/华虹/长存/长鑫未来3年资本开支超5000亿元；4）增长驱动2（实据）：美国出口管制加速国产替代：中芯/华虹被迫减少进口设备采购转向国产；5）行业",
+          "bear_rebuttal": "实据压制：竞争劣势1→竞争优势2,竞争优势3,行业优势23项  |  实据压制：估值偏高→科创板溢价",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）护城河窄（定性）：护城河等级为'窄'，竞争优势容易被侵蚀；2）竞争劣势1（实据）：收入体量小：年营收仅30亿，远低于应用材料（200亿美元+）和泛林（150亿美元+）；3）行业劣势1（实据）：收入体量小：年营收仅30亿，远低于应用材料（200亿美元+）和泛林（150亿美元+）；4）高负债（实据）：负债率61%，财务杠杆风险；5）财务一般（实据）：财务健康评级'一般'，无突出优势；6）",
+          "bull_rebuttal": "实据压制：竞争优势1→护城河窄,竞争劣势2,竞争劣势33项  |  实据压制：增长驱动1→增长逆风1,增长逆风2,增长逆风3等5项  |  权重压制：竞争优势1→估值偏高"
+        }
+      ]
+    },
+    {
+      "code": "301308",
+      "name": "江波龙",
+      "judge_score": 202.465,
+      "bull_score": 162.0,
+      "bear_score": 31.72,
+      "total_score": 80.65,
+      "know_score": 34,
+      "tech_total": 75.5,
+      "pe_ttm": 42.89,
+      "industries": [
+        "AI芯片"
+      ],
+      "bear_surrendered": true,
+      "bull_surrendered": false,
+      "judge_verdict": "Bear投降，Bull胜出。Bull核心论据6项且Bear无核心反驳(权重比108:32)，Bear投降",
+      "return_pct": 32.92,
+      "max_return": 52.55,
+      "max_drawdown": 19.66,
+      "close_start": 400.61,
+      "close_end": 532.51,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "宽护城河",
+          "evidence": "护城河等级为'宽'，竞争优势难以复制",
+          "weight": 9
+        },
+        {
+          "point": "竞争优势1",
+          "evidence": "中国存储模组（SSD/内存条/USB/存储卡）出货量前三：仅次于佰维存储/朗科",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "企业级SSD：数据中心/企业级SSD进入阿里/腾讯/华为等头部客户",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "嵌入式存储（eMMC/UFS/UFS 3.1）：智能手机/平板/汽车中控存储",
+          "weight": 4
+        },
+        {
+          "point": "财务健康",
+          "evidence": "财务健康评级'健康'，ROE=31.69845040494256%",
+          "weight": 7
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率39.0%，盈利能力强",
+          "weight": 6
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "竞争劣势1",
+          "evidence": "核心DRAM/NAND颗粒依赖进口：三星/海力士/美光/铠侠等海外原厂供应",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "本质上为模组组装和封测企业：技术壁垒远低于存储原厂",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "与佰维存储/朗科/金士顿等高度同质化：价格战压缩利润",
+          "weight": 3
+        },
+        {
+          "point": "高负债",
+          "evidence": "负债率66%，财务杠杆风险",
+          "weight": 5
+        },
+        {
+          "point": "增长逆风1",
+          "evidence": "DRAM/NAND价格周期性暴跌",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风2",
+          "evidence": "三星/海力士/美光等巨头随时可以降价打压模组企业",
+          "weight": 3
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）宽护城河（定性）：护城河等级为'宽'，竞争优势难以复制；2）多头强势（实据）：趋势得分32/35，均线多头排列；3）财务健康（实据）：财务健康评级'健康'，ROE=31.69845040494256%；4）增长驱动1（实据）：AI服务器存储需求爆发：HBM/企业级SSD/DDR5内存模组；5）增长驱动2（实据）：国产存储颗粒替代：长江存储NAND+长鑫存储DRAM大规模量产；6）动量",
+          "bear_rebuttal": "无法有效反驳",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）高负债（实据）：负债率66%，财务杠杆风险；2）行业劣势1（定性）：核心DRAM/NAND颗粒依赖进口：三星/海力士/美光/铠侠等海外原厂供应；3）行业劣势2（定性）：本质上为模组组装和封测企业：技术壁垒远低于存储原厂；4）行业劣势3（定性）：与佰维存储/朗科/金士顿等高度同质化：价格战压缩利润；5）竞争劣势1（定性）：核心DRAM/NAND颗粒依赖进口：三星/海力士/美光/铠侠等海",
+          "bull_rebuttal": "权重压制：宽护城河→竞争劣势1,竞争劣势2,行业劣势23项  |  实据压制：财务健康→竞争劣势3,行业劣势32项  |  实据压制：增长驱动1→增长逆风1,增长逆风2,增长逆风3等5项"
+        }
+      ]
+    },
+    {
+      "code": "688525",
+      "name": "佰维存储",
+      "judge_score": 61.46199999999999,
+      "bull_score": 98.67,
+      "bear_score": 41.75000000000001,
+      "total_score": 79.85,
+      "know_score": 34,
+      "tech_total": 59.5,
+      "pe_ttm": 39.03,
+      "industries": [
+        "AI芯片",
+        "消费电子"
+      ],
+      "bear_surrendered": false,
+      "bull_surrendered": false,
+      "judge_verdict": "Bull优势明显(净权重+57)[Bull被反驳3条,Bear被反驳8条]",
+      "return_pct": 18.45,
+      "max_return": 24.91,
+      "max_drawdown": 9.57,
+      "close_start": 265.08,
+      "close_end": 314.0,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "宽护城河",
+          "evidence": "护城河等级为'宽'，竞争优势难以复制",
+          "weight": 9
+        },
+        {
+          "point": "竞争优势1",
+          "evidence": "中国内存模组（DRAM模块）出货量前三：在服务器/PC/嵌入式存储领域国产替代先锋",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "嵌入式存储eMMC/UFS出货量国内前三：智能手机/平板/汽车中控存储配套国产化",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "惠州+成都双基地布局：年产能超5000万颗存储芯片模组",
+          "weight": 7
+        },
+        {
+          "point": "财务健康",
+          "evidence": "财务健康评级'健康'，ROE=34.05713494378471%",
+          "weight": 7
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率42.5%，盈利能力强",
+          "weight": 6
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "竞争劣势1",
+          "evidence": "核心DRAM/NAND颗粒依赖进口：三星/海力士/美光/铠侠等海外原厂供应，无自主晶圆",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "本质上为模组组装和封测企业：技术壁垒远低于存储原厂，毛利率仅15-20%",
+          "weight": 6
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "与江波龙/朗科/雷克沙等竞争对手高度同质化：价格战压缩利润",
+          "weight": 3
+        },
+        {
+          "point": "高负债",
+          "evidence": "负债率65%，财务杠杆风险",
+          "weight": 5
+        },
+        {
+          "point": "增长逆风1",
+          "evidence": "DRAM/NAND价格周期性暴跌",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风2",
+          "evidence": "三星/海力士/美光等巨头随时可以降价打压模组企业",
+          "weight": 3
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）宽护城河（定性）：护城河等级为'宽'，竞争优势难以复制；2）竞争优势3（实据）：惠州+成都双基地布局：年产能超5000万颗存储芯片模组；3）财务健康（实据）：财务健康评级'健康'，ROE=34.05713494378471%；4）增长驱动1（实据）：AI服务器存储需求爆发：HBM高带宽存储和DDR5内存模组需求井喷；5）增长驱动2（实据）：国产存储颗粒替代：长江存储NAND+长鑫存储",
+          "bear_rebuttal": "实据压制：竞争劣势2→宽护城河,竞争优势1,竞争优势23项",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）竞争劣势2（实据）：本质上为模组组装和封测企业：技术壁垒远低于存储原厂，毛利率仅15-20%；2）行业劣势2（实据）：本质上为模组组装和封测企业：技术壁垒远低于存储原厂，毛利率仅15-20%；3）高负债（实据）：负债率65%，财务杠杆风险；4）行业劣势1（定性）：核心DRAM/NAND颗粒依赖进口：三星/海力士/美光/铠侠等海外原厂供应，无自主晶圆；5）行业劣势3（定性）：与江波龙/",
+          "bull_rebuttal": "实据压制：竞争优势3→竞争劣势1,竞争劣势32项  |  实据压制：增长驱动1→增长逆风1,增长逆风2,增长逆风3等5项  |  实据压制：财务健康→行业劣势3"
+        }
+      ]
+    },
+    {
+      "code": "688188",
+      "name": "柏楚电子",
+      "judge_score": 171.915,
+      "bull_score": 137.25,
+      "bear_score": 28.32,
+      "total_score": 72.15,
+      "know_score": 20,
+      "tech_total": 80.5,
+      "pe_ttm": 40.2,
+      "industries": [
+        "AI应用",
+        "信创"
+      ],
+      "bear_surrendered": true,
+      "bull_surrendered": false,
+      "judge_verdict": "Bear投降，Bull胜出。Bull核心论据3项且Bear无核心反驳(权重比92:28)，Bear投降",
+      "return_pct": 8.37,
+      "max_return": 25.41,
+      "max_drawdown": 0.6,
+      "close_start": 141.78,
+      "close_end": 153.65,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "竞争优势1",
+          "evidence": "中国激光切割控制系统龙头国产市占率超60%",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "激光切割控制卡/控制系统/CAD/CAM软件一体化",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "激光切割（平面/管材）",
+          "weight": 4
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率57.7%，盈利能力强",
+          "weight": 6
+        },
+        {
+          "point": "高毛利率",
+          "evidence": "毛利率74.5%，定价能力强",
+          "weight": 5
+        },
+        {
+          "point": "增长驱动1",
+          "evidence": "柏楚电子受益国产替代和自主可控政策红利",
+          "weight": 4
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "护城河窄",
+          "evidence": "护城河等级为'窄'，竞争优势容易被侵蚀",
+          "weight": 8
+        },
+        {
+          "point": "竞争劣势1",
+          "evidence": "柏楚电子行业竞争激烈需持续创新突围",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "柏楚电子受宏观经济周期和下游需求波动影响",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "柏楚电子原材料成本和供应链稳定性存在压力",
+          "weight": 3
+        },
+        {
+          "point": "财务一般",
+          "evidence": "财务健康评级'一般'，无突出优势",
+          "weight": 4
+        },
+        {
+          "point": "增长逆风1",
+          "evidence": "下游需求放缓和产能过剩压力",
+          "weight": 3
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）竞争优势1（实据）：中国激光切割控制系统龙头国产市占率超60%；2）行业优势1（实据）：中国激光切割控制系统龙头国产市占率超60%；3）动量强劲（实据）：动量得分24/30，RSI健康区间；4）高净利率（实据）：净利率57.7%，盈利能力强；5）放量活跃（实据）：量能得分19/20，资金关注；6）估值合理（实据）：PE=40，处于合理区间(15-80)。",
+          "bear_rebuttal": "权重压制：护城河窄→竞争优势2,竞争优势32项  |  权重压制：增长逆风1→行业增长1,行业增长22项",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）护城河窄（定性）：护城河等级为'窄'，竞争优势容易被侵蚀；2）财务一般（实据）：财务健康评级'一般'，无突出优势；3）竞争劣势1（定性）：柏楚电子行业竞争激烈需持续创新突围；4）竞争劣势2（定性）：柏楚电子受宏观经济周期和下游需求波动影响；5）竞争劣势3（定性）：柏楚电子原材料成本和供应链稳定性存在压力；6）增长逆风1（定性）：下游需求放缓和产能过剩压力。",
+          "bull_rebuttal": "实据压制：竞争优势1→护城河窄,竞争劣势1,竞争劣势2等4项  |  实据压制：放量活跃→增长逆风1,增长逆风3,行业逆风13项  |  实据压制：高净利率→增长逆风2,行业逆风22项"
+        }
+      ]
+    },
+    {
+      "code": "688111",
+      "name": "金山办公",
+      "judge_score": 211.205,
+      "bull_score": 169.5,
+      "bear_score": 31.28,
+      "total_score": 78.05,
+      "know_score": 28,
+      "tech_total": 73.5,
+      "pe_ttm": 30.45,
+      "industries": [
+        "AI应用",
+        "信创"
+      ],
+      "bear_surrendered": true,
+      "bull_surrendered": false,
+      "judge_verdict": "Bear投降，Bull胜出。Bull核心论据6项且Bear无核心反驳(权重比113:31)，Bear投降",
+      "return_pct": -0.55,
+      "max_return": 8.83,
+      "max_drawdown": -6.18,
+      "close_start": 251.94,
+      "close_end": 250.55,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "中等护城河",
+          "evidence": "护城河等级为'中'，具备一定竞争壁垒",
+          "weight": 6
+        },
+        {
+          "point": "竞争优势1",
+          "evidence": "中国办公软件绝对龙头：WPS Office月活超5.8亿，PC端市占率超40%移动端超90%",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "AI办公场景最丰富：WPS AI已集成文字/表格/演示/PDF四大组件，体验远超微软Copilot中国版",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "信创/国产替代最大受益者之一：党政/央国企全面从微软Office向WPS迁移",
+          "weight": 4
+        },
+        {
+          "point": "财务健康",
+          "evidence": "财务健康评级'健康'，ROE=14.508952492744429%",
+          "weight": 7
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率136.1%，盈利能力强",
+          "weight": 6
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "护城河一般",
+          "evidence": "护城河等级为'中'，壁垒不够坚固",
+          "weight": 4
+        },
+        {
+          "point": "竞争劣势1",
+          "evidence": "在专业/企业级办公场景与微软Office差距明显：宏/VBA/插件生态远不如微软",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "海外收入几乎为零：WPS仅在中国和少数东南亚国家有用户",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "订阅收入占比仍偏低：与微软365的订阅模式相比WPS付费率偏低",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风1",
+          "evidence": "微软Office+免费Office Online/移动版的竞争",
+          "weight": 3
+        },
+        {
+          "point": "增长逆风2",
+          "evidence": "飞书/钉钉/腾讯文档等免费协作工具的冲击",
+          "weight": 3
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）多头强势（实据）：趋势得分28/35，均线多头排列；2）竞争优势1（实据）：中国办公软件绝对龙头：WPS Office月活超5.8亿，PC端市占率超40%移动端超90%；3）财务健康（实据）：财务健康评级'健康'，ROE=14.508952492744429%；4）增长驱动1（实据）：信创全面推广：2027年党政/央国企2000万+台PC完成Office国产替代；5）行业优势1（实据",
+          "bear_rebuttal": "无法有效反驳",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）护城河一般（定性）：护城河等级为'中'，壁垒不够坚固；2）行业劣势1（定性）：在专业/企业级办公场景与微软Office差距明显：宏/VBA/插件生态远不如微软；3）行业劣势2（定性）：海外收入几乎为零：WPS仅在中国和少数东南亚国家有用户；4）行业劣势3（定性）：订阅收入占比仍偏低：与微软365的订阅模式相比WPS付费率偏低；5）竞争劣势1（定性）：在专业/企业级办公场景与微软Off",
+          "bull_rebuttal": "实据压制：竞争优势1→护城河一般,竞争劣势1,竞争劣势2等4项  |  实据压制：增长驱动1→增长逆风1,增长逆风2,增长逆风3等5项"
+        }
+      ]
+    },
+    {
+      "code": "300059",
+      "name": "东方财富",
+      "judge_score": 215.98499999999999,
+      "bull_score": 174.0,
+      "bear_score": 40.36,
+      "total_score": 71.85,
+      "know_score": 24,
+      "tech_total": 79.5,
+      "pe_ttm": 23.1,
+      "industries": [
+        "券商保险"
+      ],
+      "bear_surrendered": true,
+      "bull_surrendered": false,
+      "judge_verdict": "Bear投降，Bull胜出。Bull核心论据9项且Bear无核心反驳(权重比116:40)，Bear投降",
+      "return_pct": -7.12,
+      "max_return": 4.52,
+      "max_drawdown": -7.12,
+      "close_start": 20.36,
+      "close_end": 18.91,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "竞争优势1",
+          "evidence": "互联网券商龙头：东方财富APP月活超2000万，用户粘性行业第一",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "流量变现能力极强：经纪/两融/基金代销三轮驱动，券商收入占比超60%",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "天天基金网国内最大第三方基金代销平台之一，代销基金数量超8000只",
+          "weight": 7
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率74.3%，盈利能力强",
+          "weight": 6
+        },
+        {
+          "point": "高毛利率",
+          "evidence": "毛利率97.0%，定价能力强",
+          "weight": 5
+        },
+        {
+          "point": "增长驱动1",
+          "evidence": "居民财富搬家：居民增配A股及公募基金长期趋势，经纪+代销双受益",
+          "weight": 4
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "护城河窄",
+          "evidence": "护城河等级为'窄'，竞争优势容易被侵蚀",
+          "weight": 8
+        },
+        {
+          "point": "竞争劣势1",
+          "evidence": "收入高度依赖资本市场：经纪/两融/基金代销均与A股牛熊高度相关",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "投行业务几乎空白：缺少IPO/并购/债券承销等券商高附加值业务",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "牌照壁垒不如传统券商：无期货/外汇/跨境等衍生品牌照",
+          "weight": 3
+        },
+        {
+          "point": "财务一般",
+          "evidence": "财务健康评级'一般'，无突出优势",
+          "weight": 4
+        },
+        {
+          "point": "高负债",
+          "evidence": "负债率78%，财务杠杆风险",
+          "weight": 5
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）多头强势（实据）：趋势得分28/35，均线多头排列；2）竞争优势1（实据）：互联网券商龙头：东方财富APP月活超2000万，用户粘性行业第一；3）竞争优势2（实据）：流量变现能力极强：经纪/两融/基金代销三轮驱动，券商收入占比超60%；4）竞争优势3（实据）：天天基金网国内最大第三方基金代销平台之一，代销基金数量超8000只；5）增长驱动3（实据）：两融市占率持续提升：资本补充后两融",
+          "bear_rebuttal": "无法有效反驳",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）护城河窄（定性）：护城河等级为'窄'，竞争优势容易被侵蚀；2）高负债（实据）：负债率78%，财务杠杆风险；3）财务一般（实据）：财务健康评级'一般'，无突出优势；4）行业劣势1（定性）：收入高度依赖资本市场：经纪/两融/基金代销均与A股牛熊高度相关；5）行业劣势2（定性）：投行业务几乎空白：缺少IPO/并购/债券承销等券商高附加值业务；6）行业劣势3（定性）：牌照壁垒不如传统券商：无",
+          "bull_rebuttal": "实据压制：竞争优势1→护城河窄,竞争劣势1,竞争劣势2等5项  |  实据压制：竞争优势2→增长逆风1,增长逆风2,增长逆风3等5项"
+        }
+      ]
+    },
+    {
+      "code": "300857",
+      "name": "协创数据",
+      "judge_score": 98.839,
+      "bull_score": 76.77,
+      "bear_score": 17.6,
+      "total_score": 67.15,
+      "know_score": 22,
+      "tech_total": 70.5,
+      "pe_ttm": 67.19,
+      "industries": [
+        "数据中心"
+      ],
+      "bear_surrendered": true,
+      "bull_surrendered": false,
+      "judge_verdict": "Bear投降，Bull胜出。Bull核心论据2项且Bear无核心反驳(权重比51:18)，Bear投降",
+      "return_pct": -7.59,
+      "max_return": 15.9,
+      "max_drawdown": -9.31,
+      "close_start": 259.7,
+      "close_end": 240.0,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "中等护城河",
+          "evidence": "护城河等级为'中'，具备一定竞争壁垒",
+          "weight": 6
+        },
+        {
+          "point": "竞争优势1",
+          "evidence": "智能终端（智能摄像头/智能门锁/智能音箱）ODM龙头：小米/360/萤石等头部品牌核心供应商",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "物联网数据存储/云服务：物联网终端+数据存储+云平台一体化",
+          "weight": 4
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "AIoT产品线丰富：智能家居/智能安防/智能办公/智能教育",
+          "weight": 4
+        },
+        {
+          "point": "增长驱动1",
+          "evidence": "净利率12.3%，盈利水平好",
+          "weight": 7
+        },
+        {
+          "point": "行业优势1",
+          "evidence": "智能终端（智能摄像头/智能门锁/智能音箱）ODM龙头：小米/360/萤石等头部品牌核心供应商",
+          "weight": 4
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "护城河一般",
+          "evidence": "护城河等级为'中'，壁垒不够坚固",
+          "weight": 4
+        },
+        {
+          "point": "竞争劣势1",
+          "evidence": "资产负债率85.9%较高，财务风险需关注",
+          "weight": 6
+        },
+        {
+          "point": "财务一般",
+          "evidence": "财务健康评级'一般'，无突出优势",
+          "weight": 4
+        },
+        {
+          "point": "高负债",
+          "evidence": "负债率86%，财务杠杆风险",
+          "weight": 5
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）多头强势（实据）：趋势得分32/35，均线多头排列；2）增长驱动1（实据）：净利率12.3%，盈利水平好；3）中等护城河（定性）：护城河等级为'中'，具备一定竞争壁垒；4）估值合理（实据）：PE=67，处于合理区间(15-80)；5）竞争优势1（定性）：智能终端（智能摄像头/智能门锁/智能音箱）ODM龙头：小米/360/萤石等头部品牌核心供应商；6）竞争优势2（定性）：物联网数据存储",
+          "bear_rebuttal": "实据压制：竞争劣势1→中等护城河,竞争优势1,竞争优势2等4项",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）竞争劣势1（实据）：资产负债率85.9%较高，财务风险需关注；2）高负债（实据）：负债率86%，财务杠杆风险；3）护城河一般（定性）：护城河等级为'中'，壁垒不够坚固；4）财务一般（实据）：财务健康评级'一般'，无突出优势。",
+          "bull_rebuttal": "权重压制：增长驱动1→财务一般"
+        }
+      ]
+    },
+    {
+      "code": "300760",
+      "name": "迈瑞医疗",
+      "judge_score": 202.829,
+      "bull_score": 163.245,
+      "bear_score": 40.34,
+      "total_score": 69.35,
+      "know_score": 23,
+      "tech_total": 74.5,
+      "pe_ttm": 23.49,
+      "industries": [
+        "生物医药"
+      ],
+      "bear_surrendered": true,
+      "bull_surrendered": false,
+      "judge_verdict": "Bear投降，Bull胜出。Bull核心论据10项且Bear无核心反驳(权重比109:40)，Bear投降",
+      "return_pct": -13.43,
+      "max_return": 2.54,
+      "max_drawdown": -13.43,
+      "close_start": 167.03,
+      "close_end": 144.59,
+      "future_days": 21,
+      "bull_args": [
+        {
+          "point": "竞争优势1",
+          "evidence": "中国医疗器械绝对龙头：营收超300亿元，业务横跨监护/超声/体外诊断三大领域",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势2",
+          "evidence": "监护仪全球第三（仅次于飞利浦/GE）：国内市场占有率超65%，出口至190+国家",
+          "weight": 7
+        },
+        {
+          "point": "竞争优势3",
+          "evidence": "超声业务高速增长：便携超声/高端心脏超声突破，国内市占率从15%向25%+提升",
+          "weight": 7
+        },
+        {
+          "point": "高净利率",
+          "evidence": "净利率27.9%，盈利能力强",
+          "weight": 6
+        },
+        {
+          "point": "高毛利率",
+          "evidence": "毛利率61.9%，定价能力强",
+          "weight": 5
+        },
+        {
+          "point": "增长驱动1",
+          "evidence": "中国医疗器械市场十年十倍：从8000亿元向8万亿元+，国产替代空间巨大",
+          "weight": 7
+        }
+      ],
+      "bear_args": [
+        {
+          "point": "护城河窄",
+          "evidence": "护城河等级为'窄'，竞争优势容易被侵蚀",
+          "weight": 8
+        },
+        {
+          "point": "竞争劣势1",
+          "evidence": "在高端影像（CT/MRI/PET-CT）几乎空白：与联影/西门子/GE差距巨大",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势2",
+          "evidence": "体外诊断化学发光仍落后：罗氏/雅培/贝克曼/西门子垄断高端化学发光市场",
+          "weight": 3
+        },
+        {
+          "point": "竞争劣势3",
+          "evidence": "海外收入以中低端为主：欧美高端医院采购迈瑞比例低，品牌溢价不足",
+          "weight": 3
+        },
+        {
+          "point": "财务一般",
+          "evidence": "财务健康评级'一般'，无突出优势",
+          "weight": 4
+        },
+        {
+          "point": "增长逆风1",
+          "evidence": "IVD集采降价：江西肝功/安徽发光集采平均降价50%+，压缩利润",
+          "weight": 5
+        }
+      ],
+      "exchanges": [
+        {
+          "round_num": 1,
+          "bull_statement": "看多逻辑：1）竞争优势1（实据）：中国医疗器械绝对龙头：营收超300亿元，业务横跨监护/超声/体外诊断三大领域；2）竞争优势2（实据）：监护仪全球第三（仅次于飞利浦/GE）：国内市场占有率超65%，出口至190+国家；3）竞争优势3（实据）：超声业务高速增长：便携超声/高端心脏超声突破，国内市占率从15%向25%+提升；4）增长驱动1（实据）：中国医疗器械市场十年十倍：从8000亿元向8万亿元+，",
+          "bear_rebuttal": "实据压制：增长逆风1→行业增长2  |  权重压制：行业劣势1→创业板溢价",
+          "bear_statement": "",
+          "bull_rebuttal": ""
+        },
+        {
+          "round_num": 2,
+          "bull_statement": "",
+          "bear_rebuttal": "",
+          "bear_statement": "看空逻辑：1）护城河窄（定性）：护城河等级为'窄'，竞争优势容易被侵蚀；2）增长逆风1（实据）：IVD集采降价：江西肝功/安徽发光集采平均降价50%+，压缩利润；3）行业逆风1（实据）：IVD集采降价：江西肝功/安徽发光集采平均降价50%+，压缩利润；4）财务一般（实据）：财务健康评级'一般'，无突出优势；5）行业劣势1（定性）：在高端影像（CT/MRI/PET-CT）几乎空白：与联影/西门子/G",
+          "bull_rebuttal": "实据压制：竞争优势1→护城河窄,竞争劣势1,竞争劣势2等4项  |  实据压制：竞争优势3→增长逆风2,增长逆风3,行业逆风23项  |  实据压制：估值合理→行业劣势1,行业劣势32项"
+        }
+      ]
+    }
+  ],
+  "avg_return": 16.68,
+  "positive_rate": 60.0
+}

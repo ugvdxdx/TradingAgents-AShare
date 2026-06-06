@@ -1,3 +1,4 @@
+from __future__ import annotations
 """A-share market data provider using direct HTTP/TCP API calls.
 
 Zero third-party data wrapper dependencies (no akshare/baostock).
@@ -833,6 +834,177 @@ class AstockProvider(BaseMarketDataProvider):
         except Exception as exc:
             raise NotImplementedError(
                 f"cn_astock temporarily unavailable for hot stocks: {type(exc).__name__}: {exc}"
+            ) from exc
+
+    # ── Sector / Concept Board methods ──
+
+    def get_concept_boards(self, top_n: int = 30) -> str:
+        """Eastmoney concept board ranking with change% and fund flow."""
+        try:
+            url = "https://push2.eastmoney.com/api/qt/clist/get"
+            params = {
+                "pn": "1", "pz": str(top_n), "po": "1", "np": "1",
+                "fltt": "2", "invt": "2",
+                "fs": "m:90+t:3",
+                "fields": "f2,f3,f4,f12,f13,f14,f104,f105,f6,f128,f136,f140,f141",
+            }
+            r = requests.get(url, params=params, headers={"User-Agent": UA}, timeout=15)
+            d = r.json()
+            items = d.get("data", {}).get("diff", [])
+            if not items:
+                return "概念板块数据暂不可用。"
+
+            rows = []
+            for i, item in enumerate(items):
+                rows.append({
+                    "排名": i + 1,
+                    "名称": item.get("f14", ""),
+                    "涨跌幅%": item.get("f3", 0),
+                    "代码": item.get("f12", ""),
+                    "上涨家数": item.get("f104", 0),
+                    "下跌家数": item.get("f105", 0),
+                    "成交额": item.get("f6", 0),
+                    "领涨股": item.get("f140", ""),
+                })
+
+            df = pd.DataFrame(rows)
+            total = len(df)
+            result = df.head(top_n).to_string(index=False)
+            return f"概念板块涨跌幅排名（共{total}个，前{min(top_n, total)}名）：\n{result}"
+        except Exception as exc:
+            raise NotImplementedError(
+                f"cn_astock temporarily unavailable for concept boards: {type(exc).__name__}: {exc}"
+            ) from exc
+
+    def get_concept_board_stocks(self, board_code: str) -> str:
+        """Eastmoney concept board constituent stocks."""
+        try:
+            url = "https://push2.eastmoney.com/api/qt/clist/get"
+            params = {
+                "pn": "1", "pz": "50", "po": "1", "np": "1",
+                "fltt": "2", "invt": "2",
+                "fs": f"b:{board_code}+f:!50",
+                "fields": "f2,f3,f4,f12,f13,f14,f6,f15,f16,f17",
+            }
+            r = requests.get(url, params=params, headers={"User-Agent": UA}, timeout=15)
+            d = r.json()
+            items = d.get("data", {}).get("diff", [])
+            if not items:
+                return f"板块 {board_code} 成分股数据暂不可用。"
+
+            rows = []
+            for i, item in enumerate(items):
+                rows.append({
+                    "排名": i + 1,
+                    "代码": item.get("f12", ""),
+                    "名称": item.get("f14", ""),
+                    "涨跌幅%": item.get("f3", 0),
+                    "现价": item.get("f2", 0),
+                    "成交额": item.get("f6", 0),
+                    "最高": item.get("f15", 0),
+                    "最低": item.get("f16", 0),
+                })
+
+            df = pd.DataFrame(rows)
+            total = len(df)
+            result = df.head(30).to_string(index=False)
+            return f"板块 {board_code} 成分股（共{total}只，前30名）：\n{result}"
+        except Exception as exc:
+            raise NotImplementedError(
+                f"cn_astock temporarily unavailable for board stocks: {type(exc).__name__}: {exc}"
+            ) from exc
+
+    def get_stock_concept_belonging(self, symbol: str) -> str:
+        """Baidu PAE concept/industry/region belonging for a stock."""
+        code = _normalize_symbol(symbol)
+        try:
+            url = (
+                f"https://finance.pae.baidu.com/api/getrelatedblock"
+                f"?code={code}&market=ab"
+                f"&typeCode=all&finClientType=pc"
+            )
+            headers = {
+                "User-Agent": UA,
+                "Accept": "application/vnd.finance-web.v1+json",
+                "Origin": "https://gushitong.baidu.com",
+                "Referer": "https://gushitong.baidu.com/",
+            }
+            r = requests.get(url, headers=headers, timeout=10)
+            d = r.json()
+            if str(d.get("ResultCode", -1)) != "0":
+                return f"{symbol} 概念归属数据暂不可用。"
+
+            parts = [f"{symbol} 所属板块："]
+            for block in d.get("Result", []):
+                block_type = block.get("type", "")
+                items_list = block.get("list", [])
+                if not items_list:
+                    continue
+                type_label = ""
+                if "行业" in block_type:
+                    type_label = "行业"
+                elif "概念" in block_type:
+                    type_label = "概念"
+                elif "地域" in block_type:
+                    type_label = "地域"
+                else:
+                    continue
+
+                entries = []
+                for item in items_list:
+                    name = item.get("name", "")
+                    change = item.get("increase", "")
+                    if change != "":
+                        entries.append(f"{name}({change}%)")
+                    else:
+                        entries.append(name)
+                parts.append(f"\n{type_label}：{', '.join(entries)}")
+
+            return "\n".join(parts)
+        except Exception as exc:
+            raise NotImplementedError(
+                f"cn_astock temporarily unavailable for stock concept belonging: {type(exc).__name__}: {exc}"
+            ) from exc
+
+    def search_concept_board(self, keyword: str) -> str:
+        """Search concept boards by keyword from Eastmoney."""
+        try:
+            url = "https://push2.eastmoney.com/api/qt/clist/get"
+            params = {
+                "pn": "1", "pz": "200", "po": "1", "np": "1",
+                "fltt": "2", "invt": "2",
+                "fs": "m:90+t:3",
+                "fields": "f2,f3,f12,f13,f14,f104,f105,f6,f140",
+            }
+            r = requests.get(url, params=params, headers={"User-Agent": UA}, timeout=15)
+            d = r.json()
+            items = d.get("data", {}).get("diff", [])
+            if not items:
+                return f"未找到与'{keyword}'相关的概念板块。"
+
+            keyword_lower = keyword.lower()
+            matched = []
+            for item in items:
+                name = item.get("f14", "")
+                if keyword_lower in name.lower():
+                    matched.append({
+                        "名称": name,
+                        "代码": item.get("f12", ""),
+                        "涨跌幅%": item.get("f3", 0),
+                        "上涨家数": item.get("f104", 0),
+                        "下跌家数": item.get("f105", 0),
+                        "成交额": item.get("f6", 0),
+                        "领涨股": item.get("f140", ""),
+                    })
+
+            if not matched:
+                return f"未找到与'{keyword}'匹配的概念板块。"
+
+            df = pd.DataFrame(matched)
+            return f"概念板块搜索'{keyword}'结果（共{len(matched)}个）：\n{df.to_string(index=False)}"
+        except Exception as exc:
+            raise NotImplementedError(
+                f"cn_astock temporarily unavailable for concept search: {type(exc).__name__}: {exc}"
             ) from exc
 
     # ── Internal raw API methods (from SKILL.md) ──

@@ -230,6 +230,8 @@ __marimo__/
 eval_results/
 reports/
 results/
+debate_report_*.json
+stock_picker_*.json
 
 # Private dirs (not open-source for now)
 deploy/

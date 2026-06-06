@@ -1,3 +1,4 @@
+from __future__ import annotations
 # TradingAgents/graph/signal_processing.py
 
 import re
@@ -87,18 +88,18 @@ def _extract_decision_keyword(text: str) -> str | None:
             "回避",
             "看空",
             "偏空",
+            "离场",
         ]
         buy_keywords = [
             "BUY",
             "买入",
             "增持",
-            "做多",
+            "建仓",
             "看多",
             "偏多",
             "谨慎看多",
-            "有条件建仓",
             "条件建仓",
-            "建仓",
+            "分批建仓",
         ]
         hold_keywords = [
             "HOLD",

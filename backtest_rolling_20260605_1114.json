@@ -1,0 +1,1723 @@
+{
+  "timestamp": "2026-06-05T11:14:01.646608",
+  "windows": 6,
+  "date_range": "2026-04-07 ~ 2026-05-15",
+  "overall_top5_avg": 17.66,
+  "overall_top5_pos": 66.7,
+  "overall_top10_avg": 15.4,
+  "overall_top10_pos": 65.0,
+  "overall_top20_avg": 21.73,
+  "overall_top20_pos": 68.3,
+  "results": [
+    {
+      "window": 1,
+      "cutoff_date": "2026-04-07",
+      "future_days": 39,
+      "top5_return": 53.14,
+      "top5_positive": 80.0,
+      "top10_return": 41.48,
+      "top10_positive": 80.0,
+      "top20_return": 47.9,
+      "top20_positive": 85.0,
+      "top10_results": [
+        {
+          "code": "300723",
+          "name": "一品红",
+          "judge_score": 41.836,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 8.55,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "301308",
+          "name": "江波龙",
+          "judge_score": 29.945999999999998,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 91.31,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 24.242,
+          "cutoff_date": "2026-04-07",
+          "return_pct": -3.08,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 106.86,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688257",
+          "name": "新锐股份",
+          "judge_score": 23.536,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 62.05,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 11.89,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688127",
+          "name": "蓝特光学",
+          "judge_score": 11.37,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 37.91,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 11.046000000000003,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 56.98,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688003",
+          "name": "天准科技",
+          "judge_score": 10.824,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 67.68,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688331",
+          "name": "荣昌生物",
+          "judge_score": 10.47,
+          "cutoff_date": "2026-04-07",
+          "return_pct": -25.36,
+          "future_days": 39,
+          "verify_target": 39
+        }
+      ],
+      "top20_results": [
+        {
+          "code": "300723",
+          "name": "一品红",
+          "judge_score": 41.836,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 8.55,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "301308",
+          "name": "江波龙",
+          "judge_score": 29.945999999999998,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 91.31,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 24.242,
+          "cutoff_date": "2026-04-07",
+          "return_pct": -3.08,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 106.86,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688257",
+          "name": "新锐股份",
+          "judge_score": 23.536,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 62.05,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688630",
+          "name": "芯碁微装",
+          "judge_score": 16.074,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 104.59,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 11.89,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688002",
+          "name": "睿创微纳",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 22.03,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688127",
+          "name": "蓝特光学",
+          "judge_score": 11.37,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 37.91,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688183",
+          "name": "生益电子",
+          "judge_score": 11.070000000000002,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 58.88,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 11.046000000000003,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 56.98,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688003",
+          "name": "天准科技",
+          "judge_score": 10.824,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 67.68,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688331",
+          "name": "荣昌生物",
+          "judge_score": 10.47,
+          "cutoff_date": "2026-04-07",
+          "return_pct": -25.36,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688625",
+          "name": "呈和科技",
+          "judge_score": 10.050000000000002,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 91.64,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688372",
+          "name": "伟测科技",
+          "judge_score": 10.050000000000002,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 8.06,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688150",
+          "name": "莱特光电",
+          "judge_score": 8.124,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 29.66,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688235",
+          "name": "百济神州",
+          "judge_score": 8.124,
+          "cutoff_date": "2026-04-07",
+          "return_pct": -5.54,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "001309",
+          "name": "德明利",
+          "judge_score": 7.7280000000000015,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 80.03,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688200",
+          "name": "华峰测控",
+          "judge_score": 7.404,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 68.8,
+          "future_days": 39,
+          "verify_target": 39
+        },
+        {
+          "code": "688498",
+          "name": "源杰科技",
+          "judge_score": 6.120000000000001,
+          "cutoff_date": "2026-04-07",
+          "return_pct": 85.05,
+          "future_days": 39,
+          "verify_target": 39
+        }
+      ]
+    },
+    {
+      "window": 2,
+      "cutoff_date": "2026-04-14",
+      "future_days": 34,
+      "top5_return": 22.51,
+      "top5_positive": 100.0,
+      "top10_return": 28.27,
+      "top10_positive": 100.0,
+      "top20_return": 21.55,
+      "top20_positive": 80.0,
+      "top10_results": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 65.79,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 7.94,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688002",
+          "name": "睿创微纳",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 1.33,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688127",
+          "name": "蓝特光学",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 29.21,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688123",
+          "name": "聚辰股份",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 8.29,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688308",
+          "name": "欧科亿",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 60.07,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 10.12,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688012",
+          "name": "DR中微公",
+          "judge_score": 3.8759999999999994,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 32.98,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 2.856,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 18.47,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688200",
+          "name": "华峰测控",
+          "judge_score": 2.724000000000002,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 48.51,
+          "future_days": 34,
+          "verify_target": 34
+        }
+      ],
+      "top20_results": [
+        {
+          "code": "300723",
+          "name": "一品红",
+          "judge_score": 41.836,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 9.84,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 65.79,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-04-14",
+          "return_pct": -2.12,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "300475",
+          "name": "香农芯创",
+          "judge_score": 15.378000000000002,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 16.64,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 7.94,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688002",
+          "name": "睿创微纳",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 1.33,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688127",
+          "name": "蓝特光学",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 29.21,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688123",
+          "name": "聚辰股份",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 8.29,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688308",
+          "name": "欧科亿",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 60.07,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 10.12,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": -6.12,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688625",
+          "name": "呈和科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 57.62,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688578",
+          "name": "艾力斯",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": -13.93,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688208",
+          "name": "道通科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": -15.43,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688120",
+          "name": "华海清科",
+          "judge_score": 4.488,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 38.74,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688187",
+          "name": "时代电气",
+          "judge_score": 4.440000000000001,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 13.84,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688012",
+          "name": "DR中微公",
+          "judge_score": 3.8759999999999994,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 32.98,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 2.856,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 18.47,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "688200",
+          "name": "华峰测控",
+          "judge_score": 2.724000000000002,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 48.51,
+          "future_days": 34,
+          "verify_target": 34
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "judge_score": 1.2720000000000002,
+          "cutoff_date": "2026-04-14",
+          "return_pct": 49.22,
+          "future_days": 34,
+          "verify_target": 34
+        }
+      ]
+    },
+    {
+      "window": 3,
+      "cutoff_date": "2026-04-21",
+      "future_days": 29,
+      "top5_return": 16.62,
+      "top5_positive": 60.0,
+      "top10_return": 10.59,
+      "top10_positive": 60.0,
+      "top20_return": 30.64,
+      "top20_positive": 80.0,
+      "top10_results": [
+        {
+          "code": "688099",
+          "name": "晶晨股份",
+          "judge_score": 56.379999999999995,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 15.34,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -7.12,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688127",
+          "name": "蓝特光学",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 20.12,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688301",
+          "name": "奕瑞科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 59.27,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688271",
+          "name": "联影医疗",
+          "judge_score": 7.446,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -4.53,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688187",
+          "name": "时代电气",
+          "judge_score": 6.390000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 11.53,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 0.48,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688281",
+          "name": "华秦科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -7.72,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -5.16,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 2.856,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 23.68,
+          "future_days": 29,
+          "verify_target": 29
+        }
+      ],
+      "top20_results": [
+        {
+          "code": "688099",
+          "name": "晶晨股份",
+          "judge_score": 56.379999999999995,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 15.34,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "300475",
+          "name": "香农芯创",
+          "judge_score": 55.378,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 15.01,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -7.12,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688766",
+          "name": "普冉股份",
+          "judge_score": 16.074,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 55.39,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688127",
+          "name": "蓝特光学",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 20.12,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688301",
+          "name": "奕瑞科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 59.27,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688396",
+          "name": "华润微",
+          "judge_score": 9.144,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 40.71,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688531",
+          "name": "日联科技",
+          "judge_score": 8.124,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 137.59,
+          "future_days": 24,
+          "verify_target": 29
+        },
+        {
+          "code": "688271",
+          "name": "联影医疗",
+          "judge_score": 7.446,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -4.53,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688187",
+          "name": "时代电气",
+          "judge_score": 6.390000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 11.53,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 0.48,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688281",
+          "name": "华秦科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -7.72,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": -5.16,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688308",
+          "name": "欧科亿",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 66.6,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688123",
+          "name": "聚辰股份",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 16.16,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688625",
+          "name": "呈和科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 57.32,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688120",
+          "name": "华海清科",
+          "judge_score": 4.488,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 34.12,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 2.856,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 23.68,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "688200",
+          "name": "华峰测控",
+          "judge_score": 2.724000000000002,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 49.9,
+          "future_days": 29,
+          "verify_target": 29
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "judge_score": 1.2720000000000002,
+          "cutoff_date": "2026-04-21",
+          "return_pct": 34.13,
+          "future_days": 29,
+          "verify_target": 29
+        }
+      ]
+    },
+    {
+      "window": 4,
+      "cutoff_date": "2026-04-28",
+      "future_days": 24,
+      "top5_return": 7.7,
+      "top5_positive": 60.0,
+      "top10_return": 1.92,
+      "top10_positive": 50.0,
+      "top20_return": 21.71,
+      "top20_positive": 75.0,
+      "top10_results": [
+        {
+          "code": "688099",
+          "name": "晶晨股份",
+          "judge_score": 56.379999999999995,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 3.34,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300723",
+          "name": "一品红",
+          "judge_score": 41.836,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 0.67,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300760",
+          "name": "迈瑞医疗",
+          "judge_score": 31.892000000000003,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -10.59,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300832",
+          "name": "新产业",
+          "judge_score": 25.476,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -10.27,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 55.34,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -6.43,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688002",
+          "name": "睿创微纳",
+          "judge_score": 8.729999999999999,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -16.43,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 6.779999999999999,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 9.57,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -7.0,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 0.95,
+          "future_days": 24,
+          "verify_target": 24
+        }
+      ],
+      "top20_results": [
+        {
+          "code": "688099",
+          "name": "晶晨股份",
+          "judge_score": 56.379999999999995,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 3.34,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300723",
+          "name": "一品红",
+          "judge_score": 41.836,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 0.67,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300760",
+          "name": "迈瑞医疗",
+          "judge_score": 31.892000000000003,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -10.59,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300832",
+          "name": "新产业",
+          "judge_score": 25.476,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -10.27,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 55.34,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -6.43,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "300475",
+          "name": "香农芯创",
+          "judge_score": 15.378000000000002,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 7.78,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688301",
+          "name": "奕瑞科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 64.71,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688002",
+          "name": "睿创微纳",
+          "judge_score": 8.729999999999999,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -16.43,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688531",
+          "name": "日联科技",
+          "judge_score": 8.124,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 137.59,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 6.779999999999999,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 9.57,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688183",
+          "name": "生益电子",
+          "judge_score": 6.390000000000001,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 10.96,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-28",
+          "return_pct": -7.0,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 0.95,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688625",
+          "name": "呈和科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 53.82,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688123",
+          "name": "聚辰股份",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 22.97,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688120",
+          "name": "华海清科",
+          "judge_score": 4.488,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 31.19,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688012",
+          "name": "DR中微公",
+          "judge_score": 3.8759999999999994,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 19.12,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 2.856,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 30.87,
+          "future_days": 24,
+          "verify_target": 24
+        },
+        {
+          "code": "688200",
+          "name": "华峰测控",
+          "judge_score": 2.724000000000002,
+          "cutoff_date": "2026-04-28",
+          "return_pct": 36.1,
+          "future_days": 24,
+          "verify_target": 24
+        }
+      ]
+    },
+    {
+      "window": 5,
+      "cutoff_date": "2026-05-08",
+      "future_days": 19,
+      "top5_return": 5.6,
+      "top5_positive": 40.0,
+      "top10_return": 8.5,
+      "top10_positive": 50.0,
+      "top20_return": 9.26,
+      "top20_positive": 55.0,
+      "top10_results": [
+        {
+          "code": "300723",
+          "name": "一品红",
+          "judge_score": 41.836,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -4.6,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300760",
+          "name": "迈瑞医疗",
+          "judge_score": 28.381999999999998,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -15.57,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -14.41,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 20.362000000000002,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 44.47,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300274",
+          "name": "阳光电源",
+          "judge_score": 11.934000000000005,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 18.1,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "001309",
+          "name": "德明利",
+          "judge_score": 5.778000000000002,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 13.91,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688123",
+          "name": "聚辰股份",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 5.32,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688308",
+          "name": "欧科亿",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 60.3,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688281",
+          "name": "华秦科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -11.72,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -10.78,
+          "future_days": 19,
+          "verify_target": 19
+        }
+      ],
+      "top20_results": [
+        {
+          "code": "300723",
+          "name": "一品红",
+          "judge_score": 41.836,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -4.6,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300760",
+          "name": "迈瑞医疗",
+          "judge_score": 28.381999999999998,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -15.57,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -14.41,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 20.362000000000002,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 44.47,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 10.39,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688301",
+          "name": "奕瑞科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 59.97,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "300274",
+          "name": "阳光电源",
+          "judge_score": 11.934000000000005,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 18.1,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688002",
+          "name": "睿创微纳",
+          "judge_score": 11.37,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -17.17,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688127",
+          "name": "蓝特光学",
+          "judge_score": 11.37,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 1.24,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688318",
+          "name": "财富趋势",
+          "judge_score": 8.124,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -1.12,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "001309",
+          "name": "德明利",
+          "judge_score": 5.778000000000002,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 13.91,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688123",
+          "name": "聚辰股份",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 5.32,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688308",
+          "name": "欧科亿",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 60.3,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688281",
+          "name": "华秦科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -11.72,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -10.78,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -3.54,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688169",
+          "name": "石头科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-08",
+          "return_pct": -13.79,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688012",
+          "name": "DR中微公",
+          "judge_score": 3.8759999999999994,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 16.63,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688525",
+          "name": "佰维存储",
+          "judge_score": 2.856,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 17.51,
+          "future_days": 19,
+          "verify_target": 19
+        },
+        {
+          "code": "688200",
+          "name": "华峰测控",
+          "judge_score": 2.724000000000002,
+          "cutoff_date": "2026-05-08",
+          "return_pct": 30.09,
+          "future_days": 19,
+          "verify_target": 19
+        }
+      ]
+    },
+    {
+      "window": 6,
+      "cutoff_date": "2026-05-15",
+      "future_days": 14,
+      "top5_return": 0.42,
+      "top5_positive": 60.0,
+      "top10_return": 1.67,
+      "top10_positive": 50.0,
+      "top20_return": -0.66,
+      "top20_positive": 35.0,
+      "top10_results": [
+        {
+          "code": "300832",
+          "name": "新产业",
+          "judge_score": 25.476,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -12.76,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 21.92,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -16.58,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 2.09,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "300274",
+          "name": "阳光电源",
+          "judge_score": 11.934000000000005,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 7.45,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688187",
+          "name": "时代电气",
+          "judge_score": 6.390000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 4.59,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -5.51,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688308",
+          "name": "欧科亿",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 44.37,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -14.2,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688169",
+          "name": "石头科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -14.67,
+          "future_days": 14,
+          "verify_target": 14
+        }
+      ],
+      "top20_results": [
+        {
+          "code": "688099",
+          "name": "晶晨股份",
+          "judge_score": 54.43,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -9.01,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "300832",
+          "name": "新产业",
+          "judge_score": 25.476,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -12.76,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "judge_score": 23.872,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 21.92,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "300972",
+          "name": "万辰集团",
+          "judge_score": 20.732,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -16.58,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688019",
+          "name": "安集科技",
+          "judge_score": 13.319999999999999,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 2.09,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "300274",
+          "name": "阳光电源",
+          "judge_score": 11.934000000000005,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 7.45,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688301",
+          "name": "奕瑞科技",
+          "judge_score": 6.779999999999999,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 31.44,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688187",
+          "name": "时代电气",
+          "judge_score": 6.390000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 4.59,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "001309",
+          "name": "德明利",
+          "judge_score": 5.778000000000002,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -4.38,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688018",
+          "name": "乐鑫科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -5.51,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688308",
+          "name": "欧科亿",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 44.37,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688608",
+          "name": "恒玄科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -14.2,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688169",
+          "name": "石头科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -14.67,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688281",
+          "name": "华秦科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -22.24,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688208",
+          "name": "道通科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -22.53,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688123",
+          "name": "聚辰股份",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -15.58,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688625",
+          "name": "呈和科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": 20.87,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688372",
+          "name": "伟测科技",
+          "judge_score": 5.370000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -4.38,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688012",
+          "name": "DR中微公",
+          "judge_score": 3.8759999999999994,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -0.32,
+          "future_days": 14,
+          "verify_target": 14
+        },
+        {
+          "code": "688213",
+          "name": "思特威",
+          "judge_score": 3.030000000000001,
+          "cutoff_date": "2026-05-15",
+          "return_pct": -3.8,
+          "future_days": 14,
+          "verify_target": 14
+        }
+      ]
+    }
+  ]
+}

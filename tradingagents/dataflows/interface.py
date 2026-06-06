@@ -1,3 +1,4 @@
+from __future__ import annotations
 import contextvars
 import os
 
@@ -60,6 +61,15 @@ TOOLS_CATEGORIES = {
             "get_lhb_detail",
             "get_zt_pool",
             "get_hot_stocks_xq",
+        ],
+    },
+    "sector_data": {
+        "description": "Concept/industry sector boards and constituent stocks",
+        "tools": [
+            "get_concept_boards",
+            "get_concept_board_stocks",
+            "get_stock_concept_belonging",
+            "search_concept_board",
         ],
     },
 }
