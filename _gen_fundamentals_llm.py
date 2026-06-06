@@ -355,12 +355,35 @@ def generate_one(code: str, name: str, industry: str, stock_knowledge: dict,
     return None
 
 
+def load_industry_map() -> dict:
+    """加载 StockAPI 行业缓存"""
+    cache_path = os.path.join(SCRIPT_DIR, ".cache", "stockapi_industry.json")
+    if os.path.exists(cache_path):
+        with open(cache_path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+        result = {}
+        for code, gl in raw.items():
+            result[code] = gl.split("-")[0] if "-" in gl else gl
+        return result
+    return {}
+
+
+def load_need_generate() -> list:
+    """从 .need_generate.json 加载待生成列表"""
+    path = os.path.join(SCRIPT_DIR, ".need_generate.json")
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
 def main():
     # 解析参数
     codes_arg = None
     force = False
     count = 0
     dry_run = False
+    use_need_file = False
 
     for arg in sys.argv[1:]:
         if arg.startswith("--codes="):
@@ -375,6 +398,8 @@ def main():
             count = int(sys.argv[sys.argv.index(arg) + 1])
         elif arg == "--dry-run":
             dry_run = True
+        elif arg in ("--need-file", "--top500"):
+            use_need_file = True
 
     # 加载资源
     logger.info("加载世界知识...")
@@ -385,29 +410,42 @@ def main():
     stock_knowledge = load_stock_knowledge()
     logger.info(f"  STOCK_KNOWLEDGE: {len(stock_knowledge)} 只股票")
 
+    logger.info("加载行业缓存...")
+    industry_map = load_industry_map()
+    logger.info(f"  行业缓存: {len(industry_map)} 只股票")
+
     # 确定要生成的股票列表
     if codes_arg:
-        # 指定代码模式
         whitelist = load_stock_whitelist()
         code_map = {s["code"]: s for s in whitelist}
         stocks = []
         for c in codes_arg:
             if c in code_map:
-                stocks.append(code_map[c])
+                s = code_map[c].copy()
+                s["industry"] = industry_map.get(c, "其他")
+                stocks.append(s)
             else:
-                # 尝试从 stock_knowledge 获取
                 sk = stock_knowledge.get(c, {})
                 stocks.append({
                     "code": c,
                     "name": sk.get("name", c),
-                    "industry": sk.get("industry", "其他"),
+                    "industry": industry_map.get(c, sk.get("industry", "其他")),
                     "mcap_yi": 0,
                 })
+    elif use_need_file:
+        stocks = load_need_generate()
+        if not stocks:
+            logger.error(".need_generate.json 为空或不存在，先运行 _build_target_list.py")
+            sys.exit(1)
+        logger.info(f"从 .need_generate.json 加载 {len(stocks)} 只股票")
     else:
-        # 全量模式
         whitelist = load_stock_whitelist()
         whitelist.sort(key=lambda x: x.get("mcap_yi", 0), reverse=True)
-        stocks = whitelist
+        stocks = []
+        for s in whitelist:
+            s_copy = s.copy()
+            s_copy["industry"] = industry_map.get(s["code"], "其他")
+            stocks.append(s_copy)
 
     if count > 0:
         stocks = stocks[:count]
@@ -450,20 +488,19 @@ def main():
     # 逐个生成
     success = 0
     fail = 0
-    skip = 0
     start_time = time.time()
 
     for i, stock in enumerate(need_generate):
         code = stock["code"]
         name = stock.get("name", "")
         industry = stock.get("industry", "")
-        total_mv = stock.get("mcap_yi", 0) or stock.get("total_mv", 0) or 0
+        total_mv = stock.get("mcap_yi", 0) or stock.get("mcap", 0) or 0
 
         elapsed = time.time() - start_time
         avg = elapsed / (success + fail) if (success + fail) > 0 else 0
         remaining = (len(need_generate) - i) * avg
-        logger.info(f"[{i+1}/{len(need_generate)}] {code} {name} | "
-                     f"成功:{success} 失败:{fail} | 剩余:{remaining/60:.1f}min")
+        logger.info(f"[{i+1}/{len(need_generate)}] {code} {name:8s} {industry} | "
+                     f"成功:{success} 失败:{fail} | 预计剩余:{remaining/60:.1f}min")
 
         try:
             data = generate_one(code, name, industry, stock_knowledge,
@@ -473,20 +510,20 @@ def main():
                 with open(path, "w", encoding="utf-8") as f:
                     json.dump(data, f, ensure_ascii=False, indent=2)
                 success += 1
-                logger.info(f"  ✓ {code} {name} 生成成功")
+                logger.info(f"  ✓ {code} {name}")
             else:
                 fail += 1
-                logger.warning(f"  ✗ {code} {name} 生成失败")
+                logger.warning(f"  ✗ {code} {name} LLM 调用失败")
         except Exception as e:
             fail += 1
             logger.error(f"  ✗ {code} {name} 异常: {e}")
 
         # 限速
-        time.sleep(1)
+        time.sleep(0.5)
 
     elapsed = time.time() - start_time
     logger.info(f"\n=== 完成 ===")
-    logger.info(f"成功: {success}, 失败: {fail}, 跳过: {skip}")
+    logger.info(f"成功: {success}, 失败: {fail}")
     logger.info(f"总耗时: {elapsed/60:.1f} 分钟")
 
 

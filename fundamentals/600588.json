@@ -1,0 +1,83 @@
+{
+  "code": "600588",
+  "name": "用友网络",
+  "fetch_date": "2026-06-06T00:00:00",
+  "market": "沪市",
+  "business_overview": {
+    "what_they_do": "中国企业级云服务与软件龙头，从ERP软件向BIP（商业创新平台）转型。核心产品：用友BIP（云ERP+财务云+人力云+供应链云）、用友U8/U9（传统ERP）；2026年受益AI+企业服务赋能，BIP云收入占比持续提升",
+    "industry": "计算机",
+    "industry_position": "中国企业级云服务市占率第一；ERP软件市占率第一（超越SAP中国）；BIP商业创新平台国内首创"
+  },
+  "competitive_analysis": {
+    "strengths": [
+      "企业级云服务市占率第一：超越SAP中国，国产替代最大受益者",
+      "客户覆盖最广：超500万企业客户，大型企业/央企覆盖率行业第一",
+      "BIP平台化转型：从软件向平台转型，ARR和云收入占比持续提升",
+      "信创替代核心标的：央企/国企ERP国产替代首选",
+      "AI+企业服务：YonGPT企业大模型赋能BIP，提升产品竞争力"
+    ],
+    "weaknesses": [
+      "转型阵痛期：BIP转型导致收入增速放缓，利润持续亏损",
+      "竞争加剧：金蝶云/钉钉/企业微信分流中小企业市场",
+      "大型项目交付周期长：定制化程度高，交付和回款周期长",
+      "估值偏高：PS超5倍，市场已充分定价云转型预期"
+    ],
+    "moat_level": "中"
+  },
+  "financial_health": {
+    "key_metrics": {
+      "revenue_yi": null,
+      "net_profit_yi": null,
+      "gross_margin_pct": 50.0,
+      "net_margin_pct": -5.0,
+      "roe_pct": -8.0,
+      "debt_ratio_pct": 45.0,
+      "rd_ratio_pct": 25.0,
+      "rd_expense_yi": null,
+      "operating_cf_yi": null,
+      "cf_to_profit": null
+    },
+    "health_rating": "一般",
+    "benchmark_ref": "企业级云服务行业",
+    "highlights": [
+      "云收入占比持续提升，ARR增长",
+      "信创替代核心标的，央企客户覆盖率高"
+    ],
+    "risks": [
+      "持续亏损：BIP转型投入大，短期难以盈利",
+      "大型项目交付周期长，回款风险"
+    ]
+  },
+  "growth_assessment": {
+    "growth_score": 6.0,
+    "growth_drivers": [
+      "信创替代加速：央企/国企ERP国产替代是确定性趋势",
+      "BIP云收入增长：云收入占比持续提升，ARR增长",
+      "AI+企业服务：YonGPT企业大模型赋能BIP，提升ARPU",
+      "大型企业客户拓展：央企/国企覆盖率行业第一"
+    ],
+    "headwinds": [
+      "转型阵痛期：BIP转型导致收入增速放缓，利润持续亏损",
+      "竞争加剧：金蝶云/钉钉/企业微信分流中小企业市场",
+      "大型项目交付周期长：定制化程度高，交付效率低"
+    ]
+  },
+  "geopolitical_assessment": {
+    "risks": [
+      "SAP/Oracle退出中国市场：虽利好国产替代，但短期可能影响大型企业IT系统稳定性",
+      "经济下行影响IT支出：企业IT预算可能被削减",
+      "AI大模型竞争：海外大模型（GPT/Claude）可能挤压国产大模型空间"
+    ],
+    "opportunities": [
+      "信创替代从'可选'变为'必选'：地缘冲突加速ERP国产替代",
+      "AI+企业服务：YonGPT企业大模型是差异化竞争力",
+      "央企IT国产化：央企/国企IT系统全面国产化是确定性趋势"
+    ],
+    "industry_momentum": [
+      "信创替代是2026年计算机板块最强主线之一",
+      "AI+企业服务是重要主题",
+      "BIP云转型是长期增长逻辑"
+    ]
+  },
+  "summary": "用友网络是中国企业级云服务龙头，ERP国产替代核心标的。BIP平台化转型推进中，云收入占比持续提升。30日维度：信创替代加速+AI企业服务赋能是催化剂；但转型阵痛期持续亏损和竞争加剧构成拖累。预计股价随信创/AI主题震荡，关注云收入增速和亏损收窄进度。"
+}

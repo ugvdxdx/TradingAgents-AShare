@@ -1,0 +1,83 @@
+{
+  "code": "002916",
+  "name": "深南电路",
+  "fetch_date": "2026-06-06T00:00:00",
+  "market": "深市",
+  "business_overview": {
+    "what_they_do": "中国高端PCB龙头，专注通信设备/服务器/数据中心用高多层PCB。核心产品：高速高多层PCB（28层+，用于5G基站/AI服务器/数据中心）、IC载板（ABF载板/BT载板，国产替代先锋）；2026年受益AI服务器PCB需求爆发和IC载板国产替代，高多层PCB+IC载板双轮驱动",
+    "industry": "电子",
+    "industry_position": "中国高端PCB绝对龙头，28层+高多层板产能国内第一；IC载板国产替代先锋（ABF载板突破中）；通信设备PCB市占率国内第一"
+  },
+  "competitive_analysis": {
+    "strengths": [
+      "高端PCB绝对龙头：28层+高多层板产能国内第一，AI服务器PCB价值量是传统5-8倍",
+      "IC载板国产替代先锋：ABF载板打破日韩垄断，国产替代空间巨大",
+      "通信设备PCB市占率第一：5G基站/传输设备PCB国内市占率超30%",
+      "技术壁垒高：高速高频PCB良率行业领先，客户粘性极强",
+      "客户结构优质：华为/中兴/浪潮/戴尔等国内外头部客户"
+    ],
+    "weaknesses": [
+      "通信设备需求波动：5G建设高峰已过，基站PCB需求承压",
+      "IC载板良率待提升：ABF载板与日韩厂商（味之素/三星电机）仍有差距",
+      "产能扩张资本开支大：广州/无锡新产线投入巨大，短期拖累自由现金流",
+      "估值偏高：PE超40倍，市场已充分定价AI需求增长"
+    ],
+    "moat_level": "中"
+  },
+  "financial_health": {
+    "key_metrics": {
+      "revenue_yi": null,
+      "net_profit_yi": null,
+      "gross_margin_pct": 25.0,
+      "net_margin_pct": 12.0,
+      "roe_pct": 14.0,
+      "debt_ratio_pct": 40.0,
+      "rd_ratio_pct": 6.0,
+      "rd_expense_yi": null,
+      "operating_cf_yi": null,
+      "cf_to_profit": null
+    },
+    "health_rating": "健康",
+    "benchmark_ref": "PCB行业",
+    "highlights": [
+      "高端PCB毛利率25%+，显著高于行业平均15-18%",
+      "IC载板国产替代先锋，ABF载板突破中"
+    ],
+    "risks": [
+      "通信设备需求波动：5G建设高峰已过",
+      "IC载板良率待提升：量产进度可能不及预期"
+    ]
+  },
+  "growth_assessment": {
+    "growth_score": 7.5,
+    "growth_drivers": [
+      "AI服务器PCB需求爆发：28层+高多层板价值量是传统5-8倍",
+      "IC载板国产替代：ABF载板打破日韩垄断，替代空间巨大",
+      "数据中心投资爆发：全球7880亿美元（+56%），服务器PCB需求激增",
+      "封装基板升级：先进封装（CoWoS/HBM）驱动ABF载板需求增长"
+    ],
+    "headwinds": [
+      "5G建设高峰已过：基站PCB需求承压",
+      "IC载板良率待提升：量产进度可能不及预期",
+      "产能扩张资本开支大：短期拖累自由现金流"
+    ]
+  },
+  "geopolitical_assessment": {
+    "risks": [
+      "中美科技脱钩：若限制高端PCB出口，海外客户订单可能受影响",
+      "供应链风险：高端铜箔/树脂部分依赖进口",
+      "华为等客户受制裁影响：核心客户受美国制裁可能影响订单"
+    ],
+    "opportunities": [
+      "AI算力需求爆发：全球数据中心投资7880亿美元（+56%），AI服务器PCB需求激增",
+      "IC载板国产替代：地缘冲突加速国产替代，ABF载板替代空间巨大",
+      "先进封装驱动：CoWoS/HBM封装需求增长，ABF载板用量增加"
+    ],
+    "industry_momentum": [
+      "AI算力链是2026年最强主线，高端PCB+IC载板是核心材料",
+      "IC载板国产替代是电子板块重要主题",
+      "先进封装（CoWoS/HBM）驱动ABF载板需求增长"
+    ]
+  },
+  "summary": "深南电路是中国高端PCB绝对龙头，IC载板国产替代先锋。28层+高多层板产能国内第一，AI服务器PCB价值量是传统5-8倍。30日维度：AI服务器PCB需求爆发+IC载板国产替代双轮驱动；但5G建设高峰已过和IC载板良率待提升构成拖累。预计股价随AI算力/IC载板主题震荡偏强。"
+}

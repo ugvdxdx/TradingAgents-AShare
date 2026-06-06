@@ -1,0 +1,83 @@
+{
+  "code": "002463",
+  "name": "沪电股份",
+  "fetch_date": "2026-06-06T00:00:00",
+  "market": "深市",
+  "business_overview": {
+    "what_they_do": "中国高端PCB领先厂商，专注通信设备/汽车电子/数据中心用高多层PCB。核心产品：高速高多层PCB（用于5G/6G通信设备/AI服务器）、汽车电子PCB（ADAS/智能座舱用高可靠性PCB）；2026年受益AI服务器PCB需求爆发和汽车电子PCB放量，双轮驱动增长",
+    "industry": "电子",
+    "industry_position": "中国通信设备PCB龙头（华为/中兴核心供应商）；汽车电子PCB国内领先（ADAS PCB市占率前三）；AI服务器PCB高多层板产能国内前三"
+  },
+  "competitive_analysis": {
+    "strengths": [
+      "通信设备PCB龙头：华为/中兴核心供应商，5G/6G通信设备PCB市占率超25%",
+      "汽车电子PCB领先：ADAS/智能座舱PCB市占率前三，新能源车渗透率62.5%驱动需求",
+      "AI服务器PCB放量：高多层板产能快速扩张，AI服务器PCB价值量是传统5-8倍",
+      "技术壁垒高：高速高频PCB/高可靠性汽车PCB良率行业领先",
+      "客户结构优质：华为/中兴/特斯拉/博世等国内外头部客户"
+    ],
+    "weaknesses": [
+      "通信设备需求波动：5G建设高峰已过，基站PCB需求承压",
+      "汽车电子竞争加剧：景旺电子/胜宏科技等竞争对手加速布局",
+      "产能扩张资本开支大：新产线投入巨大，短期拖累自由现金流",
+      "客户集中度较高：华为/中兴等前5大客户占比超50%"
+    ],
+    "moat_level": "中"
+  },
+  "financial_health": {
+    "key_metrics": {
+      "revenue_yi": null,
+      "net_profit_yi": null,
+      "gross_margin_pct": 28.0,
+      "net_margin_pct": 15.0,
+      "roe_pct": 16.0,
+      "debt_ratio_pct": 35.0,
+      "rd_ratio_pct": 5.0,
+      "rd_expense_yi": null,
+      "operating_cf_yi": null,
+      "cf_to_profit": null
+    },
+    "health_rating": "健康",
+    "benchmark_ref": "PCB行业",
+    "highlights": [
+      "毛利率28%+，PCB行业最高之一",
+      "ROE 16%，盈利能力PCB板块第一"
+    ],
+    "risks": [
+      "通信设备需求波动：5G建设高峰已过",
+      "客户集中度较高：华为/中兴等占比超50%"
+    ]
+  },
+  "growth_assessment": {
+    "growth_score": 7.0,
+    "growth_drivers": [
+      "AI服务器PCB需求爆发：高多层板价值量是传统5-8倍",
+      "汽车电子PCB放量：新能源车渗透率62.5%，ADAS/智能座舱PCB需求激增",
+      "6G通信设备预研：6G标准推进，通信设备PCB升级需求",
+      "全球数据中心投资7880亿美元（+56%），服务器PCB需求确定性极高"
+    ],
+    "headwinds": [
+      "5G建设高峰已过：基站PCB需求承压",
+      "汽车电子竞争加剧：多家PCB厂商加速布局",
+      "华为等客户受制裁影响：核心客户受美国制裁可能影响订单"
+    ]
+  },
+  "geopolitical_assessment": {
+    "risks": [
+      "华为等客户受制裁：美国制裁可能影响核心客户订单",
+      "中美科技脱钩：若限制高端PCB出口，海外客户订单可能受影响",
+      "供应链风险：高端铜箔/树脂部分依赖进口"
+    ],
+    "opportunities": [
+      "AI算力需求爆发：全球数据中心投资7880亿美元（+56%），AI服务器PCB需求激增",
+      "汽车电子国产替代：地缘冲突加速汽车电子PCB国产化",
+      "6G通信设备预研：6G标准推进，通信设备PCB升级需求"
+    ],
+    "industry_momentum": [
+      "AI算力链+汽车电子双轮驱动，PCB是核心受益材料",
+      "AI服务器PCB价值量是传统5-8倍，结构性增长空间巨大",
+      "汽车电子PCB需求随新能源车渗透率提升持续增长"
+    ]
+  },
+  "summary": "沪电股份是中国通信设备PCB龙头+汽车电子PCB领先厂商。毛利率28%+行业最高，ROE 16%盈利能力PCB板块第一。30日维度：AI服务器PCB需求爆发+汽车电子PCB放量双轮驱动；但5G建设高峰已过和客户集中度较高构成风险。预计股价随AI/汽车电子主题震荡偏强。"
+}

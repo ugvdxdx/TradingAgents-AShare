@@ -1,0 +1,83 @@
+{
+  "code": "002384",
+  "name": "东山精密",
+  "fetch_date": "2026-06-06T00:00:00",
+  "market": "深市",
+  "business_overview": {
+    "what_they_do": "全球领先的电子制造服务（EMS）和PCB厂商。核心业务：柔性线路板（FPC）全球前三（苹果核心供应商）、刚性PCB（AI服务器/数据中心用高多层板）、LED封装（全球前三）、通信设备组件；2026年受益AI服务器PCB需求爆发和苹果AI手机换机潮，FPC+高多层PCB双轮驱动",
+    "industry": "电子",
+    "industry_position": "全球FPC前三（苹果核心供应商），国内PCB综合实力前三；LED封装全球前三；苹果产业链核心标的+AI服务器PCB新增长极"
+  },
+  "competitive_analysis": {
+    "strengths": [
+      "FPC全球前三：苹果FPC核心供应商，iPhone/Apple Watch/MacBook用FPC市占率超20%",
+      "AI服务器PCB新增长极：高多层PCB产能快速扩张，AI服务器PCB价值量是传统5-8倍",
+      "苹果AI换机潮受益：2026年AI手机渗透率53%，AI PC渗透率60%+，FPC用量增加",
+      "多元化布局：FPC+PCB+LED+通信组件多业务对冲风险",
+      "规模效应：营收超300亿元，PCB行业规模效应显著"
+    ],
+    "weaknesses": [
+      "苹果依赖度高：苹果收入占比超40%，客户集中风险大",
+      "LED业务拖累：LED封装竞争激烈，利润率持续下滑",
+      "毛利率偏低：EMS模式毛利率仅15-20%，低于纯PCB设计厂商",
+      "海外产能布局风险：泰国工厂受地缘政治和关税影响"
+    ],
+    "moat_level": "中"
+  },
+  "financial_health": {
+    "key_metrics": {
+      "revenue_yi": null,
+      "net_profit_yi": null,
+      "gross_margin_pct": 18.0,
+      "net_margin_pct": 6.0,
+      "roe_pct": 12.0,
+      "debt_ratio_pct": 50.0,
+      "rd_ratio_pct": 4.0,
+      "rd_expense_yi": null,
+      "operating_cf_yi": null,
+      "cf_to_profit": null
+    },
+    "health_rating": "健康",
+    "benchmark_ref": "PCB/EMS行业",
+    "highlights": [
+      "FPC全球前三，苹果核心供应商地位稳固",
+      "AI服务器PCB新增长极，量价齐升"
+    ],
+    "risks": [
+      "苹果依赖度高：iPhone销量波动直接影响业绩",
+      "LED业务持续拖累整体利润率"
+    ]
+  },
+  "growth_assessment": {
+    "growth_score": 7.0,
+    "growth_drivers": [
+      "苹果AI换机潮：AI手机渗透率53%，AI PC渗透率60%+，FPC用量和价值量增加",
+      "AI服务器PCB需求爆发：高多层PCB产能扩张，AI服务器PCB价值量是传统5-8倍",
+      "端侧AI设备爆发：全球端侧AI设备出货12亿台（+55%），FPC/PCB需求增加",
+      "LED业务触底反弹：Mini LED背光渗透率提升，车载LED需求增长"
+    ],
+    "headwinds": [
+      "苹果销量波动：iPhone销量不及预期直接影响FPC订单",
+      "LED业务持续亏损：竞争激烈，利润率持续下滑",
+      "EMS模式毛利率低：15-20%毛利率低于纯设计厂商"
+    ]
+  },
+  "geopolitical_assessment": {
+    "risks": [
+      "中美贸易战影响苹果产业链：145%关税可能影响iPhone出口/进口",
+      "苹果供应链转移风险：苹果推动印度/越南产能替代中国产能",
+      "泰国工厂关税风险：中美贸易战下海外产能可能受影响"
+    ],
+    "opportunities": [
+      "AI算力需求爆发：全球数据中心投资7880亿美元（+56%），AI服务器PCB需求激增",
+      "端侧AI设备爆发：全球出货12亿台（+55%），FPC/PCB需求增加",
+      "苹果AI战略深化：Apple Intelligence推动换机潮，FPC用量增加"
+    ],
+    "industry_momentum": [
+      "AI算力链+端侧AI双轮驱动，PCB/FPC是核心受益材料",
+      "苹果AI换机潮是消费电子板块最强催化剂",
+      "AI服务器PCB价值量是传统5-8倍，结构性增长空间巨大"
+    ]
+  },
+  "summary": "东山精密是全球FPC前三+AI服务器PCB新增长极。苹果核心供应商地位稳固，AI服务器PCB产能快速扩张。30日维度：苹果AI换机潮+AI服务器PCB需求爆发双轮驱动；但苹果依赖度高和LED业务拖累构成风险。预计股价随AI/苹果产业链主题震荡偏强。"
+}

@@ -1,0 +1,83 @@
+{
+  "code": "688008",
+  "name": "澜起科技",
+  "fetch_date": "2026-06-06T00:00:00",
+  "market": "科创板",
+  "business_overview": {
+    "what_they_do": "全球内存接口芯片（DDR RCD）龙头，市占率约50%。核心产品：DDR5 RCD（内存接口芯片，全球仅三家供应商）、PCIe Retimer（AI服务器PCIe重定时器）、MXC（CXL内存扩展控制器）、津逮服务器CPU（与Intel合作）；2026年受益DDR5渗透率提升+AI服务器PCIe Retimer需求爆发",
+    "industry": "电子",
+    "industry_position": "全球DDR RCD市占率约50%（与Rambus/IDT三足鼎立）；PCIe Retimer全球领先；CXL内存扩展控制器先发优势；AI服务器内存互联芯片核心供应商"
+  },
+  "competitive_analysis": {
+    "strengths": [
+      "DDR RCD全球市占率50%：与Rambus/IDT三足鼎立，DDR5 RCD单价是DDR4的2-3倍",
+      "PCIe Retimer AI服务器刚需：AI服务器GPU互联需要大量PCIe Retimer，单台AI服务器用量8-16颗",
+      "CXL先发优势：MXC是CXL内存扩展控制器，AI大模型训练内存扩展刚需",
+      "Intel深度合作：津逮服务器CPU与Intel合作，信创市场受益",
+      "高毛利率：毛利率70%+，半导体设计公司中仅次于海光/寒武纪"
+    ],
+    "weaknesses": [
+      "产品线相对单一：RCD占收入超60%，DDR5渗透率见顶后增长放缓",
+      "Intel依赖度高：津逮CPU与Intel深度绑定，AMD生态覆盖不足",
+      "CXL生态成熟度低：CXL标准仍在迭代，大规模商用需等待",
+      "估值偏高：PE超60倍，市场已充分定价AI需求增长"
+    ],
+    "moat_level": "宽"
+  },
+  "financial_health": {
+    "key_metrics": {
+      "revenue_yi": null,
+      "net_profit_yi": null,
+      "gross_margin_pct": 70.0,
+      "net_margin_pct": 35.0,
+      "roe_pct": 12.0,
+      "debt_ratio_pct": 15.0,
+      "rd_ratio_pct": 20.0,
+      "rd_expense_yi": null,
+      "operating_cf_yi": null,
+      "cf_to_profit": null
+    },
+    "health_rating": "健康",
+    "benchmark_ref": "半导体设计行业",
+    "highlights": [
+      "毛利率70%+，半导体设计公司中最高之一",
+      "DDR5 RCD市占率50%，定价权极强"
+    ],
+    "risks": [
+      "DDR5渗透率见顶后RCD增长放缓",
+      "CXL生态成熟度低，大规模商用需等待"
+    ]
+  },
+  "growth_assessment": {
+    "growth_score": 8.0,
+    "growth_drivers": [
+      "DDR5渗透率持续提升：从50%提升至80%+，RCD单价是DDR4的2-3倍",
+      "AI服务器PCIe Retimer需求爆发：单台AI服务器用量8-16颗，量价齐升",
+      "CXL内存扩展：AI大模型训练内存扩展刚需，MXC先发优势明显",
+      "全球数据中心投资7880亿美元（+56%），内存互联芯片需求确定性极高"
+    ],
+    "headwinds": [
+      "DDR5渗透率见顶风险：2027年后DDR5渗透率接近100%，RCD增长放缓",
+      "CXL商用进度不确定：标准仍在迭代，大规模商用可能延迟",
+      "估值偏高：PE超60倍，市场已充分定价增长预期"
+    ]
+  },
+  "geopolitical_assessment": {
+    "risks": [
+      "中美科技脱钩：若限制Intel合作，津逮CPU业务将受重大影响",
+      "半导体出口管制加严：可能影响先进制程芯片流片",
+      "Rambus专利诉讼风险：内存接口芯片领域专利竞争激烈"
+    ],
+    "opportunities": [
+      "AI算力需求爆发：全球数据中心投资7880亿美元（+56%），内存互联芯片需求激增",
+      "国产替代加速：地缘冲突强化自主可控逻辑，澜起作为国产内存接口芯片龙头受益",
+      "CXL国产化：CXL内存扩展是AI算力瓶颈突破口，澜起先发优势明显"
+    ],
+    "industry_momentum": [
+      "AI算力链是2026年最强主线，内存互联芯片是算力瓶颈突破口",
+      "DDR5渗透率持续提升+PCIe Retimer需求爆发双轮驱动",
+      "CXL是AI大模型训练的关键技术，澜起先发优势明显"
+    ]
+  },
+  "summary": "澜起科技是全球DDR RCD龙头（市占率50%），AI服务器内存互联芯片核心供应商。毛利率70%+行业最高，DDR5渗透率提升+PCIe Retimer需求爆发双轮驱动。30日维度：AI算力需求爆发（全球数据中心投资+56%）是最大催化剂，PCIe Retimer和CXL是新增量；但需警惕DDR5渗透率见顶和估值偏高风险。预计股价随AI算力主题高位震荡偏强。"
+}

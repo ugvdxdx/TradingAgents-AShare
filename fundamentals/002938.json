@@ -1,0 +1,83 @@
+{
+  "code": "002938",
+  "name": "鹏鼎控股",
+  "fetch_date": "2026-06-06T00:00:00",
+  "market": "深市",
+  "business_overview": {
+    "what_they_do": "全球最大的PCB制造商，营收规模全球第一。核心产品：FPC（柔性线路板，苹果核心供应商）、HDI（高密度互连板，用于手机/可穿戴）、SLP（类载板，用于高端手机）、高多层板（用于服务器/汽车）；2026年受益苹果AI换机潮+AI服务器PCB需求爆发",
+    "industry": "电子",
+    "industry_position": "全球PCB营收规模第一；苹果FPC/SLP核心供应商；FPC产能全球第一；HDI/SLP技术行业领先"
+  },
+  "competitive_analysis": {
+    "strengths": [
+      "全球PCB营收第一：规模效应和成本优势明显，议价能力强",
+      "苹果核心供应商：FPC/SLP/HDI全面供应苹果，iPhone/Apple Watch/MacBook",
+      "FPC产能全球第一：FPC出货量全球第一，苹果FPC市占率超30%",
+      "SLP技术领先：类载板是高端手机主板趋势，鹏鼎SLP技术行业领先",
+      "多元化布局：FPC+HDI+SLP+高多层板，覆盖消费电子/服务器/汽车"
+    ],
+    "weaknesses": [
+      "苹果依赖度极高：苹果收入占比超70%，客户集中风险最大",
+      "毛利率偏低：EMS模式毛利率仅15-18%，低于纯设计厂商",
+      "苹果供应链转移风险：苹果推动印度/越南产能替代",
+      "消费电子周期性：手机/PC换机周期影响订单波动"
+    ],
+    "moat_level": "中"
+  },
+  "financial_health": {
+    "key_metrics": {
+      "revenue_yi": null,
+      "net_profit_yi": null,
+      "gross_margin_pct": 18.0,
+      "net_margin_pct": 8.0,
+      "roe_pct": 12.0,
+      "debt_ratio_pct": 40.0,
+      "rd_ratio_pct": 4.0,
+      "rd_expense_yi": null,
+      "operating_cf_yi": null,
+      "cf_to_profit": null
+    },
+    "health_rating": "健康",
+    "benchmark_ref": "PCB行业",
+    "highlights": [
+      "全球PCB营收第一，规模效应明显",
+      "苹果核心供应商地位稳固"
+    ],
+    "risks": [
+      "苹果依赖度极高：超70%收入来自苹果",
+      "苹果供应链转移风险：印度/越南产能替代"
+    ]
+  },
+  "growth_assessment": {
+    "growth_score": 7.0,
+    "growth_drivers": [
+      "苹果AI换机潮：AI手机渗透率53%，AI PC渗透率60%+，FPC/SLP用量和价值量增加",
+      "AI服务器PCB需求爆发：高多层板产能扩张，AI服务器PCB价值量是传统5-8倍",
+      "端侧AI设备爆发：全球出货12亿台（+55%），FPC/HDI需求增加",
+      "汽车电子PCB：新能源车渗透率62.5%，车载PCB需求增长"
+    ],
+    "headwinds": [
+      "苹果依赖度极高：iPhone销量波动直接影响70%+收入",
+      "苹果供应链转移：印度/越南产能替代中国产能",
+      "EMS模式毛利率低：15-18%低于纯设计厂商"
+    ]
+  },
+  "geopolitical_assessment": {
+    "risks": [
+      "中美贸易战影响苹果产业链：145%关税可能影响iPhone出口/进口",
+      "苹果供应链转移：苹果推动印度/越南产能替代，鹏鼎中国产能可能被替代",
+      "台湾地缘风险：鹏鼎母公司臻鼎科技为台企，台海局势影响估值"
+    ],
+    "opportunities": [
+      "苹果AI战略深化：Apple Intelligence推动换机潮，FPC/SLP用量增加",
+      "AI服务器PCB需求爆发：全球数据中心投资7880亿美元（+56%）",
+      "端侧AI设备爆发：全球出货12亿台（+55%），FPC/HDI需求增加"
+    ],
+    "industry_momentum": [
+      "苹果AI换机潮是消费电子板块最强催化剂",
+      "AI服务器PCB是新增量，鹏鼎高多层板产能扩张中",
+      "端侧AI设备爆发驱动FPC/HDI需求增长"
+    ]
+  },
+  "summary": "鹏鼎控股是全球PCB营收规模第一，苹果FPC/SLP核心供应商。30日维度：苹果AI换机潮+AI服务器PCB需求爆发双轮驱动；但苹果依赖度极高（超70%）和供应链转移风险是最大隐忧。预计股价随苹果/AI产业链主题震荡偏强，关注iPhone销量和AI服务器PCB出货量。"
+}
