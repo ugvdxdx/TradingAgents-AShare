@@ -1,234 +1,10 @@
 [
   {
-    "code": "601288",
-    "name": "农业银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 20176.23
-  },
-  {
-    "code": "601398",
-    "name": "工商银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 19466.0
-  },
-  {
-    "code": "601857",
-    "name": "中国石油",
-    "industry": "石油石化",
-    "industry_full": "石油石化-炼化及贸易",
-    "mcap_yi": 17600.93
-  },
-  {
-    "code": "601988",
-    "name": "中国银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 12350.86
-  },
-  {
-    "code": "601628",
-    "name": "中国人寿",
-    "industry": "非银金融",
-    "industry_full": "非银金融-保险Ⅱ",
-    "mcap_yi": 7044.6
-  },
-  {
-    "code": "688041",
-    "name": "海光信息",
-    "industry": "电子",
-    "industry_full": "电子-半导体",
-    "mcap_yi": 6831.23
-  },
-  {
-    "code": "601318",
-    "name": "中国平安",
-    "industry": "非银金融",
-    "industry_full": "非银金融-保险Ⅱ",
-    "mcap_yi": 5703.13
-  },
-  {
-    "code": "601728",
-    "name": "中国电信",
-    "industry": "通信",
-    "industry_full": "通信-通信服务",
-    "mcap_yi": 4696.6
-  },
-  {
-    "code": "601166",
-    "name": "兴业银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 3915.13
-  },
-  {
-    "code": "601658",
-    "name": "邮储银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 3611.88
-  },
-  {
-    "code": "300394",
-    "name": "天孚通信",
-    "industry": "通信",
-    "industry_full": "通信-通信设备",
-    "mcap_yi": 3539.62
-  },
-  {
-    "code": "600183",
-    "name": "生益科技",
-    "industry": "电子",
-    "industry_full": "电子-元件",
-    "mcap_yi": 3367.15
-  },
-  {
-    "code": "603993",
-    "name": "洛阳钼业",
-    "industry": "有色金属",
-    "industry_full": "有色金属-工业金属",
-    "mcap_yi": 3232.0
-  },
-  {
-    "code": "300476",
-    "name": "胜宏科技",
-    "industry": "电子",
-    "industry_full": "电子-元件",
-    "mcap_yi": 3188.42
-  },
-  {
-    "code": "600000",
-    "name": "浦发银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 3120.76
-  },
-  {
-    "code": "603986",
-    "name": "兆易创新",
-    "industry": "电子",
-    "industry_full": "电子-半导体",
-    "mcap_yi": 3118.9
-  },
-  {
-    "code": "601998",
-    "name": "中信银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 3024.61
-  },
-  {
-    "code": "002384",
-    "name": "东山精密",
-    "industry": "电子",
-    "industry_full": "电子-元件",
-    "mcap_yi": 2953.56
-  },
-  {
-    "code": "688008",
-    "name": "澜起科技",
-    "industry": "电子",
-    "industry_full": "电子-半导体",
-    "mcap_yi": 2900.46
-  },
-  {
-    "code": "300274",
-    "name": "阳光电源",
-    "industry": "电力设备",
-    "industry_full": "电力设备-光伏设备",
-    "mcap_yi": 2830.07
-  },
-  {
-    "code": "600150",
-    "name": "中国船舶",
-    "industry": "国防军工",
-    "industry_full": "国防军工-航海装备Ⅱ",
-    "mcap_yi": 2813.08
-  },
-  {
-    "code": "688012",
-    "name": "DR中微公",
-    "industry": "电子",
-    "industry_full": "电子-半导体",
-    "mcap_yi": 2789.18
-  },
-  {
-    "code": "002916",
-    "name": "深南电路",
-    "industry": "电子",
-    "industry_full": "电子-元件",
-    "mcap_yi": 2735.09
-  },
-  {
-    "code": "300059",
-    "name": "东方财富",
-    "industry": "非银金融",
-    "industry_full": "非银金融-证券Ⅱ",
-    "mcap_yi": 2555.54
-  },
-  {
-    "code": "002463",
-    "name": "沪电股份",
-    "industry": "电子",
-    "industry_full": "电子-元件",
-    "mcap_yi": 2538.88
-  },
-  {
-    "code": "603259",
-    "name": "XD药明康",
-    "industry": "医药生物",
-    "industry_full": "医药生物-医疗服务",
-    "mcap_yi": 2512.85
-  },
-  {
-    "code": "601225",
-    "name": "陕西煤业",
-    "industry": "煤炭",
-    "industry_full": "煤炭-煤炭开采",
-    "mcap_yi": 2495.49
-  },
-  {
-    "code": "601816",
-    "name": "京沪高铁",
-    "industry": "交通运输",
-    "industry_full": "交通运输-铁路公路",
-    "mcap_yi": 2456.07
-  },
-  {
-    "code": "601319",
-    "name": "中国人保",
-    "industry": "非银金融",
-    "industry_full": "非银金融-保险Ⅱ",
-    "mcap_yi": 2428.05
-  },
-  {
-    "code": "002938",
-    "name": "鹏鼎控股",
-    "industry": "电子",
-    "industry_full": "电子-元件",
-    "mcap_yi": 2425.14
-  },
-  {
     "code": "300408",
     "name": "三环集团",
     "industry": "电子",
     "industry_full": "电子-元件",
     "mcap_yi": 2407.93
-  },
-  {
-    "code": "600309",
-    "name": "万华化学",
-    "industry": "基础化工",
-    "industry_full": "基础化工-化学制品",
-    "mcap_yi": 2299.33
-  },
-  {
-    "code": "601601",
-    "name": "中国太保",
-    "industry": "非银金融",
-    "industry_full": "非银金融-保险Ⅱ",
-    "mcap_yi": 2202.73
   },
   {
     "code": "000651",
@@ -278,13 +54,6 @@
     "industry": "食品饮料",
     "industry_full": "食品饮料-调味发酵品Ⅱ",
     "mcap_yi": 1997.37
-  },
-  {
-    "code": "601668",
-    "name": "中国建筑",
-    "industry": "建筑装饰",
-    "industry_full": "建筑装饰-房屋建设Ⅱ",
-    "mcap_yi": 1995.77
   },
   {
     "code": "600406",
@@ -385,32 +154,11 @@
     "mcap_yi": 1707.26
   },
   {
-    "code": "601985",
-    "name": "中国核电",
-    "industry": "公用事业",
-    "industry_full": "公用事业-电力",
-    "mcap_yi": 1707.05
-  },
-  {
-    "code": "600887",
-    "name": "伊利股份",
-    "industry": "食品饮料",
-    "industry_full": "食品饮料-饮料乳品",
-    "mcap_yi": 1694.33
-  },
-  {
     "code": "600176",
     "name": "中国巨石",
     "industry": "建筑材料",
     "industry_full": "建筑材料-玻璃玻纤",
     "mcap_yi": 1685.32
-  },
-  {
-    "code": "002352",
-    "name": "顺丰控股",
-    "industry": "交通运输",
-    "industry_full": "交通运输-物流",
-    "mcap_yi": 1667.12
   },
   {
     "code": "601869",
@@ -441,13 +189,6 @@
     "mcap_yi": 1584.29
   },
   {
-    "code": "600809",
-    "name": "山西汾酒",
-    "industry": "食品饮料",
-    "industry_full": "食品饮料-白酒Ⅱ",
-    "mcap_yi": 1565.21
-  },
-  {
     "code": "301308",
     "name": "江波龙",
     "industry": "电子",
@@ -467,13 +208,6 @@
     "industry": "机械设备",
     "industry_full": "机械设备-自动化设备",
     "mcap_yi": 1526.77
-  },
-  {
-    "code": "600031",
-    "name": "三一重工",
-    "industry": "机械设备",
-    "industry_full": "机械设备-工程机械",
-    "mcap_yi": 1520.31
   },
   {
     "code": "601600",
@@ -511,13 +245,6 @@
     "mcap_yi": 1462.97
   },
   {
-    "code": "002714",
-    "name": "牧原股份",
-    "industry": "农林牧渔",
-    "industry_full": "农林牧渔-养殖业",
-    "mcap_yi": 1446.73
-  },
-  {
     "code": "600522",
     "name": "中天科技",
     "industry": "通信",
@@ -537,13 +264,6 @@
     "industry": "煤炭",
     "industry_full": "煤炭-煤炭开采",
     "mcap_yi": 1435.03
-  },
-  {
-    "code": "600104",
-    "name": "上汽集团",
-    "industry": "汽车",
-    "industry_full": "汽车-乘用车",
-    "mcap_yi": 1416.22
   },
   {
     "code": "601766",
@@ -607,13 +327,6 @@
     "industry": "钢铁",
     "industry_full": "钢铁-普钢",
     "mcap_yi": 1313.46
-  },
-  {
-    "code": "600690",
-    "name": "海尔智家",
-    "industry": "家用电器",
-    "industry_full": "家用电器-白色家电",
-    "mcap_yi": 1305.63
   },
   {
     "code": "600188",
@@ -719,13 +432,6 @@
     "industry": "基础化工",
     "industry_full": "基础化工-农化制品",
     "mcap_yi": 1210.88
-  },
-  {
-    "code": "600346",
-    "name": "恒力石化",
-    "industry": "石油石化",
-    "industry_full": "石油石化-炼化及贸易",
-    "mcap_yi": 1210.02
   },
   {
     "code": "002080",
@@ -889,32 +595,11 @@
     "mcap_yi": 1051.47
   },
   {
-    "code": "601633",
-    "name": "长城汽车",
-    "industry": "汽车",
-    "industry_full": "汽车-乘用车",
-    "mcap_yi": 1048.74
-  },
-  {
-    "code": "002230",
-    "name": "科大讯飞",
-    "industry": "计算机",
-    "industry_full": "计算机-软件开发",
-    "mcap_yi": 1048.67
-  },
-  {
     "code": "002600",
     "name": "领益智造",
     "industry": "电子",
     "industry_full": "电子-消费电子",
     "mcap_yi": 1047.56
-  },
-  {
-    "code": "601006",
-    "name": "大秦铁路",
-    "industry": "交通运输",
-    "industry_full": "交通运输-铁路公路",
-    "mcap_yi": 1045.64
   },
   {
     "code": "600547",
@@ -1083,13 +768,6 @@
     "industry": "食品饮料",
     "industry_full": "食品饮料-饮料乳品",
     "mcap_yi": 962.92
-  },
-  {
-    "code": "601939",
-    "name": "建设银行",
-    "industry": "银行",
-    "industry_full": "银行-银行Ⅱ",
-    "mcap_yi": 955.53
   },
   {
     "code": "000977",
@@ -1309,13 +987,6 @@
     "mcap_yi": 808.52
   },
   {
-    "code": "600585",
-    "name": "海螺水泥",
-    "industry": "建筑材料",
-    "industry_full": "建筑材料-水泥",
-    "mcap_yi": 805.94
-  },
-  {
     "code": "002027",
     "name": "分众传媒",
     "industry": "传媒",
@@ -1342,13 +1013,6 @@
     "industry": "石油石化",
     "industry_full": "石油石化-炼化及贸易",
     "mcap_yi": 796.28
-  },
-  {
-    "code": "601111",
-    "name": "中国国航",
-    "industry": "交通运输",
-    "industry_full": "交通运输-航空机场",
-    "mcap_yi": 792.56
   },
   {
     "code": "300450",
@@ -1512,13 +1176,6 @@
     "mcap_yi": 742.08
   },
   {
-    "code": "600029",
-    "name": "南方航空",
-    "industry": "交通运输",
-    "industry_full": "交通运输-航空机场",
-    "mcap_yi": 739.89
-  },
-  {
     "code": "603893",
     "name": "瑞芯微",
     "industry": "电子",
@@ -1624,13 +1281,6 @@
     "mcap_yi": 698.98
   },
   {
-    "code": "601669",
-    "name": "中国电建",
-    "industry": "建筑装饰",
-    "industry_full": "建筑装饰-基础建设",
-    "mcap_yi": 698.02
-  },
-  {
     "code": "688048",
     "name": "长光华芯",
     "industry": "电子",
@@ -1720,13 +1370,6 @@
     "industry": "通信",
     "industry_full": "通信-通信设备",
     "mcap_yi": 674.1
-  },
-  {
-    "code": "002049",
-    "name": "紫光国微",
-    "industry": "电子",
-    "industry_full": "电子-半导体",
-    "mcap_yi": 673.66
   },
   {
     "code": "301358",
@@ -1867,13 +1510,6 @@
     "industry": "电子",
     "industry_full": "电子-消费电子",
     "mcap_yi": 626.31
-  },
-  {
-    "code": "601877",
-    "name": "正泰电器",
-    "industry": "电力设备",
-    "industry_full": "电力设备-电网设备",
-    "mcap_yi": 626.21
   },
   {
     "code": "300316",
@@ -2275,13 +1911,6 @@
     "mcap_yi": 513.35
   },
   {
-    "code": "600009",
-    "name": "上海机场",
-    "industry": "交通运输",
-    "industry_full": "交通运输-航空机场",
-    "mcap_yi": 513.0
-  },
-  {
     "code": "600027",
     "name": "华电国际",
     "industry": "公用事业",
@@ -2583,13 +2212,6 @@
     "mcap_yi": 459.66
   },
   {
-    "code": "600570",
-    "name": "恒生电子",
-    "industry": "计算机",
-    "industry_full": "计算机-软件开发",
-    "mcap_yi": 459.59
-  },
-  {
     "code": "002203",
     "name": "海亮股份",
     "industry": "有色金属",
@@ -2616,13 +2238,6 @@
     "industry": "基础化工",
     "industry_full": "基础化工-化学制品",
     "mcap_yi": 450.07
-  },
-  {
-    "code": "688027",
-    "name": "国盾量子",
-    "industry": "通信",
-    "industry_full": "通信-通信设备",
-    "mcap_yi": 450.0
   },
   {
     "code": "000783",
@@ -2749,13 +2364,6 @@
     "industry": "基础化工",
     "industry_full": "基础化工-化学原料",
     "mcap_yi": 432.03
-  },
-  {
-    "code": "601878",
-    "name": "浙商证券",
-    "industry": "非银金融",
-    "industry_full": "非银金融-证券Ⅱ",
-    "mcap_yi": 431.77
   },
   {
     "code": "002195",
@@ -2912,17 +2520,17 @@
     "mcap_yi": 403.34
   },
   {
-    "code": "000987",
-    "name": "越秀资本",
-    "industry": "非银金融",
-    "industry_full": "非银金融-多元金融",
-    "mcap_yi": 402.57
-  },
-  {
     "code": "688167",
     "name": "炬光科技",
     "industry": "电子",
     "industry_full": "电子-半导体",
+    "mcap_yi": 402.57
+  },
+  {
+    "code": "000987",
+    "name": "越秀资本",
+    "industry": "非银金融",
+    "industry_full": "非银金融-多元金融",
     "mcap_yi": 402.57
   },
   {
