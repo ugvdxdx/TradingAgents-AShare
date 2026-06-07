@@ -1,0 +1,532 @@
+#!/usr/bin/env python3
+"""从 _top500_and_leaders.txt 批量生成基本面文件
+
+用法:
+  uv run python3 _gen_top500_fundamentals.py                    # 生成所有未完成
+  uv run python3 _gen_top500_fundamentals.py --codes 600019,600188  # 只生成指定股票
+  uv run python3 _gen_top500_fundamentals.py --count 10         # 只生成前N只
+  uv run python3 _gen_top500_fundamentals.py --dry-run          # 只打印要生成的列表
+  uv run python3 _gen_top500_fundamentals.py --force            # 强制重新生成（覆盖已有文件）
+  uv run python3 _gen_top500_fundamentals.py --start-from 600019  # 从指定代码开始（跳过之前的）
+"""
+import json
+import os
+import re
+import sys
+import time
+import logging
+from datetime import datetime
+from typing import Optional, List, Dict, Tuple
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+FUNDAMENTALS_DIR = os.path.join(SCRIPT_DIR, "fundamentals")
+WORLD_KNOWLEDGE_FILE = os.path.join(SCRIPT_DIR, "_world_knowledge_2026_06.md")
+TOP500_FILE = os.path.join(SCRIPT_DIR, "_top500_and_leaders.txt")
+
+
+# ========== 解析 _top500_and_leaders.txt ==========
+
+def parse_top500_file(filepath: str) -> List[Dict]:
+    """解析 _top500_and_leaders.txt，返回股票列表
+    
+    每行格式: "    1. 601939 建设银行       银行       (   26736亿) [DONE]"
+    """
+    stocks = []
+    with open(filepath, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            # 匹配: 序号. 代码 名称 行业 (市值) [DONE]
+            m = re.match(
+                r'\d+\.\s+(\d{6})\s+(\S+)\s+(\S+)\s+\(\s*(\d+)亿\)\s*(\[DONE\])?',
+                line
+            )
+            if m:
+                code = m.group(1)
+                name = m.group(2)
+                industry = m.group(3)
+                mcap = int(m.group(4))
+                done = m.group(5) is not None
+                stocks.append({
+                    "code": code,
+                    "name": name,
+                    "industry": industry,
+                    "mcap_yi": mcap,
+                    "done": done,
+                })
+    return stocks
+
+
+def mark_stock_done(filepath: str, code: str) -> bool:
+    """在 _top500_and_leaders.txt 中标记某股票为 [DONE]"""
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    # 查找该股票的行，在行尾添加 [DONE]
+    # 匹配: 代码 名称 ... (市值) 后面没有 [DONE] 的情况
+    pattern = rf'({code}\s+\S+\s+\S+\s+\(\s*\d+亿\))\s*$'
+    replacement = rf'\1 [DONE]'
+    
+    new_content, count = re.subn(pattern, replacement, content, flags=re.MULTILINE)
+    
+    if count > 0:
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(new_content)
+        return True
+    else:
+        # 可能已经有 [DONE] 了
+        return False
+
+
+# ========== 加载世界知识 ==========
+
+def load_world_knowledge() -> str:
+    """读取世界知识文档"""
+    if not os.path.exists(WORLD_KNOWLEDGE_FILE):
+        logger.warning(f"世界知识文件不存在: {WORLD_KNOWLEDGE_FILE}")
+        return ""
+    with open(WORLD_KNOWLEDGE_FILE, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+# ========== 加载参考文件 ==========
+
+def load_reference_fundamentals() -> str:
+    """加载已完成的参考基本面文件，作为 prompt 中的示例"""
+    ref_codes = ["002281", "605117"]  # 高质量参考文件
+    refs = []
+    for code in ref_codes:
+        path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            refs.append(f"## 参考示例: {data.get('name', code)} ({code})\n```json\n{json.dumps(data, ensure_ascii=False, indent=2)[:3000]}\n```")
+    return "\n\n".join(refs)
+
+
+# ========== LLM 调用 ==========
+
+def _get_llm_config() -> Tuple[str, str, str]:
+    """获取 LLM 配置: (api_key, base_url, model)"""
+    api_key = os.environ.get("TA_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
+    base_url = os.environ.get("TA_BASE_URL") or os.environ.get("OPENAI_BASE_URL", "")
+    model = os.environ.get("TA_LLM_DEEP") or os.environ.get("TA_LLM_QUICK") or "gpt-4o"
+    return api_key, base_url, model
+
+
+def call_llm(prompt: str, max_tokens: int = 8192, temperature: float = 0.3) -> Optional[str]:
+    """调用 LLM，返回文本响应"""
+    api_key, base_url, model = _get_llm_config()
+    if not api_key:
+        logger.error("无 LLM API key，请设置 TA_API_KEY 或 OPENAI_API_KEY")
+        return None
+
+    # 方式1: openai 库
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key, base_url=base_url or None)
+        resp = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=180,
+        )
+        content = resp.choices[0].message.content or ""
+        return content.strip()
+    except ImportError:
+        pass
+    except Exception as e:
+        logger.warning(f"openai 库调用失败: {e}，尝试 urllib")
+
+    # 方式2: urllib 直调
+    try:
+        import urllib.request
+        req_data = json.dumps({
+            "model": model,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            f"{base_url}/chat/completions",
+            data=req_data,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            raw = json.loads(resp.read())
+            return raw["choices"][0]["message"].get("content", "").strip()
+    except Exception as e:
+        logger.error(f"urllib 调用也失败: {e}")
+        return None
+
+
+# ========== JSON 清理 ==========
+
+def clean_json_text(text: str) -> str:
+    """清理 LLM 输出中的 JSON 文本"""
+    if "```" in text:
+        m = re.search(r"```(?:json)?\s*\n?(.*?)```", text, re.DOTALL)
+        if m:
+            text = m.group(1)
+    text = text.replace("\u201c", "'").replace("\u201d", "'")
+    text = text.replace("\u2018", "'").replace("\u2019", "'")
+    text = text.replace("\u300a", "<").replace("\u300b", ">")
+    return text.strip()
+
+
+def parse_json_response(text: str) -> Optional[dict]:
+    """解析 LLM 响应为 JSON dict"""
+    text = clean_json_text(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        text = re.sub(r",\s*([}\]])", r"\1", text)
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            logger.error(f"JSON 解析失败，前200字符: {text[:200]}")
+            return None
+
+
+def validate_fundamental(data: dict) -> bool:
+    """验证 fundamentals JSON 结构完整性"""
+    required_keys = ["code", "name", "business_overview", "competitive_analysis",
+                     "financial_health", "growth_assessment", "geopolitical_assessment", "summary"]
+    for key in required_keys:
+        if key not in data:
+            logger.warning(f"缺少字段: {key}")
+            return False
+
+    bo = data.get("business_overview", {})
+    if not bo.get("what_they_do"):
+        logger.warning("business_overview.what_they_do 为空")
+        return False
+
+    ca = data.get("competitive_analysis", {})
+    if not ca.get("strengths") or not ca.get("weaknesses"):
+        logger.warning("competitive_analysis.strengths 或 weaknesses 为空")
+        return False
+
+    # 检查中文引号残留
+    text = json.dumps(data, ensure_ascii=False)
+    if "\u201c" in text or "\u201d" in text:
+        logger.warning("JSON 中包含中文引号，需要清理")
+        # 自动清理
+        data_str = json.dumps(data, ensure_ascii=False)
+        data_str = data_str.replace("\u201c", "'").replace("\u201d", "'")
+        data.update(json.loads(data_str))
+
+    return True
+
+
+# ========== Prompt 构建 ==========
+
+SYSTEM_PROMPT = """你是一位资深的A股研究总监，擅长将世界知识、行业趋势、财务数据和地缘政治分析融合为结构化的股票基本面世界知识。
+
+你的输出将用于辅助量化系统对未来30天股价走势的判断，因此必须：
+1. 具体而非泛泛：用数据、客户名、市占率、价格等具体事实，而非'行业领先'等空话
+2. 前瞻而非回顾：重点分析未来30天可能影响股价的催化因素和风险
+3. 结合世界局势：将伊朗战争、AI革命、中美贸易战等宏观事件与个股具体业务关联
+4. 诚实客观：劣势和风险必须真实，不能只写好话
+
+重要格式要求：
+- 所有文本使用中文
+- 不要使用中文引号（""''），如需引用请用英文单引号''
+- 输出严格的 JSON 格式，不要有其他文字
+- 财务数据必须精确（如"营收119.3亿+44.2%"），不要用"约"、"超"等模糊词
+- 竞争对手必须具名并含市占率/排名
+- 风险因素必须含具体数据点和潜在影响"""
+
+
+def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
+                 world_knowledge: str, reference: str) -> str:
+    """构建生成 fundamentals 的 prompt"""
+    
+    # 截取世界知识（避免 prompt 过长）
+    wk_text = world_knowledge[:8000] if len(world_knowledge) > 8000 else world_knowledge
+
+    prompt = f"""请为以下股票生成完整的基本面世界知识 JSON 文件。
+
+## 股票信息
+- 代码: {code}
+- 名称: {name}
+- 行业: {industry}
+- 市值: {mcap_yi}亿元
+
+## 当前世界知识（2026年6月）
+{wk_text}
+
+## 输出格式要求
+请输出严格 JSON，结构如下（所有字段必填）：
+
+```json
+{{
+  "code": "{code}",
+  "name": "{name}",
+  "fetch_date": "{datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
+  "market": "{"沪市" if code.startswith("6") else "深市"}",
+  "business_overview": {{
+    "what_they_do": "该公司真正在做什么业务，核心产品/服务，主要客户，技术特点，含具体财务数据（营收/增速/占比）。200-400字",
+    "industry": "行业分类（细分行业）",
+    "industry_position": "在行业中的真实地位，用市占率/排名/与竞争对手对比的数据说话"
+  }},
+  "competitive_analysis": {{
+    "strengths": ["5条具体优势，每条含数据支撑（市占率/客户名/技术指标/财务数据）"],
+    "weaknesses": ["5条具体劣势，每条含数据（毛利率差距/客户集中度/技术短板等）"],
+    "moat_level": "低/中/中高/高"
+  }},
+  "financial_health": {{
+    "key_metrics": {{
+      "revenue_yi": 0.0,
+      "net_profit_yi": 0.0,
+      "gross_margin_pct": 0.0,
+      "net_margin_pct": 0.0,
+      "roe_pct": 0.0,
+      "debt_ratio_pct": 0.0,
+      "rd_ratio_pct": 0.0,
+      "rd_expense_yi": 0.0,
+      "operating_cf_yi": 0.0,
+      "cf_to_profit": 0.0
+    }},
+    "health_rating": "健康/一般/较差",
+    "benchmark_ref": "行业基准",
+    "highlights": ["4条财务亮点，含具体数据"],
+    "risks": ["4条财务风险，含具体数据"]
+  }},
+  "growth_assessment": {{
+    "growth_score": 0.0,
+    "growth_drivers": ["5条增长驱动，结合世界局势"],
+    "headwinds": ["5条增长阻力，含具体数据"]
+  }},
+  "geopolitical_assessment": {{
+    "risks": ["4条地缘风险，必须引用世界知识中的具体数据"],
+    "opportunities": ["4条地缘机会，必须引用世界知识中的具体数据"],
+    "industry_momentum": ["3条行业趋势"]
+  }},
+  "summary": "200-300字总结，格式：<公司>是<定位>。<核心财务数据>。核心优势：①...②...③...。主要风险：①...②...③...。<增长展望>。"
+}}
+```
+
+## 关键质量要求（不可妥协）
+1. **财务数据必须精确**：如"2025年营收119.3亿（+44.2%）"、"毛利率51.1%"，不要用"约"、"超"等模糊词
+2. **竞争对手必须具名**：如"与中际旭创（全球第一28%）、新易盛（全球第二15-18%）同列第一阵营"，不要写"行业竞争激烈"
+3. **风险因素必须个性化**：如"存货74.8亿激增（+30%），跌价准备3.1亿，若需求放缓风险巨大"，不要写"行业竞争加剧"
+4. **地缘评估必须引用世界知识**：伊朗战争（布伦特$93.09/桶）、中美贸易战（加权平均实际税率21.6%）、AI革命（全球数据中心投资7880亿美元+56%）、新能源（中国渗透率62.5%）、稀土管制（对日断供，日本库存8-10月见底）
+5. **业务概述必须数据丰富**：含分业务营收/增速/占比/毛利率
+6. **增长评分参考**：AI算力/光模块/半导体设备 8-9分，新能源/军工/医药 7-8分，消费/银行/电力 5-6分，旧赛道退潮 4-5分
+
+{reference}
+
+请直接输出 JSON，不要有任何其他文字。"""
+
+    return prompt
+
+
+# ========== 主流程 ==========
+
+def generate_one(code: str, name: str, industry: str, mcap_yi: float,
+                 world_knowledge: str, reference: str,
+                 max_retries: int = 2) -> Optional[dict]:
+    """生成单只股票的 fundamentals"""
+    prompt = build_prompt(code, name, industry, mcap_yi, world_knowledge, reference)
+
+    for attempt in range(max_retries + 1):
+        logger.info(f"  调用 LLM 生成 {code} {name} (尝试 {attempt+1}/{max_retries+1})")
+        response = call_llm(prompt, max_tokens=8192, temperature=0.3)
+        if not response:
+            logger.warning(f"  LLM 无响应")
+            continue
+
+        data = parse_json_response(response)
+        if not data:
+            logger.warning(f"  JSON 解析失败")
+            continue
+
+        # 补全必要字段
+        data.setdefault("code", code)
+        data.setdefault("name", name)
+        data.setdefault("fetch_date", datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+        data.setdefault("market", "沪市" if code.startswith("6") else "深市")
+
+        # 确保 financial_health.key_metrics 存在
+        fh = data.setdefault("financial_health", {})
+        km = fh.setdefault("key_metrics", {})
+        for k in ["revenue_yi", "net_profit_yi", "gross_margin_pct", "net_margin_pct",
+                   "roe_pct", "debt_ratio_pct", "rd_ratio_pct", "rd_expense_yi",
+                   "operating_cf_yi", "cf_to_profit"]:
+            km.setdefault(k, None)
+
+        if validate_fundamental(data):
+            return data
+        else:
+            logger.warning(f"  验证失败，重试...")
+
+    logger.error(f"  {code} {name} 生成失败（已重试 {max_retries+1} 次）")
+    return None
+
+
+def main():
+    # 解析参数
+    codes_arg = None
+    force = False
+    count = 0
+    dry_run = False
+    start_from = None
+
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg in ("--codes", "--code") and i + 1 < len(sys.argv):
+            i += 1
+            codes_arg = [c.strip() for c in sys.argv[i].split(",") if c.strip()]
+        elif arg.startswith("--codes="):
+            codes_arg = [c.strip() for c in arg.split("=", 1)[1].split(",") if c.strip()]
+        elif arg == "--force":
+            force = True
+        elif arg in ("--count", "-n") and i + 1 < len(sys.argv):
+            i += 1
+            count = int(sys.argv[i])
+        elif arg.startswith("--count="):
+            count = int(arg.split("=", 1)[1])
+        elif arg == "--dry-run":
+            dry_run = True
+        elif arg in ("--start-from",) and i + 1 < len(sys.argv):
+            i += 1
+            start_from = sys.argv[i]
+        elif arg.startswith("--start-from="):
+            start_from = arg.split("=", 1)[1]
+        i += 1
+
+    # 加载资源
+    logger.info("解析 _top500_and_leaders.txt...")
+    all_stocks = parse_top500_file(TOP500_FILE)
+    logger.info(f"  总计: {len(all_stocks)} 只股票, 已完成: {sum(1 for s in all_stocks if s['done'])} 只")
+
+    logger.info("加载世界知识...")
+    world_knowledge = load_world_knowledge()
+    logger.info(f"  世界知识: {len(world_knowledge)} 字符")
+
+    logger.info("加载参考文件...")
+    reference = load_reference_fundamentals()
+    logger.info(f"  参考文件: {len(reference)} 字符")
+
+    # 确定要生成的股票列表
+    if codes_arg:
+        stocks = [s for s in all_stocks if s["code"] in codes_arg]
+        if not stocks:
+            logger.error(f"未找到指定代码: {codes_arg}")
+            sys.exit(1)
+    else:
+        stocks = all_stocks
+
+    # start_from: 跳过指定代码之前的所有股票
+    if start_from:
+        found = False
+        for idx, s in enumerate(stocks):
+            if s["code"] == start_from:
+                stocks = stocks[idx:]
+                found = True
+                break
+        if not found:
+            logger.warning(f"未找到 start-from 代码: {start_from}")
+
+    # 过滤已完成的（除非 --force）
+    os.makedirs(FUNDAMENTALS_DIR, exist_ok=True)
+    existing_files = set()
+    if not force:
+        for f in os.listdir(FUNDAMENTALS_DIR):
+            if f.endswith(".json"):
+                existing_files.add(f.replace(".json", ""))
+
+    need_generate = []
+    for s in stocks:
+        code = s["code"]
+        if force or (not s["done"] and code not in existing_files):
+            need_generate.append(s)
+
+    logger.info(f"待生成: {len(need_generate)} 只 (已完成: {len(stocks) - len(need_generate)})")
+
+    if dry_run:
+        for s in need_generate[:50]:
+            print(f"  {s['code']} {s['name']:10s} {s['industry']:10s} ({s['mcap_yi']}亿)")
+        if len(need_generate) > 50:
+            print(f"  ... 还有 {len(need_generate) - 50} 只")
+        return
+
+    if not need_generate:
+        logger.info("全部已是最新，无需生成")
+        return
+
+    # 检查 LLM 配置
+    api_key, base_url, model = _get_llm_config()
+    if not api_key:
+        logger.error("未配置 LLM API key，请设置 TA_API_KEY 或 OPENAI_API_KEY")
+        sys.exit(1)
+    logger.info(f"LLM 配置: model={model}, base_url={base_url or 'default'}")
+
+    # 限制数量
+    if count > 0:
+        need_generate = need_generate[:count]
+        logger.info(f"限制生成数量: {count}")
+
+    # 逐个生成
+    success = 0
+    fail = 0
+    start_time = time.time()
+
+    for i, stock in enumerate(need_generate):
+        code = stock["code"]
+        name = stock["name"]
+        industry = stock["industry"]
+        mcap_yi = stock["mcap_yi"]
+
+        elapsed = time.time() - start_time
+        avg = elapsed / (success + fail) if (success + fail) > 0 else 0
+        remaining = (len(need_generate) - i) * avg
+        logger.info(f"[{i+1}/{len(need_generate)}] {code} {name:10s} {industry:10s} ({mcap_yi}亿) | "
+                     f"成功:{success} 失败:{fail} | 预计剩余:{remaining/60:.1f}min")
+
+        try:
+            data = generate_one(code, name, industry, mcap_yi,
+                                world_knowledge, reference)
+            if data:
+                # 写入 JSON 文件
+                path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
+                with open(path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                
+                # 在 _top500_and_leaders.txt 中标记 [DONE]
+                mark_stock_done(TOP500_FILE, code)
+                
+                success += 1
+                logger.info(f"  ✓ {code} {name} 已生成并标记 [DONE]")
+            else:
+                fail += 1
+                logger.warning(f"  ✗ {code} {name} 生成失败")
+        except Exception as e:
+            fail += 1
+            logger.error(f"  ✗ {code} {name} 异常: {e}")
+
+        # 限速
+        time.sleep(0.5)
+
+    elapsed = time.time() - start_time
+    logger.info(f"\n=== 完成 ===")
+    logger.info(f"成功: {success}, 失败: {fail}")
+    logger.info(f"总耗时: {elapsed/60:.1f} 分钟")
+
+
+if __name__ == "__main__":
+    main()
