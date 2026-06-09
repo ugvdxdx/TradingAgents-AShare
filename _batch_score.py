@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""批量基本面打分脚本 —— 对 10 支股票进行 LLM + 规则引擎评分
-支持 OpenAI 和 Anthropic 两种 API 协议，自动适配 DeepSeek / Anthropic 端点"""
-import json
-import os
-import re
-import sys
-import urllib.request
+"""双 Prompt A/B 回测：V1 旧（AI主线匹配度） vs V2 新（基本面25 + 赛道25）"""
+import json, os, re, sys, urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from fundamental_scorer import (
-    _rule_based_score, _build_stock_json, _parse_llm_response, SCORING_PROMPT
-)
+from fundamental_scorer import _rule_based_score, _build_stock_json, _parse_llm_response, SCORING_PROMPT
 
 STOCKS = [
     ("600519", "贵州茅台"),
@@ -26,133 +19,65 @@ STOCKS = [
 ]
 
 FUNDAMENTALS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fundamentals")
-LLM_CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".fundamental_llm_scores.json")
 
+# ====== V2: 双轨制 Prompt ======
+SCORING_PROMPT_V2 = """你是A股量化研究员，需要对一只股票进行双维度评分。
 
-def _load_llm_cache() -> dict:
-    try:
-        with open(LLM_CACHE_FILE, 'r') as f:
-            return json.load(f)
-    except:
-        return {}
+## 当前市场背景
+2025-2026年A股核心交易逻辑是AI算力产业链业绩兑现。但评分需要同时考虑：
+- 公司自身的基本面质量（不因行业偏见否定优质公司）
+- 当前市场主线中的位置（AI产业链给予合理溢价）
 
+## 评分维度（满分50 = 25基本面质量 + 25赛道动量）
 
-def _save_llm_cache(cache: dict):
-    try:
-        with open(LLM_CACHE_FILE, 'w') as f:
-            json.dump(cache, f, ensure_ascii=False)
-    except:
-        pass
+### 第一部分：基本面质量（0-25分）
+评估公司自身的经营质量，与当前市场风口无关：
 
+1. 盈利能力 (0-10分)：ROE、净利率、毛利率综合评估
+   - ROE>20%且净利率>20% → 8-10分
+   - ROE>10%且净利率>10% → 5-7分
+   - ROE>5% → 2-4分
+   - 其余0-1分
+2. 护城河与竞争地位 (0-8分)：从moat、strengths、行业地位判断
+   - 真正的行业龙头，有定价权 → 6-8分
+   - 细分龙头，竞争格局良好 → 3-5分
+   - 竞争激烈，无明显优势 → 0-2分
+3. 财务健康度 (0-7分)：负债率、现金流、资产质量
+   - 低负债+现金流充裕+资产优质 → 5-7分
+   - 财务结构合理 → 2-4分
+   - 财务有压力 → 0-1分
 
-def call_llm_score(code: str, data_json: str) -> dict | None:
-    """
-    调用 LLM 打分。自动检测 API 协议：
-    - 如果 TA_BASE_URL 含 'anthropic' → 用 Anthropic Messages API
-    - 否则 → 用 OpenAI Chat Completions API
-    """
-    api_key = os.environ.get("TA_API_KEY") or os.environ.get("OPENAI_API_KEY")
-    base_url = (os.environ.get("TA_BASE_URL") or os.environ.get("OPENAI_BASE_URL") or "").rstrip("/")
-    model = os.environ.get("TA_LLM_QUICK") or os.environ.get("TA_LLM_DEEP") or "deepseek-v4-pro"
+校验规则：
+- ROE<3% → 盈利能力上限4分
+- 净利润为负 → 盈利能力0分
+- 净利率<5%且营收>千亿 → 偏代工属性，盈利能力上限5分
 
-    if not api_key:
-        return None
+### 第二部分：赛道动量（0-25分）
+评估公司是否在AI算力/半导体/消费电子产业链上，以及业绩兑现程度：
 
-    prompt = SCORING_PROMPT + data_json[:8000]
+1. 产业链位置 (0-10分)：
+   - 核心供应商（光模块/PCB/先进封装/AI芯片/存储）→ 7-10分
+   - 间接配套/消费电子/汽车电子 → 4-6分
+   - 产业链外但有自己的独立成长逻辑 → 1-3分
+   - 传统行业无催化 → 0分
 
-    # 检查缓存
-    path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
-    cache = _load_llm_cache()
-    if os.path.exists(path):
-        cache_key = f"{code}_{os.path.getmtime(path):.0f}_v5"
-        if cache_key in cache:
-            cached = cache[cache_key]
-            if isinstance(cached, dict):
-                return cached
-            return {"score": cached, "brief": ""}
+2. 业绩兑现度 (0-10分)：是否有具体订单/产能/大客户验证？
+   - 明确大客户（英伟达/华为/苹果/特斯拉等）+ 产能扩张 → 7-10分
+   - 有客户但未放量 → 3-6分
+   - 只有概念无订单 → 0-2分
 
-    # 判断 API 协议
-    is_anthropic = "anthropic" in base_url.lower()
+3. 资金关注度 (0-5分)：当前是否处于资金流入方向？
+   - AI算力/光模块/先进封装 → 4-5分
+   - 消费电子复苏/汽车电子 → 2-3分
+   - 冷门/资金流出 → 0-1分
 
-    if is_anthropic:
-        result = _call_anthropic_api(api_key, base_url, model, prompt)
-    else:
-        result = _call_openai_api(api_key, base_url, model, prompt)
+注意：非AI产业链的优质公司（如创新药、高端消费），如果自身成长逻辑清晰（GLP-1出海、消费升级等），产业链位置给1-3分而非0分，资金关注度给1-2分而非0分。旧赛道退潮品种（锂电/白酒/地产/传统矿业）产业链和资金关注度给0分。
 
-    # 写入缓存
-    if result and result.get("score", 0) > 0:
-        cache_key = f"{code}_{os.path.getmtime(path):.0f}_v5" if os.path.exists(path) else f"{code}_v5"
-        cache[cache_key] = result
-        _save_llm_cache(cache)
+请输出严格JSON格式，不要解释：
+{"fundamental_score": 整数0-25, "sector_score": 整数0-25, "total": 整数0-50, "brief": "一句话理由（中文，40字以内）"}
 
-    return result
-
-
-def _call_openai_api(api_key: str, base_url: str, model: str, prompt: str) -> dict | None:
-    """OpenAI Chat Completions 协议"""
-    url = f"{base_url}/chat/completions"
-    req_data = json.dumps({
-        "model": model,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0,
-        "max_tokens": 2048,
-    }).encode("utf-8")
-
-    try:
-        req = urllib.request.Request(url, data=req_data, headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
-        })
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            raw = json.loads(resp.read())
-            msg = raw["choices"][0]["message"]
-            content = msg.get("content", "") or ""
-            reasoning = msg.get("reasoning_content", "") or ""
-            return _parse_llm_response(content, reasoning)
-    except Exception as e:
-        print(f"  [OpenAI] 调用失败: {e}")
-        return None
-
-
-def _call_anthropic_api(api_key: str, base_url: str, model: str, prompt: str) -> dict | None:
-    """Anthropic Messages API 协议（DeepSeek / Anthropic 兼容端点）"""
-    # Anthropic Messages API: POST /v1/messages
-    # DeepSeek 的实现是: POST {base_url}/messages（不带 /v1）
-    for url_tail in ["/messages", "/v1/messages"]:
-        url = f"{base_url}{url_tail}"
-        req_data = json.dumps({
-            "model": model,
-            "max_tokens": 2048,
-            "messages": [{"role": "user", "content": prompt}],
-        }).encode("utf-8")
-
-        try:
-            req = urllib.request.Request(url, data=req_data, headers={
-                "Content-Type": "application/json",
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-            })
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                raw = json.loads(resp.read())
-                # Anthropic 响应格式: content[0].text
-                content = ""
-                for block in raw.get("content", []):
-                    if block.get("type") == "text":
-                        content += block.get("text", "")
-                # 也尝试兼容 OpenAI 格式的响应（有些代理同时支持两种）
-                if not content:
-                    choices = raw.get("choices", [])
-                    if choices:
-                        content = choices[0].get("message", {}).get("content", "")
-                return _parse_llm_response(content, "")
-        except Exception as e:
-            err = str(e)[:100]
-            if "404" not in err and "405" not in err:
-                print(f"  [Anthropic] {url_tail} 失败: {err}")
-            continue
-
-    print(f"  [Anthropic] 所有路径均失败")
-    return None
+股票数据：
+"""
 
 
 def load_fundamentals(code):
@@ -161,24 +86,71 @@ def load_fundamentals(code):
         return json.load(f)
 
 
-def extract_key_info(data):
-    biz = data.get("business_overview", {})
-    fin = data.get("financial_health", {})
-    metrics = fin.get("key_metrics", {})
-    comp = data.get("competitive_analysis", {})
+def _call_anthropic_api(api_key, base_url, model, prompt, v2_mode=False):
+    for url_tail in ["/messages", "/v1/messages"]:
+        url = f"{base_url}{url_tail}"
+        req_data = json.dumps({
+            "model": model,
+            "max_tokens": 2048,
+            "messages": [{"role": "user", "content": prompt}],
+        }).encode("utf-8")
+        try:
+            req = urllib.request.Request(url, data=req_data, headers={
+                "Content-Type": "application/json",
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+            })
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                raw = json.loads(resp.read())
+                content = ""
+                for block in raw.get("content", []):
+                    if block.get("type") == "text":
+                        content += block.get("text", "")
+                if not content:
+                    choices = raw.get("choices", [])
+                    if choices:
+                        content = choices[0].get("message", {}).get("content", "")
+                if v2_mode:
+                    return _parse_v2_response(content)
+                return _parse_llm_response(content, "")
+        except Exception as e:
+            err = str(e)[:80]
+            if "404" not in err and "405" not in err:
+                print(f"    [API] {url_tail}: {err}")
+            continue
+    return None
 
-    return {
-        "name": data.get("name", ""),
-        "industry": biz.get("industry", ""),
-        "moat": comp.get("moat_level", ""),
-        "health": fin.get("health_rating", ""),
-        "revenue_yi": metrics.get("revenue_yi"),
-        "net_profit_yi": metrics.get("net_profit_yi"),
-        "roe_pct": metrics.get("roe_pct"),
-        "gross_margin_pct": metrics.get("gross_margin_pct"),
-        "net_margin_pct": metrics.get("net_margin_pct"),
-        "what_they_do": biz.get("what_they_do", "")[:120],
-    }
+
+def _parse_v2_response(content: str):
+    """解析 V2 的三段式 JSON：fundamental_score / sector_score / total"""
+    text = content.strip() if content else ""
+    if not text:
+        return None
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+    text = text.strip()
+    try:
+        result = json.loads(text)
+        return {
+            "fundamental_score": result.get("fundamental_score"),
+            "sector_score": result.get("sector_score"),
+            "total": result.get("total", 0),
+            "brief": result.get("brief", ""),
+        }
+    except json.JSONDecodeError:
+        return None
+
+
+def llm_score(code, data_json, prompt_label, prompt_text, v2_mode=False):
+    api_key = os.environ.get("TA_API_KEY")
+    base_url = (os.environ.get("TA_BASE_URL") or "").rstrip("/")
+    model = os.environ.get("TA_LLM_QUICK") or os.environ.get("TA_LLM_DEEP") or "deepseek-v4-pro"
+    if not api_key:
+        return None
+    prompt = prompt_text + data_json[:8000]
+    return _call_anthropic_api(api_key, base_url, model, prompt, v2_mode=v2_mode)
 
 
 def main():
@@ -190,93 +162,106 @@ def main():
         print(f"{'='*60}")
 
         data = load_fundamentals(code)
-        info = extract_key_info(data)
-
-        # LLM 打分
-        llm_score = None
-        llm_brief = ""
         stock_json = _build_stock_json(code)
-        if stock_json:
-            llm_result = call_llm_score(code, stock_json)
-            if llm_result:
-                llm_score = llm_result.get("score")
-                llm_brief = llm_result.get("brief", "")
+        if not stock_json:
+            print("  ❌ 无法构建 JSON，跳过")
+            continue
 
-        # 规则引擎打分
-        rule_score = _rule_based_score(code)
+        # V1：旧 Prompt（AI 主线匹配）
+        v1 = llm_score(code, stock_json, "v1", SCORING_PROMPT, v2_mode=False)
+        v1_score = v1["score"] if v1 else None
+        v1_brief = v1["brief"] if v1 else ""
 
-        # 最终得分（优先 LLM，回退规则）
-        final_score = llm_score if llm_score is not None else rule_score
+        # V2：新 Prompt（双轨制）
+        v2 = llm_score(code, stock_json, "v2", SCORING_PROMPT_V2, v2_mode=True)
 
-        print(f"  LLM 打分:  {llm_score if llm_score is not None else 'N/A (调用失败，回退规则引擎)'}")
-        if llm_brief:
-            print(f"  LLM 理由: {llm_brief}")
-        print(f"  规则打分:  {rule_score}")
-        print(f"  最终得分:  {final_score} / 50")
-        print(f"  行业:      {info['industry']}")
-        print(f"  护城河:    {info['moat']}  |  财务: {info['health']}")
-        print(f"  营收: {info['revenue_yi']}亿  |  净利: {info['net_profit_yi']}亿")
-        print(f"  ROE: {info['roe_pct']}%  |  毛利率: {info['gross_margin_pct']}%  |  净利率: {info['net_margin_pct']}%")
+        # 规则引擎
+        rule = _rule_based_score(code)
+
+        biz = data.get("business_overview", {})
+        fin = data.get("financial_health", {})
+        metrics = fin.get("key_metrics", {})
+        comp = data.get("competitive_analysis", {})
+
+        v1_s = f"{v1_score}" if v1_score is not None else "N/A"
+        v2_t = f"{v2['total']}" if v2 and v2['total'] is not None else "N/A"
+        v2_f = f"{v2['fundamental_score']}" if v2 and v2.get('fundamental_score') is not None else "-"
+        v2_s = f"{v2['sector_score']}" if v2 and v2.get('sector_score') is not None else "-"
+        rule_s = f"{rule}" if rule is not None else "N/A"
+
+        print(f"  V1={v1_s}  V2={v2_t} (基本{v2_f}+赛道{v2_s})  Rule={rule_s}")
+        if v1_brief:
+            print(f"  V1: {v1_brief}")
+        if v2 and v2.get("brief"):
+            print(f"  V2: {v2['brief']}")
 
         results.append({
             "code": code,
-            "name": info["name"],
-            "industry": info["industry"],
-            "moat": info["moat"],
-            "health": info["health"],
-            "revenue_yi": info["revenue_yi"],
-            "net_profit_yi": info["net_profit_yi"],
-            "roe_pct": info["roe_pct"],
-            "gross_margin_pct": info["gross_margin_pct"],
-            "net_margin_pct": info["net_margin_pct"],
-            "llm_score": llm_score,
-            "llm_brief": llm_brief,
-            "rule_score": rule_score,
-            "final_score": final_score,
+            "name": data.get("name", name),
+            "industry": biz.get("industry", ""),
+            "moat": comp.get("moat_level", ""),
+            "health": fin.get("health_rating", ""),
+            "roe": metrics.get("roe_pct"),
+            "net_margin": metrics.get("net_margin_pct"),
+            "v1_score": v1_score,
+            "v1_brief": v1_brief,
+            "v2_fundamental": v2.get("fundamental_score") if v2 else None,
+            "v2_sector": v2.get("sector_score") if v2 else None,
+            "v2_total": v2.get("total") if v2 else None,
+            "v2_brief": v2.get("brief") if v2 else "",
+            "rule_score": rule,
         })
 
-    # ============ 汇总表 ============
-    print(f"\n\n{'='*94}")
-    print("                           📊 10 支股票基本面打分汇总")
-    print(f"{'='*94}")
-    header = f"{'排名':<4} {'代码':<8} {'名称':<8} {'行业':<16} {'护城河':<6} {'ROE%':<8} {'净利率%':<8} {'LLM':<5} {'规则':<5} {'最终':<5}"
-    print(header)
-    print(f"{'-'*94}")
+    # ============ 汇总 ============
+    print(f"\n\n{'='*110}")
+    print("                    📊 A/B 回测对比：V1 (AI主线匹配) vs V2 (基本面+赛道)")
+    print(f"{'='*110}")
+    h = f"{'代码':<8} {'名称':<8} {'行业':<14} {'ROE%':<7} {'净利率%':<7} | {'V1':>4} | {'V2基':>4} {'V2赛':>4} {'V2总':>4} | {'规则':>4}"
+    print(h)
+    print(f"{'-'*110}")
 
-    sorted_results = sorted(results, key=lambda x: x["final_score"] or 0, reverse=True)
-    for i, r in enumerate(sorted_results, 1):
-        llm = f"{r['llm_score']}" if r['llm_score'] is not None else "N/A"
+    # 按 V1 排名
+    sorted_v1 = sorted([r for r in results if r["v1_score"] is not None], key=lambda x: x["v1_score"], reverse=True)
+    sorted_v2 = sorted([r for r in results if r["v2_total"] is not None], key=lambda x: x["v2_total"], reverse=True)
+
+    for r in sorted_v1:
+        roe = f"{r['roe']:.1f}" if r['roe'] else "N/A"
+        nm = f"{r['net_margin']:.1f}" if r['net_margin'] else "N/A"
+        v1 = f"{r['v1_score']}" if r['v1_score'] is not None else "N/A"
+        v2f = f"{r['v2_fundamental']}" if r['v2_fundamental'] is not None else "-"
+        v2s = f"{r['v2_sector']}" if r['v2_sector'] is not None else "-"
+        v2t = f"{r['v2_total']}" if r['v2_total'] is not None else "N/A"
         rule = f"{r['rule_score']}" if r['rule_score'] is not None else "N/A"
-        final = f"{r['final_score']}" if r['final_score'] is not None else "N/A"
-        roe = f"{r['roe_pct']:.1f}" if r['roe_pct'] else "N/A"
-        nm = f"{r['net_margin_pct']:.1f}" if r['net_margin_pct'] else "N/A"
-        print(f"{i:<4} {r['code']:<8} {r['name']:<8} {r['industry']:<16} {r['moat']:<6} {roe:<8} {nm:<8} {llm:<5} {rule:<5} {final:<5}")
+        print(f"{r['code']:<8} {r['name']:<8} {r['industry']:<14} {roe:<7} {nm:<7} | {v1:>4} | {v2f:>4} {v2s:>4} {v2t:>4} | {rule:>4}")
 
-    print(f"{'='*94}")
+    print(f"{'='*110}")
 
-    # LLM vs 规则引擎差异
-    print(f"\n📊 LLM vs 规则引擎差异分析:")
-    print(f"{'代码':<8} {'名称':<8} {'LLM':<5} {'规则':<5} {'差值':<6} {'说明'}")
-    print(f"{'-'*60}")
-    for r in sorted_results:
-        llm = r['llm_score'] if r['llm_score'] is not None else None
-        rule = r['rule_score'] if r['rule_score'] is not None else None
-        if llm is not None and rule is not None:
-            diff = llm - rule
-            if diff != 0:
-                direction = "LLM更高 ↑" if diff > 0 else "LLM更低 ↓"
-                print(f"{r['code']:<8} {r['name']:<8} {llm:<5} {rule:<5} {diff:+<6} {direction}")
-        elif llm is not None:
-            print(f"{r['code']:<8} {r['name']:<8} {llm:<5} {'N/A':<5} {'--':<6} 仅 LLM")
-        elif rule is not None:
-            print(f"{r['code']:<8} {r['name']:<8} {'N/A':<5} {rule:<5} {'--':<6} 仅规则")
+    # V1 vs V2 排名变化
+    print(f"\n📊 排名对比：")
+    v1_rank = {r["code"]: i+1 for i, r in enumerate(sorted_v1)}
+    v2_rank = {r["code"]: i+1 for i, r in enumerate(sorted_v2)}
+    print(f"{'代码':<8} {'名称':<8} {'V1排名':<7} {'V2排名':<7} {'变化':<6}")
+    print(f"{'-'*40}")
+    for code, _ in STOCKS:
+        r1 = v1_rank.get(code, "-")
+        r2 = v2_rank.get(code, "-")
+        if isinstance(r1, int) and isinstance(r2, int):
+            delta = r1 - r2
+            arrow = "↑" if delta > 0 else ("↓" if delta < 0 else "—")
+            change = f"{arrow}{abs(delta)}"
+        else:
+            change = "-"
+        print(f"{code:<8} {dict(STOCKS)[code]:<8} {str(r1):<7} {str(r2):<7} {change:<6}")
 
-    # LLM 打分简要理由汇总
-    llm_results = [r for r in sorted_results if r.get("llm_brief")]
-    if llm_results:
-        print(f"\n📝 LLM 打分简要理由:")
-        for r in llm_results:
-            print(f"  [{r['llm_score']}分] {r['code']} {r['name']}: {r['llm_brief']}")
+    # V2 维度详情
+    print(f"\n📝 V2 双维度详情 + 对比 V1：")
+    for r in sorted_v2:
+        v1_s = f"V1={r['v1_score']}" if r['v1_score'] is not None else "V1=N/A"
+        print(f"  {r['code']} {r['name']}: 基本面{r['v2_fundamental']} + 赛道{r['v2_sector']} = {r['v2_total']}  ({v1_s})")
+        if r.get("v2_brief"):
+            print(f"    V2: {r['v2_brief']}")
+        if r.get("v1_brief"):
+            print(f"    V1: {r['v1_brief']}")
 
 if __name__ == "__main__":
     main()

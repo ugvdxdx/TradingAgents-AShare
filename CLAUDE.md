@@ -53,6 +53,10 @@ api/                    # FastAPI 服务端
 scheduler/              # 定时调度器（独立进程）
 cli/                    # typer CLI 入口
 a-stock-data/           # SKILL.md — 数据端点参考文档
+skills/
+  tradingagents-analysis/  # 15-Agent 深度分析
+  tradingagents-sector/    # 板块分析
+  fundamentals-scorer/     # ★ 基本面评分 & 赛道Alpha（回测ρ=0.56）
 ```
 
 ## 数据源架构

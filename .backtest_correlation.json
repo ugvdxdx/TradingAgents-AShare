@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "start_date": "2025-12-09",
+    "end_date": "2026-06-09",
+    "sample_size": 539,
+    "price_fetch_failed": 0
+  },
+  "correlation": {
+    "V2 总分": {
+      "spearman": 0.4753,
+      "t_stat": 12.52,
+      "pearson": 0.4199
+    },
+    "V2 基本面": {
+      "spearman": 0.0393,
+      "t_stat": 0.91,
+      "pearson": -0.0182
+    },
+    "V2 赛道": {
+      "spearman": 0.5563,
+      "t_stat": 15.51,
+      "pearson": 0.5429
+    },
+    "V1 得分": {
+      "spearman": 0.477,
+      "t_stat": 12.58,
+      "pearson": 0.5394
+    },
+    "规则引擎": {
+      "spearman": 0.1365,
+      "t_stat": 3.19,
+      "pearson": 0.0845
+    }
+  },
+  "top20_avg_return": 1.097777,
+  "bottom20_avg_return": -0.0231,
+  "long_short_spread": 1.120877
+}

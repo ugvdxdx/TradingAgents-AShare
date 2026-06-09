@@ -91,14 +91,38 @@ print(result["final_trade_decision"])
 
 ## Skills (AI 能力包)
 
-项目内置两组可被 Claude Code / Cursor 等 AI IDE 直接调用的技能包：
+项目内置三组可被 Claude Code / Cursor 等 AI IDE 直接调用的技能包：
 
 | Skill | 路径 | 说明 |
 |-------|------|------|
 | **个股深度分析** | `skills/tradingagents-analysis/SKILL.md` | 15 个 AI 分析师五阶段协作：市场→博弈→多空辩论→交易→风控，输出买卖建议+风险评估 |
 | **板块分析** | `skills/tradingagents-sector/SKILL.md` | 6 名 AI 分析师协作完成板块搜索、排名、资金流向、成分股分析，输出结构化研报 |
+| **★ 基本面评分 & 赛道Alpha** | `skills/fundamentals-scorer/SKILL.md` | 回测验证的赛道动量选股（Spearman ρ=0.56），基本面风控过滤，545只A股全覆盖 |
 
-两种技能均可通过自然语言直接触发（例："分析贵州茅台"或"分析商业航天板块"）。
+三种技能均可通过自然语言直接触发（例："分析贵州茅台"、"分析商业航天板块"或"挑10支赛道最强的股票"）。
+
+## 基本面评分 & 赛道Alpha选股（新增）
+
+基于 LLM 的双维度评分系统，对 545 只 A 股（市值 ≥ 65亿）进行基本面评估。**回测验证（2025.12-2026.06）**：
+
+| 发现 | 数据 |
+|:---|:---|
+| 赛道动量分 vs 半年涨幅 | Spearman **ρ = 0.556** (p<0.001) |
+| 基本面质量分 vs 半年涨幅 | ρ = 0.039 (不显著) |
+| 五等分 Q1→Q5 涨幅 | **-1.6% → +1.1% → +13.8% → +61.8% → +134.8%** |
+| 赛道Top20 均涨幅 | **+109.78%** |
+| 多空收益差（Top20 - Bottom20） | **+112.09%** |
+| 基本面过滤（≥10分）提升信号纯度 | ρ 0.556 → **0.580** |
+
+**推荐用法**：按赛道动量分排名选股，用基本面分（≥10）排除亏损/财务危机股。
+
+```python
+from fundamental_scorer import compute_sector_alpha
+
+result = compute_sector_alpha("300502")
+# → {"sector_score": 24, "fundamental_score": 22, 
+#    "filter_pass": True, "recommendation": "BUY"}
+```
 
 ## 高级工具：选股 & 回测
 
