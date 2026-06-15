@@ -6,6 +6,12 @@
 
 **核心交互方式**: 通过 Claude Code CLI 直接对话，无需前端。
 
+**两阶段选股流水线**：
+1. 阶段一（半月）：V3 基本面打分（`_v3_full_score.py`）— 544 只全量评分 + essence 精华，ρ=0.527
+2. 阶段二（每日）：30 天涨幅竞争辩论（`debate_picker_v5.py`）— LangGraph 7 阶段：三分析师并行 → 分组海选 Top50→20 → claim 驱动多空交叉辩论 20→10 → 终极 PK → 风控复核 → 终端富文本报告
+
+**归档**：旧版脚本（`run_debate_picker.py`, `run_stock_picker.py` 等）已移入 `archive/`。
+
 ## 关键命令
 
 ```bash
@@ -56,7 +62,19 @@ a-stock-data/           # SKILL.md — 数据端点参考文档
 skills/
   tradingagents-analysis/  # 15-Agent 深度分析
   tradingagents-sector/    # 板块分析
-  fundamentals-scorer/     # ★ 基本面评分 & 赛道Alpha（回测ρ=0.56）
+  fundamentals-scorer/     # ★ V3 基本面评分 & 赛道Alpha（回测ρ=0.527）
+
+── 两阶段选股工具 (根目录) ──
+_v3_full_score.py         # V3 全量基本面评分 + essence（544只，8并发，~35min）
+_v3_full_backtest.py      # V3 vs 半年涨幅 Spearman 回测
+debate_picker_v5.py       # 30天涨幅竞争辩论 — LangGraph 7阶段 (Top50→20→10, claim驱动辩论)
+_v5_rolling_backtest.py   # v5 滚动回测 — V3基线 vs v5辩论 收益对比
+tradingagents/agents/picker/  # v5 辩论选股包 (graph/state/analysts/judges/debaters/reporter)
+fundamental_scorer.py     # V3 评分引擎（三子维度 + essence）
+money_flow.py             # 资金流分析（东方财富 + Tushare fallback）
+fetch_money_flow_all.py   # 全市场资金流预拉取 → .mf_cache/
+_gen_top500_fundamentals.py  # 个股基本面 JSON 生成器
+archive/                  # 历史脚本归档
 ```
 
 ## 数据源架构

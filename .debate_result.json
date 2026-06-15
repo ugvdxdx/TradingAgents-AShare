@@ -1,0 +1,184 @@
+{
+  "trade_date": "2026-06-15",
+  "cutoff_date": null,
+  "generated_at": "2026-06-15T19:46:12.604460",
+  "ranking": [
+    {
+      "code": "300308",
+      "name": "中际旭创",
+      "score": 92.0,
+      "confidence": 0.9,
+      "confidence_level": "高",
+      "key_thesis": "全球光模块绝对龙头，1.6T市占50-70%独占鳌头，2026Q1营收翻倍+毛利率44.5%逐季新高，订单锁定至2027年，在AI算力核心卡位中确定性最强，强者恒强。",
+      "key_risk": "近5日主力净流出55.7亿，机构高位兑现压力较大，短期可能进入盘整消化。",
+      "supporting_claim_ids": [],
+      "risk_flags": [
+        "主力持续流出"
+      ],
+      "rank": 1
+    },
+    {
+      "code": "300394",
+      "name": "天孚通信",
+      "score": 90.0,
+      "confidence": 0.88,
+      "confidence_level": "高",
+      "key_thesis": "1.6T光引擎全球垄断（份额90%+），是AI光互连最核心的'卖铲人'，ROE 41.9%行业顶尖，CPO产业化元年率先受益，业绩弹性与确定性兼备。",
+      "key_risk": "近5日主力净流出47.9亿，机构出货坚决；若英伟达GPU出货节奏放缓，单一客户依赖风险将集中暴露。",
+      "supporting_claim_ids": [],
+      "risk_flags": [
+        "主力持续流出"
+      ],
+      "rank": 2
+    },
+    {
+      "code": "600487",
+      "name": "亨通光电",
+      "score": 80.0,
+      "confidence": 0.75,
+      "confidence_level": "高",
+      "key_thesis": "AI光纤量价齐升（G657A2暴涨650%）+英伟达1.6T定点Q3量产，20日涨幅39.8%趋势极强，近5日仍有2日主力净流入，是光模块板块中短期爆发力最强的挑战者。",
+      "key_risk": "铜导体营收占比30%但毛利率仅1%，整体ROE仅8.96%严重低于龙头，近5日主力净流出10.4亿，高位出现量价背离。",
+      "supporting_claim_ids": [
+        "BULL-1",
+        "BEAR-4",
+        "BULL-6",
+        "BEAR-8",
+        "BEAR-12"
+      ],
+      "risk_flags": [
+        "主力持续流出",
+        "量价背离"
+      ],
+      "rank": 3
+    },
+    {
+      "code": "300502",
+      "name": "新易盛",
+      "score": 89.0,
+      "confidence": 0.86,
+      "confidence_level": "高",
+      "key_thesis": "全球首批1.6T量产厂商，ROE 72.8%盈利能力最强，800G/1.6T双轮驱动下增速领先，技术迭代快（6.4T NPO/12.8T XPO已发布），是光模块板块弹性最大的标的。",
+      "key_risk": "近5日主力净流出64.5亿（全场最大），且96%收入来自海外，汇兑损失5.2亿是明确的财报硬伤。",
+      "supporting_claim_ids": [],
+      "risk_flags": [
+        "主力持续流出"
+      ],
+      "rank": 4
+    },
+    {
+      "code": "601138",
+      "name": "工业富联",
+      "score": 78.0,
+      "confidence": 0.8,
+      "confidence_level": "高",
+      "key_thesis": "AI服务器全球市占42.3%，英伟达GB300核心代工，2026Q1净利+102%，液冷毛利率15-18%打开利润空间，是AI算力基建最稳健的大盘龙头。",
+      "key_risk": "代工模式毛利率仅6.98%，经营现金流暴跌78%，近5日主力净流出11.8亿，资金面持续承压。",
+      "supporting_claim_ids": [],
+      "risk_flags": [
+        "主力持续流出"
+      ],
+      "rank": 5
+    },
+    {
+      "code": "002281",
+      "name": "光迅科技",
+      "score": 72.0,
+      "confidence": 0.7,
+      "confidence_level": "高",
+      "key_thesis": "A股唯一光芯片到模块全链垂直整合，3.2T硅光NPO国内首发通过头部CSP验证，具备下一代技术卡位优势，1.6T在手订单排至2027年。",
+      "key_risk": "毛利率仅23.4%远低于龙头（中际42%/新易盛49%），ROE 9.9%偏低，近5日主力净流出18.3亿，股价低位震荡趋势疲弱。",
+      "supporting_claim_ids": [],
+      "risk_flags": [
+        "主力持续流出",
+        "趋势破位"
+      ],
+      "rank": 6
+    },
+    {
+      "code": "688256",
+      "name": "寒武纪",
+      "score": 78.0,
+      "confidence": 0.72,
+      "confidence_level": "高",
+      "key_thesis": "思元590在DeepSeek R1推理场景性能超H20约50%，Q1经营现金流首次转正+合同负债8.24亿预示Q2爆发，近5日主力净流入+5.7亿持续加仓，国产替代逻辑最强标的。",
+      "key_risk": "趋势仅12（技术破位），20日涨幅-0.6%横盘，被列实体清单制约先进代工，ROE仅8.2%整体盈利能力偏弱。",
+      "supporting_claim_ids": [
+        "BULL-11"
+      ],
+      "risk_flags": [
+        "趋势破位"
+      ],
+      "rank": 7
+    },
+    {
+      "code": "002384",
+      "name": "东山精密",
+      "score": 82.0,
+      "confidence": 0.78,
+      "confidence_level": "高",
+      "key_thesis": "最新日主力净流入+16.14亿（全场最强单日反转），边际改善+28.06亿，技术动量26全场最高，全球唯一PCB+光芯片+光模块全流程整合的稀缺标的，底部涨停形态确立。",
+      "key_risk": "光模块营收仅占3.58%，1.6T批量出货在2026Q4，30天窗口内无实质业绩催化，前3日主力累计流出超23亿，资金持续性存疑。",
+      "supporting_claim_ids": [
+        "BULL-3",
+        "BEAR-5",
+        "BULL-7",
+        "BEAR-9",
+        "BULL-10",
+        "BEAR-13",
+        "BEAR-14"
+      ],
+      "risk_flags": [
+        "题材无支撑"
+      ],
+      "rank": 8
+    },
+    {
+      "code": "688808",
+      "name": "联讯仪器",
+      "score": 65.0,
+      "confidence": 0.65,
+      "confidence_level": "中",
+      "key_thesis": "全球第二家1.6T光模块全套测试仪器量产商，Q1净利增515%业绩爆发，科创板新股情绪加持，光模块升级强制换代带来刚性需求。",
+      "key_risk": "动态PE超820倍，市值2200亿但营收仅12亿，估值泡沫严重；上市满一年将面临解禁压力，流通盘极小导致股价易涨易跌，属于情绪博弈品种。",
+      "supporting_claim_ids": [],
+      "risk_flags": [
+        "题材无支撑",
+        "数据不足"
+      ],
+      "rank": 9
+    },
+    {
+      "code": "600183",
+      "name": "生益科技",
+      "score": 76.0,
+      "confidence": 0.75,
+      "confidence_level": "高",
+      "key_thesis": "国内唯一通过英伟达认证的AI高频高速CCL厂商，M8/M9/M10持续突破，沙特PPE断供驱动涨价超级周期，订单饱满且近5日主力净流入+3.7亿逆势加仓。",
+      "key_risk": "铜价+45%/电子布+100%成本压力大，成本传导仅完成约30%，属于上游材料股，与光模块龙头相比缺乏终端产品级弹性。",
+      "supporting_claim_ids": [
+        "BULL-2"
+      ],
+      "risk_flags": [],
+      "rank": 10
+    }
+  ],
+  "risk_review": {
+    "overall_confidence": 0.78,
+    "overall_level": "高",
+    "data_integrity": 0.98,
+    "avg_rank_confidence": 0.78,
+    "debate_rounds": 3,
+    "total_claims": 14,
+    "unresolved_claims": 1,
+    "risk_flag_summary": {
+      "主力持续流出": 6,
+      "量价背离": 1,
+      "趋势破位": 2,
+      "题材无支撑": 2,
+      "数据不足": 1
+    },
+    "disclaimer": "本结果由多智能体辩论自动生成, 仅供研究参考, 不构成投资建议。市场有风险, 决策需谨慎。"
+  },
+  "run_dir": "results/picker_v5/2026-06-15_20260615_1939"
+}

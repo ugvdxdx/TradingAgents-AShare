@@ -1,0 +1,1143 @@
+{
+  "timestamp": "2026-06-10T01:17:06.603762",
+  "mode": "full-debate",
+  "windows": 5,
+  "v3_top5_avg": 40.23,
+  "db_top5_avg": 27.01,
+  "v3_top10_avg": 32.53,
+  "db_top10_avg": 27.73,
+  "debate_delta_top5": -13.22,
+  "debate_delta_top10": -4.8,
+  "results": [
+    {
+      "cutoff_date": "2026-04-14",
+      "future_days": 34,
+      "v3_top5_avg": 54.61,
+      "v3_top5_pos": 100.0,
+      "v3_top10_avg": 52.22,
+      "v3_top10_pos": 90.0,
+      "db_top5_avg": 37.88,
+      "db_top5_pos": 100.0,
+      "db_top10_avg": 39.75,
+      "db_top10_pos": 90.0,
+      "v3_top5": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 65.79,
+          "future_days": 34
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 38.92,
+          "future_days": 34
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 49.22,
+          "future_days": 34
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 33.32,
+          "future_days": 34
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 85.82,
+          "future_days": 34
+        }
+      ],
+      "v3_top10": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 65.79,
+          "future_days": 34
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 38.92,
+          "future_days": 34
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 49.22,
+          "future_days": 34
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 33.32,
+          "future_days": 34
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 85.82,
+          "future_days": 34
+        },
+        {
+          "code": "002281",
+          "name": "光迅科技",
+          "return_pct": 97.99,
+          "future_days": 34
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -0.59,
+          "future_days": 34
+        },
+        {
+          "code": "603083",
+          "name": "剑桥科技",
+          "return_pct": 69.52,
+          "future_days": 34
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 19.09,
+          "future_days": 34
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 63.16,
+          "future_days": 34
+        }
+      ],
+      "db_top5": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 65.79,
+          "future_days": 34
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 19.09,
+          "future_days": 34
+        },
+        {
+          "code": "002463",
+          "name": "沪电股份",
+          "return_pct": 45.06,
+          "future_days": 34
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 33.32,
+          "future_days": 34
+        },
+        {
+          "code": "002475",
+          "name": "立讯精密",
+          "return_pct": 26.12,
+          "future_days": 34
+        }
+      ],
+      "db_top10": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 65.79,
+          "future_days": 34
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 19.09,
+          "future_days": 34
+        },
+        {
+          "code": "002463",
+          "name": "沪电股份",
+          "return_pct": 45.06,
+          "future_days": 34
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 33.32,
+          "future_days": 34
+        },
+        {
+          "code": "002475",
+          "name": "立讯精密",
+          "return_pct": 26.12,
+          "future_days": 34
+        },
+        {
+          "code": "002938",
+          "name": "鹏鼎控股",
+          "return_pct": 83.99,
+          "future_days": 34
+        },
+        {
+          "code": "000021",
+          "name": "深科技",
+          "return_pct": 36.22,
+          "future_days": 34
+        },
+        {
+          "code": "300442",
+          "name": "润泽科技",
+          "return_pct": -10.27,
+          "future_days": 34
+        },
+        {
+          "code": "688498",
+          "name": "源杰科技",
+          "return_pct": 59.25,
+          "future_days": 34
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 38.92,
+          "future_days": 34
+        }
+      ],
+      "v3_top10_codes": [
+        "300308",
+        "300394",
+        "300502",
+        "601138",
+        "600487",
+        "002281",
+        "300548",
+        "603083",
+        "300476",
+        "688256"
+      ],
+      "db_top10_codes": [
+        "300308",
+        "300476",
+        "002463",
+        "601138",
+        "002475",
+        "002938",
+        "000021",
+        "300442",
+        "688498",
+        "300394"
+      ],
+      "elapsed_s": 450.0,
+      "window": 1
+    },
+    {
+      "cutoff_date": "2026-04-21",
+      "future_days": 29,
+      "v3_top5_avg": 42.0,
+      "v3_top5_pos": 100.0,
+      "v3_top10_avg": 36.8,
+      "v3_top10_pos": 90.0,
+      "db_top5_avg": 22.38,
+      "db_top5_pos": 80.0,
+      "db_top10_avg": 29.23,
+      "db_top10_pos": 80.0,
+      "v3_top5": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 48.18,
+          "future_days": 29
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 36.1,
+          "future_days": 29
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 34.13,
+          "future_days": 29
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 27.91,
+          "future_days": 29
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 63.66,
+          "future_days": 29
+        }
+      ],
+      "v3_top10": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 48.18,
+          "future_days": 29
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 36.1,
+          "future_days": 29
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 34.13,
+          "future_days": 29
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 27.91,
+          "future_days": 29
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 63.66,
+          "future_days": 29
+        },
+        {
+          "code": "002281",
+          "name": "光迅科技",
+          "return_pct": 81.1,
+          "future_days": 29
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -13.16,
+          "future_days": 29
+        },
+        {
+          "code": "603083",
+          "name": "剑桥科技",
+          "return_pct": 26.87,
+          "future_days": 29
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 10.83,
+          "future_days": 29
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 52.36,
+          "future_days": 29
+        }
+      ],
+      "db_top5": [
+        {
+          "code": "600601",
+          "name": "方正科技",
+          "return_pct": 10.12,
+          "future_days": 29
+        },
+        {
+          "code": "002916",
+          "name": "深南电路",
+          "return_pct": 34.01,
+          "future_days": 29
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -13.16,
+          "future_days": 29
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 52.36,
+          "future_days": 29
+        },
+        {
+          "code": "000657",
+          "name": "中钨高新",
+          "return_pct": 28.58,
+          "future_days": 29
+        }
+      ],
+      "db_top10": [
+        {
+          "code": "600601",
+          "name": "方正科技",
+          "return_pct": 10.12,
+          "future_days": 29
+        },
+        {
+          "code": "002916",
+          "name": "深南电路",
+          "return_pct": 34.01,
+          "future_days": 29
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -13.16,
+          "future_days": 29
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 52.36,
+          "future_days": 29
+        },
+        {
+          "code": "000657",
+          "name": "中钨高新",
+          "return_pct": 28.58,
+          "future_days": 29
+        },
+        {
+          "code": "688498",
+          "name": "源杰科技",
+          "return_pct": 42.47,
+          "future_days": 29
+        },
+        {
+          "code": "301165",
+          "name": "锐捷网络",
+          "return_pct": -1.97,
+          "future_days": 29
+        },
+        {
+          "code": "603083",
+          "name": "剑桥科技",
+          "return_pct": 26.87,
+          "future_days": 29
+        },
+        {
+          "code": "301200",
+          "name": "大族数控",
+          "return_pct": 49.36,
+          "future_days": 29
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 63.66,
+          "future_days": 29
+        }
+      ],
+      "v3_top10_codes": [
+        "300308",
+        "300394",
+        "300502",
+        "601138",
+        "600487",
+        "002281",
+        "300548",
+        "603083",
+        "300476",
+        "688256"
+      ],
+      "db_top10_codes": [
+        "600601",
+        "002916",
+        "300548",
+        "688256",
+        "000657",
+        "688498",
+        "301165",
+        "603083",
+        "301200",
+        "600487"
+      ],
+      "elapsed_s": 197.0,
+      "window": 2
+    },
+    {
+      "cutoff_date": "2026-04-28",
+      "future_days": 24,
+      "v3_top5_avg": 42.77,
+      "v3_top5_pos": 100.0,
+      "v3_top10_avg": 36.43,
+      "v3_top10_pos": 90.0,
+      "db_top5_avg": 37.48,
+      "db_top5_pos": 100.0,
+      "db_top10_avg": 33.42,
+      "db_top10_pos": 90.0,
+      "v3_top5": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 55.34,
+          "future_days": 24
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 55.08,
+          "future_days": 24
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 44.91,
+          "future_days": 24
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 15.18,
+          "future_days": 24
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 43.32,
+          "future_days": 24
+        }
+      ],
+      "v3_top10": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 55.34,
+          "future_days": 24
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 55.08,
+          "future_days": 24
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 44.91,
+          "future_days": 24
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 15.18,
+          "future_days": 24
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 43.32,
+          "future_days": 24
+        },
+        {
+          "code": "002281",
+          "name": "光迅科技",
+          "return_pct": 60.99,
+          "future_days": 24
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -6.87,
+          "future_days": 24
+        },
+        {
+          "code": "603083",
+          "name": "剑桥科技",
+          "return_pct": 31.76,
+          "future_days": 24
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 17.14,
+          "future_days": 24
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 47.43,
+          "future_days": 24
+        }
+      ],
+      "db_top5": [
+        {
+          "code": "002281",
+          "name": "光迅科技",
+          "return_pct": 60.99,
+          "future_days": 24
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 15.18,
+          "future_days": 24
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 47.43,
+          "future_days": 24
+        },
+        {
+          "code": "688498",
+          "name": "源杰科技",
+          "return_pct": 38.15,
+          "future_days": 24
+        },
+        {
+          "code": "002916",
+          "name": "深南电路",
+          "return_pct": 25.67,
+          "future_days": 24
+        }
+      ],
+      "db_top10": [
+        {
+          "code": "002281",
+          "name": "光迅科技",
+          "return_pct": 60.99,
+          "future_days": 24
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 15.18,
+          "future_days": 24
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 47.43,
+          "future_days": 24
+        },
+        {
+          "code": "688498",
+          "name": "源杰科技",
+          "return_pct": 38.15,
+          "future_days": 24
+        },
+        {
+          "code": "002916",
+          "name": "深南电路",
+          "return_pct": 25.67,
+          "future_days": 24
+        },
+        {
+          "code": "688313",
+          "name": "仕佳光子",
+          "return_pct": 23.34,
+          "future_days": 24
+        },
+        {
+          "code": "002156",
+          "name": "通富微电",
+          "return_pct": 41.64,
+          "future_days": 24
+        },
+        {
+          "code": "600584",
+          "name": "长电科技",
+          "return_pct": 77.56,
+          "future_days": 24
+        },
+        {
+          "code": "300857",
+          "name": "协创数据",
+          "return_pct": -6.38,
+          "future_days": 24
+        },
+        {
+          "code": "001389",
+          "name": "广合科技",
+          "return_pct": 10.6,
+          "future_days": 24
+        }
+      ],
+      "v3_top10_codes": [
+        "300308",
+        "300394",
+        "300502",
+        "601138",
+        "600487",
+        "002281",
+        "300548",
+        "603083",
+        "300476",
+        "688256"
+      ],
+      "db_top10_codes": [
+        "002281",
+        "601138",
+        "688256",
+        "688498",
+        "002916",
+        "688313",
+        "002156",
+        "600584",
+        "300857",
+        "001389"
+      ],
+      "elapsed_s": 239.0,
+      "window": 3
+    },
+    {
+      "cutoff_date": "2026-05-08",
+      "future_days": 19,
+      "v3_top5_avg": 36.63,
+      "v3_top5_pos": 100.0,
+      "v3_top10_avg": 21.38,
+      "v3_top10_pos": 90.0,
+      "db_top5_avg": 15.17,
+      "db_top5_pos": 80.0,
+      "db_top10_avg": 17.14,
+      "db_top10_pos": 90.0,
+      "v3_top5": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 44.47,
+          "future_days": 19
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 47.24,
+          "future_days": 19
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 40.65,
+          "future_days": 19
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 24.13,
+          "future_days": 19
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 26.66,
+          "future_days": 19
+        }
+      ],
+      "v3_top10": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 44.47,
+          "future_days": 19
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 47.24,
+          "future_days": 19
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 40.65,
+          "future_days": 19
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 24.13,
+          "future_days": 19
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 26.66,
+          "future_days": 19
+        },
+        {
+          "code": "002281",
+          "name": "光迅科技",
+          "return_pct": 22.05,
+          "future_days": 19
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -16.28,
+          "future_days": 19
+        },
+        {
+          "code": "603083",
+          "name": "剑桥科技",
+          "return_pct": 7.71,
+          "future_days": 19
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 2.25,
+          "future_days": 19
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 14.91,
+          "future_days": 19
+        }
+      ],
+      "db_top5": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 44.47,
+          "future_days": 19
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 2.25,
+          "future_days": 19
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -16.28,
+          "future_days": 19
+        },
+        {
+          "code": "002463",
+          "name": "沪电股份",
+          "return_pct": 29.54,
+          "future_days": 19
+        },
+        {
+          "code": "000988",
+          "name": "华工科技",
+          "return_pct": 15.85,
+          "future_days": 19
+        }
+      ],
+      "db_top10": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 44.47,
+          "future_days": 19
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 2.25,
+          "future_days": 19
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -16.28,
+          "future_days": 19
+        },
+        {
+          "code": "002463",
+          "name": "沪电股份",
+          "return_pct": 29.54,
+          "future_days": 19
+        },
+        {
+          "code": "000988",
+          "name": "华工科技",
+          "return_pct": 15.85,
+          "future_days": 19
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 14.91,
+          "future_days": 19
+        },
+        {
+          "code": "688629",
+          "name": "华丰科技",
+          "return_pct": 2.08,
+          "future_days": 19
+        },
+        {
+          "code": "300811",
+          "name": "铂科新材",
+          "return_pct": 26.14,
+          "future_days": 19
+        },
+        {
+          "code": "002156",
+          "name": "通富微电",
+          "return_pct": 24.52,
+          "future_days": 19
+        },
+        {
+          "code": "000021",
+          "name": "深科技",
+          "return_pct": 27.92,
+          "future_days": 19
+        }
+      ],
+      "v3_top10_codes": [
+        "300308",
+        "300394",
+        "300502",
+        "601138",
+        "600487",
+        "002281",
+        "300548",
+        "603083",
+        "300476",
+        "688256"
+      ],
+      "db_top10_codes": [
+        "300308",
+        "300476",
+        "300548",
+        "002463",
+        "000988",
+        "688256",
+        "688629",
+        "300811",
+        "002156",
+        "000021"
+      ],
+      "elapsed_s": 243.0,
+      "window": 4
+    },
+    {
+      "cutoff_date": "2026-05-15",
+      "future_days": 14,
+      "v3_top5_avg": 25.12,
+      "v3_top5_pos": 100.0,
+      "v3_top10_avg": 15.82,
+      "v3_top10_pos": 90.0,
+      "db_top5_avg": 22.17,
+      "db_top5_pos": 100.0,
+      "db_top10_avg": 19.12,
+      "db_top10_pos": 100.0,
+      "v3_top5": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 21.92,
+          "future_days": 14
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 20.12,
+          "future_days": 14
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 27.19,
+          "future_days": 14
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 16.16,
+          "future_days": 14
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 40.21,
+          "future_days": 14
+        }
+      ],
+      "v3_top10": [
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 21.92,
+          "future_days": 14
+        },
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 20.12,
+          "future_days": 14
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 27.19,
+          "future_days": 14
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 16.16,
+          "future_days": 14
+        },
+        {
+          "code": "600487",
+          "name": "亨通光电",
+          "return_pct": 40.21,
+          "future_days": 14
+        },
+        {
+          "code": "002281",
+          "name": "光迅科技",
+          "return_pct": 12.25,
+          "future_days": 14
+        },
+        {
+          "code": "300548",
+          "name": "长芯博创",
+          "return_pct": -8.51,
+          "future_days": 14
+        },
+        {
+          "code": "603083",
+          "name": "剑桥科技",
+          "return_pct": 8.69,
+          "future_days": 14
+        },
+        {
+          "code": "300476",
+          "name": "胜宏科技",
+          "return_pct": 7.79,
+          "future_days": 14
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 12.4,
+          "future_days": 14
+        }
+      ],
+      "db_top5": [
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 20.12,
+          "future_days": 14
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 21.92,
+          "future_days": 14
+        },
+        {
+          "code": "002938",
+          "name": "鹏鼎控股",
+          "return_pct": 29.2,
+          "future_days": 14
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 27.19,
+          "future_days": 14
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 12.4,
+          "future_days": 14
+        }
+      ],
+      "db_top10": [
+        {
+          "code": "300394",
+          "name": "天孚通信",
+          "return_pct": 20.12,
+          "future_days": 14
+        },
+        {
+          "code": "300308",
+          "name": "中际旭创",
+          "return_pct": 21.92,
+          "future_days": 14
+        },
+        {
+          "code": "002938",
+          "name": "鹏鼎控股",
+          "return_pct": 29.2,
+          "future_days": 14
+        },
+        {
+          "code": "300502",
+          "name": "新易盛",
+          "return_pct": 27.19,
+          "future_days": 14
+        },
+        {
+          "code": "688256",
+          "name": "寒武纪",
+          "return_pct": 12.4,
+          "future_days": 14
+        },
+        {
+          "code": "688498",
+          "name": "源杰科技",
+          "return_pct": 27.84,
+          "future_days": 14
+        },
+        {
+          "code": "000021",
+          "name": "深科技",
+          "return_pct": 17.88,
+          "future_days": 14
+        },
+        {
+          "code": "001389",
+          "name": "广合科技",
+          "return_pct": 1.07,
+          "future_days": 14
+        },
+        {
+          "code": "300620",
+          "name": "光库科技",
+          "return_pct": 17.37,
+          "future_days": 14
+        },
+        {
+          "code": "601138",
+          "name": "工业富联",
+          "return_pct": 16.16,
+          "future_days": 14
+        }
+      ],
+      "v3_top10_codes": [
+        "300308",
+        "300394",
+        "300502",
+        "601138",
+        "600487",
+        "002281",
+        "300548",
+        "603083",
+        "300476",
+        "688256"
+      ],
+      "db_top10_codes": [
+        "300394",
+        "300308",
+        "002938",
+        "300502",
+        "688256",
+        "688498",
+        "000021",
+        "001389",
+        "300620",
+        "601138"
+      ],
+      "elapsed_s": 590.0,
+      "window": 5
+    }
+  ]
+}

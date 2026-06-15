@@ -34,6 +34,7 @@ dependencies = [
     "markdown>=3.7",
     "redis[hiredis]>=5.0.0",
     "typer>=0.15.0",
+    "duckduckgo-search>=8.1.1",
 ]
 
 [project.scripts]

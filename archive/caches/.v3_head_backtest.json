@@ -1,0 +1,10 @@
+{
+  "warning": "前视偏差：fundamentals快照2026-06-07，ρ系统性虚高，仅供V2/V3横向对比",
+  "n": 30,
+  "v3_rho": 0.1631,
+  "v2_rho": 0.3207,
+  "v3_unique": 26,
+  "v2_unique": 3,
+  "top_half_ret": 1.3464,
+  "bot_half_ret": 1.0578
+}
