@@ -91,15 +91,16 @@ print(result["final_trade_decision"])
 
 ## Skills (AI 能力包)
 
-项目内置三组可被 Claude Code / Cursor 等 AI IDE 直接调用的技能包：
+项目内置四组可被 Claude Code / Cursor 等 AI IDE 直接调用的技能包：
 
 | Skill | 路径 | 说明 |
 |-------|------|------|
 | **个股深度分析** | `skills/tradingagents-analysis/SKILL.md` | 15 个 AI 分析师五阶段协作：市场→博弈→多空辩论→交易→风控，输出买卖建议+风险评估 |
 | **板块分析** | `skills/tradingagents-sector/SKILL.md` | 6 名 AI 分析师协作完成板块搜索、排名、资金流向、成分股分析，输出结构化研报 |
 | **★ 基本面V3评分 & 赛道Alpha** | `skills/fundamentals-scorer/SKILL.md` | 回测验证（Spearman ρ=0.527），V3三子维度+essence精华，544只A股全覆盖 |
+| **研报知识系统** | `skills/research-knowledge/SKILL.md` | 财经博主圈子数据采集→LLM结构化知识提取→双层知识库，为选股辩论提供增量信息 |
 
-三种技能均可通过自然语言直接触发（例："分析贵州茅台"、"分析商业航天板块"或"挑10支赛道最强的股票"）。
+四种技能均可通过自然语言直接触发（例："分析贵州茅台"、"分析商业航天板块"、"挑10支赛道最强的股票"或"查询半导体行业研报知识"）。
 
 ## 基本面评分 & 赛道Alpha选股（V3 正式版）
 
@@ -215,6 +216,78 @@ world_knowledge.py        ← 1000+ 条业务认知 (strengths/weaknesses/growth
 | `world_knowledge.py` | 1000+ 条 | Top1000 差异化业务认知 |
 | `ai_knowledge_base.py` | 全市场 | 行业热力分映射，覆盖 AI 芯片/光通信/算力/机器人等 |
 
+## 研报知识系统
+
+从财经博主圈子采集盘前/盘中/盘后复盘及行业研报，通过 LLM 提取结构化知识，构建双层知识库，为选股辩论提供增量信息。
+
+### 数据规模（2026.04-2026.06）
+
+| 指标 | 数量 |
+|:---|:---|
+| 原始帖子 | 211 条 |
+| 已提取结构化知识 | 198 条 |
+| 行业知识库 | 676 条 |
+| 通用知识库 | 207 条 |
+| 每日复盘索引 | 207 条 |
+
+### 五层架构
+
+```
+L1. Collector  ─ 数据采集层 (小鹅通圈子API + cursor分页 + 增量更新)
+L2. Cleaner    ─ 数据清洗与标准化层 (去噪/分段/信息类型分类/行业标签初筛)
+L3. Extractor  ─ 知识提取层 (LLM结构化提取: 行业观点/个股提及/逻辑链条/关键数据)
+L4. Store      ─ 知识存储层 (SQLite + 双层知识库 + 快照 + 回测)
+L5. Service    ─ 知识服务层 (API + 检索 + 回测接口)
+```
+
+### 双层知识库
+
+| 层 | 表 | 组织维度 | 内容 |
+|:---|:---|:---|:---|
+| 行业知识库 | `sector_knowledge` | 行业/板块 | 观点 + 逻辑链条 + 情绪 + 关键数据 |
+| 通用知识库 | `general_knowledge` | 帖子 | 摘要 + 市场概览 + 洞察 + 风险 + 个股提及 |
+| 每日复盘索引 | `daily_review` | 交易日 | 快速定位某日全部复盘信息 |
+
+### 与选股系统集成
+
+```
+研报知识系统 (ResearchService)
+  │  query_sector() → 行业观点/逻辑链条/关键数据
+  │  query_stock()  → 个股提及/情绪/理由
+  │  query_date()   → 每日复盘信息
+  ▼
+辩论选股系统 (debate_picker_v5.py)
+  │  三分析师报告注入研报知识
+  │  claim辩论引用行业逻辑链条
+  ▼
+最终 TOP10 排名
+```
+
+### 核心脚本
+
+```bash
+# 全量采集 (指定日期范围)
+uv run python3 run_research_pipeline.py --step collect --from 2026-04-01 --to 2026-06-15
+
+# 增量采集 (仅拉取新帖子)
+uv run python3 run_research_pipeline.py --step collect --incremental
+
+# 知识提取 (处理未处理的帖子)
+uv run python3 run_research_pipeline.py --step extract
+
+# 知识检索
+uv run python3 skills/research-knowledge/scripts/query.py stats
+uv run python3 skills/research-knowledge/scripts/query.py sector 半导体
+uv run python3 skills/research-knowledge/scripts/query.py stock 立昂微
+uv run python3 skills/research-knowledge/scripts/query.py date 2026-06-15
+```
+
+### 增量更新 & 回测
+
+- **增量更新**：基于时间戳 + `raw_text_hash` 变更检测，仅处理新增/修改的帖子
+- **历史快照**：`Service.snapshot(as_of='2026-05-01')` 获取指定时间点知识状态
+- **回测隔离**：回测过程不影响生产环境数据
+
 ## 14 个 Agent
 
 | 角色 | Agent | 说明 |
@@ -272,6 +345,12 @@ tradingagents/              # 核心包
       yfinance_provider.py
   llm_clients/              # LLM 适配层 (OpenAI/Anthropic/Google)
   prompts/                  # 提示词模板 (支持 zh/en/auto)
+  research/                 # ★ 研报知识系统 (五层架构)
+    collector.py            # L1 数据采集 (小鹅通API + cursor分页)
+    cleaner.py              # L2 数据清洗 (去噪/分段/分类)
+    extractor.py            # L3 知识提取 (LLM结构化提取)
+    store.py                # L4 知识存储 (SQLite + 双层知识库)
+    service.py              # L5 知识服务 (API + 检索 + 回测)
   default_config.py         # 默认配置 + 环境变量映射
 
 api/                        # FastAPI 服务端
@@ -287,6 +366,7 @@ skills/                     # AI IDE 技能包 (Claude Code / Cursor)
   tradingagents-analysis/   # 个股深度分析 — 15 Agent 协作
   tradingagents-sector/     # 板块分析 — 6 Agent 协作
   fundamentals-scorer/      # ★ 基本面 V3 评分 & 赛道 Alpha
+  research-knowledge/       # ★ 研报知识系统 — 采集+提取+双层知识库
 
 a-stock-data/               # 数据端点参考文档
 
@@ -301,6 +381,11 @@ _gen_top500_fundamentals.py # 个股基本面 JSON 生成器
 money_flow.py               # 资金流分析 (双源: 东方财富 + Tushare fallback)
 fetch_money_flow_all.py     # 全市场资金流预拉取 → .mf_cache/
 data/news_cache.json        # WebSearch 新闻缓存 (按股票代码, 按时间线排序)
+
+── 研报知识系统工具 (根目录) ──
+run_research_pipeline.py    # ★ 研报全流程 (采集→清洗→提取→存储)
+save_batch.py               # 批量知识导入 (JSON→SQLite)
+research.db                 # 研报知识库 (SQLite)
 
 ── 其他工具 (根目录) ──
 analyze_stock.py            # 单股深度分析 (复用评分+辩论+实时行情)
