@@ -160,6 +160,10 @@ def _load_fundamental_detail(code: str) -> Optional[Dict]:
         "industry_position": bo.get("industry_position", "")[:200],
         "strengths": ca.get("strengths", []),
         "weaknesses": ca.get("weaknesses", []),
+        # 研报催化 (外部市场视角, 与公司自述 strengths 隔离)
+        "research_catalysts": d.get("research_catalysts", {}),
+        # 地缘评估
+        "geopolitical_assessment": d.get("geopolitical_assessment", {}),
     }
 
 
@@ -228,6 +232,26 @@ def _fmt_fundamental_detail(fd: Dict) -> str:
     if fd.get("weaknesses"):
         for w in fd["weaknesses"][:2]:
             lines.append(f"  劣势: {str(w)[:80]}")
+
+    # 研报催化 (外部市场视角, 与公司自述 strengths 隔离)
+    rc = fd.get("research_catalysts")
+    if rc and isinstance(rc, dict) and rc.get("high_momentum_exposure", 0) > 0:
+        exp = rc["high_momentum_exposure"]
+        tags = rc.get("catalyst_tags", [])
+        evi = rc.get("evidence", [])
+        lines.append(f"研报催化: exposure={exp}/5, tags={','.join(tags[:3])}")
+        for e in evi[:2]:
+            lines.append(f"  催化证据: {str(e)[:100]}")
+
+    # 地缘评估
+    geo = fd.get("geopolitical_assessment")
+    if geo and isinstance(geo, dict):
+        opps = geo.get("opportunities", [])
+        risks = geo.get("risks", [])
+        if opps:
+            lines.append(f"地缘机遇: {str(opps[0])[:100]}")
+        if risks:
+            lines.append(f"地缘风险: {str(risks[0])[:100]}")
 
     return "\n".join(lines)
 
@@ -476,6 +500,18 @@ def make_incremental_info(llm: LLMHelper):
                 if detail:
                     parts.append(f"【竞争与增长】\n{detail}")
 
+            # 1c+. 研报信号 (research.db 个股级研报提及 + research_catalysts)
+            try:
+                from tradingagents.research.consumer import (
+                    get_stock_research_signal, fmt_stock_research_signal,
+                )
+                rsig = get_stock_research_signal(code, cutoff_date=cutoff or "", days=30)
+                rsig_text = fmt_stock_research_signal(rsig)
+                if rsig_text:
+                    parts.append(f"【研报信号】\n{rsig_text}")
+            except Exception:
+                pass  # research.db 不存在时静默跳过
+
             # 1d. 量化差分信号 (K线+资金流, 按 cutoff 截断, 无未来函数)
             sig = _compute_signals(code, cutoff, mf_cache)
             if sig:
@@ -484,14 +520,17 @@ def make_incremental_info(llm: LLMHelper):
             briefs[code] = "\n".join(parts)
 
         # 2. LLM 近期事件摘要 (一次批量调用, 补充 akshare 无法覆盖的事件)
-        try:
-            print(f"  🤖 LLM事件摘要: 批量生成...")
-            events = _fetch_events(llm, candidates, cutoff or "")
-            for code, evt in events.items():
-                if code in briefs:
-                    briefs[code] += f"\n【近期事件(LLM)】{evt}"
-        except Exception as e:
-            print(f"  ⚠ LLM事件摘要失败: {e}")
+        if state.get("dry_run"):
+            print(f"  ⏭ LLM事件摘要: dry-run 跳过")
+        else:
+            try:
+                print(f"  🤖 LLM事件摘要: 批量生成...")
+                events = _fetch_events(llm, candidates, cutoff or "")
+                for code, evt in events.items():
+                    if code in briefs:
+                        briefs[code] += f"\n【近期事件(LLM)】{evt}"
+            except Exception as e:
+                print(f"  ⚠ LLM事件摘要失败: {e}")
 
         # 3. 行业轮动感知 (实盘才采集, 回测跳过避免未来函数)
         rotation_context = ""
@@ -509,6 +548,29 @@ def make_incremental_info(llm: LLMHelper):
             except Exception as e:
                 print(f"  ⚠ 轮动信号获取失败: {e}")
 
+        # 4. 研报行业动量 + 市场情绪 (research.db, 无未来函数)
+        research_context = ""
+        try:
+            from tradingagents.research.consumer import (
+                get_sector_momentum, fmt_sector_momentum,
+                get_market_sentiment, fmt_market_sentiment,
+            )
+            momentum = get_sector_momentum(cutoff_date=cutoff or "", days=14)
+            mom_text = fmt_sector_momentum(momentum)
+            sentiment = get_market_sentiment(cutoff_date=cutoff or "", days=7)
+            sent_text = fmt_market_sentiment(sentiment)
+            parts = []
+            if mom_text:
+                parts.append(mom_text)
+            if sent_text:
+                parts.append(sent_text)
+            research_context = "\n\n".join(parts)
+            if research_context:
+                print(f"  📋 研报行业动量: {len(momentum.get('hot_sectors',[]))}热门 "
+                      f"{len(momentum.get('emerging_sectors',[]))}新兴")
+        except Exception as e:
+            print(f"  ⚠ 研报行业动量获取失败: {e}")
+
 
         # 落盘
         run_dir = state.get("run_dir", "")
@@ -523,15 +585,17 @@ def make_incremental_info(llm: LLMHelper):
 
         n_with_news = sum(1 for b in briefs.values() if "新闻" in b)
         n_with_events = sum(1 for b in briefs.values() if "近期事件" in b)
+        n_with_research = sum(1 for b in briefs.values() if "研报信号" in b)
         print(f"  ✅ 采集完成: {len(briefs)}只, "
-              f"{n_with_news}只有新闻, {n_with_events}只有LLM事件"
+              f"{n_with_news}只有新闻, {n_with_events}只有LLM事件, {n_with_research}只有研报信号"
               f"{', 含轮动信号' if rotation_context else ''}")
 
         return {
             "incremental_briefs": briefs,
             "rotation_context": rotation_context,
+            "research_context": research_context,
             "trace": [{"node": "incremental_info",
-                       "note": f"{len(briefs)}只增量简报, {n_with_news}新闻, {n_with_events}事件",
+                       "note": f"{len(briefs)}只增量简报, {n_with_news}新闻, {n_with_events}事件, {n_with_research}研报",
                        "ts": datetime.now().isoformat()}],
         }
 

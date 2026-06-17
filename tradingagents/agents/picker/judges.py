@@ -83,6 +83,48 @@ def make_screen_round1(llm: LLMHelper, v3_auto_promote: int = 20,
 
         cands_sorted = sorted(cands, key=lambda x: -x["v3"])
 
+        # 研报黑马保送: 近期有 bullish 催化但不在 Top50 的个股
+        dark_horse_from_research = []
+        research_risk_codes = set()
+        try:
+            from tradingagents.research.consumer import (
+                get_dark_horse_stocks, get_research_risk_signals,
+            )
+            existing_codes = [c["code"] for c in cands_sorted]
+            cutoff = state.get("cutoff_date") or state.get("trade_date", "")
+            dark_horse_from_research = get_dark_horse_stocks(
+                cutoff_date=cutoff, days=14,
+                existing_codes=existing_codes, min_bullish=2,
+            )
+            # 研报风险信号: 被看空的个股
+            risks = get_research_risk_signals(cutoff_date=cutoff, days=14)
+            for s in risks.get("bearish_stocks", []):
+                research_risk_codes.add(s.get("code", ""))
+            # 将研报黑马注入候选池 (保送入海选)
+            for dh in dark_horse_from_research:
+                cands_sorted.append({
+                    "code": dh["code"],
+                    "name": dh.get("name", ""),
+                    "v3": 0.0,  # 无 V3 分, 靠研报催化保送
+                    "chain": 0, "delivery": 0, "capital": 0,
+                    "essence": {
+                        "chain_position": "研报黑马",
+                        "core_catalyst": "; ".join(dh.get("reasons", [])[:2]),
+                        "biggest_bull": f"研报{dh.get('bullish_count',0)}次看多",
+                        "biggest_bear": "",
+                        "quality_redline": "",
+                        "catalyst_horizon": "short",
+                    },
+                    "tech_total": 0, "tech_trend": 0, "fund_5d": 0,
+                    "screen_reason": "研报黑马保送",
+                })
+            if dark_horse_from_research:
+                print(f"  🐎 研报黑马: {len(dark_horse_from_research)}只近期bullish催化但未入池")
+            if research_risk_codes:
+                print(f"  ⚠ 研报看空: {len(research_risk_codes)}只近期bearish")
+        except Exception:
+            pass  # research.db 不存在时静默跳过
+
         print(f"\n{'='*60}")
         print(f"🗂️  [阶段 3/7] 海选 (mode={screen_mode}, 决赛名额={debate_top_k})")
         print(f"{'='*60}")
@@ -99,10 +141,18 @@ def make_screen_round1(llm: LLMHelper, v3_auto_promote: int = 20,
             "请从中选出【未来30天涨幅可能超预期】的股票, 要求:\n"
             "- 必须有明确的短期催化(产品验证/订单放量/政策利好)\n"
             "- 资金面有主力净流入迹象\n"
-            "- 不得因'大客户集中/估值高/催化已兑现'等传统理由排除\n\n"
+            "- 不得因'大客户集中/估值高/催化已兑现'等传统理由排除\n"
+            "- 标注'研报黑马'的股票有近期博主看多催化, 请特别关注\n\n"
             "严格输出JSON数组(按涨幅潜力高→低排序):\n"
             '[{"code":"代码","rank":1,"reason":"20字内理由"},...]\n'
         )
+        # 研报风险提示
+        if research_risk_codes:
+            dark_horse_prompt += (
+                f"\n\n【研报风险提示 (近期被博主看空的个股)】\n"
+                f"代码: {', '.join(sorted(research_risk_codes)[:10])}\n"
+                "如果这些股出现在候选中, 请谨慎评估。"
+            )
 
         def _screen_pool(pool: List[Dict[str, Any]], take: int) -> tuple:
             """对一个候选池分组跑 LLM 海选, 返回 (按涨幅排序的晋级股, 日志)。"""

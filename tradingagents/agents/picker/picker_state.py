@@ -109,6 +109,7 @@ class PickerState(TypedDict, total=False):
     candidates: List[StockProfile]  # Top-N 候选 (采集后)
     incremental_briefs: Dict[str, str]  # 增量信息简报 (code→text, 基本面深度+量化信号+事件)
     rotation_context: str           # 行业轮动上下文 (板块资金流排名+主线切换信号, 实盘才有)
+    research_context: str           # 研报行业动量+市场情绪 (research.db, 回测安全)
     analyst_reports: Annotated[Dict[str, str], merge_dict]  # 并行写, dict 合并
     analyst_claims: Annotated[List[Claim], operator.add]    # 分析师阶段初始 claim
     round1_promoted: List[str]      # 海选晋级 codes (50→20)

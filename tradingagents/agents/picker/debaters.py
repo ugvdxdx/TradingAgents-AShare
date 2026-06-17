@@ -142,11 +142,18 @@ def make_debate_round(llm: LLMHelper, top_k: int = 10):
         else:
             incr_text = "(增量信息已在首轮提供, 本轮聚焦对已有 claim 的证据攻防)"
 
+        # 研报行业动量 + 市场情绪 (外部市场视角, 首轮注入)
+        research_text = ""
+        if rnd == 1:
+            rctx = state.get("research_context", "")
+            if rctx:
+                research_text = f"\n\n--- 研报行业动量与市场情绪 ---\n{rctx}"
+
         # ── 多头 ──
         bull_human = (f"本轮目标: {ledger['round_goal']}\n候选股:\n{stock_text}\n\n"
                       f"增量信息(实时财务+新闻+量化):\n{incr_text}\n\n"
                       f"分析师报告:\n{report_text}\n\n"
-                      f"已有claim:\n{claim_brief}")
+                      f"已有claim:\n{claim_brief}{research_text}")
         bull_raw = llm.call(BULL_DEBATER_SYSTEM, bull_human, deep=True, max_chars=4000)
         _ingest_claims(ledger, extract_tagged_json(bull_raw, "DEBATE_STATE"), "bullish", "BULL")
 
@@ -158,7 +165,7 @@ def make_debate_round(llm: LLMHelper, top_k: int = 10):
         bear_human = (f"本轮目标: {ledger['round_goal']}\n候选股:\n{stock_text}\n\n"
                       f"增量信息(实时财务+新闻+量化):\n{incr_text}\n\n"
                       f"分析师报告:\n{report_text}\n\n"
-                      f"多头已提出的claim:\n{claim_brief2}\n\n请针对性反驳。")
+                      f"多头已提出的claim:\n{claim_brief2}\n\n请针对性反驳。{research_text}")
         bear_raw = llm.call(BEAR_DEBATER_SYSTEM, bear_human, deep=True, max_chars=4000)
         _ingest_claims(ledger, extract_tagged_json(bear_raw, "DEBATE_STATE"), "bearish", "BEAR")
 

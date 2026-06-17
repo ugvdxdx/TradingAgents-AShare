@@ -393,6 +393,7 @@ def build_rotation_context(
                          f"涨跌{r['change_pct']:+.1f}%")
     if rotation.get("summary"):
         lines.append("\n【主线轮动信号】\n" + rotation["summary"])
+
     return "\n".join(lines)
 
 

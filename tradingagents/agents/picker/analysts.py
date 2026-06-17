@@ -159,6 +159,10 @@ def make_fund_analyst(llm: LLMHelper):
         rot = state.get("rotation_context", "")
         if rot:
             human += f"\n\n--- 板块资金轮动 ---\n{rot}"
+        # 研报行业动量 (领先信号, 与资金流滞后确认互补)
+        rctx = state.get("research_context", "")
+        if rctx:
+            human += f"\n\n--- 研报行业动量与市场情绪 ---\n{rctx}"
         report = llm.call(FUND_ANALYST_SYSTEM, human,
                           deep=False, max_chars=3000)
         _dump(state["run_dir"], "02_analyst_fund.md", report)
@@ -180,6 +184,10 @@ def make_fundamental_analyst(llm: LLMHelper):
         incr = _fmt_incremental(cands, briefs)
         if incr and incr != "(无增量信息)":
             human += f"\n\n--- 实时增量信息 (财务+新闻+竞争+量化) ---\n{incr}"
+        # 研报行业动量 + 市场情绪 (外部市场视角, V3没有)
+        rctx = state.get("research_context", "")
+        if rctx:
+            human += f"\n\n--- 研报行业动量与市场情绪 ---\n{rctx}"
         report = llm.call(FUNDAMENTAL_ANALYST_SYSTEM, human,
                           deep=True, max_chars=5000)
         _dump(state["run_dir"], "02_analyst_fundamental.md", report)

@@ -247,15 +247,65 @@ SYSTEM_PROMPT = """你是一位资深的A股研究总监，擅长将世界知识
 - 输出严格的 JSON 格式，不要有其他文字
 - 财务数据必须精确（如"营收119.3亿+44.2%"），不要用"约"、"超"等模糊词
 - 竞争对手必须具名并含市占率/排名
-- 风险因素必须含具体数据点和潜在影响"""
+- 风险因素必须含具体数据点和潜在影响
+
+【信源可信度分级与防污染规则 — 强制执行】
+你掌握的信息信源参差不齐，必须对每条"强断言"标注信源可信度，并按规则处理，防止低质信源污染基本面数据。
+
+信源分级标准：
+- [信源:高] = 公司公告/财报/招股书、券商深度研报、权威媒体(上证报/证券时报/路透/彭博)、监管文件。这类数据可作为硬事实。
+- [信源:中] = 行业媒体/产业数据库(Prismark/TrendForce等)、券商晨会简报、公司投资者关系记录。可信但需交叉验证。
+- [信源:低] = 雪球/股吧/东方财富号/今日头条等自媒体、博主个人观点、网络传言、你基于行业常识的推测。
+
+强断言的标注与处理规则（覆盖 strengths/growth_drivers/summary 等所有字段）：
+1. 凡含以下"强断言触发词"的表述，必须在该条【开头】标注 [信源:高/中/低]：
+   触发词：'一供/一供份额/独家供应/锁定/已锁定/已认证/份额XX%/唯一供应商/独家/首批/核心供应商/驻场'。
+   示例："[信源:低]锁定英伟达Rubin Midplane一供份额40%+"、"[信源:高]2025年营收153.08亿(+20.92%)"。
+2. 【删除规则 — 严格执行】若一条强断言满足以下任一条件，必须从输出中【整条删除】，不得保留、不得降级表述：
+   (a) 信源为"低"，且与更高信源(高/中)的事实存在矛盾或被其削弱；
+   (b) 信源为"低"，且该断言是公司核心多头逻辑的关键支点(一旦失实会显著扭曲基本面判断)；
+   (c) 该事件当前仍处于"送样测试/验证/规划/预期"阶段，却被表述为已确定事实(如把"送样测试中"写成"已锁定一供")。
+3. 财务数据(营收/净利/毛利率/ROE等出自财报)默认 [信源:高]，无需每条都标，但 strengths/weaknesses/growth_drivers 中的非财报强断言必须标注。
+4. 交叉验证意识：当不同信源对同一事实(如份额/排名/认证状态)给出不同数字时，以更高信源为准；若高信源与低信源冲突，按规则2删除低信源断言，不得折中。
+5. 宁缺毋滥：无法判定信源或信源可疑的强断言，宁可删除也不要写入。基本面数据被"乐观但失实"的自媒体叙事污染，比信息略少危害更大。"""
 
 
 def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
-                 world_knowledge: str, reference: str) -> str:
-    """构建生成 fundamentals 的 prompt"""
+                 world_knowledge: str, reference: str,
+                 real_financials: dict = None, industry_research: str = "") -> str:
+    """构建生成 fundamentals 的 prompt
+
+    新增两源注入 (解决财务靠LLM回忆不准 + 研报完全未注入的问题):
+    - real_financials: Tushare 真实财报 dict, 直接填 key_metrics, 不让LLM推测
+    - industry_research: research.db 板块研报文本, 标注[信源:中·板块级]供LLM参考
+    """
     
     # 截取世界知识（避免 prompt 过长）
     wk_text = world_knowledge[:8000] if len(world_knowledge) > 8000 else world_knowledge
+
+    # ── 权威财报段 (Tushare, 直接填入) ──
+    fin_section = ""
+    if real_financials:
+        ann = real_financials.get("_ann_period", "")
+        fin_clean = {k: v for k, v in real_financials.items() if not k.startswith("_")}
+        fin_json = json.dumps(fin_clean, ensure_ascii=False, indent=2)
+        fin_section = f"""
+## ⚠️ 权威财报数据 (来自Tushare, 财报期 {ann})
+以下财务数据【必须原样填入 financial_health.key_metrics】, 不得修改、不得用你的记忆替换、不得推测。
+```json
+{fin_json}
+```
+（revenue_yi/net_profit_yi/operating_cf_yi 单位:亿元; 比率类为百分比。rd_ratio_pct/rd_expense_yi Tushare未提供, 可填null。)
+"""
+
+    # ── 板块研报段 (research.db, 信源中) ──
+    research_section = ""
+    if industry_research:
+        research_section = f"""
+## 博主研报信号 (板块级)
+{industry_research}
+（以上是该公司所在板块的研报观点, 信源可信度: 中。可参考其行业趋势/数据, 但【不得】据此虚构该股的份额/认证/订单等个股级强断言; 个股级强断言仍须遵循信源分级与防污染规则。)
+"""
 
     prompt = f"""请为以下股票生成完整的基本面世界知识 JSON 文件。
 
@@ -264,7 +314,7 @@ def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
 - 名称: {name}
 - 行业: {industry}
 - 市值: {mcap_yi}亿元
-
+{fin_section}{research_section}
 ## 当前世界知识（2026年6月）
 {wk_text}
 
@@ -283,7 +333,7 @@ def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
     "industry_position": "在行业中的真实地位，用市占率/排名/与竞争对手对比的数据说话"
   }},
   "competitive_analysis": {{
-    "strengths": ["5条具体优势，每条含数据支撑（市占率/客户名/技术指标/财务数据）"],
+    "strengths": ["5条具体优势，每条含数据支撑（市占率/客户名/技术指标/财务数据）。含'锁定/一供/份额/独家/唯一'等强断言的条目，开头必须加[信源:高/中/低]标注"],
     "weaknesses": ["5条具体劣势，每条含数据（毛利率差距/客户集中度/技术短板等）"],
     "moat_level": "低/中/中高/高"
   }},
@@ -307,7 +357,7 @@ def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
   }},
   "growth_assessment": {{
     "growth_score": 0.0,
-    "growth_drivers": ["5条增长驱动，结合世界局势"],
+    "growth_drivers": ["5条增长驱动，结合世界局势。含'锁定/一供/份额/独家/量产'等强断言的条目，开头必须加[信源:高/中/低]标注；信源低且与他源矛盾者删除"],
     "headwinds": ["5条增长阻力，含具体数据"]
   }},
   "geopolitical_assessment": {{
@@ -326,6 +376,11 @@ def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
 4. **地缘评估必须引用世界知识**：伊朗战争（布伦特$93.09/桶）、中美贸易战（加权平均实际税率21.6%）、AI革命（全球数据中心投资7880亿美元+56%）、新能源（中国渗透率62.5%）、稀土管制（对日断供，日本库存8-10月见底）
 5. **业务概述必须数据丰富**：含分业务营收/增速/占比/毛利率
 6. **增长评分参考**：AI算力/光模块/半导体设备 8-9分，新能源/军工/医药 7-8分，消费/银行/电力 5-6分，旧赛道退潮 4-5分
+7. **供应链份额/认证类断言必须防污染**（极易出错的高危领域，强制执行信源规则）：
+   - 供应链地位、份额、认证状态的信源质量差异极大，必须严格区分。券商供应链调查/分析师(如郭明錤)纪要 > 公司公告 > 行业媒体 > 雪球/股吧/自媒体。
+   - 特别警惕"把送样/测试/规划阶段写成已确定事实"：如"正在送样测试中"不可写成"已锁定一供"，"预计26Q1量产"不可写成"26Q1大规模量产已确认"。
+   - 特别警惕"份额数字单一信源"：若"份额40%+"只来自雪球/自媒体而无券商研报佐证，且券商调查给出更小份额(如10%)，必须删除高份额断言。
+   - 若某条供应链断言是公司核心多头逻辑的支点，且信源低或与他源矛盾，宁可删除也不要保留——一个失实的"一供"支点会严重扭曲量化判断。
 
 {reference}
 
@@ -339,8 +394,52 @@ def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
 def generate_one(code: str, name: str, industry: str, mcap_yi: float,
                  world_knowledge: str, reference: str,
                  max_retries: int = 2) -> Optional[dict]:
-    """生成单只股票的 fundamentals"""
-    prompt = build_prompt(code, name, industry, mcap_yi, world_knowledge, reference)
+    """生成单只股票的 fundamentals
+
+    生成前先拉两源真实数据注入 prompt:
+    - Tushare 真实财报 (financial_health.key_metrics 准确性保障)
+    - research.db 板块研报 (冷门股也能获得板块视角)
+    拉取失败时回退到纯LLM生成 (退化到原行为, 不会崩)。
+    """
+    # ── 拉取真实财报 (Tushare) ──
+    real_financials = None
+    try:
+        from fundamentals_data import fetch_real_financials
+        real_financials = fetch_real_financials(code)
+        if real_financials:
+            logger.info(f"  ✓ Tushare 财报已注入 (营收{real_financials.get('revenue_yi')}亿)")
+    except Exception as e:
+        logger.warning(f"  Tushare 财报拉取失败, 回退LLM填: {type(e).__name__}")
+
+    # ── 拉取板块研报 (research.db) ──
+    # industry 来自 _top500 粗分类(如"元器件"), 太粗无法匹配细分板块(如PCB)。
+    # 故用 name + 已有 fundamentals 的细 industry 组合作为匹配文本, 提升召回。
+    industry_research = ""
+    try:
+        from tradingagents.research.consumer import get_industry_research_brief
+        match_text = industry or ""
+        if name:
+            match_text = f"{match_text} {name}"
+        # 若 fundamentals 已存在(增量更新场景), 读取其细 industry 补充
+        exist_path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
+        if os.path.exists(exist_path):
+            try:
+                with open(exist_path) as f:
+                    ed = json.load(f)
+                fine_ind = ed.get("business_overview", {}).get("industry", "")
+                if fine_ind:
+                    match_text = f"{match_text} {fine_ind}"
+            except Exception:
+                pass
+        industry_research = get_industry_research_brief(match_text)
+        if industry_research:
+            logger.info(f"  ✓ 板块研报已注入 ({len(industry_research)}字符)")
+    except Exception as e:
+        logger.warning(f"  板块研报拉取失败: {type(e).__name__}")
+
+    prompt = build_prompt(code, name, industry, mcap_yi, world_knowledge, reference,
+                          real_financials=real_financials,
+                          industry_research=industry_research)
 
     for attempt in range(max_retries + 1):
         logger.info(f"  调用 LLM 生成 {code} {name} (尝试 {attempt+1}/{max_retries+1})")
