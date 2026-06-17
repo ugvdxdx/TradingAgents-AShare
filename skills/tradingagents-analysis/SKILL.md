@@ -264,24 +264,11 @@ curl "${TRADINGAGENTS_API_URL:-https://api.510168.xyz}/v1/jobs/{job_id}/result" 
 
 ## 🏆 辩论选股（高级工具）
 
-除单只股票分析外，项目还提供**多轮辩论选股系统**，从全 A 股 Top100 中通过四轮交互式辩论筛选至 10 只推荐：
+除单只股票分析外，项目还提供 **v5 辩论选股系统**（LangGraph 7阶段），从 V3 Top50 通过增量信息采集→hybrid海选→claim驱动辩论筛选至 TOP10：
 
 ```bash
 cd /path/to/J-TradingAgents
-uv run python3 run_debate_picker.py
+uv run python3 debate_picker_v5.py --top-n 50
 ```
 
-**辩论流程**：Top100 → 辩论1(50) → 辩论2(30) → 辩论3(20) → 辩论4(10)
-
-每只股票经历：
-1. 🐂 Bull 陈述核心论据（基本面+世界知识+技术+估值）
-2. 🐻 Bear 反驳（语义对立+数据优势反驳+权重衰减）
-3. 🐻 Bear 陈述看空论据
-4. 🐂 Bull 反驳
-5. 投降检查（核心压制/连续被反驳/信息缺失/权重碾压）
-6. ⚖️ Judge 裁决
-
-**特色**：
-- 世界知识深度引用：区分真实业务数据(权重7)与模板填充(权重1)
-- 投降机制：当一方论据被完全压制时可选择投降
-- 10日验证：选股后自动计算10交易日收益
+详见 debate-picker skill（`skills/debate-picker/SKILL.md`）。

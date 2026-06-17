@@ -34,11 +34,10 @@ tags:
 
 | 指标 | 数量 |
 |:---|:---|
-| 原始帖子 | 211 条 |
-| 已提取结构化知识 | 198 条 |
-| 行业知识库 | 676 条 |
-| 通用知识库 | 207 条 |
-| 每日复盘索引 | 207 条 |
+| 原始帖子 | 213 条 |
+| 行业知识库 | 682 条 |
+| 通用知识库 | 209 条 |
+| 每日复盘索引 | 209 条 |
 | 覆盖时间范围 | 2026-04-01 ~ 2026-06-15 |
 
 ## 五层架构
@@ -88,56 +87,48 @@ L5. Service    ─ 知识服务层 (API + 检索 + 回测接口)
 ## 核心脚本
 
 ```bash
-# 全量采集 (指定日期范围)
 cd /path/to/J-TradingAgents
-uv run python3 run_research_pipeline.py --step collect --from 2026-04-01 --to 2026-06-15
 
-# 增量采集 (仅拉取新帖子)
-uv run python3 run_research_pipeline.py --step collect --incremental
+# ★ 日常增量更新 (推荐, 采集+提取+注入三合一)
+uv run python3 run_daily_update.py              # 全流程
+uv run python3 run_daily_update.py --step 1     # 仅采集
+uv run python3 run_daily_update.py --step 2     # 仅提取
+uv run python3 run_daily_update.py --step 3     # 仅注入fundamentals
 
-# 知识提取 (处理未处理的帖子)
-uv run python3 run_research_pipeline.py --step extract
-
-# 全流程 (采集+清洗+提取+存储)
-uv run python3 run_research_pipeline.py --step all
+# 一次性全量历史回填 (首次部署)
+uv run python3 run_research_pipeline.py
 ```
 
-## 知识检索 (Python API)
+> 详细的 --step 用法见 research-daily-update skill。
 
-```python
-from tradingagents.research.service import ResearchService
+## 知识检索 (CLI)
 
-service = ResearchService(db_path='research.db')
+```bash
+# 统计概览
+uv run python3 skills/research-knowledge/scripts/query.py stats
 
 # 按行业检索
-results = service.query_sector('半导体')
-
-# 按日期检索
-results = service.query_date('2026-06-15')
+uv run python3 skills/research-knowledge/scripts/query.py sector 半导体
 
 # 按个股检索
-results = service.query_stock('立昂微')
+uv run python3 skills/research-knowledge/scripts/query.py stock 立昂微
 
-# 获取每日复盘
-review = service.get_daily_review('2026-06-15')
-
-# 历史快照 (回测用)
-snapshot = service.snapshot(as_of='2026-05-01')
+# 按日期检索
+uv run python3 skills/research-knowledge/scripts/query.py date 2026-06-15
 ```
 
 ## 增量更新机制
 
 1. **基于时间戳** — Collector 记录上次采集时间，仅拉取新帖子
-2. **基于 raw_text_hash** — 检测内容变更，避免重复处理
-3. **is_processed 标记** — 跟踪每条帖子的处理状态
-4. **更新日志** — 记录每次更新的内容、时间和影响范围
+2. **is_processed 标记** — 跟踪每条帖子的处理状态
+3. **更新日志** — `update_log` 表记录每次更新的内容、时间和影响范围
 
 ## 回测支持
 
-- **历史快照** — `Service.snapshot(as_of='2026-05-01')` 获取指定时间点的知识状态
-- **回测接口** — 选股系统可基于历史知识状态进行模拟测试
-- **结果对比** — 不同时间点的知识快照可进行差异对比
-- **生产隔离** — 回测过程不影响生产环境数据
+- **历史时间过滤** — `consumer.py` 的各查询接口支持 `cutoff_date` 参数，可按历史时间点过滤知识（回测时只取该日前的研报，避免未来函数）
+- **回测接口** — 选股系统 `debate_picker_v5.py` 可基于 `--date` 指定历史日期，配合 `cutoff_date` 走回测模式（仅用本地缓存数据）
+- **生产隔离** — 回测只读 research.db，不影响生产环境数据
+- ⚠️ `knowledge_snapshots` 表当前为空（快照机制未启用），历史回测靠 `cutoff_date` 时间过滤实现
 
 ## 与选股系统集成
 
@@ -147,10 +138,12 @@ snapshot = service.snapshot(as_of='2026-05-01')
 V3 基本面评分 + essence精华
   │
   ▼
-研报知识系统 (ResearchService)
-  │  query_sector() → 行业观点/逻辑链条/关键数据
-  │  query_stock()  → 个股提及/情绪/理由
-  │  query_date()   → 每日复盘信息
+研报知识系统 (consumer.py)
+  │  get_stock_research_signal()  → 个股研报信号 (辩论+增量)
+  │  get_industry_research_brief()→ 板块研报摘要 (基本面生成注入)
+  │  get_sector_momentum()        → 行业研报动量 (分析师+轮动)
+  │  get_dark_horse_stocks()      → 研报黑马 (海选保送)
+  │  get_research_risk_signals()  → 研报风险 (海选排雷)
   ▼
 辩论选股系统 (debate_picker_v5.py)
   │  三分析师报告注入研报知识
@@ -163,22 +156,22 @@ V3 基本面评分 + essence精华
 
 ```sql
 -- 原始帖子
-raw_feeds (feed_id, text, title, created_at, author_name, is_processed, raw_text_hash)
+raw_feeds (feed_id, community_id, author_id, author_name, title, content, text, created_at, fetched_at, updated_at, is_processed, version)
 
 -- 行业知识库
-sector_knowledge (feed_id, sector, viewpoint, logic_chain, sentiment, key_data, created_at)
+sector_knowledge (id, feed_id, sector, viewpoint, logic_chain, sentiment, key_data, created_at, inserted_at, raw_hash)
 
 -- 通用知识库
-general_knowledge (feed_id, info_type, summary, market_overview, key_insights, risk_warnings, stock_mentions, created_at)
+general_knowledge (id, feed_id, info_type, summary, market_overview, key_insights, risk_warnings, stock_mentions, created_at, inserted_at, raw_hash)
 
 -- 每日复盘索引
-daily_review (trade_date, feed_id, info_type, summary, sectors)
+daily_review (id, trade_date, feed_id, info_type, summary, sectors, inserted_at)
 
--- 知识快照 (回测)
-knowledge_snapshots (snapshot_date, table_name, data_json, created_at)
+-- 知识快照 (回测, 当前未启用)
+knowledge_snapshots (id, snap_date, snap_type, sector_json, general_json, feed_count, created_at)
 
 -- 更新日志
-update_logs (update_time, records_added, records_updated, details)
+update_log (id, run_at, new_count, update_count, error_count, last_feed_id, last_created_at, detail)
 ```
 
 ## 信息类型分类
