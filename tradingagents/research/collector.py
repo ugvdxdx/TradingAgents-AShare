@@ -54,6 +54,7 @@ class ResearchCollector:
             import sqlite3
             self._db = sqlite3.connect(self.db_path)
             self._db.row_factory = sqlite3.Row
+            self._db.execute('PRAGMA journal_mode=WAL')
             self._init_tables()
         return self._db
 
@@ -84,6 +85,7 @@ class ResearchCollector:
                 error_count INTEGER DEFAULT 0,
                 last_feed_id TEXT,
                 last_created_at TEXT,
+                cookie_expired INTEGER DEFAULT 0,
                 detail      TEXT
             );
 
@@ -92,6 +94,11 @@ class ResearchCollector:
             CREATE INDEX IF NOT EXISTS idx_raw_feeds_processed
                 ON raw_feeds(is_processed);
         """)
+        # 增量加列: 兼容旧库 (cookie_expired 可能不存在)
+        try:
+            db.execute("ALTER TABLE update_log ADD COLUMN cookie_expired INTEGER DEFAULT 0")
+        except Exception:
+            pass  # 列已存在
         db.commit()
 
     # ── API 请求 ─────────────────────────────────────────
@@ -174,6 +181,7 @@ class ResearchCollector:
         last_feed_id = None
         last_created_at = None
         empty_streak = 0
+        cookie_expired = False
         date_from_dt = date_from + ' 00:00:00' if date_from else ''
         date_to_dt = date_to + ' 23:59:59' if date_to else ''
         cursor = ''  # cursor 分页
@@ -196,6 +204,7 @@ class ResearchCollector:
                 print(f'  [Collector] API错误 page={page_num}: code={code} msg={msg}')
                 if code == 23:
                     print('  [Collector] Cookie已过期，请重新获取')
+                    cookie_expired = True
                     break
                 time.sleep(1)
                 continue
@@ -291,9 +300,9 @@ class ResearchCollector:
 
         # 记录更新日志
         db.execute("""
-            INSERT INTO update_log (new_count, update_count, error_count, last_feed_id, last_created_at)
-            VALUES (?, ?, ?, ?, ?)
-        """, (new_count, update_count, error_count, last_feed_id, last_created_at))
+            INSERT INTO update_log (new_count, update_count, error_count, last_feed_id, last_created_at, cookie_expired)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (new_count, update_count, error_count, last_feed_id, last_created_at, 1 if cookie_expired else 0))
         db.commit()
 
         return {
@@ -301,23 +310,51 @@ class ResearchCollector:
             'updated': update_count,
             'errors': error_count,
             'last_created_at': last_created_at,
+            'cookie_expired': cookie_expired,
         }
 
-    def get_unprocessed(self, limit: int = 100) -> List[Dict]:
-        """获取未处理的帖子。"""
+    def get_unprocessed(self, limit: int = 100, include_failed: bool = False) -> List[Dict]:
+        """获取未处理的帖子。
+
+        Args:
+            limit: 最多返回条数
+            include_failed: True=同时包含提取失败(is_processed=2)的帖子, 用于重试;
+                            False=只返回未处理(is_processed=0)的帖子
+        """
         db = self._get_db()
-        rows = db.execute("""
-            SELECT feed_id, community_id, author_name, title, text, created_at
-            FROM raw_feeds WHERE is_processed = 0
-            ORDER BY created_at DESC LIMIT ?
-        """, (limit,)).fetchall()
+        if include_failed:
+            rows = db.execute("""
+                SELECT feed_id, community_id, author_name, title, text, created_at
+                FROM raw_feeds WHERE is_processed IN (0, 2)
+                ORDER BY created_at DESC LIMIT ?
+            """, (limit,)).fetchall()
+        else:
+            rows = db.execute("""
+                SELECT feed_id, community_id, author_name, title, text, created_at
+                FROM raw_feeds WHERE is_processed = 0
+                ORDER BY created_at DESC LIMIT ?
+            """, (limit,)).fetchall()
         return [dict(r) for r in rows]
 
     def mark_processed(self, feed_ids: List[str]):
-        """标记帖子为已处理。"""
+        """标记帖子为已处理成功 (is_processed=1)。"""
         db = self._get_db()
         db.executemany(
             'UPDATE raw_feeds SET is_processed = 1 WHERE feed_id = ?',
+            [(fid,) for fid in feed_ids]
+        )
+        db.commit()
+
+    def mark_failed(self, feed_ids: List[str]):
+        """标记帖子为提取失败 (is_processed=2), 可后续重试。
+
+        与 mark_processed 区分: 失败的帖子不会被 get_unprocessed(默认) 捞起,
+        但可通过 get_unprocessed(include_failed=True) 或 --retry-failed 重试,
+        避免永久丢失且不会阻塞增量流程。
+        """
+        db = self._get_db()
+        db.executemany(
+            'UPDATE raw_feeds SET is_processed = 2 WHERE feed_id = ?',
             [(fid,) for fid in feed_ids]
         )
         db.commit()

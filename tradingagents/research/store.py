@@ -338,6 +338,29 @@ class KnowledgeStore:
         ).fetchone()
         return {'min_date': row['min_date'], 'max_date': row['max_date']}
 
+    def query_knowledge_until(self, date: str) -> Dict[str, List[Dict]]:
+        """查询指定日期及之前的全部知识 (公开接口, 用于回测)。
+
+        替代 service.py 中直接访问 _get_db() 的反模式。
+        返回截至 date 23:59:59 的 sector + general 知识, 按时间倒序。
+        """
+        db = self._get_db()
+        general_rows = db.execute("""
+            SELECT * FROM general_knowledge
+            WHERE created_at <= ? || ' 23:59:59'
+            ORDER BY created_at DESC
+        """, (date,)).fetchall()
+        sector_rows = db.execute("""
+            SELECT * FROM sector_knowledge
+            WHERE created_at <= ? || ' 23:59:59'
+            ORDER BY created_at DESC
+        """, (date,)).fetchall()
+        return {
+            'sector_knowledge': [dict(r) for r in sector_rows],
+            'general_knowledge': [dict(r) for r in general_rows],
+            'feed_count': len(general_rows),
+        }
+
     def stats(self) -> Dict:
         """获取知识库统计信息。"""
         db = self._get_db()

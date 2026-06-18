@@ -8,6 +8,7 @@
   uv run python3 _gen_top500_fundamentals.py --dry-run          # 只打印要生成的列表
   uv run python3 _gen_top500_fundamentals.py --force            # 强制重新生成（覆盖已有文件）
   uv run python3 _gen_top500_fundamentals.py --start-from 600019  # 从指定代码开始（跳过之前的）
+  uv run python3 _gen_top500_fundamentals.py --force --workers 4  # 并行4线程 (LLM为IO密集, 适合线程池)
 """
 import json
 import os
@@ -15,6 +16,8 @@ import re
 import sys
 import time
 import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 
@@ -25,6 +28,9 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 FUNDAMENTALS_DIR = os.path.join(SCRIPT_DIR, "fundamentals")
 WORLD_KNOWLEDGE_FILE = os.path.join(SCRIPT_DIR, "_world_knowledge_2026_06.md")
 TOP500_FILE = os.path.join(SCRIPT_DIR, "_top500_and_leaders.txt")
+
+# 并行写 _top500_and_leaders.txt (mark_stock_done) 的文件锁
+_DONE_LOCK = threading.Lock()
 
 
 # ========== 解析 _top500_and_leaders.txt ==========
@@ -60,24 +66,28 @@ def parse_top500_file(filepath: str) -> List[Dict]:
 
 
 def mark_stock_done(filepath: str, code: str) -> bool:
-    """在 _top500_and_leaders.txt 中标记某股票为 [DONE]"""
-    with open(filepath, "r", encoding="utf-8") as f:
-        content = f.read()
-    
-    # 查找该股票的行，在行尾添加 [DONE]
-    # 匹配: 代码 名称 ... (市值) 后面没有 [DONE] 的情况
-    pattern = rf'({code}\s+\S+\s+\S+\s+\(\s*\d+亿\))\s*$'
-    replacement = rf'\1 [DONE]'
-    
-    new_content, count = re.subn(pattern, replacement, content, flags=re.MULTILINE)
-    
-    if count > 0:
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(new_content)
-        return True
-    else:
-        # 可能已经有 [DONE] 了
-        return False
+    """在 _top500_and_leaders.txt 中标记某股票为 [DONE]
+
+    并行安全: 用全局 _DONE_LOCK 保护读-改-写操作。
+    """
+    with _DONE_LOCK:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # 查找该股票的行，在行尾添加 [DONE]
+        # 匹配: 代码 名称 ... (市值) 后面没有 [DONE] 的情况
+        pattern = rf'({code}\s+\S+\s+\S+\s+\(\s*\d+亿\))\s*$'
+        replacement = rf'\1 [DONE]'
+
+        new_content, count = re.subn(pattern, replacement, content, flags=re.MULTILINE)
+
+        if count > 0:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(new_content)
+            return True
+        else:
+            # 可能已经有 [DONE] 了
+            return False
 
 
 # ========== 加载世界知识 ==========
@@ -581,6 +591,7 @@ def main():
     dry_run = False
     start_from = None
     fh_only = False
+    workers = 1
 
     i = 1
     while i < len(sys.argv):
@@ -606,6 +617,11 @@ def main():
             start_from = sys.argv[i]
         elif arg.startswith("--start-from="):
             start_from = arg.split("=", 1)[1]
+        elif arg in ("--workers", "-w") and i + 1 < len(sys.argv):
+            i += 1
+            workers = max(1, int(sys.argv[i]))
+        elif arg.startswith("--workers="):
+            workers = max(1, int(arg.split("=", 1)[1]))
         i += 1
 
     # ── fh-only: 只刷新已有 fundamentals 的 financial_health 部分 (慢层增量更新) ──
@@ -685,46 +701,73 @@ def main():
         need_generate = need_generate[:count]
         logger.info(f"限制生成数量: {count}")
 
-    # 逐个生成
+    # 逐个生成 (串行 / 并行)
     success = 0
     fail = 0
     start_time = time.time()
+    n_total = len(need_generate)
 
-    for i, stock in enumerate(need_generate):
+    # 单只生成的 worker 函数 (无共享状态, 线程安全)
+    def _gen(stock):
         code = stock["code"]
         name = stock["name"]
         industry = stock["industry"]
         mcap_yi = stock["mcap_yi"]
+        data = generate_one(code, name, industry, mcap_yi, world_knowledge, reference)
+        if data:
+            # 写入 JSON 文件 (按 code 隔离, 无冲突)
+            path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            mark_stock_done(TOP500_FILE, code)  # 内部有 _DONE_LOCK
+        return code, name, data
 
-        elapsed = time.time() - start_time
-        avg = elapsed / (success + fail) if (success + fail) > 0 else 0
-        remaining = (len(need_generate) - i) * avg
-        logger.info(f"[{i+1}/{len(need_generate)}] {code} {name:10s} {industry:10s} ({mcap_yi}亿) | "
-                     f"成功:{success} 失败:{fail} | 预计剩余:{remaining/60:.1f}min")
-
-        try:
-            data = generate_one(code, name, industry, mcap_yi,
-                                world_knowledge, reference)
-            if data:
-                # 写入 JSON 文件
-                path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
-                with open(path, "w", encoding="utf-8") as f:
-                    json.dump(data, f, ensure_ascii=False, indent=2)
-                
-                # 在 _top500_and_leaders.txt 中标记 [DONE]
-                mark_stock_done(TOP500_FILE, code)
-                
-                success += 1
-                logger.info(f"  ✓ {code} {name} 已生成并标记 [DONE]")
-            else:
+    if workers <= 1:
+        # ── 串行模式 (原逻辑) ──
+        for i, stock in enumerate(need_generate):
+            code = stock["code"]; name = stock["name"]
+            elapsed = time.time() - start_time
+            avg = elapsed / (success + fail) if (success + fail) > 0 else 0
+            remaining = (n_total - i) * avg
+            logger.info(f"[{i+1}/{n_total}] {code} {name:10s} | "
+                        f"成功:{success} 失败:{fail} | 预计剩余:{remaining/60:.1f}min")
+            try:
+                _, _, data = _gen(stock)
+                if data:
+                    success += 1
+                    logger.info(f"  ✓ {code} {name} 已生成并标记 [DONE]")
+                else:
+                    fail += 1
+                    logger.warning(f"  ✗ {code} {name} 生成失败")
+            except Exception as e:
                 fail += 1
-                logger.warning(f"  ✗ {code} {name} 生成失败")
-        except Exception as e:
-            fail += 1
-            logger.error(f"  ✗ {code} {name} 异常: {e}")
-
-        # 限速
-        time.sleep(0.5)
+                logger.error(f"  ✗ {code} {name} 异常: {e}")
+            time.sleep(0.5)
+    else:
+        # ── 并行模式 (ThreadPoolExecutor, LLM 为 IO 密集) ──
+        logger.info(f"并行模式: {workers} workers")
+        done_cnt = 0
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(_gen, s): s for s in need_generate}
+            for fut in as_completed(futures):
+                stock = futures[fut]
+                code = stock["code"]; name = stock["name"]
+                done_cnt += 1
+                elapsed = time.time() - start_time
+                avg = elapsed / done_cnt
+                remaining = (n_total - done_cnt) * avg / workers
+                try:
+                    _, _, data = fut.result()
+                    if data:
+                        success += 1
+                        logger.info(f"[{done_cnt}/{n_total}] ✓ {code} {name:10s} | "
+                                    f"成功:{success} 失败:{fail} | 预计剩余:{remaining/60:.1f}min")
+                    else:
+                        fail += 1
+                        logger.warning(f"[{done_cnt}/{n_total}] ✗ {code} {name:10s} 生成失败")
+                except Exception as e:
+                    fail += 1
+                    logger.error(f"[{done_cnt}/{n_total}] ✗ {code} {name:10s} 异常: {e}")
 
     elapsed = time.time() - start_time
     logger.info(f"\n=== 完成 ===")

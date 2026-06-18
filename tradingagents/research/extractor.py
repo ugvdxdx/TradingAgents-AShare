@@ -18,6 +18,10 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .normalize import (
+    normalize_info_type, normalize_sentiment, normalize_sector,
+)
+
 # 确保独立运行时也能读到 .env
 try:
     from dotenv import load_dotenv
@@ -99,11 +103,12 @@ EXTRACT_PROMPT = """你是一个金融研报知识提取专家。请从以下帖
 ```
 
 注意:
-1. sector 名称从以下选取: AI芯片, 光通信, 半导体设备, 半导体材料, 封装, AI应用, 存储, PCB, 新能源, 汽车, 医药, 消费, 其他
-2. stock_mentions 只提取明确提及的公司，不要推测
-3. sentiment 严格三选一: bullish/bearish/neutral
-4. key_insights 提取最有价值的投资逻辑，不超过5条
-5. 如果文本不含某类信息，对应字段留空数组或空字符串"""
+1. sector 必须从以下标准赛道中选取: 光通信/AI算力, AI芯片, PCB/CCL, 先进封装, 存储/HBM, AI电源/散热, AI用铜/连接, 半导体设备/材料, 战略金属, 机器人/物理AI, 固态电池, 商业航天, 创新药, MLCC/被动元件, 消费电子, 电力/电网, 锂电/新能源, 贵金属/有色, AI应用, 军工, 油气煤炭, 化工, 大金融, 农业, 交运/海运, 消费/互联网, 其他
+2. info_type 必须是以下之一: pre_market(盘前) / intraday(盘中) / post_market(盘后) / research(研报) / announcement(公告) / general(通用)
+3. stock_mentions 只提取明确提及的公司，不要推测
+4. sentiment 严格三选一: bullish / bearish / neutral (不要用 positive/negative)
+5. key_insights 提取最有价值的投资逻辑，不超过5条
+6. 如果文本不含某类信息，对应字段留空数组或空字符串"""
 
 
 class KnowledgeExtractor:
@@ -154,7 +159,7 @@ class KnowledgeExtractor:
         info_type = cleaned_feed.info_type.value if hasattr(cleaned_feed.info_type, 'value') else str(cleaned_feed.info_type)
 
         # 短文本直接用规则提取，不调 LLM
-        if len(text) < 50:
+        if len(text) < 30:
             return self._rule_based_extract(cleaned_feed)
 
         # 调用 LLM 提取
@@ -185,6 +190,9 @@ class KnowledgeExtractor:
         import hashlib
         raw_hash = hashlib.md5(text.encode()).hexdigest()[:12]
 
+        # 落库前归一化 (info_type/sentiment/sector 全部清洗到白名单)
+        parsed = self._normalize_parsed(parsed)
+
         return StructuredKnowledge(
             feed_id=cleaned_feed.feed_id,
             info_type=info_type,
@@ -200,6 +208,47 @@ class KnowledgeExtractor:
     def extract_batch(self, cleaned_feeds) -> List[StructuredKnowledge]:
         """批量提取。"""
         return [self.extract(cf) for cf in cleaned_feeds]
+
+    # ── 归一化辅助 ─────────────────────────────────────────
+
+    @staticmethod
+    def _normalize_parsed(parsed: Dict) -> Dict:
+        """对 LLM/规则提取结果做落库前归一化。
+
+        确保入库的 info_type/sentiment/sector 全部在白名单内,
+        避免碎片化标签污染下游聚合统计。
+        """
+        if not isinstance(parsed, dict):
+            return {}
+
+        # info_type 归一化
+        if 'info_type' in parsed:
+            parsed['info_type'] = normalize_info_type(parsed['info_type'])
+
+        # sector_views 归一化 (sentiment + sector)
+        norm_sectors = []
+        seen_sectors = set()
+        for sv in parsed.get('sector_views', []):
+            if not isinstance(sv, dict):
+                continue
+            sector = normalize_sector(sv.get('sector', ''))
+            if not sector:  # 跳过太泛/非行业标签
+                continue
+            # 同一帖内重复的 sector 去重
+            if sector in seen_sectors:
+                continue
+            seen_sectors.add(sector)
+            sv['sector'] = sector
+            sv['sentiment'] = normalize_sentiment(sv.get('sentiment', 'neutral'))
+            norm_sectors.append(sv)
+        parsed['sector_views'] = norm_sectors
+
+        # stock_mentions 归一化 (sentiment)
+        for sm in parsed.get('stock_mentions', []):
+            if isinstance(sm, dict):
+                sm['sentiment'] = normalize_sentiment(sm.get('sentiment', 'neutral'))
+
+        return parsed
 
     # ── 解析辅助 ─────────────────────────────────────────
 
@@ -236,6 +285,9 @@ class KnowledgeExtractor:
 
         import hashlib
         raw_hash = hashlib.md5(text.encode()).hexdigest()[:12]
+
+        # 落库前归一化 (与 LLM 路径一致)
+        parsed = KnowledgeExtractor._normalize_parsed(parsed)
 
         return StructuredKnowledge(
             feed_id=cleaned_feed.feed_id,

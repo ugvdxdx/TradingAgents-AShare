@@ -1,47 +1,69 @@
 #!/usr/bin/env python3
-"""全量采集 4月1日-6月15日 小鹅通圈子数据，并执行 LLM 知识提取。"""
-import json, os, sys, time
+"""采集圈子数据并执行 LLM 知识提取 (全量/增量均可)。
+
+变更要点 (vs 旧版):
+  - Cookie 改从环境变量 XIAOE_COOKIE 读取, 不再硬编码进源码
+  - date_from/date_to 默认动态计算 (近 90 天 ~ 今天), 不再写死日期
+  - 提取失败的帖子标记 is_processed=2 (而非永久跳过), 可用 --retry-failed 重试
+  - Cookie 过期时以非零退出码退出, 便于 cron/调度感知
+
+使用:
+  uv run python3 run_research_pipeline.py                 # 默认: 近90天全量采集+提取
+  uv run python3 run_research_pipeline.py --step 2        # 只跑提取
+  uv run python3 run_research_pipeline.py --retry-failed  # 重试提取失败的帖子
+  uv run python3 run_research_pipeline.py --from 2026-04-01 --to 2026-06-15
+"""
+import os
+import sys
+from datetime import datetime, timedelta
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except Exception:
+    pass
 
 from tradingagents.research.collector import ResearchCollector
 from tradingagents.research.cleaner import ResearchCleaner
 from tradingagents.research.extractor import KnowledgeExtractor
 from tradingagents.research.store import KnowledgeStore
 
-# Cookie (从用户提供的 cURL 中提取)
-COOKIE = (
-    'sensorsdata2015jssdkcross=%7B%22%24device_id%22%3A%2219ecb3aed7c132c-04d46ebd3def7c-'
-    '7e433c49-2073600-19ecb3aed7d212%22%7D; app_id=appv5zuapfz7716; '
-    'activity_id=appv5zuapfz7716-c_62a95f0db904a_yYyOAuyh3445; '
-    'last_created_token_app_id=appv5zuapfz7716; '
-    'pc_token_appv5zuapfz7716=6b3535c4136351bbe4313ed547d8e815; '
-    'user_id_appv5zuapfz7716=u_6a2febec326f6_forCo1x2NO; '
-    'union_id=oTHW5v8aXlUQ_ZGErBxa4ut-gR9g; '
-    'sa_jssdk_2015_quanzi_xiaoe-tech_com=%7B%22distinct_id%22%3A%2219ecb3aed7c132c-'
-    '04d46ebd3def7c-7e433c49-2073600-19ecb3aed7d212%22%2C%22first_id%22%3A%22%22%2C'
-    '%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81'
-    '%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_'
-    '%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%7D'
-)
-
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'research.db')
 
-def step1_collect():
+
+def get_cookie():
+    """从环境变量读取 Cookie, 缺失则报错退出。"""
+    cookie = os.getenv('XIAOE_COOKIE', '').strip()
+    if not cookie:
+        print('✗ 未设置环境变量 XIAOE_COOKIE, 请在 .env 中配置后重试。')
+        sys.exit(2)
+    return cookie
+
+
+def step1_collect(cookie, date_from, date_to):
     """Step 1: 采集原始数据"""
     print('=' * 60)
-    print('Step 1: 采集 2026-04-01 ~ 2026-06-15 圈子数据')
+    print(f'Step 1: 采集 {date_from} ~ {date_to} 圈子数据')
     print('=' * 60)
 
     collector = ResearchCollector(db_path=DB_PATH)
     result = collector.collect(
-        cookie=COOKIE,
+        cookie=cookie,
         max_pages=500,
         incremental=False,
-        date_from='2026-04-01',
-        date_to='2026-06-15',
+        date_from=date_from,
+        date_to=date_to,
     )
     print(f'\n采集完成: new={result["new"]}, updated={result["updated"]}, errors={result["errors"]}')
     print(f'最新帖子时间: {result.get("last_created_at", "N/A")}')
+
+    # Cookie 过期感知
+    if result.get('cookie_expired'):
+        print('✗ Cookie 已过期, 请重新获取 XIAOE_COOKIE 后重试。')
+        collector.close()
+        sys.exit(3)
 
     # 查看统计
     db = collector._get_db()
@@ -53,10 +75,15 @@ def step1_collect():
     collector.close()
     return result
 
-def step2_extract():
-    """Step 2: 清洗 + LLM 知识提取 + 存储"""
+
+def step2_extract(retry_failed=False):
+    """Step 2: 清洗 + LLM 知识提取 + 存储
+
+    Args:
+        retry_failed: True=只重试提取失败的帖子(is_processed=2)
+    """
     print('\n' + '=' * 60)
-    print('Step 2: 清洗 + LLM 知识提取 + 存储')
+    print(f'Step 2: 清洗 + LLM 知识提取 + 存储{" (重试失败态)" if retry_failed else ""}')
     print('=' * 60)
 
     collector = ResearchCollector(db_path=DB_PATH)
@@ -64,17 +91,31 @@ def step2_extract():
     extractor = KnowledgeExtractor()
     store = KnowledgeStore(db_path=DB_PATH)
 
-    # 获取所有未处理的帖子
+    # 获取待处理帖子: 失败重试模式只取 is_processed=2, 否则取 is_processed=0
     db = collector._get_db()
-    rows = db.execute("""
-        SELECT feed_id, text, title, created_at, author_name
-        FROM raw_feeds
-        WHERE is_processed = 0 AND text IS NOT NULL AND length(text) > 10
-        ORDER BY created_at ASC
-    """).fetchall()
+    if retry_failed:
+        rows = db.execute("""
+            SELECT feed_id, text, title, created_at, author_name
+            FROM raw_feeds
+            WHERE is_processed = 2 AND text IS NOT NULL AND length(text) > 10
+            ORDER BY created_at ASC
+        """).fetchall()
+    else:
+        rows = db.execute("""
+            SELECT feed_id, text, title, created_at, author_name
+            FROM raw_feeds
+            WHERE is_processed = 0 AND text IS NOT NULL AND length(text) > 10
+            ORDER BY created_at ASC
+        """).fetchall()
 
     total = len(rows)
     print(f'待处理帖子: {total} 条')
+
+    if total == 0:
+        print('无需处理')
+        collector.close()
+        store.close()
+        return
 
     success = 0
     fail = 0
@@ -88,7 +129,7 @@ def step2_extract():
             knowledge.created_at = cleaned.created_at
             # 存储
             store.save(knowledge)
-            # 标记已处理
+            # 标记成功
             db.execute('UPDATE raw_feeds SET is_processed = 1 WHERE feed_id = ?', (raw['feed_id'],))
             db.commit()
             success += 1
@@ -97,8 +138,8 @@ def step2_extract():
         except Exception as e:
             fail += 1
             print(f'  [{i+1}/{total}] 失败: {raw["feed_id"]} - {e}')
-            # 标记为已处理避免重复
-            db.execute('UPDATE raw_feeds SET is_processed = 1 WHERE feed_id = ?', (raw['feed_id'],))
+            # 标记为失败态(is_processed=2), 可后续重试, 不再永久跳过
+            db.execute('UPDATE raw_feeds SET is_processed = 2 WHERE feed_id = ?', (raw['feed_id'],))
             db.commit()
 
     print(f'\n提取完成: success={success}, fail={fail}')
@@ -114,6 +155,7 @@ def step2_extract():
 
     collector.close()
     store.close()
+
 
 def step3_verify():
     """Step 3: 验证知识库完整性"""
@@ -163,15 +205,26 @@ def step3_verify():
 
     store.close()
 
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--step', type=int, default=0, help='1=采集, 2=提取, 3=验证, 0=全部')
+    parser.add_argument('--retry-failed', action='store_true', help='重试提取失败的帖子 (仅对 step 2 生效)')
+    parser.add_argument('--from', dest='date_from', default='', help='起始日期 YYYY-MM-DD (默认近90天)')
+    parser.add_argument('--to', dest='date_to', default='', help='结束日期 YYYY-MM-DD (默认今天)')
     args = parser.parse_args()
 
+    # 动态默认日期: 近 90 天 ~ 今天
+    today = datetime.now().strftime('%Y-%m-%d')
+    default_from = (datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')
+    date_from = args.date_from or default_from
+    date_to = args.date_to or today
+
     if args.step == 0 or args.step == 1:
-        step1_collect()
+        cookie = get_cookie()
+        step1_collect(cookie, date_from, date_to)
     if args.step == 0 or args.step == 2:
-        step2_extract()
+        step2_extract(retry_failed=args.retry_failed)
     if args.step == 0 or args.step == 3:
         step3_verify()
