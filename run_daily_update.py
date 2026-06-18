@@ -205,7 +205,7 @@ def step3_update_fundamentals(date_from_recent):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--step', type=int, default=0, help='1=采集, 2=提取, 3=更新fundamentals, 0=全部')
+    parser.add_argument('--step', type=int, default=0, help='1=采集, 2=提取, 3=更新fundamentals, 4=更新世界知识, 0=全部')
     parser.add_argument('--from', dest='date_from', default='', help='采集起始日期 YYYY-MM-DD (默认近3天)')
     parser.add_argument('--to', dest='date_to', default='', help='采集结束日期 YYYY-MM-DD (默认今天)')
     args = parser.parse_args()
@@ -223,3 +223,12 @@ if __name__ == '__main__':
         step2_extract()
     if args.step == 0 or args.step == 3:
         step3_update_fundamentals(date_from_recent=date_from)
+    if args.step == 0 or args.step == 4:
+        print('\n' + '=' * 60)
+        print('Step 4: 更新世界知识 (宏观 .md + 热门个股)')
+        print('=' * 60)
+        try:
+            from update_world_knowledge import main as update_wk
+            update_wk()
+        except Exception as e:
+            print(f'  ⚠ 世界知识更新失败 (不影响主流程): {e}')

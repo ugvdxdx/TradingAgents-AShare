@@ -26,6 +26,162 @@ MF_CACHE_DIR = os.path.join(ROOT, ".mf_cache")
 # 强制纳入候选池的股票 (无论 V3 排名如何, 均参与辩论排序)
 FORCE_INCLUDE_CODES: List[str] = ["001309", "600522"]
 
+# 新晋股归因缓存路径 (scan_mispriced.py 产出)
+ATTR_CACHE = os.path.join(ROOT, ".mispriced_attribution_cache.json")
+# 新晋股保送上限 (避免过多冲淡候选池, 但要覆盖主要热点板块)
+MAX_RISING_STAR_INCLUDE = 15
+
+
+def _rising_star_trend_ok(code: str) -> bool:
+    """检查新晋股当前量价趋势是否仍支持 (趋势完整性三条件取一)。
+
+    防止已暴跌的过期归因股被保送进候选池。
+    """
+    try:
+        df = _read_kline_raw(code)
+        if df is None or len(df) < 21:
+            return True  # K线不足, 不拦截
+        df = df.sort_values("trade_date").reset_index(drop=True)
+        close = df["close"]
+        last, ma5, ma20 = close.iloc[-1], close.iloc[-5:].mean(), close.iloc[-20:].mean()
+        high20, low20 = close.iloc[-20:].max(), close.iloc[-20:].min()
+        # 三条件取一: 均线多头 / 高位区间 / 未创新低
+        return (ma5 >= ma20 * 0.97) or (last >= high20 * 0.80) or (last >= low20 * 1.05)
+    except Exception:
+        return True
+
+
+def _load_rising_stars() -> List[Dict[str, Any]]:
+    """从归因缓存加载量价新晋股 (板块供需型), 保送进入候选池。
+
+    排序: 按近20日涨幅降序 (优先保送最强势的), 截断到 MAX_RISING_STAR_INCLUDE。
+    """
+    if not os.path.exists(ATTR_CACHE):
+        return []
+    try:
+        cache = json.load(open(ATTR_CACHE))
+    except Exception:
+        return []
+
+    from datetime import datetime, timedelta
+    cutoff = (datetime.now() - timedelta(days=14)).strftime("%Y-%m-%d")
+    candidates = []
+    for code, entry in cache.items():
+        if not entry.get("is_sector_wide"):
+            continue
+        if entry.get("cached_date", "") < cutoff:
+            continue
+        if not _rising_star_trend_ok(code):
+            continue
+        name = entry.get("name", "")
+        if not name:
+            try:
+                name = json.load(open(os.path.join(FUNDAMENTALS_DIR, f"{code}.json"))).get("name", "")
+            except Exception:
+                pass
+        # 算近20日涨幅用于排序
+        r20 = 0.0
+        try:
+            df = _read_kline_raw(code)
+            if df is not None and len(df) >= 21:
+                df = df.sort_values("trade_date").reset_index(drop=True)
+                r20 = (df["close"].iloc[-1] / df["close"].iloc[-21] - 1) * 100
+        except Exception:
+            pass
+        candidates.append((r20, code, name, entry))
+
+    candidates.sort(key=lambda x: -x[0])
+    stars = []
+    for r20, code, name, entry in candidates[:MAX_RISING_STAR_INCLUDE]:
+        stars.append({
+            "code": code,
+            "name": name,
+            "v3": 0,
+            "chain": 0, "delivery": 0, "capital": 0,
+            "brief": entry.get("summary", ""),
+            "essence": {
+                "chain_position": f"新晋股: {entry.get('sector_tag', '')}",
+                "core_catalyst": entry.get("summary", ""),
+                "biggest_bull": entry.get("summary", ""),
+                "biggest_bear": "短期涨幅过大,存在回调风险",
+                "quality_redline": "需关注业绩兑现度与估值消化",
+                "catalyst_horizon": "near",
+            },
+            "screen_reason": "量价新晋股保送",
+            "_rising_star": True,
+        })
+    return stars
+
+
+# 行业动量缓存 (避免每只股票都查一次数据库)
+_SECTOR_MOMENTUM_CACHE: Optional[dict] = None
+_KW_INDEX_CACHE = None
+
+
+def _get_sector_momentum_cached() -> dict:
+    """获取板块动量 (单次查询, 全局缓存)。"""
+    global _SECTOR_MOMENTUM_CACHE
+    if _SECTOR_MOMENTUM_CACHE is not None:
+        return _SECTOR_MOMENTUM_CACHE
+    try:
+        from tradingagents.research.consumer import get_sector_momentum
+        _SECTOR_MOMENTUM_CACHE = get_sector_momentum(days=5)
+    except Exception:
+        _SECTOR_MOMENTUM_CACHE = {}
+    return _SECTOR_MOMENTUM_CACHE
+
+
+def _get_kw_index_cached():
+    """获取板块关键词索引 (单次构建, 全局缓存)。"""
+    global _KW_INDEX_CACHE
+    if _KW_INDEX_CACHE is None:
+        try:
+            from tradingagents.research.normalize import get_sector_keyword_index
+            _KW_INDEX_CACHE = get_sector_keyword_index()
+        except Exception:
+            _KW_INDEX_CACHE = {}
+    return _KW_INDEX_CACHE
+
+
+def _compute_sector_momentum_factor(industry: str) -> float:
+    """根据个股所属行业的近5日动量, 计算调整因子 (0.90~1.10)。
+
+    热门板块加分(最高+10%), 冷门板块减分(最低-10%), 中性不变。
+    每天选股时实时计算, 叠加到 V3 基准分上。
+    """
+    try:
+        momentum = _get_sector_momentum_cached()
+        if not momentum.get("hot_sectors"):
+            return 1.0  # 无研报数据, 不调整
+
+        # 归类个股到标准板块
+        kw_index = _get_kw_index_cached()
+        best_sector, best_hits = "", 0
+        for sector, keywords in kw_index.items():
+            hits = sum(1 for kw in keywords if kw in (industry or ""))
+            if hits > best_hits:
+                best_hits, best_sector = hits, sector
+        if not best_sector:
+            return 1.0
+
+        # 热门板块 → 加分, 冷门板块 → 减分
+        hot_sectors = {s["sector"] for s in momentum.get("hot_sectors", [])}
+        cold_sectors = {s["sector"] for s in momentum.get("cold_sectors", [])}
+        emerging = {s["sector"] for s in momentum.get("emerging_sectors", [])}
+
+        if best_sector in hot_sectors:
+            # 热门度越高加分越多 (根据 hot_sectors 排名)
+            hot_list = [s["sector"] for s in momentum.get("hot_sectors", [])]
+            rank = hot_list.index(best_sector) if best_sector in hot_list else 5
+            return 1.10 - rank * 0.005  # Top1=1.10, Top2=1.095, ... 递减
+        elif best_sector in emerging:
+            return 1.05
+        elif best_sector in cold_sectors:
+            return 0.92
+        return 1.0
+    except Exception:
+        return 1.0  # 出错不调整
+
 
 def _build_stock(code: str, v: Dict[str, Any]) -> Dict[str, Any]:
     name = ""
@@ -46,13 +202,23 @@ def _build_stock(code: str, v: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def load_top_n(n: int = 50, include_codes: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+def load_top_n(n: int = 50, include_codes: Optional[List[str]] = None,
+               v3_cache: Optional[dict] = None) -> List[Dict[str, Any]]:
     """加载 V3 Top-N, 附带 essence(定性精华) + brief + name。
 
-    include_codes: 强制纳入的股票代码 (即使不在 Top-N 内), 用于人工指定关注标的。
+    三层数据来源:
+      1. V3 Top-N (按 sector_score 降序) — 季度级静态锚
+      2. 强制纳入 (FORCE_INCLUDE + include_codes)
+      3. 量价新晋股保送 (板块供需型归因, 最多15只)
+
+    行业动量调整: 加载后对每只股按所属板块近5日动量微调 V3 (±10%),
+    使每日排序反映最新行业热度。V3 本身不变。
+
+    Args:
+        v3_cache: 外部传入的 V3 cache (含 capital 动态更新), 避免读文件竞争。
+                  为 None 则从文件读取。
     """
-    with open(V3_CACHE) as f:
-        d = json.load(f)
+    d = v3_cache if v3_cache is not None else json.load(open(V3_CACHE))
     scored = [(c, v) for c, v in d.items() if "sector_score" in v]
     scored.sort(key=lambda x: -x[1]["sector_score"])
     stocks: List[Dict[str, Any]] = [_build_stock(code, v) for code, v in scored[:n]]
@@ -66,10 +232,34 @@ def load_top_n(n: int = 50, include_codes: Optional[List[str]] = None) -> List[D
             continue
         v = dmap.get(code)
         if v is None:
-            # V3 缓存里没有该股, 仍以最小信息纳入 (name 来自 fundamentals)
             v = {"sector_score": 0}
         stocks.append(_build_stock(code, v))
         present.add(code)
+
+    # 量价新晋股保送 (板块供需型归因, scan_mispriced.py 产出)
+    rising_stars = _load_rising_stars()
+    for star in rising_stars:
+        if star["code"] not in present:
+            stocks.append(star)
+            present.add(star["code"])
+
+    # 行业动量调整 (方案3: 每日实时行业动量微调 V3)
+    for s in stocks:
+        if s.get("_rising_star"):
+            continue  # 新晋股无 V3 分, 不调整
+        # 只读一次 JSON 取 industry
+        industry = ""
+        try:
+            with open(os.path.join(FUNDAMENTALS_DIR, f"{s['code']}.json")) as f:
+                fd = json.load(f)
+            industry = fd.get("industry", "") or fd.get("business_overview", {}).get("industry", "")
+        except Exception:
+            pass
+        factor = _compute_sector_momentum_factor(industry)
+        s["v3_original"] = s["v3"]
+        s["v3"] = round(s["v3"] * factor, 1)
+        s["momentum_factor"] = round(factor, 3)
+
     return stocks
 
 

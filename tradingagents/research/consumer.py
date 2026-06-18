@@ -647,15 +647,12 @@ def fmt_research_risk_signals(risks: Dict[str, Any]) -> str:
 # industry 字段常见关键词 → 板块匹配关键词
 # 用于把 fundamentals.business_overview.industry (如"元器件（印制电路板PCB）")
 # 映射到可在 sector_knowledge.sector 上 LIKE 匹配的关键词。
-_INDUSTRY_KEYWORD_MAP: Dict[str, List[str]] = {
-    "PCB/CCL": ["PCB", "印制电路板", "电路板", "覆铜板", "CCL", "电子布", "钻针"],
-    "光通信/AI算力": ["光模块", "光通信", "CPO", "光迅", "硅光", "光互联", "光纤"],
-    "AI芯片": ["AI芯片", "GPU", "ASIC", "算力芯片", "GPU"],
-    "存储/HBM": ["存储", "HBM", "存储芯片"],
-    "先进封装": ["先进封装", "CoPoS", "封装", "面板级"],
-    "AI电源/散热": ["电源", "液冷", "散热", "HVDC", "800V", "SST"],
-    "半导体设备": ["半导体设备", "光刻", "刻蚀", "薄膜"],
-}
+#
+# 自动从 normalize.py 生成 (单一真相源), 覆盖全部 27 个标准赛道。
+# 早先版本只有手写 7 个板块, 导致电子特气/MLCC/钨/铜箔/电感等 AI 上游材料
+# 无法匹配到板块研报 → 基本面生成时缺失研报上下文 → V3 chain 评分偏低。
+from .normalize import get_sector_keyword_index as _build_keyword_map
+_INDUSTRY_KEYWORD_MAP: Dict[str, List[str]] = _build_keyword_map()
 
 
 def _extract_sector_keywords(industry_text: str) -> List[str]:

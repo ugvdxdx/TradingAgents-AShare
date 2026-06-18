@@ -41,7 +41,19 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
     cutoff = state.get("cutoff_date")
     print(f"\n{'='*60}\n📡 [阶段 1/7] 数据采集 (Top{top_n})\n{'='*60}")
 
-    pool = data_io.load_top_n(top_n)
+    # ── 先更新 capital 子维度 (纯量化, 0次LLM, 几秒完成) ──
+    # 只算不写文件 (persist=False), 避免与手动跑 _v3_full_score 的文件竞争
+    # 回测模式 (cutoff_date 非空) 跳过, 避免用未来数据污染
+    v3_cache_override = None
+    if not cutoff:
+        try:
+            from _v3_full_score import update_capital
+            capital_mode = os.environ.get("CAPITAL_MODE", "D")
+            v3_cache_override = update_capital(mode=capital_mode, persist=False)
+        except Exception as e:
+            print(f"  [capital] 更新失败(不影响流程): {e}")
+
+    pool = data_io.load_top_n(top_n, v3_cache=v3_cache_override)
     mf_cache = data_io.load_mf_cache()
     print(f"  V3 Top{top_n}: {pool[0]['v3']:.1f} ~ {pool[-1]['v3']:.1f} | 资金流缓存 {len(mf_cache)} 只")
 

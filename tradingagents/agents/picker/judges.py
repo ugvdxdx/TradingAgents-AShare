@@ -343,10 +343,18 @@ def make_final_judge(llm: LLMHelper, top_k: int = 10):
         # 规则:
         # 1. 如果某股有未解决的空头 claim 且含真风险标签 → 允许下调(最多降 max_drop 位)
         # 2. 如果某股有未解决的多头 claim 且无空头风险标签 → 允许上调(最多升 max_rise 位)
-        # 3. 其余保持 V3 排名
+        # 3. 新晋股(量价保送, _rising_star)若有未决多头 claim → 上限放宽到 max_rise+2
+        #    (新晋股V3=0排名靠后, 需要更大空间才能进入有效排名区间)
+        # 4. 其余保持 V3 排名
         HARD_RISK_FLAGS = {"趋势破位", "主力持续流出", "质量红线", "催化证伪", "量价背离"}
+        # 可持续性相关的风险标签 (见 SUSTAINABILITY_CRITERIA)
+        SUSTAINABILITY_RISK_FLAGS = {"催化衰竭", "资金衰减", "量价背离", "透支风险", "纯题材"}
+        ALL_RISK_FLAGS = HARD_RISK_FLAGS | SUSTAINABILITY_RISK_FLAGS
         max_drop = int((state.get("metadata") or {}).get("max_rank_drop", 3))
         max_rise = int((state.get("metadata") or {}).get("max_rank_rise", 3))
+
+        # 新晋股集合 (用于放宽上调上限)
+        rising_star_codes = {c["code"] for c in cands.values() if c.get("_rising_star")}
 
         unresolved_ids = set(ledger.get("unresolved_claim_ids", [])
                              + ledger.get("open_claim_ids", []))
@@ -367,32 +375,41 @@ def make_final_judge(llm: LLMHelper, top_k: int = 10):
         for row in rows:
             code = row["code"]
             flags = set(row.get("risk_flags", []))
-            hard_flags = flags & HARD_RISK_FLAGS
+            hard_flags = flags & ALL_RISK_FLAGS
             bears = bear_claims.get(code, [])
             bulls = bull_claims.get(code, [])
             has_bear = len(bears) > 0
             has_bull = len(bulls) > 0
+            is_rising_star = code in rising_star_codes
+
+            # 新晋股上调上限放宽 (V3=0 需要更大空间)
+            effective_max_rise = max_rise + (2 if is_rising_star else 0)
 
             delta = 0
             if hard_flags and has_bear:
-                # 有硬风险标签 + 未决空头 claim → 下调
-                # 强度: 硬标签数 + 高置信度空头 claim 数, 上限 max_drop
+                # 有风险标签 + 未决空头 claim → 下调
                 strong_bear = sum(1 for cl in bears if float(cl.get("confidence", 0.6) or 0.6) >= 0.7)
                 delta = -min(len(hard_flags) + strong_bear, max_drop)
             elif has_bull and not has_bear:
                 # 有未决多头 claim 且无空头反驳 → 上调
-                # 强度: 高置信度多头 claim 数(证据扎实的新鲜催化), 上限 max_rise
+                # 可持续性信号: 多头 claim 提及催化余量/资金持续/业绩支撑 → 额外+1
                 strong_bull = sum(1 for cl in bulls if float(cl.get("confidence", 0.6) or 0.6) >= 0.7)
-                delta = min(max(1, strong_bull), max_rise)
+                sustainability_bonus = sum(
+                    1 for cl in bulls
+                    if any(kw in cl.get("claim", "") for kw in ["可持续", "催化余量", "资金持续", "业绩支撑"])
+                )
+                delta = min(max(1, strong_bull) + sustainability_bonus, effective_max_rise)
             elif has_bear and not hard_flags:
-                # 有空头 claim 但无硬风险标签 → 空头理由不够硬, 不降权;
-                # 若同时有未被反驳掉的多头 claim, 仍给予小幅上调(多头证据未被有效推翻)
+                # 有空头 claim 但无风险标签 → 不降权
                 if has_bull:
-                    delta = min(1, max_rise)
+                    delta = min(1, effective_max_rise)
                 else:
                     delta = 0
 
             adjustments[code] = delta
+            if delta != 0:
+                tag = f"新晋股+{delta}" if is_rising_star and delta > 0 else str(delta)
+                print(f"    调整: {code} {row.get('name','')} delta={tag}")
 
         # 应用调整: 按 V3 排名 + delta 排序 (回测验证: V3 做主排序优于 LLM 排名)
         for row in rows:
