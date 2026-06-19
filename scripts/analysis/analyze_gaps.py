@@ -1,9 +1,12 @@
 """分析知识库覆盖缺口，并批量扩编"""
 import json
+import os, sys
 from collections import Counter
-from ai_knowledge_base import CODE_TO_INDUSTRY
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from picker import paths
+from picker.knowledge.ai_knowledge_base import CODE_TO_INDUSTRY
 
-with open("stock_whitelist.json") as f:
+with open(paths.STOCK_WHITELIST) as f:
     whitelist = json.load(f)
 
 # 分析未覆盖的股票

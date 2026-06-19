@@ -1,7 +1,7 @@
 import sys
 sys.path.insert(0, '.')
 
-from fundamental_agent import analyze_one
+from picker.knowledge.fundamental_agent import analyze_one
 import time
 
 stocks = [

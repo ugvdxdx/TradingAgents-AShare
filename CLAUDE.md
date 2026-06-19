@@ -7,13 +7,13 @@
 **核心交互方式**: 通过 Claude Code CLI 直接对话，无需前端。
 
 **两阶段选股流水线**：
-1. 阶段一（每周）：V3 基本面打分（`_v3_full_score.py`）— 全量评分 + essence + capital 动态更新
-2. 阶段二（每日）：30 天涨幅竞争辩论（`debate_picker_v5.py`）— LangGraph 7 阶段：三分析师并行 → 分组海选 Top50→20 → claim 驱动三段式辩论(多→空→多反驳) → 终极 PK → 风控复核 → 终端富文本报告
+1. 阶段一（每周）：V3 基本面打分（`picker/scoring/v3_full_score.py`）— 全量评分 + essence + capital 动态更新
+2. 阶段二（每日）：30 天涨幅竞争辩论（`picker/pipeline/debate_picker_v5.py`）— LangGraph 7 阶段：三分析师并行 → 分组海选 Top50→20 → claim 驱动三段式辩论(多→空→多反驳) → 终极 PK → 风控复核 → 终端富文本报告
 
 **核心机制**：
-- **新晋股发现**（`scan_mispriced.py`）：量价扫描 + 网络搜索归因 + 板块扩散 + 冷股激活
-- **capital 动态更新**（`_v3_full_score.py:update_capital`）：每次选股前用研报板块动量 + 个股量价(双窗口)重算 capital，纯量化 0 次 LLM
-- **过热股检测**（`_v3_full_score.py:detect_overheated`）：高分滞涨股搜索验证 + 风险标记，不自动惩罚
+- **新晋股发现**（`picker/discovery/scan_mispriced.py`）：量价扫描 + 网络搜索归因 + 板块扩散 + 冷股激活
+- **capital 动态更新**（`picker/scoring/v3_full_score.py:update_capital`）：每次选股前用研报板块动量 + 个股量价(双窗口)重算 capital，纯量化 0 次 LLM
+- **过热股检测**（`picker/scoring/v3_full_score.py:detect_overheated`）：高分滞涨股搜索验证 + 风险标记，不自动惩罚
 - **冷股池**（`cold_fundamentals/`）：167 只无催化股票冬眠，新晋股逻辑可激活
 
 **归档**：旧版脚本（`run_debate_picker.py`, `run_stock_picker.py` 等）已移入 `archive/`。
@@ -45,6 +45,7 @@ tradingagents-scheduler
 ```
 tradingagents/          # 核心包
   agents/               # 14 个 Agent
+    picker/             # v5 辩论选股包 (graph/state/analysts/judges/debaters/reporter/incremental/rotation)
   graph/                # LangGraph 编排
   dataflows/            # 数据流 + 数据源路由
     providers/          # 数据供应商
@@ -54,6 +55,7 @@ tradingagents/          # 核心包
       yfinance_provider.py     # 美股/港股
   llm_clients/          # LLM 适配层
   prompts/              # 提示词模板
+  research/             # 研报知识系统 (collector/cleaner/extractor/store/consumer/normalize)
   default_config.py     # 默认配置
 
 api/                    # FastAPI 服务端
@@ -70,21 +72,41 @@ skills/
   tradingagents-sector/    # 板块分析
   fundamentals-scorer/     # ★ V3 基本面评分 & 赛道Alpha（回测ρ=0.527）
 
-── 两阶段选股工具 (根目录) ──
-_v3_full_score.py         # V3 全量评分 + capital动态更新 + 过热股检测 + 归因注入
-debate_picker_v5.py       # 30天涨幅竞争辩论 — LangGraph 7阶段 (三段式辩论+横向对比矩阵)
-scan_mispriced.py         # 新晋股发现 — 量价扫描+搜索归因+板块扩散+冷股激活
-_gen_top500_fundamentals.py  # 个股基本面 JSON 生成器 (三源融合, --workers 并行)
-update_world_knowledge.py # 世界知识定期更新 (LLM精简+归因注入+过期清理)
-run_daily_update.py       # 每日运维: 采集→提取→基本面→世界知识 (step1-4)
-run_research_pipeline.py  # 研报全量采集+提取流水线
-fetch_money_flow_all.py   # 全市场资金流预拉取 → .mf_cache/
-tradingagents/agents/picker/  # v5 辩论选股包 (graph/state/analysts/judges/debaters/reporter/incremental/rotation)
-tradingagents/research/       # 研报知识系统 (collector/cleaner/extractor/store/consumer/normalize)
-fundamentals/             # 基本面 JSON (537只热股)
-cold_fundamentals/        # 冷股池 (167只无催化, 冬眠)
-archive/                  # 历史脚本归档
+── 两阶段选股工具 (picker 包, 原根目录脚本) ──
+picker/                 # ★ 选股工具包 (路径统一经 picker.paths 解析)
+  paths.py              # 统一路径解析层 (缓存/DB/whitelist 唯一真相源)
+  knowledge/            # world_knowledge / ai_knowledge_base / fundamental_agent
+  data/                 # data_cache / money_flow / fundamentals_data
+  scoring/              # tech_analysis / fundamental_scorer / v3_full_score (原 _v3_full_score)
+  discovery/            # scan_mispriced — 新晋股发现
+  pipeline/             # debate_picker_v5 / gen_fundamentals / update_* / run_* / fetch_money_flow_all
+  backtest/             # run_backtest
+
+── 运行时数据 ──
+data/                   # 运行时数据集中
+  caches/               # 原 .xxx.json 点前缀缓存 (fundamental_v3_scores / overheated_risk / ...)
+  whitelist/            # stock_whitelist / top500_whitelist
+  reference/            # top500_and_leaders / world_knowledge_2026_06 / stocks_audit / ...
+  board_flow_cache.json / news_cache.json
+fundamentals/           # 基本面 JSON (537只热股)
+cold_fundamentals/      # 冷股池 (167只无催化, 冬眠)
+kline_cache/  profiles/  .mf_cache/  .cache/   # 大缓存目录
+research.db             # 研报知识库
+
+── 归档 (不进版本库) ──
+archive/                # 备份/一次性脚本/批量产物 (.bak / batch* / 过期脚本)
+docs/                   # 设计文档
 ```
+
+> **入口脚本速查** (原根目录文件名 → 新路径):
+> - `_v3_full_score.py` → `picker/scoring/v3_full_score.py`
+> - `debate_picker_v5.py` → `picker/pipeline/debate_picker_v5.py`
+> - `scan_mispriced.py` → `picker/discovery/scan_mispriced.py`
+> - `_gen_top500_fundamentals.py` → `picker/pipeline/gen_fundamentals.py`
+> - `update_world_knowledge.py` → `picker/pipeline/update_world_knowledge.py`
+> - `run_daily_update.py` → `picker/pipeline/run_daily_update.py`
+> - `run_research_pipeline.py` → `picker/pipeline/run_research_pipeline.py`
+> - `fetch_money_flow_all.py` → `picker/pipeline/fetch_money_flow_all.py`
 
 ## 数据源架构
 
@@ -116,7 +138,7 @@ archive/                  # 历史脚本归档
 ### 数据流
 
 ```
-每日选股 (debate_picker_v5.py)
+每日选股 (picker/pipeline/debate_picker_v5.py)
   ├─ collect_data
   │    ├─ update_capital(persist=False)     ← capital动态更新, 0次LLM, 秒级
   │    │    研报板块动量(14天) + 个股量价(双窗口r5+r20) → 重算capital
@@ -139,7 +161,7 @@ archive/                  # 历史脚本归档
 | delivery (业绩兑现) | 季度 | LLM | 顶级客户+产能+高增兑现→8-10 |
 | capital (资金热度) | **每日** | **量化** | 板块动量×个股量价, 模式D(默认): 细分拆分+双窗口 |
 
-### 新晋股发现机制 (scan_mispriced.py)
+### 新晋股发现机制 (picker/discovery/scan_mispriced.py)
 
 ```
 量价扫描 (近5日>15% & V3<15) → 搜索归因(14天缓存) → 板块扩散(强度过滤)
@@ -150,11 +172,13 @@ archive/                  # 历史脚本归档
 
 ### 关键文件说明
 
+> 所有缓存路径经 `picker/paths.py` 统一解析；下表为相对项目根的实际位置。
+
 | 缓存文件 | 内容 | TTL |
 |---|---|---|
-| `.fundamental_v3_scores.json` | V3 评分 (chain/delivery/capital/essence) | 季度+每日capital |
-| `.mispriced_attribution_cache.json` | 新晋股归因 (板块供需/个股事件) | 14天 |
-| `.overheated_risk_cache.json` | 过热股风险验证 | 7天 |
-| `.cold_stocks.json` | 冷股清单 | 手动 |
-| `.sub_sector_override.json` | 细分赛道 capital 拆分表 | scan_mispriced 维护 |
-| `_world_knowledge_2026_06.md` | 世界知识 (宏观+归因) | 每日更新 |
+| `data/caches/fundamental_v3_scores.json` | V3 评分 (chain/delivery/capital/essence) | 季度+每日capital |
+| `data/caches/mispriced_attribution_cache.json` | 新晋股归因 (板块供需/个股事件) | 14天 |
+| `data/caches/overheated_risk_cache.json` | 过热股风险验证 | 7天 |
+| `data/caches/cold_stocks.json` | 冷股清单 | 手动 |
+| `data/caches/sub_sector_override.json` | 细分赛道 capital 拆分表 | scan_mispriced 维护 |
+| `data/reference/world_knowledge_2026_06.md` | 世界知识 (宏观+归因) | 每日更新 |

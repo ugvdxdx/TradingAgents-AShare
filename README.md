@@ -53,7 +53,7 @@ cp .env.example .env
 # TA_LLM_DEEP=gpt-4o                    # 深度思考模型
 # TA_LLM_QUICK=gpt-4o-mini              # 快速模型
 # ── 财务/资金流数据源 (选股流水线必需) ──
-# TUSHARE_TOKEN=your-tushare-token      # Tushare (财报+资金流, fundamentals_data.py / money_flow.py)
+# TUSHARE_TOKEN=your-tushare-token      # Tushare (财报+资金流, picker/data/fundamentals_data.py / picker/data/money_flow.py)
 # STOCKAPI_TOKEN=your-stockapi-token    # StockAPI (行业数据)
 ```
 
@@ -128,10 +128,10 @@ print(result["final_trade_decision"])
 
 ```bash
 # 全量 V3 打分（544只，8并发，~35分钟）
-uv run python3 _v3_full_score.py
+uv run python3 picker/scoring/v3_full_score.py
 
 # 全量回测验证
-uv run python3 run_backtest.py
+uv run python3 picker/backtest/run_backtest.py
 ```
 
 ### V3 三子维度（小数分 0.0-25.0）
@@ -166,20 +166,20 @@ research.db    fundamentals/*.json     .fundamental_v3_       results/picker_v5/
 
 | 目标 | 命令 | 说明 |
 |------|------|------|
-| **① 更新研报** | `uv run python3 run_daily_update.py` | 全流程（采集→提取→注入 fundamentals）。约 10-20 分钟 |
-| ① 仅采集 | `uv run python3 run_daily_update.py --step 1` | 只拉最新博主编入 research.db |
-| ① 仅提取 | `uv run python3 run_daily_update.py --step 2` | 只把帖子 LLM 提取为结构化知识 |
-| ① 仅注入 | `uv run python3 run_daily_update.py --step 3` | 只把研报提炼写回 fundamentals JSON |
-| ① 研报全量回填 | `uv run python3 run_research_pipeline.py` | 一次性历史回填（区别于日常增量） |
-| **② 重生成基本面** | `uv run python3 _gen_top500_fundamentals.py --force` | 全量 544 只（Tushare财报+研报+防污染）。约 544×3 分钟 |
-| ② 仅指定股票 | `uv run python3 _gen_top500_fundamentals.py --codes 603308,300394 --force` | 只重生指定代码 |
-| ② 仅补缺失 | `uv run python3 _gen_top500_fundamentals.py` | 不加 `--force` 则跳过已存在的 |
-| ② 试跑前 N 只 | `uv run python3 _gen_top500_fundamentals.py --count 10` | 先验证再全量 |
-| **③ 全量评分** | `uv run python3 _v3_full_score.py` | 544 只 V3 评分（8 并发，~35 分钟）。复用缓存，已评的跳过 |
-| **④ 选股 Top50→10** | `uv run python3 debate_picker_v5.py --top-n 50` | LangGraph 7 阶段辩论。约 18 分钟 |
-| ④ 指定日期 | `uv run python3 debate_picker_v5.py --date 2026-06-16` | 回测/缓存数据 |
-| ④ 验证管道 | `uv run python3 debate_picker_v5.py --dry-run` | 跳过 LLM，仅验证数据流 |
-| **资金流预拉取** | `uv run python3 fetch_money_flow_all.py` | 全市场资金流缓存（`.mf_cache/`），辩论阶段秒读 |
+| **① 更新研报** | `uv run python3 picker/pipeline/run_daily_update.py` | 全流程（采集→提取→注入 fundamentals）。约 10-20 分钟 |
+| ① 仅采集 | `uv run python3 picker/pipeline/run_daily_update.py --step 1` | 只拉最新博主编入 research.db |
+| ① 仅提取 | `uv run python3 picker/pipeline/run_daily_update.py --step 2` | 只把帖子 LLM 提取为结构化知识 |
+| ① 仅注入 | `uv run python3 picker/pipeline/run_daily_update.py --step 3` | 只把研报提炼写回 fundamentals JSON |
+| ① 研报全量回填 | `uv run python3 picker/pipeline/run_research_pipeline.py` | 一次性历史回填（区别于日常增量） |
+| **② 重生成基本面** | `uv run python3 picker/pipeline/gen_fundamentals.py --force` | 全量 544 只（Tushare财报+研报+防污染）。约 544×3 分钟 |
+| ② 仅指定股票 | `uv run python3 picker/pipeline/gen_fundamentals.py --codes 603308,300394 --force` | 只重生指定代码 |
+| ② 仅补缺失 | `uv run python3 picker/pipeline/gen_fundamentals.py` | 不加 `--force` 则跳过已存在的 |
+| ② 试跑前 N 只 | `uv run python3 picker/pipeline/gen_fundamentals.py --count 10` | 先验证再全量 |
+| **③ 全量评分** | `uv run python3 picker/scoring/v3_full_score.py` | 544 只 V3 评分（8 并发，~35 分钟）。复用缓存，已评的跳过 |
+| **④ 选股 Top50→10** | `uv run python3 picker/pipeline/debate_picker_v5.py --top-n 50` | LangGraph 7 阶段辩论。约 18 分钟 |
+| ④ 指定日期 | `uv run python3 picker/pipeline/debate_picker_v5.py --date 2026-06-16` | 回测/缓存数据 |
+| ④ 验证管道 | `uv run python3 picker/pipeline/debate_picker_v5.py --dry-run` | 跳过 LLM，仅验证数据流 |
+| **资金流预拉取** | `uv run python3 picker/pipeline/fetch_money_flow_all.py` | 全市场资金流缓存（`.mf_cache/`），辩论阶段秒读 |
 
 > 💡 **怎么说给 AI 听**：与其记命令，不如直接说"重生成全量基本面"、"评分完接着选股"、"从研报到选股全跑一遍"，AI 会按上表执行。
 
@@ -187,21 +187,21 @@ research.db    fundamentals/*.json     .fundamental_v3_       results/picker_v5/
 
 | 工具 | 命令 | 说明 |
 |------|------|------|
-| **V3 全量打分** | `uv run python3 _v3_full_score.py` | 544 只 A 股基本面评分 + essence 精华（8 并发，~35 分钟） |
-| **30 天辩论选股** | `uv run python3 debate_picker_v5.py` | LangGraph 7 阶段：增量信息→三分析师→海选→claim 辩论→TOP10 |
-| **全量回测** | `uv run python3 run_backtest.py` | V3 评分 vs 涨幅相关性回测 |
-| **资金流预拉取** | `uv run python3 fetch_money_flow_all.py` | 全市场资金流缓存（`.mf_cache/`），辩论阶段秒读 |
-| **个股基本面生成** | `uv run python3 _gen_top500_fundamentals.py` | Tushare 财报 + 板块研报 + 防污染规则驱动的 JSON 生成 |
+| **V3 全量打分** | `uv run python3 picker/scoring/v3_full_score.py` | 544 只 A 股基本面评分 + essence 精华（8 并发，~35 分钟） |
+| **30 天辩论选股** | `uv run python3 picker/pipeline/debate_picker_v5.py` | LangGraph 7 阶段：增量信息→三分析师→海选→claim 辩论→TOP10 |
+| **全量回测** | `uv run python3 picker/backtest/run_backtest.py` | V3 评分 vs 涨幅相关性回测 |
+| **资金流预拉取** | `uv run python3 picker/pipeline/fetch_money_flow_all.py` | 全市场资金流缓存（`.mf_cache/`），辩论阶段秒读 |
+| **个股基本面生成** | `uv run python3 picker/pipeline/gen_fundamentals.py` | Tushare 财报 + 板块研报 + 防污染规则驱动的 JSON 生成 |
 
-### Tushare 财报集成（`fundamentals_data.py`）
+### Tushare 财报集成（`picker/data/fundamentals_data.py`）
 
-基本面 JSON 的财务数字（营收/净利/毛利率/ROE 等）直接来自 Tushare 真实财报，不再依赖 LLM 回忆——后者会取错财报期（实测曾把真实营收 153 亿错记成 107 亿）。`_gen_top500_fundamentals.py` 生成时自动调用，需配置 `TUSHARE_TOKEN`。失败时回退到 LLM 填写（退化到旧行为，不会崩）。
+基本面 JSON 的财务数字（营收/净利/毛利率/ROE 等）直接来自 Tushare 真实财报，不再依赖 LLM 回忆——后者会取错财报期（实测曾把真实营收 153 亿错记成 107 亿）。`picker/pipeline/gen_fundamentals.py` 生成时自动调用，需配置 `TUSHARE_TOKEN`。失败时回退到 LLM 填写（退化到旧行为，不会崩）。
 
 ### 板块研报注入 & 防污染规则
 
 **研报注入**：基本面生成时，通过 `tradingagents/research/consumer.py` 的 `get_industry_research_brief()` 按个股所属行业从 `research.db` 取板块研报（如 PCB 股取 PCB 板块研报），注入 prompt 并标注「板块级·信源中」。冷门股（未被研报直接点名的）也能获得板块视角。
 
-**防污染规则**（`_gen_top500_fundamentals.py` 的 SYSTEM_PROMPT）：对「一供/份额 XX%/锁定/独家」等强断言强制信源分级（高=公告/券商、中=行业媒体、低=雪球自媒体），**信源低且与他源矛盾的强断言直接删除**。避免自媒体乐观叙事污染基本面数据。
+**防污染规则**（`picker/pipeline/gen_fundamentals.py` 的 SYSTEM_PROMPT）：对「一供/份额 XX%/锁定/独家」等强断言强制信源分级（高=公告/券商、中=行业媒体、低=雪球自媒体），**信源低且与他源矛盾的强断言直接删除**。避免自媒体乐观叙事污染基本面数据。
 
 ### 辩论系统 v5 — 增量信息驱动的 claim 竞争辩论
 
@@ -277,26 +277,26 @@ research.db
   │  get_dark_horse_stocks()      → 研报黑马 (海选保送)
   │  get_research_risk_signals()  → 研报风险 (海选排雷)
   ▼
-基本面生成 (_gen_top500_fundamentals.py)  ← 注入板块研报 (信源:中)
-辩论选股 (debate_picker_v5.py)             ← 注入个股研报信号
+基本面生成 (picker/pipeline/gen_fundamentals.py)  ← 注入板块研报 (信源:中)
+辩论选股 (picker/pipeline/debate_picker_v5.py)             ← 注入个股研报信号
 ```
 
 ### 核心脚本
 
 ```bash
 # 日常增量更新 (推荐, 含采集+提取+注入 fundamentals)
-uv run python3 run_daily_update.py              # 全流程
-uv run python3 run_daily_update.py --step 1     # 仅采集最新研报
-uv run python3 run_daily_update.py --step 2     # 仅 LLM 提取
-uv run python3 run_daily_update.py --step 3     # 仅注入 fundamentals
+uv run python3 picker/pipeline/run_daily_update.py              # 全流程
+uv run python3 picker/pipeline/run_daily_update.py --step 1     # 仅采集最新研报
+uv run python3 picker/pipeline/run_daily_update.py --step 2     # 仅 LLM 提取
+uv run python3 picker/pipeline/run_daily_update.py --step 3     # 仅注入 fundamentals
 
 # 一次性历史回填 (首次部署或补历史数据)
-uv run python3 run_research_pipeline.py
+uv run python3 picker/pipeline/run_research_pipeline.py
 
 # 研报→fundamentals 增量注入 (单独跑, 可指定个股)
-uv run python3 update_fundamentals_from_research.py
-uv run python3 update_fundamentals_from_research.py --stock 300308
-uv run python3 update_fundamentals_from_research.py --dry-run
+uv run python3 picker/pipeline/update_fundamentals_from_research.py
+uv run python3 picker/pipeline/update_fundamentals_from_research.py --stock 300308
+uv run python3 picker/pipeline/update_fundamentals_from_research.py --dry-run
 
 # 知识检索
 uv run python3 skills/research-knowledge/scripts/query.py stats
@@ -403,22 +403,22 @@ skills/                     # AI IDE 技能包 (Claude Code / Cursor)
 
 a-stock-data/               # 数据端点参考文档
 
-── 选股流水线工具 (根目录) ──
-debate_picker_v5.py         # ④ 30天涨幅辩论选股 — LangGraph 7阶段
-_v3_full_score.py           # ③ V3 全量基本面评分 + essence 精华 (544只，8并发)
-_gen_top500_fundamentals.py # ② 个股基本面 JSON 生成 (Tushare财报+研报+防污染)
-fundamentals_data.py        #   Tushare 真实财报拉取模块 (②的依赖)
-fundamental_scorer.py       #   V3 评分引擎 (三子维度 + essence, ③的依赖)
-run_daily_update.py         # ① 每日研报增量更新 (采集→提取→注入)
-run_research_pipeline.py    # ① 研报全量历史回填 (首次部署用)
-update_fundamentals_from_research.py  # 研报→fundamentals 注入 (①的step3独立版)
-_rotation_rescore.py        # 轮动重评
-fetch_money_flow_all.py     # 全市场资金流预拉取 → .mf_cache/
-money_flow.py               # 资金流分析 (双源: 东方财富 + Tushare fallback)
-tech_analysis.py            # 技术指标 (趋势/动量/量能/形态)
-data_cache.py               # K 线缓存
-run_backtest.py             # 全量回测分析
-run_analysis.py             # 单股深度分析 (流式输出+历史复盘)
+── 选股流水线工具 (picker 包, 路径统一经 picker/paths.py) ──
+picker/pipeline/debate_picker_v5.py         # ④ 30天涨幅辩论选股 — LangGraph 7阶段
+picker/scoring/v3_full_score.py           # ③ V3 全量基本面评分 + essence 精华 (544只，8并发)
+picker/pipeline/gen_fundamentals.py # ② 个股基本面 JSON 生成 (Tushare财报+研报+防污染)
+picker/data/fundamentals_data.py        #   Tushare 真实财报拉取模块 (②的依赖)
+picker/scoring/fundamental_scorer.py       #   V3 评分引擎 (三子维度 + essence, ③的依赖)
+picker/pipeline/run_daily_update.py         # ① 每日研报增量更新 (采集→提取→注入)
+picker/pipeline/run_research_pipeline.py    # ① 研报全量历史回填 (首次部署用)
+picker/pipeline/update_fundamentals_from_research.py  # 研报→fundamentals 注入 (①的step3独立版)
+picker/pipeline/rotation_rescore.py        # 轮动重评
+picker/pipeline/fetch_money_flow_all.py     # 全市场资金流预拉取 → .mf_cache/
+picker/data/money_flow.py               # 资金流分析 (双源: 东方财富 + Tushare fallback)
+picker/scoring/tech_analysis.py            # 技术指标 (趋势/动量/量能/形态)
+picker/data/data_cache.py               # K 线缓存
+picker/backtest/run_backtest.py             # 全量回测分析
+picker/pipeline/run_analysis.py             # 单股深度分析 (流式输出+历史复盘)
 data/news_cache.json        # WebSearch 新闻缓存 (按股票代码, 按时间线排序)
 research.db                 # 研报知识库 (SQLite)
 fundamentals/               # 个股基本面 JSON (544只)

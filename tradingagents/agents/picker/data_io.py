@@ -11,12 +11,13 @@ import os
 import pickle
 from typing import Any, Dict, List, Optional
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from picker import paths
 
-V3_CACHE = os.path.join(ROOT, ".fundamental_v3_scores.json")
-FUNDAMENTALS_DIR = os.path.join(ROOT, "fundamentals")
-KLINE_CACHE_DIR = os.path.join(ROOT, "kline_cache")
-MF_CACHE_DIR = os.path.join(ROOT, ".mf_cache")
+# 路径统一经 picker.paths 解析 (原 4 层 dirname 回溯已废弃)
+V3_CACHE = paths.V3_CACHE
+FUNDAMENTALS_DIR = paths.FUNDAMENTALS_DIR
+KLINE_CACHE_DIR = paths.KLINE_CACHE_DIR
+MF_CACHE_DIR = paths.MF_CACHE_DIR
 
 
 # ══════════════════════════════════════════════════════════
@@ -27,7 +28,7 @@ MF_CACHE_DIR = os.path.join(ROOT, ".mf_cache")
 FORCE_INCLUDE_CODES: List[str] = ["001309", "600522"]
 
 # 新晋股归因缓存路径 (scan_mispriced.py 产出)
-ATTR_CACHE = os.path.join(ROOT, ".mispriced_attribution_cache.json")
+ATTR_CACHE = paths.ATTR_CACHE
 # 新晋股保送上限 (避免过多冲淡候选池, 但要覆盖主要热点板块)
 MAX_RISING_STAR_INCLUDE = 15
 
@@ -108,9 +109,13 @@ def _load_rising_stars() -> List[Dict[str, Any]]:
             # V3 有评分 — 用真实 essence, 追加归因标记
             essence = dict(real_essence)
             essence["chain_position"] = f"{essence.get('chain_position','')} + 量价归因: {entry.get('sector_tag','')}"
+            # 保留真实 V3 分 (sector_score) 作为 v3, 仅靠 _rising_star 标记身份。
+            # 此前把 v3 清零会导致: 保送失败(未进前3)的新晋股 v3=0 沉到候选池底部,
+            # 既无法被分组海选选中, 也不能参与正常排序竞争 → 彻底沦为废票。
+            real_sector_score = v3_entry.get("sector_score", 0)
             star = {
                 "code": code, "name": name,
-                "v3": 0,  # V3=0 表示保送, 但 chain/delivery 保留真实值供参考
+                "v3": real_sector_score,  # 保留真实分, 参与正常竞争
                 "chain": real_chain,
                 "delivery": v3_entry.get("delivery", 0),
                 "capital": v3_entry.get("capital", 0),
@@ -118,7 +123,7 @@ def _load_rising_stars() -> List[Dict[str, Any]]:
                 "essence": essence,
             }
         else:
-            # V3 无评分 — 用归因模板
+            # V3 无评分 — 用归因模板 (无真实分, 仅靠 _rising_star 保送机制)
             star = {
                 "code": code, "name": name,
                 "v3": 0, "chain": 0, "delivery": 0, "capital": 0,
@@ -270,8 +275,10 @@ def load_top_n(n: int = 50, include_codes: Optional[List[str]] = None,
 
     # 行业动量调整 (方案3: 每日实时行业动量微调 V3)
     for s in stocks:
-        if s.get("_rising_star"):
-            continue  # 新晋股无 V3 分, 不调整
+        # 新晋股若有真实 V3 分 (sector_score>0) 应参与动量微调;
+        # 仅 v3=0 的归因模板型新晋股跳过 (无基准分可调)。
+        if s.get("_rising_star") and s.get("v3", 0) == 0:
+            continue
         # 只读一次 JSON 取 industry
         industry = ""
         try:

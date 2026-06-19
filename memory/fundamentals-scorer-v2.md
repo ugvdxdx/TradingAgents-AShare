@@ -40,7 +40,7 @@ result = compute_sector_alpha("300502")
 
 | 文件 | 用途 |
 |:---|:---|
-| `fundamental_scorer.py` | 核心评分模块 |
-| `fundamental_agent.py` | 基本面数据生成 |
+| `picker/scoring/fundamental_scorer.py` | 核心评分模块 |
+| `picker/knowledge/fundamental_agent.py` | 基本面数据生成 |
 | `skills/fundamentals-scorer/scripts/batch_score.py` | 批量打分 |
 | `skills/fundamentals-scorer/scripts/backtest_correlation.py` | 相关性回测 |

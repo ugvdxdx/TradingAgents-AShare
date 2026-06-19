@@ -102,9 +102,11 @@ def make_report_render():
             "run_dir": state.get("run_dir"),
         }
         _dump(state["run_dir"], "result.json", result, as_json=True)
-        # 根目录兼容文件
+        # 对外主结果缓存 (兼容 v4 .debate_result.json 的消费方)
         try:
-            with open(".debate_result.json", "w", encoding="utf-8") as f:
+            from picker import paths as _paths
+            _paths.ensure_caches_dir()
+            with open(_paths.DEBATE_RESULT_PATH, "w", encoding="utf-8") as f:
                 json.dump(result, f, ensure_ascii=False, indent=2)
         except Exception:
             pass

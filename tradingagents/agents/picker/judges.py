@@ -162,9 +162,8 @@ def make_screen_round1(llm: LLMHelper, v3_auto_promote: int = 20,
             # 优先用 V3 真实评分/essence, 仅在 V3 缺失时用模板
             v3_data = {}
             try:
-                v3_data = json.load(open(os.path.join(
-                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
-                    ".fundamental_v3_scores.json")))
+                from picker import paths as _paths
+                v3_data = json.load(open(_paths.V3_CACHE))
             except Exception:
                 pass
             for dh in dark_horse_from_research:

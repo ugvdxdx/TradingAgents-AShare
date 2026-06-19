@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List
 
-from tech_analysis import compute_tech_score
+from picker.scoring.tech_analysis import compute_tech_score
 
 from . import data_io
 from .llm_helper import LLMHelper
@@ -47,7 +47,7 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
     v3_cache_override = None
     if not cutoff:
         try:
-            from _v3_full_score import update_capital, detect_overheated
+            from picker.scoring.v3_full_score import update_capital, detect_overheated
             capital_mode = os.environ.get("CAPITAL_MODE", "D")
             v3_cache_override = update_capital(mode=capital_mode, persist=False)
             # 过热股检测: 高分但持续下跌的标的, 搜索验证 + 风险标记 (不改 V3 分)
@@ -61,7 +61,8 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
     # 回写过热风险标记到候选池 (供 format_stock_brief 显示 + 辩论参考)
     if not cutoff:
         try:
-            oh_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), ".overheated_risk_cache.json")
+            from picker import paths as _paths
+            oh_path = _paths.OVERHEATED_CACHE
             if os.path.exists(oh_path):
                 oh_cache = json.load(open(oh_path))
                 oh_marked = 0

@@ -43,7 +43,7 @@ tradingagents-api = "api.main:run"
 tradingagents-scheduler = "scheduler.main:sync_main"
 
 [tool.setuptools.packages.find]
-include = ["tradingagents*", "cli*", "api*", "scheduler*"]
+include = ["tradingagents*", "cli*", "api*", "scheduler*", "picker*"]
 
 [dependency-groups]
 dev = [

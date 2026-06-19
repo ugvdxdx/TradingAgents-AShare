@@ -4,7 +4,10 @@
 结果持久化到 JSON，后续可增量更新
 """
 import json, os, time, re
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import requests
+from picker import paths
 
 KNOWLEDGE_STORE = "stock_knowledge.json"
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
@@ -96,9 +99,9 @@ def classify_business(biz_text, name):
 
 def batch_enrich(limit=50):
     """批量扩充知识库"""
-    from ai_knowledge_base import CODE_TO_INDUSTRY, match_by_name_traditional
+    from picker.knowledge.ai_knowledge_base import CODE_TO_INDUSTRY, match_by_name_traditional
     
-    with open("stock_whitelist.json") as f:
+    with open(paths.STOCK_WHITELIST) as f:
         whitelist = json.load(f)
     
     store = load_knowledge_store()

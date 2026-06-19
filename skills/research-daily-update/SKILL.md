@@ -3,7 +3,7 @@ name: research-daily-update
 version: 1.0.0
 description: >-
   每日研报增量更新流水线。从财经博主圈子采集最新研报→LLM结构化提取→注入fundamentals JSON。
-  区别于 run_research_pipeline.py(全量历史回填), 本流程聚焦日常增量, 用 --step 控制
+  区别于 picker/pipeline/run_research_pipeline.py(全量历史回填), 本流程聚焦日常增量, 用 --step 控制
   采集/提取/注入三阶段。产出 research.db 供选股辩论和基本面生成消费。
 tags:
   - research
@@ -36,16 +36,16 @@ metadata:
 
 ```bash
 # 全流程: 采集 → LLM提取 → 注入fundamentals (约10-20分钟)
-uv run python3 run_daily_update.py
+uv run python3 picker/pipeline/run_daily_update.py
 
 # 仅采集最新研报到 research.db
-uv run python3 run_daily_update.py --step 1
+uv run python3 picker/pipeline/run_daily_update.py --step 1
 
 # 仅LLM提取(把未处理帖子转为结构化知识)
-uv run python3 run_daily_update.py --step 2
+uv run python3 picker/pipeline/run_daily_update.py --step 2
 
 # 仅注入fundamentals(把研报提炼写回JSON)
-uv run python3 run_daily_update.py --step 3
+uv run python3 picker/pipeline/run_daily_update.py --step 3
 ```
 
 ## 📋 参数说明
@@ -75,32 +75,32 @@ uv run python3 run_daily_update.py --step 3
 
 | 场景 | 命令 | 用途 |
 |:---|:---|:---|
-| **日常增量** | `run_daily_update.py` | 每天跑，只处理新帖子 |
-| **首次部署/补历史** | `run_research_pipeline.py` | 一次性回填指定日期范围的历史数据 |
+| **日常增量** | `picker/pipeline/run_daily_update.py` | 每天跑，只处理新帖子 |
+| **首次部署/补历史** | `picker/pipeline/run_research_pipeline.py` | 一次性回填指定日期范围的历史数据 |
 
 ## 🔧 单独注入研报（不走完整流水线）
 
 ```bash
 # 把研报提炼注入全部提及过的个股
-uv run python3 update_fundamentals_from_research.py
+uv run python3 picker/pipeline/update_fundamentals_from_research.py
 
 # 只注入指定个股
-uv run python3 update_fundamentals_from_research.py --stock 300308
+uv run python3 picker/pipeline/update_fundamentals_from_research.py --stock 300308
 
 # 最少提及2次才处理(默认)
-uv run python3 update_fundamentals_from_research.py --min-mentions 2
+uv run python3 picker/pipeline/update_fundamentals_from_research.py --min-mentions 2
 
 # 干跑(只输出不写文件)
-uv run python3 update_fundamentals_from_research.py --dry-run
+uv run python3 picker/pipeline/update_fundamentals_from_research.py --dry-run
 ```
 
 ## 📁 相关文件
 
 | 文件 | 用途 |
 |:---|:---|
-| `run_daily_update.py` | ★ 每日增量流水线入口(--step 控制) |
-| `run_research_pipeline.py` | 全量历史回填(首次部署) |
-| `update_fundamentals_from_research.py` | 研报→fundamentals 注入(可单独跑) |
+| `picker/pipeline/run_daily_update.py` | ★ 每日增量流水线入口(--step 控制) |
+| `picker/pipeline/run_research_pipeline.py` | 全量历史回填(首次部署) |
+| `picker/pipeline/update_fundamentals_from_research.py` | 研报→fundamentals 注入(可单独跑) |
 | `tradingagents/research/collector.py` | L1 数据采集(小鹅通API) |
 | `tradingagents/research/cleaner.py` | L2 数据清洗 |
 | `tradingagents/research/extractor.py` | L3 知识提取(LLM) |
@@ -111,11 +111,11 @@ uv run python3 update_fundamentals_from_research.py --dry-run
 
 ## ⚠️ 注意事项
 
-- **Cookie** — `run_daily_update.py` 中的小鹅通 Cookie 是硬编码的，可能过期失效。失效时采集步骤会报错，需更新 Cookie。
+- **Cookie** — `picker/pipeline/run_daily_update.py` 中的小鹅通 Cookie 是硬编码的，可能过期失效。失效时采集步骤会报错，需更新 Cookie。
 - **LLM 成本** — 提取步骤(--step 2)对每个新帖子调用一次 LLM，量大时有成本。
-- **注入范围** — `update_fundamentals_from_research.py` 只注入被研报**直接点名**的个股(`stock_mentions`)，冷门股靠板块匹配(见 fundamentals-generator skill 的 `get_industry_research_brief`)。
+- **注入范围** — `picker/pipeline/update_fundamentals_from_research.py` 只注入被研报**直接点名**的个股(`stock_mentions`)，冷门股靠板块匹配(见 fundamentals-generator skill 的 `get_industry_research_brief`)。
 
 ## 🔗 上下游
 
 - **上游** — 财经博主圈子(小鹅通API)
-- **下游** — ② 基本面生成(`_gen_top500_fundamentals.py` 注入板块研报) + ④ 选股辩论(`debate_picker_v5.py` 注入个股研报信号)
+- **下游** — ② 基本面生成(`picker/pipeline/gen_fundamentals.py` 注入板块研报) + ④ 选股辩论(`picker/pipeline/debate_picker_v5.py` 注入个股研报信号)

@@ -1,5 +1,5 @@
 {
- "date": "2026-06-18",
+ "date": "2026-06-19",
  "rows": [
   {
    "name": "半导体（AI算力芯片设计）",
@@ -44,7 +44,7 @@
    "rank": 7
   },
   {
-   "name": "专用机械（激光加工设备）与通信（光模块）双主业",
+   "name": "专用设备（激光设备）与光通信器件",
    "change_pct": 0.0,
    "main_net_yi": 10.91,
    "rank": 8
@@ -170,7 +170,7 @@
    "rank": 28
   },
   {
-   "name": "化工/先进陶瓷材料",
+   "name": "先进陶瓷材料/电子化学品",
    "change_pct": 0.0,
    "main_net_yi": 4.6,
    "rank": 29
@@ -206,7 +206,7 @@
    "rank": 34
   },
   {
-   "name": "电气设备（电源管理及电控）",
+   "name": "电气设备（定制电源与电力电子）",
    "change_pct": 0.0,
    "main_net_yi": 4.12,
    "rank": 35
@@ -362,3448 +362,2572 @@
    "rank": 60
   },
   {
-   "name": "国防军工（航天电子及无人系统）",
-   "change_pct": 0.0,
-   "main_net_yi": 2.49,
-   "rank": 61
-  },
-  {
    "name": "电气设备（电机及驱控系统）",
    "change_pct": 0.0,
    "main_net_yi": 2.37,
-   "rank": 62
+   "rank": 61
   },
   {
    "name": "半导体（特种集成电路及智能安全芯片）",
    "change_pct": 0.0,
    "main_net_yi": 2.35,
-   "rank": 63
+   "rank": 62
   },
   {
    "name": "国防军工/商业航天与卫星制造",
    "change_pct": 0.0,
    "main_net_yi": 2.2,
-   "rank": 64
+   "rank": 63
   },
   {
    "name": "通信设备（精密连接器及组件）",
    "change_pct": 0.0,
    "main_net_yi": 2.18,
-   "rank": 65
+   "rank": 64
   },
   {
    "name": "半导体材料",
    "change_pct": 0.0,
    "main_net_yi": 2.13,
-   "rank": 66
+   "rank": 65
   },
   {
    "name": "IT设备（数据存储与消费电子代工）",
    "change_pct": 0.0,
    "main_net_yi": 2.1,
-   "rank": 67
+   "rank": 66
   },
   {
    "name": "电子元器件（高速连接器）",
    "change_pct": 0.0,
    "main_net_yi": 2.1,
-   "rank": 68
+   "rank": 67
   },
   {
    "name": "有色金属（铅锌冶炼）",
    "change_pct": 0.0,
    "main_net_yi": 2.05,
-   "rank": 69
+   "rank": 68
   },
   {
    "name": "医疗器械（核心零部件/X线探测器）",
    "change_pct": 0.0,
    "main_net_yi": 1.97,
-   "rank": 70
+   "rank": 69
   },
   {
    "name": "元器件（覆铜板CCL）",
    "change_pct": 0.0,
    "main_net_yi": 1.96,
-   "rank": 71
+   "rank": 70
   },
   {
    "name": "元器件（印制电路板 PCB）",
    "change_pct": 0.0,
    "main_net_yi": 1.95,
-   "rank": 72
+   "rank": 71
   },
   {
    "name": "通信设备（光纤光缆）",
    "change_pct": 0.0,
    "main_net_yi": 1.94,
-   "rank": 73
+   "rank": 72
   },
   {
    "name": "国防军工(航空机电/特种电源)",
    "change_pct": 0.0,
    "main_net_yi": 1.86,
-   "rank": 74
+   "rank": 73
   },
   {
    "name": "区域地产/拟跨界光通信",
    "change_pct": 0.0,
    "main_net_yi": 1.76,
-   "rank": 75
+   "rank": 74
   },
   {
    "name": "半导体（存储芯片封装测试与电子制造）",
    "change_pct": 0.0,
    "main_net_yi": 1.71,
-   "rank": 76
+   "rank": 75
   },
   {
    "name": "IT设备(AI服务器及算力基础设施)",
    "change_pct": 0.0,
    "main_net_yi": 1.7,
-   "rank": 77
+   "rank": 76
   },
   {
    "name": "通信服务 / 算力基础设施 (IDC / 智算中心)",
    "change_pct": 0.0,
    "main_net_yi": 1.68,
-   "rank": 78
+   "rank": 77
   },
   {
    "name": "生物制药（ADC/自免抗体药物）",
    "change_pct": 0.0,
    "main_net_yi": 1.49,
-   "rank": 79
-  },
-  {
-   "name": "轻工机械（包装装备/水上动力）",
-   "change_pct": 0.0,
-   "main_net_yi": 1.39,
-   "rank": 80
+   "rank": 78
   },
   {
    "name": "半导体（模拟芯片/电源管理）",
    "change_pct": 0.0,
    "main_net_yi": 1.37,
-   "rank": 81
+   "rank": 79
   },
   {
    "name": "有色金属（铜冶炼及加工）",
    "change_pct": 0.0,
    "main_net_yi": 1.31,
-   "rank": 82
+   "rank": 80
   },
   {
    "name": "普钢及稀土金属开采",
    "change_pct": 0.0,
    "main_net_yi": 1.28,
-   "rank": 83
+   "rank": 81
   },
   {
    "name": "玻璃纤维（高端电子布/CCL上游基材）",
    "change_pct": 0.0,
    "main_net_yi": 1.26,
-   "rank": 84
+   "rank": 82
   },
   {
    "name": "电子元器件（先进陶瓷及MLCC）",
    "change_pct": 0.0,
    "main_net_yi": 1.23,
-   "rank": 85
+   "rank": 83
   },
   {
    "name": "塑料/功能性涂层复合材料/电子级胶粘剂与光学膜",
    "change_pct": 0.0,
    "main_net_yi": 1.2,
-   "rank": 86
+   "rank": 84
   },
   {
    "name": "通用设备制造(数控机床)",
    "change_pct": 0.0,
    "main_net_yi": 1.13,
-   "rank": 87
+   "rank": 85
   },
   {
    "name": "矿物制品(永磁铁氧体磁材)",
    "change_pct": 0.0,
    "main_net_yi": 1.12,
-   "rank": 88
+   "rank": 86
   },
   {
    "name": "汽车整车（新能源汽车）",
    "change_pct": 0.0,
    "main_net_yi": 1.12,
-   "rank": 89
+   "rank": 87
   },
   {
    "name": "通信设备（企业级网络与数据中心交换机）",
    "change_pct": 0.0,
    "main_net_yi": 1.09,
-   "rank": 90
+   "rank": 88
   },
   {
    "name": "医药外包服务(CXO)",
    "change_pct": 0.0,
    "main_net_yi": 1.02,
-   "rank": 91
+   "rank": 89
   },
   {
    "name": "矿物制品（电子级硅微粉/先进功能粉体）",
    "change_pct": 0.0,
    "main_net_yi": 1.02,
-   "rank": 92
+   "rank": 90
   },
   {
    "name": "半导体（射频前端芯片）",
    "change_pct": 0.0,
    "main_net_yi": 1.01,
-   "rank": 93
+   "rank": 91
   },
   {
    "name": "软件服务（电力数字化/算力服务）",
    "change_pct": 0.0,
    "main_net_yi": 1.0,
-   "rank": 94
+   "rank": 92
   },
   {
    "name": "电气设备（继电器）",
    "change_pct": 0.0,
    "main_net_yi": 0.93,
-   "rank": 95
+   "rank": 93
   },
   {
    "name": "半导体（集成电路设计/智能SoC）",
    "change_pct": 0.0,
    "main_net_yi": 0.93,
-   "rank": 96
+   "rank": 94
   },
   {
    "name": "元器件（PCB印制电路板/精密结构件）",
    "change_pct": 0.0,
    "main_net_yi": 0.85,
-   "rank": 97
+   "rank": 95
   },
   {
    "name": "专用机械（工业自动化/DCS）",
    "change_pct": 0.0,
    "main_net_yi": 0.85,
-   "rank": 98
+   "rank": 96
   },
   {
    "name": "元器件（精密结构件/连接器）",
    "change_pct": 0.0,
    "main_net_yi": 0.84,
-   "rank": 99
+   "rank": 97
   },
   {
    "name": "专用机械（精密温控设备）",
    "change_pct": 0.0,
    "main_net_yi": 0.83,
-   "rank": 100
+   "rank": 98
   },
   {
    "name": "汽车配件(底盘/传动/制动系统)",
    "change_pct": 0.0,
    "main_net_yi": 0.8,
-   "rank": 101
-  },
-  {
-   "name": "橡胶与高分子新材料",
-   "change_pct": 0.0,
-   "main_net_yi": 0.78,
-   "rank": 102
+   "rank": 99
   },
   {
    "name": "纺织机械",
    "change_pct": 0.0,
    "main_net_yi": 0.75,
-   "rank": 103
+   "rank": 100
   },
   {
    "name": "有色金属（铅锌及稀贵金属）",
    "change_pct": 0.0,
    "main_net_yi": 0.71,
-   "rank": 104
+   "rank": 101
   },
   {
    "name": "通信设备/电力设备（海缆与特种电缆）",
    "change_pct": 0.0,
    "main_net_yi": 0.71,
-   "rank": 105
+   "rank": 102
   },
   {
-   "name": "元器件（被动元件-电感）",
+   "name": "元器件（被动元件/电感/MLCC）",
    "change_pct": 0.0,
    "main_net_yi": 0.69,
-   "rank": 106
+   "rank": 103
   },
   {
    "name": "半导体材料（第三代半导体/碳化硅衬底）",
    "change_pct": 0.0,
    "main_net_yi": 0.66,
-   "rank": 107
+   "rank": 104
   },
   {
    "name": "小金属（锡、铟等有色金属）",
    "change_pct": 0.0,
    "main_net_yi": 0.65,
-   "rank": 108
+   "rank": 105
   },
   {
    "name": "非金属矿物制品（高纯石英材料）",
    "change_pct": 0.0,
    "main_net_yi": 0.64,
-   "rank": 109
-  },
-  {
-   "name": "运输设备（电梯制造）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.62,
-   "rank": 110
+   "rank": 106
   },
   {
    "name": "半导体（集成电路设计/利基型存储芯片）",
    "change_pct": 0.0,
    "main_net_yi": 0.62,
-   "rank": 111
+   "rank": 107
   },
   {
    "name": "工业机器人及自动化装备",
    "change_pct": 0.0,
    "main_net_yi": 0.61,
-   "rank": 112
+   "rank": 108
   },
   {
    "name": "工业自动化（伺服系统/变频器/新能源车电控）",
    "change_pct": 0.0,
    "main_net_yi": 0.59,
-   "rank": 113
+   "rank": 109
   },
   {
    "name": "新型电力（核电与新能源发电）",
    "change_pct": 0.0,
    "main_net_yi": 0.59,
-   "rank": 114
-  },
-  {
-   "name": "互联网（网络安全与AI大模型）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.57,
-   "rank": 115
+   "rank": 110
   },
   {
    "name": "半导体（芯片设计）",
    "change_pct": 0.0,
    "main_net_yi": 0.57,
-   "rank": 116
-  },
-  {
-   "name": "农产品流通/区域房地产",
-   "change_pct": 0.0,
-   "main_net_yi": 0.56,
-   "rank": 117
+   "rank": 111
   },
   {
    "name": "汽车零部件（热管理与数字能源冷却）",
    "change_pct": 0.0,
    "main_net_yi": 0.54,
-   "rank": 118
+   "rank": 112
   },
   {
    "name": "电气设备（储能系统）",
    "change_pct": 0.0,
    "main_net_yi": 0.5,
-   "rank": 119
+   "rank": 113
   },
   {
    "name": "软件服务（基础软件/办公SaaS）",
    "change_pct": 0.0,
    "main_net_yi": 0.5,
-   "rank": 120
+   "rank": 114
   },
   {
    "name": "消费电子（精密零组件与代工）",
    "change_pct": 0.0,
    "main_net_yi": 0.49,
-   "rank": 121
+   "rank": 115
   },
   {
    "name": "食品饮料（预调鸡尾酒/微醺酒）",
    "change_pct": 0.0,
    "main_net_yi": 0.49,
-   "rank": 122
+   "rank": 116
   },
   {
    "name": "矿物制品（高性能稀土永磁材料）",
    "change_pct": 0.0,
    "main_net_yi": 0.49,
-   "rank": 123
+   "rank": 117
   },
   {
    "name": "专用设备（化工/石化自动化装备及机器人）",
    "change_pct": 0.0,
    "main_net_yi": 0.48,
-   "rank": 124
-  },
-  {
-   "name": "化学原料和化学制品制造业（有机颜料及染料涂料）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.48,
-   "rank": 125
+   "rank": 118
   },
   {
    "name": "农产品加工（软饮料原材料/浓缩果汁）",
    "change_pct": 0.0,
    "main_net_yi": 0.48,
-   "rank": 126
+   "rank": 119
   },
   {
    "name": "轻工制造（高端品牌包装）",
    "change_pct": 0.0,
    "main_net_yi": 0.46,
-   "rank": 127
-  },
-  {
-   "name": "软饮料（植物蛋白饮料）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.46,
-   "rank": 128
+   "rank": 120
   },
   {
    "name": "通信设备（光器件/光模块上游）",
    "change_pct": 0.0,
    "main_net_yi": 0.45,
-   "rank": 129
+   "rank": 121
   },
   {
    "name": "有色金属（铜冶炼）",
    "change_pct": 0.0,
    "main_net_yi": 0.45,
-   "rank": 130
+   "rank": 122
   },
   {
    "name": "光伏辅材（胶膜/背板）",
    "change_pct": 0.0,
    "main_net_yi": 0.44,
-   "rank": 131
+   "rank": 123
+  },
+  {
+   "name": "农林牧渔（饲料与生猪养殖）",
+   "change_pct": 0.0,
+   "main_net_yi": 0.43,
+   "rank": 124
   },
   {
    "name": "半导体（基带通信与AI SoC）",
    "change_pct": 0.0,
    "main_net_yi": 0.42,
-   "rank": 132
-  },
-  {
-   "name": "农林牧渔（饲料与生猪养殖）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.42,
-   "rank": 133
-  },
-  {
-   "name": "通信服务（移动信息服务/数字营销）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.42,
-   "rank": 134
+   "rank": 125
   },
   {
    "name": "医药商业(医药流通)",
    "change_pct": 0.0,
    "main_net_yi": 0.42,
-   "rank": 135
+   "rank": 126
   },
   {
    "name": "消费电子（跨境电商/品牌出海）",
    "change_pct": 0.0,
    "main_net_yi": 0.41,
-   "rank": 136
+   "rank": 127
   },
   {
    "name": "特种钢铁（高端不锈钢管）",
    "change_pct": 0.0,
    "main_net_yi": 0.41,
-   "rank": 137
+   "rank": 128
   },
   {
    "name": "医疗服务（CRO/CDMO）",
    "change_pct": 0.0,
    "main_net_yi": 0.4,
-   "rank": 138
+   "rank": 129
   },
   {
    "name": "专用机械（激光加工设备）",
    "change_pct": 0.0,
    "main_net_yi": 0.4,
-   "rank": 139
+   "rank": 130
   },
   {
    "name": "有色金属（黄金及稀贵金属锑/钨）",
    "change_pct": 0.0,
    "main_net_yi": 0.4,
-   "rank": 140
-  },
-  {
-   "name": "石油化工与化纤",
-   "change_pct": 0.0,
-   "main_net_yi": 0.39,
-   "rank": 141
+   "rank": 131
   },
   {
    "name": "医药生物（化学制药/医美）",
    "change_pct": 0.0,
    "main_net_yi": 0.39,
-   "rank": 142
+   "rank": 132
   },
   {
    "name": "仓储物流（快递）",
    "change_pct": 0.0,
    "main_net_yi": 0.37,
-   "rank": 143
+   "rank": 133
   },
   {
    "name": "通用设备制造（数控机床及核心零部件）",
    "change_pct": 0.0,
    "main_net_yi": 0.37,
-   "rank": 144
+   "rank": 134
   },
   {
    "name": "燃气(清洁能源/LNG/特种气体)",
    "change_pct": 0.0,
    "main_net_yi": 0.36,
-   "rank": 145
+   "rank": 135
   },
   {
    "name": "IT设备（智能消费电子/全景相机）",
    "change_pct": 0.0,
    "main_net_yi": 0.34,
-   "rank": 146
+   "rank": 136
   },
   {
    "name": "小金属（天然铀开采与冶炼）",
    "change_pct": 0.0,
    "main_net_yi": 0.34,
-   "rank": 147
+   "rank": 137
   },
   {
    "name": "医药生物（模式动物/CRO/创新药）",
    "change_pct": 0.0,
    "main_net_yi": 0.33,
-   "rank": 148
+   "rank": 138
   },
   {
    "name": "IT设备（网络设备与算力服务器）",
    "change_pct": 0.0,
    "main_net_yi": 0.33,
-   "rank": 149
-  },
-  {
-   "name": "影视音像",
-   "change_pct": 0.0,
-   "main_net_yi": 0.27,
-   "rank": 150
+   "rank": 139
   },
   {
    "name": "医药生物（化学制药/大输液/创新药）",
    "change_pct": 0.0,
    "main_net_yi": 0.26,
-   "rank": 151
+   "rank": 140
   },
   {
    "name": "国防军工（船舶动力及装备）",
    "change_pct": 0.0,
    "main_net_yi": 0.25,
-   "rank": 152
+   "rank": 141
   },
   {
    "name": "软件服务（IT服务/信创）",
    "change_pct": 0.0,
    "main_net_yi": 0.23,
-   "rank": 153
+   "rank": 142
   },
   {
    "name": "有色金属（黄金采选）",
    "change_pct": 0.0,
    "main_net_yi": 0.21,
-   "rank": 154
+   "rank": 143
   },
   {
    "name": "软件服务（网络安全与云计算）",
    "change_pct": 0.0,
    "main_net_yi": 0.2,
-   "rank": 155
-  },
-  {
-   "name": "钢铁加工（球墨铸管及普钢）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.2,
-   "rank": 156
-  },
-  {
-   "name": "装修装饰（家庭住宅装修）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.2,
-   "rank": 157
+   "rank": 144
   },
   {
    "name": "软件服务(工业软件/IDC)",
    "change_pct": 0.0,
    "main_net_yi": 0.19,
-   "rank": 158
+   "rank": 145
   },
   {
    "name": "多元金融与电网设备",
    "change_pct": 0.0,
    "main_net_yi": 0.19,
-   "rank": 159
+   "rank": 146
   },
   {
    "name": "家居用品（木地板制造）",
    "change_pct": 0.0,
    "main_net_yi": 0.19,
-   "rank": 160
+   "rank": 147
   },
   {
    "name": "通信设备/军工电子（红外热成像与微波射频）",
    "change_pct": 0.0,
    "main_net_yi": 0.19,
-   "rank": 161
-  },
-  {
-   "name": "建材（集成吊顶/家居装饰）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.17,
-   "rank": 162
-  },
-  {
-   "name": "商贸代理与供应链",
-   "change_pct": 0.0,
-   "main_net_yi": 0.16,
-   "rank": 163
+   "rank": 148
   },
   {
    "name": "交通运输（高速公路投资与运营）",
    "change_pct": 0.0,
    "main_net_yi": 0.15,
-   "rank": 164
+   "rank": 149
   },
   {
    "name": "非金属矿物制品（高端石英玻璃/石英纤维）",
    "change_pct": 0.0,
    "main_net_yi": 0.15,
-   "rank": 165
+   "rank": 150
   },
   {
    "name": "汽车整车（SUV/皮卡/新能源）",
    "change_pct": 0.0,
    "main_net_yi": 0.15,
-   "rank": 166
-  },
-  {
-   "name": "化学制品（特种颜料/钛白粉）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.14,
-   "rank": 167
+   "rank": 151
   },
   {
    "name": "化学制药/创新药/医疗器械",
    "change_pct": 0.0,
    "main_net_yi": 0.14,
-   "rank": 168
-  },
-  {
-   "name": "其他建材（集成吊顶/家居装饰）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.12,
-   "rank": 169
-  },
-  {
-   "name": "全国地产",
-   "change_pct": 0.0,
-   "main_net_yi": 0.11,
-   "rank": 170
-  },
-  {
-   "name": "园区开发（商业地产运营）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.11,
-   "rank": 171
+   "rank": 152
   },
   {
    "name": "电气设备(箱式变电站+充电运营)",
    "change_pct": 0.0,
    "main_net_yi": 0.11,
-   "rank": 172
-  },
-  {
-   "name": "交通基础设施（高速公路运营）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.1,
-   "rank": 173
+   "rank": 153
   },
   {
    "name": "电气设备（光伏组件/磁性材料/锂电池）",
    "change_pct": 0.0,
    "main_net_yi": 0.1,
-   "rank": 174
+   "rank": 154
   },
   {
    "name": "电器仪表（第三方检测与认证服务）",
    "change_pct": 0.0,
    "main_net_yi": 0.1,
-   "rank": 175
-  },
-  {
-   "name": "出版业",
-   "change_pct": 0.0,
-   "main_net_yi": 0.09,
-   "rank": 176
+   "rank": 155
   },
   {
    "name": "半导体(模拟芯片设计)",
    "change_pct": 0.0,
    "main_net_yi": 0.09,
-   "rank": 177
+   "rank": 156
   },
   {
    "name": "医药商业（医药流通）",
    "change_pct": 0.0,
    "main_net_yi": 0.09,
-   "rank": 178
+   "rank": 157
   },
   {
    "name": "文教休闲用品（人造草坪制造）",
    "change_pct": 0.0,
    "main_net_yi": 0.09,
-   "rank": 179
-  },
-  {
-   "name": "钢铁（特种钢/不锈钢）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.08,
-   "rank": 180
+   "rank": 158
   },
   {
    "name": "文教休闲（文具制造与办公用品直销）",
    "change_pct": 0.0,
    "main_net_yi": 0.08,
-   "rank": 181
+   "rank": 159
   },
   {
    "name": "玻璃纤维/复合材料",
    "change_pct": 0.0,
    "main_net_yi": 0.08,
-   "rank": 182
+   "rank": 160
   },
   {
    "name": "供气供热(天然气产业链一体化)",
    "change_pct": 0.0,
    "main_net_yi": 0.07,
-   "rank": 183
+   "rank": 161
   },
   {
    "name": "纺织服饰（服装家纺）",
    "change_pct": 0.0,
    "main_net_yi": 0.07,
-   "rank": 184
-  },
-  {
-   "name": "装修装饰（公装及住宅精装修）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.07,
-   "rank": 185
+   "rank": 162
   },
   {
    "name": "纺织服装设备（智能电控系统）",
    "change_pct": 0.0,
    "main_net_yi": 0.07,
-   "rank": 186
+   "rank": 163
   },
   {
    "name": "软件（金融信息服务/人工智能应用）",
    "change_pct": 0.0,
    "main_net_yi": 0.06,
-   "rank": 187
-  },
-  {
-   "name": "多元金融（私募股权投资）与非金属建材（水泥）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.06,
-   "rank": 188
-  },
-  {
-   "name": "通用设备制造（金属切削机床）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.06,
-   "rank": 189
+   "rank": 164
   },
   {
    "name": "纺织服饰（运动鞋履制造）",
    "change_pct": 0.0,
    "main_net_yi": 0.05,
-   "rank": 190
-  },
-  {
-   "name": "路桥（高速公路运营与投资）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.05,
-   "rank": 191
+   "rank": 165
   },
   {
    "name": "化学制剂（创新药/肠外营养）",
    "change_pct": 0.0,
    "main_net_yi": 0.05,
-   "rank": 192
-  },
-  {
-   "name": "多元金融（信托）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.04,
-   "rank": 193
+   "rank": 166
   },
   {
    "name": "轻工制造（软体家居/定制家居）",
    "change_pct": 0.0,
    "main_net_yi": 0.04,
-   "rank": 194
+   "rank": 167
   },
   {
    "name": "农业综合（白羽肉鸡养殖加工）",
    "change_pct": 0.0,
    "main_net_yi": 0.04,
-   "rank": 195
-  },
-  {
-   "name": "纺织服饰（男装）与房地产开发",
-   "change_pct": 0.0,
-   "main_net_yi": 0.04,
-   "rank": 196
+   "rank": 168
   },
   {
    "name": "半导体（半导体设备）",
    "change_pct": 0.0,
    "main_net_yi": 0.04,
-   "rank": 197
+   "rank": 169
   },
   {
    "name": "建筑化工工程（化学工程EPC）",
    "change_pct": 0.0,
    "main_net_yi": 0.03,
-   "rank": 198
+   "rank": 170
   },
   {
    "name": "互联网（移动游戏）",
    "change_pct": 0.0,
    "main_net_yi": 0.03,
-   "rank": 199
-  },
-  {
-   "name": "区域地产",
-   "change_pct": 0.0,
-   "main_net_yi": 0.02,
-   "rank": 200
+   "rank": 171
   },
   {
    "name": "国防军工/半导体（微波毫米波/射频集成电路）",
    "change_pct": 0.0,
    "main_net_yi": 0.02,
-   "rank": 201
-  },
-  {
-   "name": "食品饮料（啤酒）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.02,
-   "rank": 202
-  },
-  {
-   "name": "园区开发（产业地产）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.01,
-   "rank": 203
+   "rank": 172
   },
   {
    "name": "建筑工程（基建工程与矿业开采）",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 204
+   "rank": 173
   },
   {
    "name": "纺织服饰（棉纺织/色纺纱）",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 205
+   "rank": 174
   },
   {
    "name": "汽车零部件（智能座舱/智能驾驶域控制器）",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 206
+   "rank": 175
   },
   {
    "name": "电子元器件/EMS（电子制造服务）",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 207
-  },
-  {
-   "name": "饲料添加剂（动物营养）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.01,
-   "rank": 208
+   "rank": 176
   },
   {
    "name": "机械基件（高端铸件/精密加工）",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 209
-  },
-  {
-   "name": "石油加工（炼油化工）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.01,
-   "rank": 210
+   "rank": 177
   },
   {
    "name": "农业机械（拖拉机/收割机）",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 211
+   "rank": 178
   },
   {
    "name": "半导体(半导体设备-量测与检测)",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 212
+   "rank": 179
   },
   {
    "name": "家居用品（金属制品/定制家居五金）",
    "change_pct": 0.0,
    "main_net_yi": 0.01,
-   "rank": 213
-  },
-  {
-   "name": "葡萄酒及白兰地（红黄酒）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.01,
-   "rank": 214
-  },
-  {
-   "name": "化工（炼油化纤）",
-   "change_pct": 0.0,
-   "main_net_yi": 0.0,
-   "rank": 215
+   "rank": 180
   },
   {
    "name": "汽车零部件（汽车玻璃及铝饰件）",
    "change_pct": 0.0,
    "main_net_yi": 0.0,
-   "rank": 216
+   "rank": 181
   },
   {
    "name": "轻工制造（手工具/动力工具/OPE）",
    "change_pct": 0.0,
    "main_net_yi": -0.01,
-   "rank": 217
+   "rank": 182
   },
   {
-   "name": "旅游零售（免税品）",
+   "name": "电子元器件（MLCC/被动元件）",
    "change_pct": 0.0,
    "main_net_yi": -0.01,
-   "rank": 218
+   "rank": 183
   },
   {
-   "name": "电子元器件（被动元件/MLCC）",
+   "name": "交通运输（高速公路运营）",
    "change_pct": 0.0,
    "main_net_yi": -0.01,
-   "rank": 219
-  },
-  {
-   "name": "种植业（天然橡胶）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.01,
-   "rank": 220
+   "rank": 184
   },
   {
    "name": "园区开发（房地产/商业地产）",
    "change_pct": 0.0,
    "main_net_yi": -0.01,
-   "rank": 221
-  },
-  {
-   "name": "商业百货/珠宝首饰/综合消费",
-   "change_pct": 0.0,
-   "main_net_yi": -0.02,
-   "rank": 222
-  },
-  {
-   "name": "其他商业（家居连锁零售/商业地产）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.02,
-   "rank": 223
-  },
-  {
-   "name": "畜禽养殖（黄羽肉鸡）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.02,
-   "rank": 224
-  },
-  {
-   "name": "石油加工（丙烷脱氢/聚丙烯/液化石油气）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.02,
-   "rank": 225
+   "rank": 185
   },
   {
    "name": "软件服务(人工智能)",
    "change_pct": 0.0,
    "main_net_yi": -0.02,
-   "rank": 226
-  },
-  {
-   "name": "环保（环卫装备与环卫服务）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.02,
-   "rank": 227
-  },
-  {
-   "name": "家居用品（建筑陶瓷/瓷砖）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.03,
-   "rank": 228
-  },
-  {
-   "name": "广告营销（数字营销与全媒体代理）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.03,
-   "rank": 229
+   "rank": 186
   },
   {
    "name": "电气设备-铜箔（锂电铜箔+电子电路铜箔）",
    "change_pct": 0.0,
    "main_net_yi": -0.03,
-   "rank": 230
+   "rank": 187
   },
   {
    "name": "园区开发与基础设施运营",
    "change_pct": 0.0,
    "main_net_yi": -0.03,
-   "rank": 231
+   "rank": 188
   },
   {
    "name": "计算机",
    "change_pct": 0.0,
    "main_net_yi": -0.03,
-   "rank": 232
+   "rank": 189
   },
   {
    "name": "专用机械（轮胎模具/风电铸件/数控机床）",
    "change_pct": 0.0,
    "main_net_yi": -0.04,
-   "rank": 233
+   "rank": 190
   },
   {
    "name": "建材（塑料管道）",
    "change_pct": 0.0,
    "main_net_yi": -0.04,
-   "rank": 234
+   "rank": 191
   },
   {
    "name": "工程机械(叉车/工业车辆)",
    "change_pct": 0.0,
    "main_net_yi": -0.04,
-   "rank": 235
+   "rank": 192
   },
   {
    "name": "种植业/粮油加工",
    "change_pct": 0.0,
    "main_net_yi": -0.05,
-   "rank": 236
-  },
-  {
-   "name": "影视音像/传媒",
-   "change_pct": 0.0,
-   "main_net_yi": -0.05,
-   "rank": 237
+   "rank": 193
   },
   {
    "name": "生物制药（创新药）",
    "change_pct": 0.0,
    "main_net_yi": -0.05,
-   "rank": 238
-  },
-  {
-   "name": "医药生物/食品添加剂",
-   "change_pct": 0.0,
-   "main_net_yi": -0.05,
-   "rank": 239
+   "rank": 194
   },
   {
    "name": "日用化工（化妆品）",
    "change_pct": 0.0,
    "main_net_yi": -0.05,
-   "rank": 240
-  },
-  {
-   "name": "房地产开发（区域型房企）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.05,
-   "rank": 241
+   "rank": 195
   },
   {
    "name": "日用化工（功能性护肤品/医疗器械敷料）",
    "change_pct": 0.0,
    "main_net_yi": -0.05,
-   "rank": 242
+   "rank": 196
   },
   {
    "name": "工程机械 (液压元件)",
    "change_pct": 0.0,
    "main_net_yi": -0.06,
-   "rank": 243
+   "rank": 197
   },
   {
    "name": "电器连锁/消费电子分销与零售",
    "change_pct": 0.0,
    "main_net_yi": -0.06,
-   "rank": 244
+   "rank": 198
   },
   {
    "name": "家用电器/建筑装饰(电工照明)",
    "change_pct": 0.0,
    "main_net_yi": -0.06,
-   "rank": 245
-  },
-  {
-   "name": "国防军工（船舶装备/水声电子）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.06,
-   "rank": 246
-  },
-  {
-   "name": "电器连锁",
-   "change_pct": 0.0,
-   "main_net_yi": -0.06,
-   "rank": 247
-  },
-  {
-   "name": "公用事业（水务/燃气/环保）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.06,
-   "rank": 248
+   "rank": 199
   },
   {
    "name": "化工新材料（光刻胶/PCB化学品）",
    "change_pct": 0.0,
    "main_net_yi": -0.06,
-   "rank": 249
+   "rank": 200
   },
   {
    "name": "半导体（CMOS图像传感器及显示驱动芯片设计）",
    "change_pct": 0.0,
    "main_net_yi": -0.06,
-   "rank": 250
+   "rank": 201
   },
   {
    "name": "化工（改性塑料/特种工程塑料）",
    "change_pct": 0.0,
    "main_net_yi": -0.07,
-   "rank": 251
+   "rank": 202
   },
   {
    "name": "银行（城商行）",
    "change_pct": 0.0,
    "main_net_yi": -0.07,
-   "rank": 252
-  },
-  {
-   "name": "家居用品（定制家居）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.07,
-   "rank": 253
+   "rank": 203
   },
   {
    "name": "铁路货运（特种物流）",
    "change_pct": 0.0,
    "main_net_yi": -0.07,
-   "rank": 254
-  },
-  {
-   "name": "煤炭开采(焦煤)",
-   "change_pct": 0.0,
-   "main_net_yi": -0.08,
-   "rank": 255
+   "rank": 204
   },
   {
    "name": "IT设备（信创整机/服务器）",
    "change_pct": 0.0,
    "main_net_yi": -0.08,
-   "rank": 256
-  },
-  {
-   "name": "影视音像（流媒体/综艺制作）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.09,
-   "rank": 257
-  },
-  {
-   "name": "钢铁（特种钢及铁合金）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.09,
-   "rank": 258
+   "rank": 205
   },
   {
    "name": "专用机械（光伏与半导体硅片设备）",
    "change_pct": 0.0,
    "main_net_yi": -0.09,
-   "rank": 259
-  },
-  {
-   "name": "房产服务（物业管理与资产管理）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.09,
-   "rank": 260
+   "rank": 206
   },
   {
    "name": "食品饮料（乳制品制造）",
    "change_pct": 0.0,
    "main_net_yi": -0.09,
-   "rank": 261
+   "rank": 207
   },
   {
    "name": "港口运输",
    "change_pct": 0.0,
    "main_net_yi": -0.09,
-   "rank": 262
-  },
-  {
-   "name": "房地产开发与基建工程",
-   "change_pct": 0.0,
-   "main_net_yi": -0.1,
-   "rank": 263
+   "rank": 208
   },
   {
    "name": "旅游及休闲（主题公园与文化演艺）",
    "change_pct": 0.0,
    "main_net_yi": -0.1,
-   "rank": 264
+   "rank": 209
   },
   {
    "name": "钢铁（特钢/中厚板）",
    "change_pct": 0.0,
    "main_net_yi": -0.1,
-   "rank": 265
+   "rank": 210
   },
   {
    "name": "钢铁（特种钢）",
    "change_pct": 0.0,
    "main_net_yi": -0.1,
-   "rank": 266
+   "rank": 211
   },
   {
    "name": "出版传媒",
    "change_pct": 0.0,
    "main_net_yi": -0.1,
-   "rank": 267
-  },
-  {
-   "name": "橡胶制品（输送带）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.1,
-   "rank": 268
+   "rank": 212
   },
   {
    "name": "公用事业（水务）",
    "change_pct": 0.0,
    "main_net_yi": -0.1,
-   "rank": 269
-  },
-  {
-   "name": "交通运输（高速公路运营）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.11,
-   "rank": 270
+   "rank": 213
   },
   {
    "name": "摩托车（含全地形车及通用机械）",
    "change_pct": 0.0,
    "main_net_yi": -0.11,
-   "rank": 271
+   "rank": 214
   },
   {
    "name": "机械基件（工业阀门）",
    "change_pct": 0.0,
    "main_net_yi": -0.11,
-   "rank": 272
-  },
-  {
-   "name": "生物制药（疫苗与体外诊断）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.11,
-   "rank": 273
+   "rank": 215
   },
   {
    "name": "铁路运输",
    "change_pct": 0.0,
    "main_net_yi": -0.11,
-   "rank": 274
-  },
-  {
-   "name": "半导体（CPU及微控制器设计）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.11,
-   "rank": 275
-  },
-  {
-   "name": "公用事业（水务与环保）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.11,
-   "rank": 276
-  },
-  {
-   "name": "专用设备（园林机械/户外动力设备OPE）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.11,
-   "rank": 277
-  },
-  {
-   "name": "房地产开发（区域地产）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.12,
-   "rank": 278
-  },
-  {
-   "name": "商贸代理（钢铁及冶金原材料供应链）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.13,
-   "rank": 279
+   "rank": 216
   },
   {
    "name": "煤炭开采(褐煤)/电解铝/绿电运营",
    "change_pct": 0.0,
    "main_net_yi": -0.13,
-   "rank": 280
+   "rank": 217
   },
   {
    "name": "黄金珠宝首饰零售",
    "change_pct": 0.0,
    "main_net_yi": -0.13,
-   "rank": 281
-  },
-  {
-   "name": "包装印刷（金属包装）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.13,
-   "rank": 282
+   "rank": 218
   },
   {
    "name": "医药商业（线下连锁药房）",
    "change_pct": 0.0,
    "main_net_yi": -0.13,
-   "rank": 283
+   "rank": 219
   },
   {
    "name": "园区开发(产业地产与创投)",
    "change_pct": 0.0,
    "main_net_yi": -0.13,
-   "rank": 284
+   "rank": 220
   },
   {
    "name": "专用机械（PCB专用设备）",
    "change_pct": 0.0,
    "main_net_yi": -0.14,
-   "rank": 285
-  },
-  {
-   "name": "商业百货/线下零售",
-   "change_pct": 0.0,
-   "main_net_yi": -0.14,
-   "rank": 286
+   "rank": 221
   },
   {
    "name": "文教休闲（人力资源服务）",
    "change_pct": 0.0,
    "main_net_yi": -0.15,
-   "rank": 287
+   "rank": 222
   },
   {
    "name": "金属制品（输电铁塔/钢加工）",
    "change_pct": 0.0,
    "main_net_yi": -0.15,
-   "rank": 288
+   "rank": 223
   },
   {
    "name": "旅游景点及服务",
    "change_pct": 0.0,
    "main_net_yi": -0.15,
-   "rank": 289
-  },
-  {
-   "name": "化工（建筑涂料/防水建材）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.15,
-   "rank": 290
+   "rank": 224
   },
   {
    "name": "食品饮料（肉制品加工与屠宰）",
    "change_pct": 0.0,
    "main_net_yi": -0.16,
-   "rank": 291
+   "rank": 225
   },
   {
    "name": "基础化工(煤化工/氮肥/新材料)",
    "change_pct": 0.0,
    "main_net_yi": -0.16,
-   "rank": 292
-  },
-  {
-   "name": "煤炭加工（焦炭及煤化工）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.16,
-   "rank": 293
+   "rank": 226
   },
   {
    "name": "饲料（宠物食品）",
    "change_pct": 0.0,
    "main_net_yi": -0.16,
-   "rank": 294
-  },
-  {
-   "name": "食品饮料（粮油加工）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.17,
-   "rank": 295
+   "rank": 227
   },
   {
    "name": "半导体设备（自动化测试系统）",
    "change_pct": 0.0,
    "main_net_yi": -0.17,
-   "rank": 296
+   "rank": 228
   },
   {
    "name": "航运港口",
    "change_pct": 0.0,
    "main_net_yi": -0.17,
-   "rank": 297
+   "rank": 229
   },
   {
    "name": "医药商业（线下实体药店连锁）",
    "change_pct": 0.0,
    "main_net_yi": -0.17,
-   "rank": 298
-  },
-  {
-   "name": "百货/家居零售",
-   "change_pct": 0.0,
-   "main_net_yi": -0.17,
-   "rank": 299
-  },
-  {
-   "name": "中药",
-   "change_pct": 0.0,
-   "main_net_yi": -0.18,
-   "rank": 300
+   "rank": 230
   },
   {
    "name": "交通运输（跨境综合物流/货代）",
    "change_pct": 0.0,
    "main_net_yi": -0.18,
-   "rank": 301
+   "rank": 231
   },
   {
    "name": "医疗保健 - 体外诊断(IVD) - 化学发光免疫诊断",
    "change_pct": 0.0,
    "main_net_yi": -0.18,
-   "rank": 302
+   "rank": 232
   },
   {
    "name": "软饮料（能量饮料）",
    "change_pct": 0.0,
    "main_net_yi": -0.18,
-   "rank": 303
-  },
-  {
-   "name": "种植业（农作物种业）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.19,
-   "rank": 304
+   "rank": 233
   },
   {
    "name": "环境保护（固废处理/新能源材料）",
    "change_pct": 0.0,
    "main_net_yi": -0.19,
-   "rank": 305
+   "rank": 234
   },
   {
    "name": "建筑装饰（洁净室系统工程）",
    "change_pct": 0.0,
    "main_net_yi": -0.19,
-   "rank": 306
+   "rank": 235
   },
   {
    "name": "汽车配件（综合汽车零部件）",
    "change_pct": 0.0,
    "main_net_yi": -0.2,
-   "rank": 307
-  },
-  {
-   "name": "供气供热（城市燃气及新能源）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.2,
-   "rank": 308
-  },
-  {
-   "name": "一般零售（百货/奥莱/免税）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.2,
-   "rank": 309
+   "rank": 236
   },
   {
    "name": "汽车（新能源）",
    "change_pct": 0.0,
    "main_net_yi": -0.2,
-   "rank": 310
+   "rank": 237
   },
   {
    "name": "汽车配件（新能源动力系统）",
    "change_pct": 0.0,
    "main_net_yi": -0.21,
-   "rank": 311
+   "rank": 238
   },
   {
    "name": "化工机械（油气服务与装备）",
    "change_pct": 0.0,
    "main_net_yi": -0.21,
-   "rank": 312
+   "rank": 239
   },
   {
    "name": "环境保护（固废处理/公用事业）",
    "change_pct": 0.0,
    "main_net_yi": -0.21,
-   "rank": 313
+   "rank": 240
   },
   {
    "name": "影视动漫制作与发行",
    "change_pct": 0.0,
    "main_net_yi": -0.22,
-   "rank": 314
+   "rank": 241
   },
   {
    "name": "医药生物（创新药/ADC药物）",
    "change_pct": 0.0,
    "main_net_yi": -0.22,
-   "rank": 315
+   "rank": 242
   },
   {
    "name": "汽车服务（汽车技术服务与测试认证）",
    "change_pct": 0.0,
    "main_net_yi": -0.22,
-   "rank": 316
-  },
-  {
-   "name": "职业教育与培训",
-   "change_pct": 0.0,
-   "main_net_yi": -0.22,
-   "rank": 317
+   "rank": 243
   },
   {
    "name": "医药（中成药/医药商业/大健康）",
    "change_pct": 0.0,
    "main_net_yi": -0.23,
-   "rank": 318
+   "rank": 244
   },
   {
    "name": "商业连锁（超市/百货）",
    "change_pct": 0.0,
    "main_net_yi": -0.23,
-   "rank": 319
+   "rank": 245
   },
   {
    "name": "石油开采（油田服务）",
    "change_pct": 0.0,
    "main_net_yi": -0.24,
-   "rank": 320
+   "rank": 246
   },
   {
    "name": "通信（卫星通信及空间运营）",
    "change_pct": 0.0,
    "main_net_yi": -0.24,
-   "rank": 321
+   "rank": 247
   },
   {
    "name": "煤炭开采（喷吹煤/动力煤）",
    "change_pct": 0.0,
    "main_net_yi": -0.24,
-   "rank": 322
-  },
-  {
-   "name": "酒店餐饮",
-   "change_pct": 0.0,
-   "main_net_yi": -0.24,
-   "rank": 323
+   "rank": 248
   },
   {
    "name": "小金属（稀土冶炼分离与深加工）",
    "change_pct": 0.0,
    "main_net_yi": -0.25,
-   "rank": 324
+   "rank": 249
   },
   {
    "name": "电气设备（低压电器与光伏新能源）",
    "change_pct": 0.0,
    "main_net_yi": -0.25,
-   "rank": 325
+   "rank": 250
   },
   {
    "name": "农化制品（钾肥）/锂（小金属）",
    "change_pct": 0.0,
    "main_net_yi": -0.25,
-   "rank": 326
+   "rank": 251
   },
   {
    "name": "医药生物（中成药/中药老字号）",
    "change_pct": 0.0,
    "main_net_yi": -0.25,
-   "rank": 327
+   "rank": 252
   },
   {
    "name": "纺织服饰(男装零售)",
    "change_pct": 0.0,
    "main_net_yi": -0.26,
-   "rank": 328
+   "rank": 253
   },
   {
    "name": "日用化工（皮肤学级护肤/功效性化妆品）",
    "change_pct": 0.0,
    "main_net_yi": -0.26,
-   "rank": 329
-  },
-  {
-   "name": "建材/钢加工（钢结构制造）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.26,
-   "rank": 330
-  },
-  {
-   "name": "港口航运（码头运营与综合物流）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.26,
-   "rank": 331
+   "rank": 254
   },
   {
    "name": "元器件（硅基OLED微显示器件）",
    "change_pct": 0.0,
    "main_net_yi": -0.26,
-   "rank": 332
+   "rank": 255
   },
   {
    "name": "电子元器件(高端PCB/CCL)",
    "change_pct": 0.0,
    "main_net_yi": -0.27,
-   "rank": 333
-  },
-  {
-   "name": "航运（特种杂货运输）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.28,
-   "rank": 334
-  },
-  {
-   "name": "出版业（学术出版与数字传媒）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.28,
-   "rank": 335
+   "rank": 256
   },
   {
    "name": "运输设备（轨道交通控制系统）",
    "change_pct": 0.0,
    "main_net_yi": -0.28,
-   "rank": 336
+   "rank": 257
   },
   {
    "name": "半导体（半导体精密零部件）",
    "change_pct": 0.0,
    "main_net_yi": -0.3,
-   "rank": 337
-  },
-  {
-   "name": "银行（区域性农商行）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.31,
-   "rank": 338
-  },
-  {
-   "name": "环保（危废处置及金属资源化）与清洁能源设备",
-   "change_pct": 0.0,
-   "main_net_yi": -0.31,
-   "rank": 339
+   "rank": 258
   },
   {
    "name": "食品（量贩零食连锁）",
    "change_pct": 0.0,
    "main_net_yi": -0.31,
-   "rank": 340
-  },
-  {
-   "name": "汽车/摩托车制造",
-   "change_pct": 0.0,
-   "main_net_yi": -0.32,
-   "rank": 341
+   "rank": 259
   },
   {
    "name": "公用事业（风力发电/天然气)",
    "change_pct": 0.0,
    "main_net_yi": -0.32,
-   "rank": 342
+   "rank": 260
   },
   {
-   "name": "影视音像（电影制作与发行）",
+   "name": "银行业（股份制银行）",
    "change_pct": 0.0,
-   "main_net_yi": -0.33,
-   "rank": 343
-  },
-  {
-   "name": "建材/水泥/房地产开发",
-   "change_pct": 0.0,
-   "main_net_yi": -0.33,
-   "rank": 344
-  },
-  {
-   "name": "特种钢/普钢",
-   "change_pct": 0.0,
-   "main_net_yi": -0.33,
-   "rank": 345
-  },
-  {
-   "name": "商贸代理/化学原料及化学制品制造业（锂电电解液）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.34,
-   "rank": 346
-  },
-  {
-   "name": "电气设备（风电整机及运营）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.34,
-   "rank": 347
+   "main_net_yi": -0.35,
+   "rank": 261
   },
   {
    "name": "电力（核电及新能源发电）",
    "change_pct": 0.0,
    "main_net_yi": -0.35,
-   "rank": 348
+   "rank": 262
   },
   {
    "name": "医药生物(中药/OTC)",
    "change_pct": 0.0,
    "main_net_yi": -0.35,
-   "rank": 349
+   "rank": 263
   },
   {
    "name": "国防军工（航空机载系统）",
    "change_pct": 0.0,
    "main_net_yi": -0.35,
-   "rank": 350
+   "rank": 264
   },
   {
    "name": "红外热成像及军工电子",
    "change_pct": 0.0,
    "main_net_yi": -0.36,
-   "rank": 351
-  },
-  {
-   "name": "航空机场",
-   "change_pct": 0.0,
-   "main_net_yi": -0.36,
-   "rank": 352
+   "rank": 265
   },
   {
    "name": "摩托车及其他非道路车辆制造",
    "change_pct": 0.0,
    "main_net_yi": -0.36,
-   "rank": 353
+   "rank": 266
   },
   {
    "name": "商贸代理（金属矿产贸易与投资）",
    "change_pct": 0.0,
    "main_net_yi": -0.36,
-   "rank": 354
-  },
-  {
-   "name": "零售业（母婴童商品零售）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.36,
-   "rank": 355
+   "rank": 267
   },
   {
    "name": "交通运输（机场枢纽）",
    "change_pct": 0.0,
    "main_net_yi": -0.37,
-   "rank": 356
+   "rank": 268
   },
   {
    "name": "通用设备制造/工业气体",
    "change_pct": 0.0,
    "main_net_yi": -0.37,
-   "rank": 357
-  },
-  {
-   "name": "化纤(碳纤维)",
-   "change_pct": 0.0,
-   "main_net_yi": -0.37,
-   "rank": 358
+   "rank": 269
   },
   {
    "name": "电气设备（电池材料/三元前驱体）",
    "change_pct": 0.0,
    "main_net_yi": -0.37,
-   "rank": 359
+   "rank": 270
   },
   {
    "name": "航空物流（航空货物运输）",
    "change_pct": 0.0,
    "main_net_yi": -0.37,
-   "rank": 360
-  },
-  {
-   "name": "日用化工（美妆个护）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.39,
-   "rank": 361
+   "rank": 271
   },
   {
    "name": "通信设备（统一通信终端）",
    "change_pct": 0.0,
    "main_net_yi": -0.39,
-   "rank": 362
-  },
-  {
-   "name": "酒店及餐饮（酒店运营与管理）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.39,
-   "rank": 363
-  },
-  {
-   "name": "油气开采与服务",
-   "change_pct": 0.0,
-   "main_net_yi": -0.39,
-   "rank": 364
+   "rank": 272
   },
   {
    "name": "半导体（IC设计/FPGA）",
    "change_pct": 0.0,
    "main_net_yi": -0.41,
-   "rank": 365
+   "rank": 273
   },
   {
    "name": "电力（火电及综合能源）",
    "change_pct": 0.0,
    "main_net_yi": -0.43,
-   "rank": 366
+   "rank": 274
   },
   {
    "name": "种植业（土地发包/粮食种植）",
    "change_pct": 0.0,
    "main_net_yi": -0.43,
-   "rank": 367
+   "rank": 275
   },
   {
    "name": "食品饮料（啤酒制造）",
    "change_pct": 0.0,
    "main_net_yi": -0.44,
-   "rank": 368
-  },
-  {
-   "name": "农林牧渔（饲料/生猪养殖/种业）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.46,
-   "rank": 369
+   "rank": 276
   },
   {
    "name": "电气设备（AI电源/精密执行器）",
    "change_pct": 0.0,
    "main_net_yi": -0.46,
-   "rank": 370
-  },
-  {
-   "name": "有色金属（铜铅锌冶炼与 mining）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.47,
-   "rank": 371
+   "rank": 277
   },
   {
    "name": "环保设备（大气治理）与新能源运营",
    "change_pct": 0.0,
    "main_net_yi": -0.47,
-   "rank": 372
+   "rank": 278
   },
   {
    "name": "水运（集装箱租赁与制造）",
    "change_pct": 0.0,
    "main_net_yi": -0.47,
-   "rank": 373
+   "rank": 279
   },
   {
    "name": "IT设备（安防监控/智慧物联）",
    "change_pct": 0.0,
    "main_net_yi": -0.48,
-   "rank": 374
+   "rank": 280
   },
   {
    "name": "专用设备（纺织机械）",
    "change_pct": 0.0,
    "main_net_yi": -0.49,
-   "rank": 375
+   "rank": 281
   },
   {
    "name": "医药生物（医药商业+医药工业）",
    "change_pct": 0.0,
    "main_net_yi": -0.49,
-   "rank": 376
+   "rank": 282
   },
   {
    "name": "专用机械（激光/工业自动化控制软件）",
    "change_pct": 0.0,
    "main_net_yi": -0.5,
-   "rank": 377
+   "rank": 283
   },
   {
    "name": "综合类（盐湖提锂与化工）",
    "change_pct": 0.0,
    "main_net_yi": -0.5,
-   "rank": 378
+   "rank": 284
   },
   {
    "name": "元器件（3D视觉传感器/机器视觉）",
    "change_pct": 0.0,
    "main_net_yi": -0.5,
-   "rank": 379
+   "rank": 285
+  },
+  {
+   "name": "资本市场服务（证券业）",
+   "change_pct": 0.0,
+   "main_net_yi": -0.5,
+   "rank": 286
   },
   {
    "name": "有色金属（铅锌及铜）",
    "change_pct": 0.0,
    "main_net_yi": -0.5,
-   "rank": 380
+   "rank": 287
   },
   {
    "name": "家用电器/消费电子/光通信",
    "change_pct": 0.0,
    "main_net_yi": -0.51,
-   "rank": 381
-  },
-  {
-   "name": "化工(炼化一体化及化纤)",
-   "change_pct": 0.0,
-   "main_net_yi": -0.52,
-   "rank": 382
-  },
-  {
-   "name": "钢铁（铁矿采选/小金属锂矿）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.55,
-   "rank": 383
+   "rank": 288
   },
   {
    "name": "运输设备（轨交电气+功率半导体）",
    "change_pct": 0.0,
    "main_net_yi": -0.55,
-   "rank": 384
-  },
-  {
-   "name": "供应链运营与房地产开发",
-   "change_pct": 0.0,
-   "main_net_yi": -0.57,
-   "rank": 385
+   "rank": 289
   },
   {
    "name": "电器仪表（半导体测试设备/高端电子测量仪器）",
    "change_pct": 0.0,
    "main_net_yi": -0.58,
-   "rank": 386
+   "rank": 290
   },
   {
    "name": "光伏设备（组件制造、系统集成、储能）",
    "change_pct": 0.0,
    "main_net_yi": -0.58,
-   "rank": 387
+   "rank": 291
   },
   {
    "name": "光伏设备（多晶硅料）",
    "change_pct": 0.0,
    "main_net_yi": -0.59,
-   "rank": 388
+   "rank": 292
   },
   {
    "name": "元器件（光学薄膜/AR-HUD/光波导）",
    "change_pct": 0.0,
    "main_net_yi": -0.59,
-   "rank": 389
+   "rank": 293
   },
   {
    "name": "出版业（报刊出版与传媒）",
    "change_pct": 0.0,
    "main_net_yi": -0.6,
-   "rank": 390
+   "rank": 294
   },
   {
    "name": "航空运输(低成本航空)",
    "change_pct": 0.0,
    "main_net_yi": -0.61,
-   "rank": 391
-  },
-  {
-   "name": "公共交通（城市客运/出租车）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.61,
-   "rank": 392
-  },
-  {
-   "name": "煤炭开采加工（焦炭加工/氢能源）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.61,
-   "rank": 393
+   "rank": 295
   },
   {
    "name": "汽车整车(新能源乘用车)",
    "change_pct": 0.0,
    "main_net_yi": -0.61,
-   "rank": 394
+   "rank": 296
   },
   {
    "name": "小金属（锂资源及锂盐深加工）",
    "change_pct": 0.0,
    "main_net_yi": -0.62,
-   "rank": 395
-  },
-  {
-   "name": "电气设备（锂盐及新能源金属）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.62,
-   "rank": 396
+   "rank": 297
   },
   {
    "name": "仓储物流",
    "change_pct": 0.0,
    "main_net_yi": -0.62,
-   "rank": 397
+   "rank": 298
   },
   {
    "name": "国防军工（航空装备整机及无人机）",
    "change_pct": 0.0,
    "main_net_yi": -0.63,
-   "rank": 398
+   "rank": 299
   },
   {
    "name": "食品饮料（调味品发酵）",
    "change_pct": 0.0,
    "main_net_yi": -0.64,
-   "rank": 399
-  },
-  {
-   "name": "运输设备（集装箱与物流装备）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.64,
-   "rank": 400
-  },
-  {
-   "name": "房地产（园区开发与住宅）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.64,
-   "rank": 401
-  },
-  {
-   "name": "造纸（特种纸及烟草配套包装）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.65,
-   "rank": 402
-  },
-  {
-   "name": "零售业（超市连锁）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.67,
-   "rank": 403
+   "rank": 300
   },
   {
    "name": "医疗服务（眼科专科连锁）",
    "change_pct": 0.0,
    "main_net_yi": -0.67,
-   "rank": 404
+   "rank": 301
   },
   {
    "name": "电气设备（锂电池正极材料）",
    "change_pct": 0.0,
    "main_net_yi": -0.68,
-   "rank": 405
-  },
-  {
-   "name": "白酒（次高端酱香/浓香）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.68,
-   "rank": 406
+   "rank": 302
   },
   {
    "name": "港口航运（港口运营）",
    "change_pct": 0.0,
    "main_net_yi": -0.68,
-   "rank": 407
+   "rank": 303
   },
   {
    "name": "通信设备（光模块及光无源器件）",
    "change_pct": 0.0,
    "main_net_yi": -0.69,
-   "rank": 408
+   "rank": 304
   },
   {
    "name": "汽车（摩托车及全地形车制造）",
    "change_pct": 0.0,
    "main_net_yi": -0.7,
-   "rank": 409
-  },
-  {
-   "name": "文教休闲用品（玩具制造+教育信息化）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.71,
-   "rank": 410
-  },
-  {
-   "name": "石油加工（炼化一体化及化纤）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.71,
-   "rank": 411
+   "rank": 305
   },
   {
    "name": "有色金属（电解铝及铝加工）",
    "change_pct": 0.0,
    "main_net_yi": -0.72,
-   "rank": 412
+   "rank": 306
   },
   {
    "name": "半导体设备（CMP及减薄设备）",
    "change_pct": 0.0,
    "main_net_yi": -0.73,
-   "rank": 413
+   "rank": 307
   },
   {
    "name": "软件服务（金融IT）",
    "change_pct": 0.0,
    "main_net_yi": -0.73,
-   "rank": 414
-  },
-  {
-   "name": "小金属（锂、铯、铷）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.73,
-   "rank": 415
+   "rank": 308
   },
   {
    "name": "通信设备（消费电子/智能终端）",
    "change_pct": 0.0,
    "main_net_yi": -0.73,
-   "rank": 416
+   "rank": 309
   },
   {
    "name": "电子元器件（精密光学/光通信器件）",
    "change_pct": 0.0,
    "main_net_yi": -0.74,
-   "rank": 417
+   "rank": 310
   },
   {
    "name": "电气设备（锂电池精密结构件）",
    "change_pct": 0.0,
    "main_net_yi": -0.74,
-   "rank": 418
-  },
-  {
-   "name": "证券（资本市场服务）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.76,
-   "rank": 419
-  },
-  {
-   "name": "通用设备制造（光伏及半导体加工机床）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.76,
-   "rank": 420
+   "rank": 311
   },
   {
    "name": "摩托车及其他（智能短交通）",
    "change_pct": 0.0,
    "main_net_yi": -0.76,
-   "rank": 421
+   "rank": 312
   },
   {
    "name": "传媒（网络游戏）",
    "change_pct": 0.0,
    "main_net_yi": -0.76,
-   "rank": 422
+   "rank": 313
   },
   {
    "name": "公用事业(水务与环保)",
    "change_pct": 0.0,
    "main_net_yi": -0.78,
-   "rank": 423
+   "rank": 314
   },
   {
    "name": "电气设备（电网二次设备/储能）",
    "change_pct": 0.0,
    "main_net_yi": -0.78,
-   "rank": 424
+   "rank": 315
   },
   {
    "name": "建材（石膏板/防水建材）",
    "change_pct": 0.0,
    "main_net_yi": -0.78,
-   "rank": 425
-  },
-  {
-   "name": "建筑建材（防水材料）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.78,
-   "rank": 426
+   "rank": 316
   },
   {
    "name": "石油石化（石油开采）",
    "change_pct": 0.0,
    "main_net_yi": -0.79,
-   "rank": 427
+   "rank": 317
   },
   {
    "name": "半导体材料(大硅片)",
    "change_pct": 0.0,
    "main_net_yi": -0.8,
-   "rank": 428
+   "rank": 318
   },
   {
    "name": "火力发电",
    "change_pct": 0.0,
    "main_net_yi": -0.8,
-   "rank": 429
+   "rank": 319
   },
   {
    "name": "元器件（显示面板/玻璃基板）",
    "change_pct": 0.0,
    "main_net_yi": -0.81,
-   "rank": 430
-  },
-  {
-   "name": "化工（化学纤维/聚酯涤纶长丝）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.82,
-   "rank": 431
+   "rank": 320
   },
   {
    "name": "医疗器械",
    "change_pct": 0.0,
    "main_net_yi": -0.82,
-   "rank": 432
+   "rank": 321
   },
   {
    "name": "电力设备(一次设备)",
    "change_pct": 0.0,
    "main_net_yi": -0.82,
-   "rank": 433
+   "rank": 322
   },
   {
    "name": "通信设备（特种光纤/光器件）",
    "change_pct": 0.0,
    "main_net_yi": -0.82,
-   "rank": 434
+   "rank": 323
+  },
+  {
+   "name": "银行",
+   "change_pct": 0.0,
+   "main_net_yi": -0.83,
+   "rank": 324
   },
   {
    "name": "造纸及林浆纸一体化",
    "change_pct": 0.0,
    "main_net_yi": -0.84,
-   "rank": 435
+   "rank": 325
   },
   {
    "name": "化工新材料（特种聚合物/高性能纤维/环氧树脂）",
    "change_pct": 0.0,
    "main_net_yi": -0.84,
-   "rank": 436
-  },
-  {
-   "name": "通信设备（量子保密通信与量子计算）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.85,
-   "rank": 437
+   "rank": 326
   },
   {
    "name": "元器件（电子制造服务/ODM）",
    "change_pct": 0.0,
    "main_net_yi": -0.85,
-   "rank": 438
+   "rank": 327
   },
   {
    "name": "电力设备（锂电池材料与设备）",
    "change_pct": 0.0,
    "main_net_yi": -0.86,
-   "rank": 439
+   "rank": 328
   },
   {
    "name": "水上运输（国际油轮/干散货/滚装）",
    "change_pct": 0.0,
    "main_net_yi": -0.87,
-   "rank": 440
-  },
-  {
-   "name": "通信设备(主设备商)",
-   "change_pct": 0.0,
-   "main_net_yi": -0.9,
-   "rank": 441
-  },
-  {
-   "name": "钢铁（普钢/板材）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.9,
-   "rank": 442
-  },
-  {
-   "name": "机场与航空辅业",
-   "change_pct": 0.0,
-   "main_net_yi": -0.93,
-   "rank": 443
+   "rank": 329
   },
   {
    "name": "输变电设备与多晶硅新能源",
    "change_pct": 0.0,
    "main_net_yi": -0.94,
-   "rank": 444
-  },
-  {
-   "name": "化工原料（氯碱化工/煤化工）",
-   "change_pct": 0.0,
-   "main_net_yi": -0.94,
-   "rank": 445
-  },
-  {
-   "name": "林业与木材加工",
-   "change_pct": 0.0,
-   "main_net_yi": -0.97,
-   "rank": 446
+   "rank": 330
   },
   {
    "name": "光伏设备（硅料/电池/组件）",
    "change_pct": 0.0,
    "main_net_yi": -0.97,
-   "rank": 447
+   "rank": 331
   },
   {
    "name": "港口与航运物流",
    "change_pct": 0.0,
    "main_net_yi": -0.99,
-   "rank": 448
+   "rank": 332
   },
   {
    "name": "钢铁冶加（普钢/特钢）",
    "change_pct": 0.0,
    "main_net_yi": -1.0,
-   "rank": 449
+   "rank": 333
   },
   {
    "name": "医药生物（中药及大健康消费品）",
    "change_pct": 0.0,
    "main_net_yi": -1.01,
-   "rank": 450
+   "rank": 334
   },
   {
    "name": "半导体/专用机械（直写光刻设备）",
    "change_pct": 0.0,
    "main_net_yi": -1.07,
-   "rank": 451
-  },
-  {
-   "name": "建筑工程（基建/铁路/市政）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.07,
-   "rank": 452
+   "rank": 335
   },
   {
    "name": "通信终端及通信设备(光模块)",
    "change_pct": 0.0,
    "main_net_yi": -1.09,
-   "rank": 453
+   "rank": 336
   },
   {
    "name": "金融科技与证券服务",
    "change_pct": 0.0,
    "main_net_yi": -1.1,
-   "rank": 454
+   "rank": 337
   },
   {
    "name": "农药化肥（钾肥）",
    "change_pct": 0.0,
    "main_net_yi": -1.1,
-   "rank": 455
-  },
-  {
-   "name": "水务及固体废物处理",
-   "change_pct": 0.0,
-   "main_net_yi": -1.1,
-   "rank": 456
+   "rank": 338
   },
   {
    "name": "交通运输(机场)",
    "change_pct": 0.0,
    "main_net_yi": -1.13,
-   "rank": 457
+   "rank": 339
   },
   {
    "name": "元器件（先进陶瓷+第三代半导体）",
    "change_pct": 0.0,
    "main_net_yi": -1.14,
-   "rank": 458
+   "rank": 340
   },
   {
    "name": "造纸（特种纸）",
    "change_pct": 0.0,
    "main_net_yi": -1.14,
-   "rank": 459
+   "rank": 341
   },
   {
    "name": "机械基件（PCB精密微型钻针及刀具）",
    "change_pct": 0.0,
    "main_net_yi": -1.15,
-   "rank": 460
-  },
-  {
-   "name": "建材（水泥制造）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.16,
-   "rank": 461
+   "rank": 342
   },
   {
    "name": "半导体（功率器件与集成电路）",
    "change_pct": 0.0,
    "main_net_yi": -1.19,
-   "rank": 462
-  },
-  {
-   "name": "农林牧渔（生猪养殖与黄羽肉鸡）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.2,
-   "rank": 463
+   "rank": 343
   },
   {
    "name": "电力（火力发电）",
    "change_pct": 0.0,
    "main_net_yi": -1.23,
-   "rank": 464
+   "rank": 344
   },
   {
    "name": "电气设备(电网自动化/特高压输电)",
    "change_pct": 0.0,
    "main_net_yi": -1.23,
-   "rank": 465
+   "rank": 345
   },
   {
    "name": "有色金属-黄金采选",
    "change_pct": 0.0,
    "main_net_yi": -1.23,
-   "rank": 466
+   "rank": 346
   },
   {
    "name": "保险（寿险）",
    "change_pct": 0.0,
    "main_net_yi": -1.23,
-   "rank": 467
+   "rank": 347
   },
   {
    "name": "电气设备(线缆/锂电/民航工程)",
    "change_pct": 0.0,
    "main_net_yi": -1.24,
-   "rank": 468
+   "rank": 348
   },
   {
    "name": "元器件(印制电路板)",
    "change_pct": 0.0,
    "main_net_yi": -1.25,
-   "rank": 469
-  },
-  {
-   "name": "建筑工程（冶金工程及矿产开发）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.27,
-   "rank": 470
+   "rank": 349
   },
   {
    "name": "航空装备（航空发动机整机及维修）",
    "change_pct": 0.0,
    "main_net_yi": -1.27,
-   "rank": 471
+   "rank": 350
   },
   {
    "name": "元器件（PCB及封装基板）",
    "change_pct": 0.0,
    "main_net_yi": -1.27,
-   "rank": 472
-  },
-  {
-   "name": "化工/轻工制造（硫铁矿、制糖、造纸）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.27,
-   "rank": 473
+   "rank": 351
   },
   {
    "name": "电力（火电及热力）",
    "change_pct": 0.0,
    "main_net_yi": -1.27,
-   "rank": 474
+   "rank": 352
   },
   {
    "name": "化工原料(聚氨酯/石化/新材料)",
    "change_pct": 0.0,
    "main_net_yi": -1.28,
-   "rank": 475
+   "rank": 353
+  },
+  {
+   "name": "银行业（城商行）",
+   "change_pct": 0.0,
+   "main_net_yi": -1.29,
+   "rank": 354
   },
   {
    "name": "化工（化纤/聚氨酯）",
    "change_pct": 0.0,
    "main_net_yi": -1.29,
-   "rank": 476
-  },
-  {
-   "name": "铁路运输(煤炭重载)",
-   "change_pct": 0.0,
-   "main_net_yi": -1.29,
-   "rank": 477
+   "rank": 355
   },
   {
    "name": "电气设备（大型发电设备制造）",
    "change_pct": 0.0,
    "main_net_yi": -1.3,
-   "rank": 478
-  },
-  {
-   "name": "软件服务（人工智能/互联网）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.3,
-   "rank": 479
+   "rank": 356
   },
   {
    "name": "半导体(EDA/IP)",
    "change_pct": 0.0,
    "main_net_yi": -1.31,
-   "rank": 480
+   "rank": 357
   },
   {
    "name": "商贸零售（商品城/跨境贸易）",
    "change_pct": 0.0,
    "main_net_yi": -1.31,
-   "rank": 481
+   "rank": 358
   },
   {
    "name": "国防军工（航空装备）",
    "change_pct": 0.0,
    "main_net_yi": -1.32,
-   "rank": 482
+   "rank": 359
   },
   {
    "name": "IT设备（智能物联/AI视觉）",
    "change_pct": 0.0,
    "main_net_yi": -1.35,
-   "rank": 483
+   "rank": 360
   },
   {
    "name": "有色金属（黄金开采与冶炼）",
    "change_pct": 0.0,
    "main_net_yi": -1.36,
-   "rank": 484
-  },
-  {
-   "name": "商业百货/零售",
-   "change_pct": 0.0,
-   "main_net_yi": -1.36,
-   "rank": 485
+   "rank": 361
   },
   {
    "name": "专用机械（光伏电池设备）",
    "change_pct": 0.0,
    "main_net_yi": -1.38,
-   "rank": 486
+   "rank": 362
   },
   {
    "name": "汽车整车 (大中型客车制造)",
    "change_pct": 0.0,
    "main_net_yi": -1.4,
-   "rank": 487
+   "rank": 363
   },
   {
    "name": "电力（水力发电及储能）",
    "change_pct": 0.0,
    "main_net_yi": -1.41,
-   "rank": 488
+   "rank": 364
   },
   {
    "name": "化工原料（高端氟材料/特种橡胶/电子化学品）",
    "change_pct": 0.0,
    "main_net_yi": -1.44,
-   "rank": 489
+   "rank": 365
   },
   {
    "name": "建筑工程（基建/疏浚/海洋工程）",
    "change_pct": 0.0,
    "main_net_yi": -1.44,
-   "rank": 490
+   "rank": 366
   },
   {
    "name": "有色金属(黄金开采与冶炼)",
    "change_pct": 0.0,
    "main_net_yi": -1.45,
-   "rank": 491
-  },
-  {
-   "name": "煤炭开采(炼焦煤)",
-   "change_pct": 0.0,
-   "main_net_yi": -1.47,
-   "rank": 492
+   "rank": 367
   },
   {
    "name": "半导体设备（测试设备）",
    "change_pct": 0.0,
    "main_net_yi": -1.47,
-   "rank": 493
-  },
-  {
-   "name": "银行",
-   "change_pct": 0.0,
-   "main_net_yi": -1.47,
-   "rank": 494
+   "rank": 368
   },
   {
    "name": "有色金属（铝冶炼及压延加工）",
    "change_pct": 0.0,
    "main_net_yi": -1.5,
-   "rank": 495
+   "rank": 369
   },
   {
    "name": "银行业（城市商业银行）",
    "change_pct": 0.0,
    "main_net_yi": -1.51,
-   "rank": 496
+   "rank": 370
   },
   {
    "name": "有色金属（铜矿采选）/ 矿山工程服务",
    "change_pct": 0.0,
    "main_net_yi": -1.55,
-   "rank": 497
+   "rank": 371
   },
   {
    "name": "农业综合（生猪养殖与饲料）",
    "change_pct": 0.0,
    "main_net_yi": -1.57,
-   "rank": 498
+   "rank": 372
   },
   {
    "name": "半导体（功率器件及特色工艺代工）",
    "change_pct": 0.0,
    "main_net_yi": -1.57,
-   "rank": 499
-  },
-  {
-   "name": "啤酒",
-   "change_pct": 0.0,
-   "main_net_yi": -1.57,
-   "rank": 500
+   "rank": 373
   },
   {
    "name": "化工原料（硅基新材料)",
    "change_pct": 0.0,
    "main_net_yi": -1.57,
-   "rank": 501
+   "rank": 374
   },
   {
    "name": "多元金融（融资租赁）",
    "change_pct": 0.0,
    "main_net_yi": -1.58,
-   "rank": 502
-  },
-  {
-   "name": "电子（半导体+ODM）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.6,
-   "rank": 503
+   "rank": 375
   },
   {
    "name": "半导体材料与电子化学品",
    "change_pct": 0.0,
    "main_net_yi": -1.61,
-   "rank": 504
+   "rank": 376
   },
   {
    "name": "基础化工（高分子功能薄膜材料）",
    "change_pct": 0.0,
    "main_net_yi": -1.62,
-   "rank": 505
-  },
-  {
-   "name": "银行业（股份制银行）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.63,
-   "rank": 506
+   "rank": 377
   },
   {
    "name": "煤炭开采与洗选",
    "change_pct": 0.0,
    "main_net_yi": -1.64,
-   "rank": 507
-  },
-  {
-   "name": "房地产开发",
-   "change_pct": 0.0,
-   "main_net_yi": -1.68,
-   "rank": 508
+   "rank": 378
   },
   {
    "name": "电力（核电）",
    "change_pct": 0.0,
    "main_net_yi": -1.72,
-   "rank": 509
-  },
-  {
-   "name": "多元金融",
-   "change_pct": 0.0,
-   "main_net_yi": -1.74,
-   "rank": 510
-  },
-  {
-   "name": "银行业（城商行）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.76,
-   "rank": 511
+   "rank": 379
   },
   {
    "name": "电气设备（特高压及智能电网）",
    "change_pct": 0.0,
    "main_net_yi": -1.76,
-   "rank": 512
+   "rank": 380
   },
   {
    "name": "有色金属（煤电铝一体化）",
    "change_pct": 0.0,
    "main_net_yi": -1.77,
-   "rank": 513
+   "rank": 381
   },
   {
    "name": "石油开采",
    "change_pct": 0.0,
    "main_net_yi": -1.78,
-   "rank": 514
+   "rank": 382
+  },
+  {
+   "name": "汽车整车",
+   "change_pct": 0.0,
+   "main_net_yi": -1.83,
+   "rank": 383
   },
   {
    "name": "煤炭开采",
    "change_pct": 0.0,
    "main_net_yi": -1.83,
-   "rank": 515
+   "rank": 384
   },
   {
    "name": "食品饮料（乳制品）",
    "change_pct": 0.0,
    "main_net_yi": -1.85,
-   "rank": 516
+   "rank": 385
   },
   {
    "name": "有色金属（电解铝）",
    "change_pct": 0.0,
    "main_net_yi": -1.87,
-   "rank": 517
+   "rank": 386
   },
   {
    "name": "煤炭开采与综合能源",
    "change_pct": 0.0,
    "main_net_yi": -1.87,
-   "rank": 518
+   "rank": 387
   },
   {
    "name": "专用设备（光伏激光加工设备）",
    "change_pct": 0.0,
    "main_net_yi": -1.87,
-   "rank": 519
+   "rank": 388
   },
   {
    "name": "电力设备（光伏与储能逆变器）",
    "change_pct": 0.0,
    "main_net_yi": -1.87,
-   "rank": 520
+   "rank": 389
   },
   {
    "name": "互联网游戏与AI算力基础设施",
    "change_pct": 0.0,
    "main_net_yi": -1.89,
-   "rank": 521
+   "rank": 390
   },
   {
    "name": "国防军工（航空整机）",
    "change_pct": 0.0,
    "main_net_yi": -1.91,
-   "rank": 522
+   "rank": 391
   },
   {
    "name": "小金属（钴/镍）及电池新材料",
    "change_pct": 0.0,
    "main_net_yi": -1.94,
-   "rank": 523
+   "rank": 392
   },
   {
    "name": "电气设备（综合电力及重型机械）",
    "change_pct": 0.0,
    "main_net_yi": -1.94,
-   "rank": 524
-  },
-  {
-   "name": "航空运输业（全服务航空）",
-   "change_pct": 0.0,
-   "main_net_yi": -1.95,
-   "rank": 525
-  },
-  {
-   "name": "煤炭开采与煤化工",
-   "change_pct": 0.0,
-   "main_net_yi": -1.95,
-   "rank": 526
+   "rank": 393
   },
   {
    "name": "化学制药/精细化工",
    "change_pct": 0.0,
    "main_net_yi": -1.96,
-   "rank": 527
+   "rank": 394
   },
   {
    "name": "半导体（先进封装与芯片封测）",
    "change_pct": 0.0,
    "main_net_yi": -1.96,
-   "rank": 528
+   "rank": 395
   },
   {
    "name": "有色金属（铜铅锌采选冶炼）",
    "change_pct": 0.0,
    "main_net_yi": -1.97,
-   "rank": 529
+   "rank": 396
   },
   {
    "name": "商用车/汽车配件（重卡动力总成）",
    "change_pct": 0.0,
    "main_net_yi": -1.98,
-   "rank": 530
+   "rank": 397
   },
   {
    "name": "水运（石油及天然气运输）",
    "change_pct": 0.0,
    "main_net_yi": -2.0,
-   "rank": 531
+   "rank": 398
   },
   {
    "name": "资本市场（证券）",
    "change_pct": 0.0,
    "main_net_yi": -2.0,
-   "rank": 532
+   "rank": 399
   },
   {
    "name": "有色金属（白银、锡、铅锌采选）",
    "change_pct": 0.0,
    "main_net_yi": -2.06,
-   "rank": 533
+   "rank": 400
   },
   {
    "name": "电力与公用事业（热电联产与供气供热）",
    "change_pct": 0.0,
    "main_net_yi": -2.07,
-   "rank": 534
+   "rank": 401
   },
   {
    "name": "电力（火力发电/热电联产）",
    "change_pct": 0.0,
    "main_net_yi": -2.12,
-   "rank": 535
-  },
-  {
-   "name": "食品饮料（白酒）",
-   "change_pct": 0.0,
-   "main_net_yi": -2.13,
-   "rank": 536
+   "rank": 402
   },
   {
    "name": "电信运营",
    "change_pct": 0.0,
    "main_net_yi": -2.23,
-   "rank": 537
+   "rank": 403
   },
   {
    "name": "化工原料（轻烃化工与高分子新材料）",
    "change_pct": 0.0,
    "main_net_yi": -2.28,
-   "rank": 538
+   "rank": 404
   },
   {
    "name": "保险（综合保险与资管）",
    "change_pct": 0.0,
    "main_net_yi": -2.3,
-   "rank": 539
+   "rank": 405
   },
   {
    "name": "小金属（金属粉体/MLCC材料/电池材料）",
    "change_pct": 0.0,
    "main_net_yi": -2.31,
-   "rank": 540
-  },
-  {
-   "name": "化学原料和化学制品制造业（染料/中间体）",
-   "change_pct": 0.0,
-   "main_net_yi": -2.35,
-   "rank": 541
+   "rank": 406
   },
   {
    "name": "通信（电信运营与算力服务）",
    "change_pct": 0.0,
    "main_net_yi": -2.36,
-   "rank": 542
+   "rank": 407
   },
   {
    "name": "有色金属(电解铝及铝加工)",
    "change_pct": 0.0,
    "main_net_yi": -2.41,
-   "rank": 543
+   "rank": 408
   },
   {
    "name": "化工原料 (煤化工/煤制烯烃)",
    "change_pct": 0.0,
    "main_net_yi": -2.44,
-   "rank": 544
+   "rank": 409
   },
   {
    "name": "基础化工（磷化工、氮肥、复合肥）",
    "change_pct": 0.0,
    "main_net_yi": -2.46,
-   "rank": 545
+   "rank": 410
   },
   {
    "name": "半导体设备/专用设备",
    "change_pct": 0.0,
    "main_net_yi": -2.5,
-   "rank": 546
+   "rank": 411
   },
   {
    "name": "化工原料（风电材料/特种树脂）",
    "change_pct": 0.0,
    "main_net_yi": -2.54,
-   "rank": 547
+   "rank": 412
   },
   {
    "name": "小金属（锂资源与锂盐加工）",
    "change_pct": 0.0,
    "main_net_yi": -2.55,
-   "rank": 548
-  },
-  {
-   "name": "免税零售/旅游服务",
-   "change_pct": 0.0,
-   "main_net_yi": -2.59,
-   "rank": 549
+   "rank": 413
   },
   {
    "name": "有色金属（铅锌/锂盐)",
    "change_pct": 0.0,
    "main_net_yi": -2.63,
-   "rank": 550
-  },
-  {
-   "name": "建筑工程（水利水电与新能源EPC）",
-   "change_pct": 0.0,
-   "main_net_yi": -2.66,
-   "rank": 551
+   "rank": 414
   },
   {
    "name": "有色金属（小金属及稀土）",
    "change_pct": 0.0,
    "main_net_yi": -2.68,
-   "rank": 552
+   "rank": 415
   },
   {
    "name": "电力（火力发电及热力供应）",
    "change_pct": 0.0,
    "main_net_yi": -2.69,
-   "rank": 553
+   "rank": 416
   },
   {
    "name": "半导体设备（薄膜沉积）",
    "change_pct": 0.0,
    "main_net_yi": -2.71,
-   "rank": 554
+   "rank": 417
   },
   {
    "name": "光伏设备",
    "change_pct": 0.0,
    "main_net_yi": -2.72,
-   "rank": 555
+   "rank": 418
   },
   {
    "name": "运输设备（轨道交通装备制造）",
    "change_pct": 0.0,
    "main_net_yi": -2.73,
-   "rank": 556
+   "rank": 419
   },
   {
    "name": "建筑工程（基建/铁路建设）",
    "change_pct": 0.0,
    "main_net_yi": -2.75,
-   "rank": 557
+   "rank": 420
   },
   {
    "name": "医疗器械（高端医疗影像设备）",
    "change_pct": 0.0,
    "main_net_yi": -2.77,
-   "rank": 558
+   "rank": 421
   },
   {
    "name": "畜牧业（生猪养殖与屠宰）",
    "change_pct": 0.0,
    "main_net_yi": -2.78,
-   "rank": 559
-  },
-  {
-   "name": "电气设备（锂电池隔膜）",
-   "change_pct": 0.0,
-   "main_net_yi": -2.83,
-   "rank": 560
+   "rank": 422
   },
   {
    "name": "元器件（高端印制电路板 PCB）",
    "change_pct": 0.0,
    "main_net_yi": -2.84,
-   "rank": 561
+   "rank": 423
   },
   {
    "name": "通信设备（光器件/光芯片）",
    "change_pct": 0.0,
    "main_net_yi": -2.87,
-   "rank": 562
+   "rank": 424
   },
   {
    "name": "银行业-城商行",
    "change_pct": 0.0,
    "main_net_yi": -2.91,
-   "rank": 563
+   "rank": 425
   },
   {
    "name": "广告包装（电梯媒体）",
    "change_pct": 0.0,
    "main_net_yi": -3.03,
-   "rank": 564
-  },
-  {
-   "name": "航空运输（全服务航司）",
-   "change_pct": 0.0,
-   "main_net_yi": -3.03,
-   "rank": 565
+   "rank": 426
   },
   {
    "name": "电力（火电与新能源综合发电）",
    "change_pct": 0.0,
    "main_net_yi": -3.11,
-   "rank": 566
+   "rank": 427
   },
   {
    "name": "半导体（存储主控芯片与模组）",
    "change_pct": 0.0,
    "main_net_yi": -3.11,
-   "rank": 567
+   "rank": 428
   },
   {
    "name": "元器件（印制电路板PCB）",
    "change_pct": 0.0,
    "main_net_yi": -3.16,
-   "rank": 568
+   "rank": 429
   },
   {
    "name": "通信-电信运营",
    "change_pct": 0.0,
    "main_net_yi": -3.17,
-   "rank": 569
+   "rank": 430
   },
   {
    "name": "电力（新能源发电）",
    "change_pct": 0.0,
    "main_net_yi": -3.22,
-   "rank": 570
+   "rank": 431
   },
   {
    "name": "有色金属矿采选业(小金属/铜)",
    "change_pct": 0.0,
    "main_net_yi": -3.3,
-   "rank": 571
+   "rank": 432
   },
   {
    "name": "光学光电子（晶体材料及精密光学元件）",
    "change_pct": 0.0,
    "main_net_yi": -3.33,
-   "rank": 572
-  },
-  {
-   "name": "电力（风电/光伏运营）",
-   "change_pct": 0.0,
-   "main_net_yi": -3.36,
-   "rank": 573
-  },
-  {
-   "name": "石油加工与炼化",
-   "change_pct": 0.0,
-   "main_net_yi": -3.45,
-   "rank": 574
-  },
-  {
-   "name": "汽车整车",
-   "change_pct": 0.0,
-   "main_net_yi": -3.45,
-   "rank": 575
-  },
-  {
-   "name": "航空运输业",
-   "change_pct": 0.0,
-   "main_net_yi": -3.45,
-   "rank": 576
+   "rank": 433
   },
   {
    "name": "白酒",
    "change_pct": 0.0,
    "main_net_yi": -3.49,
-   "rank": 577
+   "rank": 434
   },
   {
    "name": "电力（火电及新能源发电）",
    "change_pct": 0.0,
    "main_net_yi": -3.53,
-   "rank": 578
+   "rank": 435
   },
   {
    "name": "半导体（设备零部件及精密陶瓷材料）",
    "change_pct": 0.0,
    "main_net_yi": -3.59,
-   "rank": 579
+   "rank": 436
   },
   {
    "name": "家用电器（白电及综合制造）",
    "change_pct": 0.0,
    "main_net_yi": -3.63,
-   "rank": 580
+   "rank": 437
   },
   {
    "name": "半导体（存储器制造与先进封测）",
    "change_pct": 0.0,
    "main_net_yi": -3.67,
-   "rank": 581
+   "rank": 438
   },
   {
    "name": "工业金属（铜加工）",
    "change_pct": 0.0,
    "main_net_yi": -3.72,
-   "rank": 582
+   "rank": 439
   },
   {
    "name": "银行业（国有大型商业银行）",
    "change_pct": 0.0,
    "main_net_yi": -3.82,
-   "rank": 583
-  },
-  {
-   "name": "股份制银行",
-   "change_pct": 0.0,
-   "main_net_yi": -3.89,
-   "rank": 584
-  },
-  {
-   "name": "资本市场服务（证券业）",
-   "change_pct": 0.0,
-   "main_net_yi": -3.96,
-   "rank": 585
+   "rank": 440
   },
   {
    "name": "银行（城市商业银行）",
    "change_pct": 0.0,
    "main_net_yi": -4.03,
-   "rank": 586
+   "rank": 441
   },
   {
    "name": "铁路运输（高铁客运）",
    "change_pct": 0.0,
    "main_net_yi": -4.07,
-   "rank": 587
+   "rank": 442
   },
   {
-   "name": "建筑工程（房建/基建/地产）",
+   "name": "股份制商业银行",
    "change_pct": 0.0,
-   "main_net_yi": -4.11,
-   "rank": 588
+   "main_net_yi": -4.17,
+   "rank": 443
   },
   {
    "name": "建筑工程（电力工程EPC与新能源运营）",
    "change_pct": 0.0,
    "main_net_yi": -4.22,
-   "rank": 589
+   "rank": 444
   },
   {
    "name": "小金属（钼）",
    "change_pct": 0.0,
    "main_net_yi": -4.37,
-   "rank": 590
+   "rank": 445
   },
   {
    "name": "电力（火力发电/新能源发电）",
    "change_pct": 0.0,
    "main_net_yi": -4.41,
-   "rank": 591
+   "rank": 446
   },
   {
    "name": "专用机械(锂电池设备)",
    "change_pct": 0.0,
    "main_net_yi": -4.49,
-   "rank": 592
+   "rank": 447
   },
   {
    "name": "化工原料/高分子新材料",
    "change_pct": 0.0,
    "main_net_yi": -4.55,
-   "rank": 593
+   "rank": 448
   },
   {
    "name": "通信设备（光纤光缆、海外电力工程）",
    "change_pct": 0.0,
    "main_net_yi": -4.57,
-   "rank": 594
+   "rank": 449
   },
   {
    "name": "半导体材料（半导体硅片）",
    "change_pct": 0.0,
    "main_net_yi": -4.58,
-   "rank": 595
+   "rank": 450
   },
   {
    "name": "保险（人寿保险）",
    "change_pct": 0.0,
    "main_net_yi": -4.67,
-   "rank": 596
+   "rank": 451
   },
   {
    "name": "有色金属（铝土矿开采至电解铝冶炼）",
    "change_pct": 0.0,
    "main_net_yi": -4.75,
-   "rank": 597
+   "rank": 452
   },
   {
    "name": "家用电器（白色家电）",
    "change_pct": 0.0,
    "main_net_yi": -4.75,
-   "rank": 598
+   "rank": 453
   },
   {
    "name": "半导体（硅片及化合物芯片）",
    "change_pct": 0.0,
    "main_net_yi": -4.78,
-   "rank": 599
+   "rank": 454
   },
   {
    "name": "电力（火电+水电+新能源）",
    "change_pct": 0.0,
    "main_net_yi": -4.88,
-   "rank": 600
+   "rank": 455
   },
   {
    "name": "水运（国际集装箱运输）",
    "change_pct": 0.0,
    "main_net_yi": -4.96,
-   "rank": 601
+   "rank": 456
   },
   {
    "name": "工程机械",
    "change_pct": 0.0,
    "main_net_yi": -5.01,
-   "rank": 602
+   "rank": 457
   },
   {
    "name": "小金属(稀贵金属/战略新材料)",
    "change_pct": 0.0,
    "main_net_yi": -5.05,
-   "rank": 603
+   "rank": 458
   },
   {
    "name": "通信设备（光通信主设备与光纤光缆）",
    "change_pct": 0.0,
    "main_net_yi": -5.18,
-   "rank": 604
+   "rank": 459
   },
   {
    "name": "化工原料（锂电材料/精细氟化工）",
    "change_pct": 0.0,
    "main_net_yi": -5.21,
-   "rank": 605
+   "rank": 460
   },
   {
    "name": "IT设备（企业级存储/半导体）",
    "change_pct": 0.0,
    "main_net_yi": -5.55,
-   "rank": 606
+   "rank": 461
   },
   {
    "name": "保险（寿险+财险）",
    "change_pct": 0.0,
    "main_net_yi": -5.64,
-   "rank": 607
-  },
-  {
-   "name": "银行（股份制商业银行）",
-   "change_pct": 0.0,
-   "main_net_yi": -5.96,
-   "rank": 608
+   "rank": 462
   },
   {
    "name": "家用电器（白电龙头）",
    "change_pct": 0.0,
    "main_net_yi": -6.09,
-   "rank": 609
+   "rank": 463
   },
   {
    "name": "通信设备（光纤光缆与海洋通信）",
    "change_pct": 0.0,
    "main_net_yi": -6.1,
-   "rank": 610
+   "rank": 464
   },
   {
    "name": "航空/国防军工（超材料隐身装备）",
    "change_pct": 0.0,
    "main_net_yi": -6.21,
-   "rank": 611
+   "rank": 465
   },
   {
    "name": "农药化肥（钾肥）与新能源金属（盐湖提锂）",
    "change_pct": 0.0,
    "main_net_yi": -6.5,
-   "rank": 612
+   "rank": 466
   },
   {
    "name": "非银金融（证券）",
    "change_pct": 0.0,
    "main_net_yi": -6.95,
-   "rank": 613
+   "rank": 467
   },
   {
    "name": "电气设备（锂电池）",
    "change_pct": 0.0,
    "main_net_yi": -7.28,
-   "rank": 614
+   "rank": 468
   },
   {
    "name": "国防军工/船舶制造",
    "change_pct": 0.0,
    "main_net_yi": -7.87,
-   "rank": 615
+   "rank": 469
   },
   {
    "name": "电力设备（光伏逆变器与储能系统）",
    "change_pct": 0.0,
    "main_net_yi": -7.95,
-   "rank": 616
+   "rank": 470
   },
   {
    "name": "半导体（存储芯片模组与封测）",
    "change_pct": 0.0,
    "main_net_yi": -8.26,
-   "rank": 617
+   "rank": 471
   },
   {
    "name": "元器件（半导体显示/光伏硅片）",
    "change_pct": 0.0,
    "main_net_yi": -8.46,
-   "rank": 618
+   "rank": 472
   },
   {
    "name": "食品饮料（高端白酒）",
    "change_pct": 0.0,
    "main_net_yi": -8.85,
-   "rank": 619
+   "rank": 473
   },
   {
    "name": "电气设备（动力与储能电池）",
    "change_pct": 0.0,
    "main_net_yi": -8.89,
-   "rank": 620
+   "rank": 474
   },
   {
    "name": "半导体（封测）",
    "change_pct": 0.0,
    "main_net_yi": -8.95,
-   "rank": 621
+   "rank": 475
   },
   {
    "name": "化工原料",
    "change_pct": 0.0,
    "main_net_yi": -8.96,
-   "rank": 622
+   "rank": 476
   },
   {
    "name": "半导体（模拟与内存接口芯片）",
    "change_pct": 0.0,
    "main_net_yi": -8.97,
-   "rank": 623
+   "rank": 477
   },
   {
    "name": "电力（水力发电）",
    "change_pct": 0.0,
    "main_net_yi": -9.58,
-   "rank": 624
+   "rank": 478
   },
   {
    "name": "有色金属（铜/金/锌/锂）",
    "change_pct": 0.0,
    "main_net_yi": -9.62,
-   "rank": 625
+   "rank": 479
+  },
+  {
+   "name": "证券",
+   "change_pct": 0.0,
+   "main_net_yi": -10.25,
+   "rank": 480
   },
   {
    "name": "证券/互联网金融",
    "change_pct": 0.0,
    "main_net_yi": -10.34,
-   "rank": 626
+   "rank": 481
   },
   {
    "name": "化工原料（氟化工）",
    "change_pct": 0.0,
    "main_net_yi": -10.56,
-   "rank": 627
+   "rank": 482
   },
   {
-   "name": "证券",
+   "name": "银行业（股份制商业银行）",
    "change_pct": 0.0,
-   "main_net_yi": -11.73,
-   "rank": 628
+   "main_net_yi": -13.33,
+   "rank": 483
+  },
+  {
+   "name": "银行（国有大型商业银行）",
+   "change_pct": 0.0,
+   "main_net_yi": -14.3,
+   "rank": 484
   },
   {
    "name": "电力（火电+新能源发电）",
    "change_pct": 0.0,
    "main_net_yi": -14.79,
-   "rank": 629
-  },
-  {
-   "name": "银行业（股份制商业银行）",
-   "change_pct": 0.0,
-   "main_net_yi": -15.93,
-   "rank": 630
+   "rank": 485
   },
   {
    "name": "有色金属（铜）",
    "change_pct": 0.0,
    "main_net_yi": -16.33,
-   "rank": 631
-  },
-  {
-   "name": "银行（国有大型商业银行）",
-   "change_pct": 0.0,
-   "main_net_yi": -18.55,
-   "rank": 632
+   "rank": 486
   },
   {
    "name": "元器件（半导体显示）",
    "change_pct": 0.0,
    "main_net_yi": -19.82,
-   "rank": 633
+   "rank": 487
   },
   {
    "name": "保险（综合金融）",
    "change_pct": 0.0,
    "main_net_yi": -29.99,
-   "rank": 634
+   "rank": 488
   }
  ]
 }

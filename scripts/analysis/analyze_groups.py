@@ -1,8 +1,11 @@
 import json
+import os, sys
 from collections import defaultdict
-from world_knowledge import BUSINESS_WORLD_KNOWLEDGE
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from picker import paths
+from picker.knowledge.world_knowledge import BUSINESS_WORLD_KNOWLEDGE
 
-with open('stock_whitelist.json') as f:
+with open(paths.STOCK_WHITELIST) as f:
     wl = json.load(f)
 
 sorted_wl = sorted(wl, key=lambda x: x.get('mcap_yi', 0) or 0, reverse=True)

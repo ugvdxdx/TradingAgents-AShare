@@ -5,7 +5,7 @@ description: >-
   A股个股基本面 JSON 生成器(三源融合)。融合 Tushare 真实财报 + research.db 板块研报 +
   防污染规则，生成 fundamentals/{code}.json。解决财务数字靠LLM回忆不准(曾把营收153亿
   错记成107亿)、研报完全未注入、自媒体乐观叙事污染(虚假"一供份额40%+")三大问题。
-  产出供 V3 评分(_v3_full_score.py)和辩论选股(debate_picker_v5.py)消费。
+  产出供 V3 评分(picker/scoring/v3_full_score.py)和辩论选股(picker/pipeline/debate_picker_v5.py)消费。
 tags:
   - fundamental-analysis
   - 基本面生成
@@ -29,7 +29,7 @@ metadata:
 ## 🎯 三源融合架构
 
 ```
-Tushare 真实财报 (fundamentals_data.py)
+Tushare 真实财报 (picker/data/fundamentals_data.py)
   └→ 直接填 financial_health.key_metrics (营收/净利/毛利率/ROE等绝对值, 100%准确)
 research.db 板块研报 (consumer.get_industry_research_brief)
   └→ 注入 prompt, 标注 [信源:中·板块级] (冷门股也能获得板块视角)
@@ -50,25 +50,25 @@ research.db 板块研报 (consumer.get_industry_research_brief)
 
 ```bash
 # 全量重生成 (544只, 约544×3分钟, 含Tushare财报+研报+防污染)
-uv run python3 _gen_top500_fundamentals.py --force
+uv run python3 picker/pipeline/gen_fundamentals.py --force
 
 # 只重生成指定股票
-uv run python3 _gen_top500_fundamentals.py --codes 603308,300394 --force
+uv run python3 picker/pipeline/gen_fundamentals.py --codes 603308,300394 --force
 
 # 只补缺失的(不覆盖已有)
-uv run python3 _gen_top500_fundamentals.py
+uv run python3 picker/pipeline/gen_fundamentals.py
 
 # 试跑前 N 只验证
-uv run python3 _gen_top500_fundamentals.py --count 10
+uv run python3 picker/pipeline/gen_fundamentals.py --count 10
 
 # 从指定代码开始(断点续跑)
-uv run python3 _gen_top500_fundamentals.py --start-from 600019
+uv run python3 picker/pipeline/gen_fundamentals.py --start-from 600019
 
 # 只刷新财务数据(慢层增量, 比全量便宜)
-uv run python3 _gen_top500_fundamentals.py --codes 603308 --fh-only
+uv run python3 picker/pipeline/gen_fundamentals.py --codes 603308 --fh-only
 
 # 干跑(只打印不生成)
-uv run python3 _gen_top500_fundamentals.py --dry-run
+uv run python3 picker/pipeline/gen_fundamentals.py --dry-run
 ```
 
 ## 📋 参数说明
@@ -109,8 +109,8 @@ LLM 生成时对「一供/份额XX%/锁定/独家/唯一」等强断言强制信
 
 | 文件 | 用途 |
 |:---|:---|
-| `_gen_top500_fundamentals.py` | ★ 主生成脚本(SYSTEM_PROMPT含防污染规则 + build_prompt注入两源) |
-| `fundamentals_data.py` | Tushare 真实财报拉取(`fetch_real_financials`) |
+| `picker/pipeline/gen_fundamentals.py` | ★ 主生成脚本(SYSTEM_PROMPT含防污染规则 + build_prompt注入两源) |
+| `picker/data/fundamentals_data.py` | Tushare 真实财报拉取(`fetch_real_financials`) |
 | `tradingagents/research/consumer.py` | `get_industry_research_brief()` 板块研报注入 |
 | `_top500_and_leaders.txt` | 股票清单(代码/名称/行业/市值), 带进度标记 |
 | `_world_knowledge_2026_06.md` | 宏观世界知识(地缘评估用) |
@@ -141,5 +141,5 @@ LLM 生成时对「一供/份额XX%/锁定/独家/唯一」等强断言强制信
 
 ## 🔗 下游消费
 
-- **V3 评分** — `_v3_full_score.py` 读 JSON 全文打分(见 fundamentals-scorer skill)
-- **辩论选股** — `debate_picker_v5.py` 读 essence + financial_health(见 debate-picker skill)
+- **V3 评分** — `picker/scoring/v3_full_score.py` 读 JSON 全文打分(见 fundamentals-scorer skill)
+- **辩论选股** — `picker/pipeline/debate_picker_v5.py` 读 essence + financial_health(见 debate-picker skill)

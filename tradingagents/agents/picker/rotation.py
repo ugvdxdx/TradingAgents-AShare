@@ -19,12 +19,10 @@ import re
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
+from picker import paths
+
 # 板块资金流离线缓存 (实时取不到时回退)
-_CACHE_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-        os.path.abspath(__file__))))),
-    "data", "board_flow_cache.json",
-)
+_CACHE_PATH = paths.BOARD_FLOW_CACHE
 
 
 # ══════════════════════════════════════════════════════════
@@ -60,9 +58,7 @@ def _fetch_board_from_tushare() -> List[Dict[str, Any]]:
     """
     import os
     from dotenv import load_dotenv
-    load_dotenv(os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__))))), ".env"), override=True)
+    load_dotenv(os.path.join(paths.PROJECT_ROOT, ".env"), override=True)
     token = os.environ.get("TUSHARE_TOKEN", "")
     if not token:
         return []
@@ -82,9 +78,7 @@ def _fetch_board_from_tushare() -> List[Dict[str, Any]]:
         return []
 
     # 行业映射: 个股 → 行业 (从 fundamentals JSON 读取)
-    fdir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__))))), "fundamentals")
+    fdir = paths.FUNDAMENTALS_DIR
     code_ind: Dict[str, str] = {}
     try:
         for fn in os.listdir(fdir):
@@ -132,9 +126,7 @@ def _infer_from_candidates() -> List[Dict[str, Any]]:
     """
     import pickle
     import glob as _glob
-    mf_dir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__))))), ".mf_cache")
+    mf_dir = paths.MF_CACHE_DIR
     if not os.path.exists(mf_dir):
         return []
     # 找最新 mf_*.pkl
@@ -150,9 +142,7 @@ def _infer_from_candidates() -> List[Dict[str, Any]]:
         return []
 
     # 行业映射
-    fdir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__))))), "fundamentals")
+    fdir = paths.FUNDAMENTALS_DIR
     code_ind: Dict[str, str] = {}
     for fn in os.listdir(fdir):
         if not fn.endswith(".json"):

@@ -40,16 +40,16 @@ metadata:
 
 ```bash
 # 实盘选股(今日, Top50→Top10, 约18分钟)
-uv run python3 debate_picker_v5.py --top-n 50
+uv run python3 picker/pipeline/picker/pipeline/debate_picker_v5.py --top-n 50
 
 # 指定日期(回测/缓存数据)
-uv run python3 debate_picker_v5.py --date 2026-06-16 --top-n 50
+uv run python3 picker/pipeline/picker/pipeline/debate_picker_v5.py --date 2026-06-16 --top-n 50
 
 # 调整辩论轮次(默认3轮)
-uv run python3 debate_picker_v5.py --rounds 2
+uv run python3 picker/pipeline/picker/pipeline/debate_picker_v5.py --rounds 2
 
 # 验证管道(跳过LLM, 仅验证数据流)
-uv run python3 debate_picker_v5.py --dry-run
+uv run python3 picker/pipeline/picker/pipeline/debate_picker_v5.py --dry-run
 ```
 
 ## 📋 参数说明
@@ -99,10 +99,10 @@ uv run python3 debate_picker_v5.py --dry-run
 
 ## ⚙️ 前置条件
 
-1. **V3 评分** — `.fundamental_v3_scores.json`(见 fundamentals-scorer skill), 从中取 Top-N
+1. **V3 评分** — `data/caches/fundamental_v3_scores.json`(见 fundamentals-scorer skill), 从中取 Top-N
 2. **fundamentals JSON** — `fundamentals/{code}.json`(见 fundamentals-generator skill)
 3. **K线缓存** — `kline_cache/*.pkl`(技术面)
-4. **资金流缓存** — `.mf_cache/*.pkl`(`fetch_money_flow_all.py` 预拉取)
+4. **资金流缓存** — `.mf_cache/*.pkl`(`picker/pipeline/picker/pipeline/fetch_money_flow_all.py` 预拉取)
 5. **research.db** — 存在则注入研报信号/黑马/风险, 不存在则跳过
 6. **LLM API** — `.env` 中 `TA_API_KEY` + `TA_BASE_URL`
 
@@ -110,7 +110,7 @@ uv run python3 debate_picker_v5.py --dry-run
 
 | 文件 | 用途 |
 |:---|:---|
-| `debate_picker_v5.py` | ★ CLI 入口 |
+| `picker/pipeline/picker/pipeline/debate_picker_v5.py` | ★ CLI 入口 |
 | `tradingagents/agents/picker/picker_graph.py` | LangGraph 图编排(7节点+条件边) |
 | `tradingagents/agents/picker/picker_state.py` | 状态 schema(候选/claim账本/排名) |
 | `tradingagents/agents/picker/incremental.py` | 增量信息采集(财务+新闻+量化信号+研报) |

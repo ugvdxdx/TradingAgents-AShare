@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys, json
 sys.path.insert(0, '.')
-from fundamental_agent import analyze_one
+from picker.knowledge.fundamental_agent import analyze_one
 
 # 测试无手工画像的股票
 tests = [

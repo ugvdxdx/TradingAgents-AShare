@@ -233,6 +233,13 @@ results/
 debate_report_*.json
 stock_picker_*.json
 
+# 归档: 备份/一次性脚本/批量产物 (重构归档, 不进版本库)
+archive/
+
+# picker 运行时数据: 缓存/白名单/参考文件 (.db 仍由下方规则单独处理)
+data/caches/
+data/reference/
+
 # Private dirs (not open-source for now)
 deploy/
 

@@ -268,7 +268,7 @@ curl "${TRADINGAGENTS_API_URL:-https://api.510168.xyz}/v1/jobs/{job_id}/result" 
 
 ```bash
 cd /path/to/J-TradingAgents
-uv run python3 debate_picker_v5.py --top-n 50
+uv run python3 picker/pipeline/debate_picker_v5.py --top-n 50
 ```
 
 详见 debate-picker skill（`skills/debate-picker/SKILL.md`）。

@@ -90,13 +90,13 @@ L5. Service    ─ 知识服务层 (API + 检索 + 回测接口)
 cd /path/to/J-TradingAgents
 
 # ★ 日常增量更新 (推荐, 采集+提取+注入三合一)
-uv run python3 run_daily_update.py              # 全流程
-uv run python3 run_daily_update.py --step 1     # 仅采集
-uv run python3 run_daily_update.py --step 2     # 仅提取
-uv run python3 run_daily_update.py --step 3     # 仅注入fundamentals
+uv run python3 picker/pipeline/run_daily_update.py              # 全流程
+uv run python3 picker/pipeline/run_daily_update.py --step 1     # 仅采集
+uv run python3 picker/pipeline/run_daily_update.py --step 2     # 仅提取
+uv run python3 picker/pipeline/run_daily_update.py --step 3     # 仅注入fundamentals
 
 # 一次性全量历史回填 (首次部署)
-uv run python3 run_research_pipeline.py
+uv run python3 picker/pipeline/run_research_pipeline.py
 ```
 
 > 详细的 --step 用法见 research-daily-update skill。
@@ -126,7 +126,7 @@ uv run python3 skills/research-knowledge/scripts/query.py date 2026-06-15
 ## 回测支持
 
 - **历史时间过滤** — `consumer.py` 的各查询接口支持 `cutoff_date` 参数，可按历史时间点过滤知识（回测时只取该日前的研报，避免未来函数）
-- **回测接口** — 选股系统 `debate_picker_v5.py` 可基于 `--date` 指定历史日期，配合 `cutoff_date` 走回测模式（仅用本地缓存数据）
+- **回测接口** — 选股系统 `picker/pipeline/debate_picker_v5.py` 可基于 `--date` 指定历史日期，配合 `cutoff_date` 走回测模式（仅用本地缓存数据）
 - **生产隔离** — 回测只读 research.db，不影响生产环境数据
 - ⚠️ `knowledge_snapshots` 表当前为空（快照机制未启用），历史回测靠 `cutoff_date` 时间过滤实现
 
@@ -145,7 +145,7 @@ V3 基本面评分 + essence精华
   │  get_dark_horse_stocks()      → 研报黑马 (海选保送)
   │  get_research_risk_signals()  → 研报风险 (海选排雷)
   ▼
-辩论选股系统 (debate_picker_v5.py)
+辩论选股系统 (picker/pipeline/debate_picker_v5.py)
   │  三分析师报告注入研报知识
   │  claim辩论引用行业逻辑链条
   ▼
@@ -195,7 +195,7 @@ tradingagents/research/       # 核心模块
   store.py                    # L4 知识存储 (SQLite + 双层知识库)
   service.py                  # L5 知识服务 (API + 检索 + 回测)
 
-run_research_pipeline.py      # 全流程运行脚本
+picker/pipeline/run_research_pipeline.py      # 全流程运行脚本
 save_batch.py                 # 批量知识导入脚本
 research.db                   # SQLite 数据库
 

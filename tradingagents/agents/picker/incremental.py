@@ -39,8 +39,8 @@ def _fetch_fundamentals(code: str) -> str:
 
 def _load_news_cache() -> Dict[str, str]:
     """加载预缓存新闻 (由 WebSearch 等工具预填充)。"""
-    cache_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "news_cache.json")
-    cache_path = os.path.normpath(cache_path)
+    from picker import paths
+    cache_path = paths.NEWS_CACHE
     if os.path.exists(cache_path):
         with open(cache_path, "r") as f:
             return json.load(f)
@@ -543,7 +543,8 @@ def make_incremental_info(llm: LLMHelper):
             # 1c++. 过热风险标记 (detect_overheated 搜索验证的风险信息)
             if not is_backtest:
                 try:
-                    oh_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), ".overheated_risk_cache.json")
+                    from picker import paths as _paths
+                    oh_path = _paths.OVERHEATED_CACHE
                     if os.path.exists(oh_path):
                         oh_cache = json.load(open(oh_path))
                         oh_entry = oh_cache.get(code)
