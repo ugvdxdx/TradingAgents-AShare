@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from . import data_io
-from .llm_helper import LLMHelper
+from .llm_helper import LLMHelper, extract_json_array
 from .picker_state import PickerState
 
 # ══════════════════════════════════════════════════════════
@@ -435,7 +435,7 @@ def _fetch_events(llm: LLMHelper, candidates: List[Dict], cutoff_date: str) -> D
     )
     human = _INCREMENTAL_HUMAN.format(cutoff_date=cutoff_date, stock_list=stock_list)
     raw = llm.call(_INCREMENTAL_SYSTEM, human, deep=False, max_chars=3000)
-    items = llm.extract_json_array(raw)
+    items = extract_json_array(raw)
 
     result: Dict[str, str] = {}
     for item in items:
@@ -466,32 +466,60 @@ def make_incremental_info(llm: LLMHelper):
 
         briefs: Dict[str, str] = {}
 
+        # 并行预拉取实时数据 (网络IO密集, 线程池有效)
+        # 回测模式跳过 (无网络调用)
+        pre_fetched: Dict[str, str] = {}  # code → 财务摘要
+        pre_news: Dict[str, str] = {}     # code → 新闻文本
+        if not is_backtest and len(candidates) > 1:
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+            codes = [(c["code"], c["name"]) for c in candidates]
+
+            def _fetch_fin(code):
+                return code, _fetch_fundamentals(code)
+            def _fetch_news(code, name):
+                return code, _fetch_news_by_name(name, cutoff or "")
+
+            with ThreadPoolExecutor(max_workers=5) as pool:
+                futures = {pool.submit(_fetch_fin, code): code for code, _ in codes}
+                for fut in as_completed(futures):
+                    try:
+                        code, fin = fut.result()
+                        if fin and "获取失败" not in fin:
+                            pre_fetched[code] = fin[:800]
+                    except Exception:
+                        pass
+                futures2 = {pool.submit(_fetch_news, code, name): code for code, name in codes}
+                for fut in as_completed(futures2):
+                    try:
+                        code, news = fut.result()
+                        if news:
+                            pre_news[code] = news[:600]
+                    except Exception:
+                        pass
+            print(f"  ⚡ 并行预拉取完成: 财务{len(pre_fetched)}/{len(codes)} 新闻{len(pre_news)}/{len(codes)}")
+
         for i, c in enumerate(candidates):
             code = c["code"]
             parts = [f"── {code} {c['name']} ──"]
 
             if not is_backtest:
-                # 实盘模式: 拉取实时数据 (akshare)
+                # 实盘模式: 使用并行预拉取的数据
                 # 1a. 实时财务摘要
-                print(f"  📊 [{i+1}/{len(candidates)}] {code} {c['name']}: 拉取财务...")
-                fin = _fetch_fundamentals(code)
-                if fin and "获取失败" not in fin:
+                fin = pre_fetched.get(code, "")
+                if fin:
                     if len(fin) > 800:
                         fin = fin[:800] + "\n...(截断)"
                     parts.append(f"【最新财务摘要】\n{fin}")
 
-                # 1b. 近期新闻 (优先读缓存, 缓存由 WebSearch 预填充; 回退到东方财富 API)
-                if cutoff:
+                # 1b. 近期新闻 (优先预拉取, 缓存次之, API最后)
+                news = pre_news.get(code, "")
+                if not news and cutoff:
                     news_cache = _load_news_cache()
-                    cached = news_cache.get(code, "")
-                    if cached:
-                        print(f"  📰 [{i+1}/{len(candidates)}] {code} {c['name']}: 使用缓存新闻")
-                        parts.append(f"【近期新闻(WebSearch缓存)】\n{cached}")
-                    else:
-                        print(f"  📰 [{i+1}/{len(candidates)}] {code} {c['name']}: 搜索新闻(API)...")
-                        news = _fetch_news_by_name(c["name"], cutoff)
-                        if news:
-                            parts.append(f"【近30天新闻(按名称搜索)】\n{news}")
+                    news = news_cache.get(code, "")
+                    if news:
+                        parts.append(f"【近期新闻(WebSearch缓存)】\n{news}")
+                elif news:
+                    parts.append(f"【近30天新闻】\n{news}")
 
             # 1c. 竞争分析/增长评估 (fundamentals JSON, 无未来函数风险)
             fd = _load_fundamental_detail(code)
@@ -511,6 +539,23 @@ def make_incremental_info(llm: LLMHelper):
                     parts.append(f"【研报信号】\n{rsig_text}")
             except Exception:
                 pass  # research.db 不存在时静默跳过
+
+            # 1c++. 过热风险标记 (detect_overheated 搜索验证的风险信息)
+            if not is_backtest:
+                try:
+                    oh_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), ".overheated_risk_cache.json")
+                    if os.path.exists(oh_path):
+                        oh_cache = json.load(open(oh_path))
+                        oh_entry = oh_cache.get(code)
+                        if oh_entry and oh_entry.get("risk_type") not in ("未知", "技术回调"):
+                            parts.append(f"【⚠过热风险】{oh_entry.get('risk_type','')} | {oh_entry.get('summary','')}")
+                except Exception:
+                    pass
+
+            # 1c+++. 新晋股归因块 (弥补没有 fundamentals JSON 的信息缺口)
+            if c.get("_rising_star"):
+                ess = c.get("essence", {})
+                parts.append(f"【量价归因(板块供需)】{ess.get('chain_position','')} | {ess.get('core_catalyst','')}")
 
             # 1d. 量化差分信号 (K线+资金流, 按 cutoff 截断, 无未来函数)
             sig = _compute_signals(code, cutoff, mf_cache)

@@ -92,24 +92,49 @@ def _load_rising_stars() -> List[Dict[str, Any]]:
 
     candidates.sort(key=lambda x: -x[0])
     stars = []
+    # 加载 V3 cache (新晋股可能有真实评分)
+    try:
+        v3_cache_data = json.load(open(V3_CACHE))
+    except Exception:
+        v3_cache_data = {}
+
     for r20, code, name, entry in candidates[:MAX_RISING_STAR_INCLUDE]:
-        stars.append({
-            "code": code,
-            "name": name,
-            "v3": 0,
-            "chain": 0, "delivery": 0, "capital": 0,
-            "brief": entry.get("summary", ""),
-            "essence": {
-                "chain_position": f"新晋股: {entry.get('sector_tag', '')}",
-                "core_catalyst": entry.get("summary", ""),
-                "biggest_bull": entry.get("summary", ""),
-                "biggest_bear": "短期涨幅过大,存在回调风险",
-                "quality_redline": "需关注业绩兑现度与估值消化",
-                "catalyst_horizon": "near",
-            },
-            "screen_reason": "量价新晋股保送",
-            "_rising_star": True,
-        })
+        v3_entry = v3_cache_data.get(code, {})
+        # 优先用 V3 真实评分 (chain/delivery/essence), 归因作为补充
+        real_chain = v3_entry.get("chain", 0)
+        real_essence = v3_entry.get("essence", {})
+
+        if real_chain > 0 and real_essence:
+            # V3 有评分 — 用真实 essence, 追加归因标记
+            essence = dict(real_essence)
+            essence["chain_position"] = f"{essence.get('chain_position','')} + 量价归因: {entry.get('sector_tag','')}"
+            star = {
+                "code": code, "name": name,
+                "v3": 0,  # V3=0 表示保送, 但 chain/delivery 保留真实值供参考
+                "chain": real_chain,
+                "delivery": v3_entry.get("delivery", 0),
+                "capital": v3_entry.get("capital", 0),
+                "brief": v3_entry.get("brief", "") or entry.get("summary", ""),
+                "essence": essence,
+            }
+        else:
+            # V3 无评分 — 用归因模板
+            star = {
+                "code": code, "name": name,
+                "v3": 0, "chain": 0, "delivery": 0, "capital": 0,
+                "brief": entry.get("summary", ""),
+                "essence": {
+                    "chain_position": f"新晋股: {entry.get('sector_tag', '')} (板块供需缺口驱动)",
+                    "core_catalyst": entry.get("summary", ""),
+                    "biggest_bull": entry.get("summary", ""),
+                    "biggest_bear": f"板块供需逻辑待验证, {entry.get('sector_tag', '')}涨价持续性存疑",
+                    "quality_redline": "业绩兑现度待中报验证",
+                    "catalyst_horizon": "near",
+                },
+            }
+        star["screen_reason"] = "量价新晋股保送"
+        star["_rising_star"] = True
+        stars.append(star)
     return stars
 
 

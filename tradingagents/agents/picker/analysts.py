@@ -47,13 +47,34 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
     v3_cache_override = None
     if not cutoff:
         try:
-            from _v3_full_score import update_capital
+            from _v3_full_score import update_capital, detect_overheated
             capital_mode = os.environ.get("CAPITAL_MODE", "D")
             v3_cache_override = update_capital(mode=capital_mode, persist=False)
+            # 过热股检测: 高分但持续下跌的标的, 搜索验证 + 风险标记 (不改 V3 分)
+            if v3_cache_override:
+                v3_cache_override = detect_overheated(v3_cache_override)
         except Exception as e:
             print(f"  [capital] 更新失败(不影响流程): {e}")
 
     pool = data_io.load_top_n(top_n, v3_cache=v3_cache_override)
+
+    # 回写过热风险标记到候选池 (供 format_stock_brief 显示 + 辩论参考)
+    if not cutoff:
+        try:
+            oh_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), ".overheated_risk_cache.json")
+            if os.path.exists(oh_path):
+                oh_cache = json.load(open(oh_path))
+                oh_marked = 0
+                for s in pool:
+                    oh = oh_cache.get(s["code"])
+                    if oh and oh.get("risk_type") not in ("未知", "技术回调", ""):
+                        s["_overheated_risk"] = oh.get("risk_type", "")
+                        oh_marked += 1
+                if oh_marked:
+                    print(f"  ⚠ 过热风险标记: {oh_marked} 只")
+        except Exception:
+            pass
+
     mf_cache = data_io.load_mf_cache()
     print(f"  V3 Top{top_n}: {pool[0]['v3']:.1f} ~ {pool[-1]['v3']:.1f} | 资金流缓存 {len(mf_cache)} 只")
 

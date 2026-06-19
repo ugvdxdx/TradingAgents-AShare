@@ -516,6 +516,169 @@ def update_capital(mode="D", persist=True):
     return cache
 
 
+# ══════════════════════════════════════════════════════════
+# 过热股检测 (高分但量价走弱 → 搜索验证 + 风险标记, 不自动惩罚)
+# ══════════════════════════════════════════════════════════
+
+# 过热股风险验证缓存 (避免每日重复搜索)
+OVERHEATED_CACHE = os.path.join(ROOT, ".overheated_risk_cache.json")
+OVERHEATED_TTL_DAYS = 7  # 风险验证缓存有效期
+
+
+def detect_overheated(cache):
+    """检测高分滞涨股, 搜索验证后分类标记 (不自动惩罚 V3 分)。
+
+    与新晋股逻辑镜像互补:
+      新晋股 = 低分但涨得好 (被低估) → scan_mispriced 发现 + 保送
+      过热股 = 高分但持续下跌 (可能被高估) → 本函数发现 + 搜索验证
+
+    设计原则 (基于实测验证):
+      不直接打惩罚! 6 只样本中 5 只 chain 判断准确, 下跌原因各异:
+        - 技术性回调 (基本面没变) → capital 的 price_factor 已反映, 无需额外处理
+        - 特定风险 (解禁/商誉/融资流出) → 搜索发现后写入风险缓存
+        - chain 高估 (行业逻辑变化) → 标记需要重评
+      统一 -15% 惩罚会误杀正常回调。
+
+    三重过滤 (筛选候选):
+      1. chain >= 6.0  (基本面看似强)
+      2. r20 < -5%     (近20日明显下跌)
+      3. r5 < 0        (近5日仍在跌)
+
+    处理方式: 只读 cache (不改 V3 分), 输出告警 + 写入风险缓存。
+    风险缓存 (.overheated_risk_cache.json) 供后续查询, 后续可接入辩论作为空头证据。
+    """
+    import pickle as _pk
+
+    # 加载风险缓存 (避免重复搜索)
+    risk_cache = {}
+    if os.path.exists(OVERHEATED_CACHE):
+        try:
+            risk_cache = json.load(open(OVERHEATED_CACHE))
+        except Exception:
+            pass
+    from datetime import datetime, timedelta
+    cutoff_date = (datetime.now() - timedelta(days=OVERHEATED_TTL_DAYS)).strftime("%Y-%m-%d")
+
+    candidates = []
+    for code, entry in cache.items():
+        if not isinstance(entry, dict) or entry.get("chain", 0) < 6.0:
+            continue
+        if entry.get("sector_score", 0) < 12.0:
+            continue
+
+        df = None
+        for suffix in ["_SH.pkl", "_SZ.pkl"]:
+            path = os.path.join(ROOT, "kline_cache", f"{code}{suffix}")
+            if os.path.exists(path):
+                try:
+                    with open(path, "rb") as f:
+                        df = _pk.load(f)
+                except Exception:
+                    pass
+                break
+        if df is None or len(df) < 21:
+            continue
+        df = df.sort_values("trade_date").reset_index(drop=True)
+        close = df["close"]
+        r20 = (close.iloc[-1] / close.iloc[-21] - 1) * 100
+        r5 = (close.iloc[-1] / close.iloc[-6] - 1) * 100 if len(close) >= 6 else 0
+
+        if r20 < -5 and r5 < 0:
+            name = ""
+            industry = ""
+            try:
+                with open(_find_fundamental(code)) as f:
+                    d = json.load(f)
+                name = d.get("name", "")
+                industry = d.get("industry", "") or d.get("business_overview", {}).get("industry", "")
+            except Exception:
+                pass
+            candidates.append({
+                "code": code, "name": name, "chain": entry.get("chain", 0),
+                "score": entry.get("sector_score", 0), "r20": r20, "r5": r5,
+                "industry": industry,
+            })
+
+    if not candidates:
+        print(f"  [过热检测] 无高分滞涨股")
+        return cache
+
+    # 对候选股做搜索验证 (只搜未缓存或过期的)
+    print(f"  [过热检测] {len(candidates)} 只候选, 搜索验证中...")
+    new_risks = []
+    for c in candidates:
+        cached = risk_cache.get(c["code"])
+        if cached and cached.get("verified_date", "") >= cutoff_date:
+            # 缓存有效, 直接用
+            risk_type = cached.get("risk_type", "未知")
+            summary = cached.get("summary", "")
+            print(f"    {c['code']} {c['name']:10} [{risk_type}](缓存) r20={c['r20']:+.0f}% | {summary[:40]}")
+        else:
+            # 需要搜索验证
+            risk_info = _verify_overheated_stock(c["code"], c["name"], c["industry"])
+            risk_cache[c["code"]] = {
+                **risk_info,
+                "verified_date": datetime.now().strftime("%Y-%m-%d"),
+                "name": c["name"],
+                "chain": c["chain"],
+                "r20": c["r20"],
+                "r5": c["r5"],
+            }
+            new_risks.append((c, risk_info))
+            print(f"    {c['code']} {c['name']:10} [{risk_info['risk_type']}](新搜) r20={c['r20']:+.0f}% | {risk_info['summary'][:40]}")
+
+    # 保存风险缓存
+    json.dump(risk_cache, open(OVERHEATED_CACHE, "w"), ensure_ascii=False, indent=1)
+
+    return cache
+
+
+def _verify_overheated_stock(code, name, industry):
+    """搜索验证过热股的下跌原因, 分类标记。
+
+    Returns:
+        {risk_type, summary}
+        risk_type: 技术回调 / 特定风险 / chain高估 / 未知
+    """
+    try:
+        from scan_mispriced import web_search, _llm_quick
+    except Exception:
+        return {"risk_type": "未知", "summary": "搜索模块不可用"}
+
+    query = f"{name} {code} 股价下跌原因 2026年6月"
+    search_text = web_search(query)
+
+    if not search_text or len(search_text) < 50:
+        return {"risk_type": "未知", "summary": "搜索无结果"}
+
+    prompt = f"""你是A股研究员。这只股票近期下跌, 请判断下跌原因类型。
+
+股票: {name}({code}) 行业: {industry}
+
+搜索结果:
+{search_text[:1500]}
+
+请判断下跌属于哪种类型, 用|分隔输出:
+TYPE|技术回调 或 特定风险 或 chain高估 或 未知
+SUMMARY|30字内一句话原因
+
+类型定义:
+- 技术回调: 基本面没变, 只是涨幅过大后的正常回调/获利回吐/高管减持等
+- 特定风险: 有具体的负面事件 (解禁/商誉减值/融资流出/政策变化/业绩不及预期)
+- chain高估: 行业逻辑发生变化, 之前的产业链定位不再成立 (如技术路线被淘汰/市场风格切换)
+- 未知: 无法判断"""
+
+    result = _llm_quick(prompt)
+    parsed = {"risk_type": "未知", "summary": ""}
+    for line in result.strip().split("\n"):
+        line = line.strip()
+        if line.startswith("TYPE|"):
+            parsed["risk_type"] = line.split("|", 1)[1].strip()
+        elif line.startswith("SUMMARY|"):
+            parsed["summary"] = line.split("|", 1)[1].strip()
+    return parsed
+
+
 def main():
     # capital 模式: D=拆分+量价(默认, 最精准), B=板块×量价(零维护), A=纯板块
     capital_mode = os.environ.get("CAPITAL_MODE", "D")

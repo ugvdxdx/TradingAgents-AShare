@@ -7,8 +7,14 @@
 **核心交互方式**: 通过 Claude Code CLI 直接对话，无需前端。
 
 **两阶段选股流水线**：
-1. 阶段一（半月）：V3 基本面打分（`_v3_full_score.py`）— 544 只全量评分 + essence 精华，ρ=0.527
-2. 阶段二（每日）：30 天涨幅竞争辩论（`debate_picker_v5.py`）— LangGraph 7 阶段：三分析师并行 → 分组海选 Top50→20 → claim 驱动多空交叉辩论 20→10 → 终极 PK → 风控复核 → 终端富文本报告
+1. 阶段一（每周）：V3 基本面打分（`_v3_full_score.py`）— 全量评分 + essence + capital 动态更新
+2. 阶段二（每日）：30 天涨幅竞争辩论（`debate_picker_v5.py`）— LangGraph 7 阶段：三分析师并行 → 分组海选 Top50→20 → claim 驱动三段式辩论(多→空→多反驳) → 终极 PK → 风控复核 → 终端富文本报告
+
+**核心机制**：
+- **新晋股发现**（`scan_mispriced.py`）：量价扫描 + 网络搜索归因 + 板块扩散 + 冷股激活
+- **capital 动态更新**（`_v3_full_score.py:update_capital`）：每次选股前用研报板块动量 + 个股量价(双窗口)重算 capital，纯量化 0 次 LLM
+- **过热股检测**（`_v3_full_score.py:detect_overheated`）：高分滞涨股搜索验证 + 风险标记，不自动惩罚
+- **冷股池**（`cold_fundamentals/`）：167 只无催化股票冬眠，新晋股逻辑可激活
 
 **归档**：旧版脚本（`run_debate_picker.py`, `run_stock_picker.py` 等）已移入 `archive/`。
 
@@ -65,15 +71,18 @@ skills/
   fundamentals-scorer/     # ★ V3 基本面评分 & 赛道Alpha（回测ρ=0.527）
 
 ── 两阶段选股工具 (根目录) ──
-_v3_full_score.py         # V3 全量基本面评分 + essence（544只，8并发，~35min）
-_v3_full_backtest.py      # V3 vs 半年涨幅 Spearman 回测
-debate_picker_v5.py       # 30天涨幅竞争辩论 — LangGraph 7阶段 (Top50→20→10, claim驱动辩论)
-_v5_rolling_backtest.py   # v5 滚动回测 — V3基线 vs v5辩论 收益对比
-tradingagents/agents/picker/  # v5 辩论选股包 (graph/state/analysts/judges/debaters/reporter)
-fundamental_scorer.py     # V3 评分引擎（三子维度 + essence）
-money_flow.py             # 资金流分析（东方财富 + Tushare fallback）
+_v3_full_score.py         # V3 全量评分 + capital动态更新 + 过热股检测 + 归因注入
+debate_picker_v5.py       # 30天涨幅竞争辩论 — LangGraph 7阶段 (三段式辩论+横向对比矩阵)
+scan_mispriced.py         # 新晋股发现 — 量价扫描+搜索归因+板块扩散+冷股激活
+_gen_top500_fundamentals.py  # 个股基本面 JSON 生成器 (三源融合, --workers 并行)
+update_world_knowledge.py # 世界知识定期更新 (LLM精简+归因注入+过期清理)
+run_daily_update.py       # 每日运维: 采集→提取→基本面→世界知识 (step1-4)
+run_research_pipeline.py  # 研报全量采集+提取流水线
 fetch_money_flow_all.py   # 全市场资金流预拉取 → .mf_cache/
-_gen_top500_fundamentals.py  # 个股基本面 JSON 生成器
+tradingagents/agents/picker/  # v5 辩论选股包 (graph/state/analysts/judges/debaters/reporter/incremental/rotation)
+tradingagents/research/       # 研报知识系统 (collector/cleaner/extractor/store/consumer/normalize)
+fundamentals/             # 基本面 JSON (537只热股)
+cold_fundamentals/        # 冷股池 (167只无催化, 冬眠)
 archive/                  # 历史脚本归档
 ```
 
@@ -101,3 +110,51 @@ archive/                  # 历史脚本归档
 - 定时分析通知通过环境变量配置，不依赖 DB 加密存储
 - `astock_provider.py` 使用 mootdx TCP 连接（端口 7709），懒加载单例
 - 所有 Agent 输出格式统一为 markdown/CSV 字符串
+
+## 选股系统架构 (2026-06 重构)
+
+### 数据流
+
+```
+每日选股 (debate_picker_v5.py)
+  ├─ collect_data
+  │    ├─ update_capital(persist=False)     ← capital动态更新, 0次LLM, 秒级
+  │    │    研报板块动量(14天) + 个股量价(双窗口r5+r20) → 重算capital
+  │    ├─ detect_overheated()               ← 过热股检测, 搜索验证+风险标记, 不改分
+  │    ├─ load_top_n(v3_cache=内存cache)    ← 候选池: V3 Top50 + 新晋股保送 + 行业动量调整
+  │    └─ K线 + 资金流 → candidates (66只)
+  ├─ incremental_info (并行预拉取)           ← 实时财务+新闻+量化信号+研报+过热风险+新晋股归因
+  ├─ 三分析师并行 (技术/资金/基本面)
+  ├─ 海选 (hybrid: V3保送6 + LLM竞争4 + 新晋股独立加挂3)
+  ├─ 辩论 (3轮×3段式: 多头→空头→多头反驳)
+  │    └─ 横向对比矩阵(按板块分组) + 可持续性裁决 + ROUND_GOALS驱动
+  └─ 终极PK (LLM排名为基准 + 硬风险下调OR逻辑)
+```
+
+### V3 评分三子维度
+
+| 维度 | 更新频率 | 方式 | 说明 |
+|---|---|---|---|
+| chain (产业链位置) | 季度 | LLM | AI核心8.5+/AI上游材料7.0-8.4/次核心6.0-6.9/设备材料5.0-5.9 |
+| delivery (业绩兑现) | 季度 | LLM | 顶级客户+产能+高增兑现→8-10 |
+| capital (资金热度) | **每日** | **量化** | 板块动量×个股量价, 模式D(默认): 细分拆分+双窗口 |
+
+### 新晋股发现机制 (scan_mispriced.py)
+
+```
+量价扫描 (近5日>15% & V3<15) → 搜索归因(14天缓存) → 板块扩散(强度过滤)
+  ├─ 板块供需型 (保送进候选池)
+  ├─ 个股事件型 (不扩散)
+  └─ 冷股激活 (r5>15% 自动移回 fundamentals/)
+```
+
+### 关键文件说明
+
+| 缓存文件 | 内容 | TTL |
+|---|---|---|
+| `.fundamental_v3_scores.json` | V3 评分 (chain/delivery/capital/essence) | 季度+每日capital |
+| `.mispriced_attribution_cache.json` | 新晋股归因 (板块供需/个股事件) | 14天 |
+| `.overheated_risk_cache.json` | 过热股风险验证 | 7天 |
+| `.cold_stocks.json` | 冷股清单 | 手动 |
+| `.sub_sector_override.json` | 细分赛道 capital 拆分表 | scan_mispriced 维护 |
+| `_world_knowledge_2026_06.md` | 世界知识 (宏观+归因) | 每日更新 |

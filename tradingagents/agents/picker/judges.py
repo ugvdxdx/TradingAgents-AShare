@@ -28,14 +28,72 @@ def _dump(run_dir: str, name: str, content: Any, as_json: bool = False):
 def format_stock_brief(c: Dict[str, Any]) -> str:
     """候选股精简档案 (喂给评委/辩论的统一格式)。"""
     e = c.get("essence", {})
+    # 新晋股标记: 让 LLM 知道这是量价归因保送的标的, V3=0 不代表差
+    star_tag = " ★新晋股(量价归因保送)" if c.get("_rising_star") else ""
+    # 过热风险标记 (来自 detect_overheated 的搜索验证)
+    risk_tag = ""
+    if c.get("_overheated_risk"):
+        risk_tag = f" ⚠过热风险[{c['_overheated_risk']}]"
     return (
-        f"{c['code']} {c['name']} V3={c['v3']:.1f} [链{c['chain']}+兑{c['delivery']}+资{c['capital']}]\n"
+        f"{c['code']} {c['name']} V3={c['v3']:.1f}{star_tag}{risk_tag} [链{c['chain']}+兑{c['delivery']}+资{c['capital']}]\n"
         f"  卡位:{e.get('chain_position', '')} | 催化:{e.get('core_catalyst', '')}\n"
         f"  多头:{e.get('biggest_bull', '')} | 空头:{e.get('biggest_bear', '')}\n"
         f"  红线:{e.get('quality_redline', '')} | horizon:{e.get('catalyst_horizon', 'mid')}\n"
         f"  实时: tech={c['tech_total']:.0f}/100(趋势{c['tech_trend']:.0f}) "
         f"5日主力净{c['fund_5d']:+.1f}亿"
     )
+
+
+def format_comparison_matrix(finalists: List[Dict[str, Any]]) -> str:
+    """生成候选股横向对比矩阵 (按板块分组), 帮助 LLM 做相对排名判断。
+
+    解决"逐只孤立展示无法横向比较"的核心矛盾:
+    - 按板块分组, 同板块内可直接对比 V3/涨幅/资金/技术位置
+    - 明确标注同板块替代关系 (如两只光模块龙头互相竞争)
+    """
+    if not finalists:
+        return ""
+
+    # 简单板块归类 (从 industry 提取关键词)
+    SECTOR_KEYWORDS = {
+        "光模块/光通信": ["光模块", "光通信", "CPO", "光器件", "光纤"],
+        "PCB/CCL": ["PCB", "覆铜板", "电路板", "电子布"],
+        "存储/HBM": ["存储", "HBM", "DRAM"],
+        "AI芯片/算力": ["AI芯片", "GPU", "ASIC", "算力", "服务器"],
+        "半导体材料": ["半导体材料", "电子特气", "CMP", "靶材", "光刻"],
+        "半导体设备": ["半导体设备", "刻蚀", "薄膜"],
+        "MLCC/被动元件": ["MLCC", "被动元件", "电感", "电容"],
+        "AI电源/散热": ["电源", "散热", "液冷", "温控"],
+        "铜/有色": ["铜", "钨", "钼", "稀土", "有色"],
+    }
+
+    def guess_sector(c):
+        ind = c.get("essence", {}).get("chain_position", "") + " " + str(c.get("name", ""))
+        for sector, kws in SECTOR_KEYWORDS.items():
+            if any(kw in ind for kw in kws):
+                return sector
+        return "其他"
+
+    # 分组
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for c in finalists:
+        groups[guess_sector(c)].append(c)
+
+    lines = ["【候选股横向对比矩阵】(按板块分组, 便于相对排名判断)"]
+    for sector, stocks in sorted(groups.items(), key=lambda x: -len(x[1])):
+        lines.append(f"\n  ▸ {sector} ({len(stocks)}只):")
+        for c in sorted(stocks, key=lambda x: -x.get("v3", 0)):
+            star = "★" if c.get("_rising_star") else " "
+            lines.append(
+                f"    {star} {c['code']} {c['name']:8} V3={c['v3']:4.1f} "
+                f"tech={c['tech_total']:.0f} 资金={c['fund_5d']:+.1f}亿 "
+                f"horizon={c.get('essence',{}).get('catalyst_horizon','mid')}"
+            )
+        if len(stocks) >= 2:
+            lines.append(f"    ⚡ 同板块竞争: {', '.join(c['name'] for c in stocks)}")
+
+    return "\n".join(lines)
 
 
 def _apply_ranking(group: List[Dict[str, Any]], result: List[dict]) -> List[Dict[str, Any]]:
@@ -101,29 +159,55 @@ def make_screen_round1(llm: LLMHelper, v3_auto_promote: int = 20,
             for s in risks.get("bearish_stocks", []):
                 research_risk_codes.add(s.get("code", ""))
             # 将研报黑马注入候选池 (保送入海选)
+            # 优先用 V3 真实评分/essence, 仅在 V3 缺失时用模板
+            v3_data = {}
+            try:
+                v3_data = json.load(open(os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
+                    ".fundamental_v3_scores.json")))
+            except Exception:
+                pass
             for dh in dark_horse_from_research:
-                cands_sorted.append({
-                    "code": dh["code"],
-                    "name": dh.get("name", ""),
-                    "v3": 0.0,  # 无 V3 分, 靠研报催化保送
-                    "chain": 0, "delivery": 0, "capital": 0,
-                    "essence": {
-                        "chain_position": "研报黑马",
-                        "core_catalyst": "; ".join(dh.get("reasons", [])[:2]),
-                        "biggest_bull": f"研报{dh.get('bullish_count',0)}次看多",
-                        "biggest_bear": "",
-                        "quality_redline": "",
-                        "catalyst_horizon": "short",
-                    },
-                    "tech_total": 0, "tech_trend": 0, "fund_5d": 0,
-                    "screen_reason": "研报黑马保送",
-                })
+                code = dh["code"]
+                v3_entry = v3_data.get(code, {})
+                v3_chain = v3_entry.get("chain", 0)
+                v3_essence = v3_entry.get("essence", {})
+
+                if v3_chain > 0 and v3_essence:
+                    # V3 有评分 — 用真实 essence + 研报催化
+                    essence = dict(v3_essence)
+                    essence["chain_position"] = f"{essence.get('chain_position','')} + 研报{dh.get('bullish_count',0)}次看多"
+                    cands_sorted.append({
+                        "code": code, "name": dh.get("name", ""),
+                        "v3": 0.0, "chain": v3_chain,
+                        "delivery": v3_entry.get("delivery", 0), "capital": v3_entry.get("capital", 0),
+                        "essence": essence,
+                        "brief": v3_entry.get("brief", ""),
+                        "tech_total": 0, "tech_trend": 0, "fund_5d": 0,
+                        "screen_reason": "研报黑马保送",
+                    })
+                else:
+                    # V3 无评分 — 用研报模板
+                    cands_sorted.append({
+                        "code": code, "name": dh.get("name", ""),
+                        "v3": 0.0, "chain": 0, "delivery": 0, "capital": 0,
+                        "essence": {
+                            "chain_position": f"研报黑马: {dh.get('reasons', [''])[0][:20]}",
+                            "core_catalyst": "; ".join(dh.get("reasons", [])[:2]),
+                            "biggest_bull": f"研报{dh.get('bullish_count',0)}次看多",
+                            "biggest_bear": "研报看多但缺乏V3基本面验证",
+                            "quality_redline": "基本面数据待补充",
+                            "catalyst_horizon": "near",
+                        },
+                        "tech_total": 0, "tech_trend": 0, "fund_5d": 0,
+                        "screen_reason": "研报黑马保送",
+                    })
             if dark_horse_from_research:
                 print(f"  🐎 研报黑马: {len(dark_horse_from_research)}只近期bullish催化但未入池")
             if research_risk_codes:
                 print(f"  ⚠ 研报看空: {len(research_risk_codes)}只近期bearish")
-        except Exception:
-            pass  # research.db 不存在时静默跳过
+        except Exception as e:
+            print(f"  ⚠ 研报黑马/风险信号获取失败: {e}")  # 不再静默吞异常
 
         print(f"\n{'='*60}")
         print(f"🗂️  [阶段 3/7] 海选 (mode={screen_mode}, 决赛名额={debate_top_k})")
@@ -200,27 +284,32 @@ def make_screen_round1(llm: LLMHelper, v3_auto_promote: int = 20,
                           "finalists": [c["code"] for c in finalists], "group_logs": logs}
 
         elif screen_mode == "hybrid":
-            # C: V3 Top-force_k 保送 + 剩余经 LLM 海选竞争剩余名额
-            auto = cands_sorted[:force_k]
-            rest = cands_sorted[force_k:]
+            # C: V3 Top-force_k 保送 + 新晋股独立加挂 + LLM 竞争 debate_top_k-force_k 席
+            # 新晋股席位独立加挂, 不占用 LLM 竞争名额 (避免挤压海选空间)
+            auto = [c for c in cands_sorted[:force_k] if not c.get("_rising_star")]
             seen = {c["code"] for c in auto}
-            remaining = debate_top_k - len(auto)
-            picked, logs = _screen_pool(rest, remaining * 2)
+            # LLM 竞争固定有 debate_top_k - force_k 席
+            llm_slots = debate_top_k - force_k
+            rest = [c for c in cands_sorted if c["code"] not in seen and not c.get("_rising_star")]
+            picked, logs = _screen_pool(rest, llm_slots * 2) if llm_slots > 0 else ([], [])
             extra: List[Dict[str, Any]] = []
             for c in picked:
-                if len(extra) >= remaining:
+                if len(extra) >= llm_slots:
                     break
                 if c["code"] not in seen:
                     extra.append(c); seen.add(c["code"])
-            # 不足则按 V3 从 rest 补齐
             for c in rest:
-                if len(extra) >= remaining:
+                if len(extra) >= llm_slots:
                     break
                 if c["code"] not in seen:
                     extra.append(c); seen.add(c["code"])
-            finalists = auto + extra
+            # 新晋股独立加挂 (最多3只, 不占 LLM 名额)
+            rising = [c for c in cands_sorted if c.get("_rising_star") and c["code"] not in seen][:3]
+            seen.update(c["code"] for c in rising)
+            finalists = auto + extra + rising
             screen_log = {"mode": "hybrid", "auto_promote": [c["code"] for c in auto],
                           "llm_picked": [c["code"] for c in extra],
+                          "rising_stars": [c["code"] for c in rising],
                           "finalists": [c["code"] for c in finalists], "group_logs": logs}
 
         else:
@@ -277,6 +366,7 @@ def make_final_judge(llm: LLMHelper, top_k: int = 10):
                     "trace": [_trace("final_judge", f"dry-run {len(ranking)}名")]}
 
         stock_text = "\n\n".join(format_stock_brief(c) for c in finalists)
+        stock_text += "\n\n" + format_comparison_matrix(finalists)
         claim_text = "\n".join(
             f"[{cl.get('claim_id')}] {cl.get('stance')} {cl.get('code')}: "
             f"{cl.get('claim')} (conf={cl.get('confidence')}, {cl.get('status')})"
@@ -319,7 +409,7 @@ def make_final_judge(llm: LLMHelper, top_k: int = 10):
                 continue
             c = cmap[code]
             conf = float(r.get("confidence", 0.5) or 0.5)
-            sup = [cl.get("claim_id") for cl in claims if cl.get("code") == code]
+            sup = [cl.get("claim_id") for cl in claims if cl.get("code") == code and cl.get("stance") == "bullish"]
             llm_rank = int(r.get("rank", len(rows) + 1))
             rows.append({
                 "llm_rank": llm_rank, "code": code, "name": c["name"],
@@ -336,89 +426,60 @@ def make_final_judge(llm: LLMHelper, top_k: int = 10):
                     "score": round(c["v3"], 1), "confidence": 0.4, "confidence_level": "低",
                     "key_thesis": c.get("essence", {}).get("biggest_bull", ""),
                     "key_risk": c.get("essence", {}).get("biggest_bear", ""),
-                    "supporting_claim_ids": [], "risk_flags": ["数据不足"],
+                    "supporting_claim_ids": [], "risk_flags": ["LLM未评级"],
                 })
 
-        # ── 条件性调整: 辩论只在有硬证据时才调整 V3 排名 ──
-        # 规则:
-        # 1. 如果某股有未解决的空头 claim 且含真风险标签 → 允许下调(最多降 max_drop 位)
-        # 2. 如果某股有未解决的多头 claim 且无空头风险标签 → 允许上调(最多升 max_rise 位)
-        # 3. 新晋股(量价保送, _rising_star)若有未决多头 claim → 上限放宽到 max_rise+2
-        #    (新晋股V3=0排名靠后, 需要更大空间才能进入有效排名区间)
-        # 4. 其余保持 V3 排名
-        HARD_RISK_FLAGS = {"趋势破位", "主力持续流出", "质量红线", "催化证伪", "量价背离"}
-        # 可持续性相关的风险标签 (见 SUSTAINABILITY_CRITERIA)
-        SUSTAINABILITY_RISK_FLAGS = {"催化衰竭", "资金衰减", "量价背离", "透支风险", "纯题材"}
-        ALL_RISK_FLAGS = HARD_RISK_FLAGS | SUSTAINABILITY_RISK_FLAGS
+        # ── 排名: LLM 辩论结果为主, claim 只做硬风险下调 ──
+        # 设计变更 (2026-06-19):
+        #   旧逻辑: V3 排名为基准 + claim 微调 (±max_rise/max_drop)
+        #   问题: V3 是季度快照, 无法反映当前市场; 新晋股 V3=0 永远排最后
+        #   新逻辑: LLM 排名为基准 (它已看到辩论+增量信息+分析师报告)
+        #           claim 只在有硬风险标签时下调 (防 LLM 忽略致命风险)
+        #           不做上调 (LLM 已综合判断, 无需额外加分)
+        HARD_RISK_FLAGS = {"趋势破位", "主力持续流出", "质量红线", "催化证伪", "量价背离",
+                           "催化衰竭", "资金衰减", "透支风险", "纯题材"}
         max_drop = int((state.get("metadata") or {}).get("max_rank_drop", 3))
-        max_rise = int((state.get("metadata") or {}).get("max_rank_rise", 3))
-
-        # 新晋股集合 (用于放宽上调上限)
-        rising_star_codes = {c["code"] for c in cands.values() if c.get("_rising_star")}
 
         unresolved_ids = set(ledger.get("unresolved_claim_ids", [])
                              + ledger.get("open_claim_ids", []))
-        # 每只股的未决空头/多头 claim
-        bear_claims = {code: [] for code in v3_rank}
-        bull_claims = {code: [] for code in v3_rank}
+        bear_claims = {}
         for cl in claims:
             cid = cl.get("claim_id", "")
             code = cl.get("code", "")
-            if cid in unresolved_ids:
-                if cl.get("stance") == "bearish":
-                    bear_claims.setdefault(code, []).append(cl)
-                elif cl.get("stance") == "bullish":
-                    bull_claims.setdefault(code, []).append(cl)
+            if cid in unresolved_ids and cl.get("stance") == "bearish":
+                bear_claims.setdefault(code, []).append(cl)
 
-        # 计算调整量
-        adjustments = {}  # code → delta (负=下调, 正=上调)
+        # 计算下调量 (只下调, 不上调)
+        # 触发条件 (OR 逻辑, 不再要求同时满足):
+        #   (a) LLM 打了硬风险标签 → 直接下调 (不管有无空头 claim)
+        #   (b) 有高置信未决空头 claim 但 LLM 未打标签 → 强制下调 (防 LLM 漏判)
+        adjustments = {}
         for row in rows:
             code = row["code"]
             flags = set(row.get("risk_flags", []))
-            hard_flags = flags & ALL_RISK_FLAGS
+            hard_flags = flags & HARD_RISK_FLAGS
             bears = bear_claims.get(code, [])
-            bulls = bull_claims.get(code, [])
-            has_bear = len(bears) > 0
-            has_bull = len(bulls) > 0
-            is_rising_star = code in rising_star_codes
-
-            # 新晋股上调上限放宽 (V3=0 需要更大空间)
-            effective_max_rise = max_rise + (2 if is_rising_star else 0)
+            strong_bears = [cl for cl in bears if float(cl.get("confidence", 0.6) or 0.6) >= 0.7]
 
             delta = 0
-            if hard_flags and has_bear:
-                # 有风险标签 + 未决空头 claim → 下调
-                strong_bear = sum(1 for cl in bears if float(cl.get("confidence", 0.6) or 0.6) >= 0.7)
-                delta = -min(len(hard_flags) + strong_bear, max_drop)
-            elif has_bull and not has_bear:
-                # 有未决多头 claim 且无空头反驳 → 上调
-                # 可持续性信号: 多头 claim 提及催化余量/资金持续/业绩支撑 → 额外+1
-                strong_bull = sum(1 for cl in bulls if float(cl.get("confidence", 0.6) or 0.6) >= 0.7)
-                sustainability_bonus = sum(
-                    1 for cl in bulls
-                    if any(kw in cl.get("claim", "") for kw in ["可持续", "催化余量", "资金持续", "业绩支撑"])
-                )
-                delta = min(max(1, strong_bull) + sustainability_bonus, effective_max_rise)
-            elif has_bear and not hard_flags:
-                # 有空头 claim 但无风险标签 → 不降权
-                if has_bull:
-                    delta = min(1, effective_max_rise)
-                else:
-                    delta = 0
-
+            if hard_flags:
+                # (a) 有硬风险标签 → 下调
+                delta = -min(len(hard_flags) + len(strong_bears), max_drop)
+            elif strong_bears:
+                # (b) 有高置信空头 claim 但 LLM 未打标签 → 强制下调
+                delta = -min(len(strong_bears), max_drop)
             adjustments[code] = delta
             if delta != 0:
-                tag = f"新晋股+{delta}" if is_rising_star and delta > 0 else str(delta)
-                print(f"    调整: {code} {row.get('name','')} delta={tag}")
+                print(f"    风险下调: {code} {row.get('name','')} delta={delta} flags={hard_flags}")
 
-        # 应用调整: 按 V3 排名 + delta 排序 (回测验证: V3 做主排序优于 LLM 排名)
+        # 应用: LLM 排名为基准 + 风险下调
         for row in rows:
-            row["_adj_rank"] = v3_rank.get(row["code"], row["llm_rank"]) + adjustments.get(row["code"], 0)
-        rows.sort(key=lambda x: (x["_adj_rank"], v3_rank.get(x["code"], 99)))
+            row["_final_rank"] = row["llm_rank"] + adjustments.get(row["code"], 0)
+        rows.sort(key=lambda x: (x["_final_rank"], x["llm_rank"]))
 
         ranking: List[dict] = []
         for i, row in enumerate(rows):
-            row.pop("_adj_rank", None)
+            row.pop("_final_rank", None)
             row.pop("llm_rank", None)
             row["rank"] = i + 1
             ranking.append(row)

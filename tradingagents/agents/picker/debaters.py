@@ -31,10 +31,13 @@ def _dump(run_dir: str, name: str, content: Any, as_json: bool = False):
 
 ROUND_GOALS = [
     "基于增量信息(新闻催化/财务增速/资金流明细/K线走势)建立最核心的多空 claim。"
-    "每个 claim 必须引用至少一条带日期或数值的具体证据, 说明为何是现在、相对其他候选谁涨更多。",
+    "每个 claim 必须引用至少一条带日期或数值的具体证据, 说明为何是现在、相对其他候选谁涨更多。"
+    "对每只提及的候选股, 在 claim 中明确标注其上涨可持续性判断(可持续/不可持续/待观察)。",
     "针对对手 claim 的【证据本身】反驳: 证据是否过时、数据是否夸大、量价是否背离。"
-    "用 target_claim_ids 精确指向被攻击的 claim, 不要扩散到新议题。",
-    "围绕30天时间窗口与失败路径, 结合资金流趋势与新高位置, 判断谁的涨幅逻辑最扎实、排序应最高。",
+    "用 target_claim_ids 精确指向被攻击的 claim, 不要扩散到新议题。"
+    "重点审视标注为'可持续'的 claim: 催化是否真的还有余量? 资金是否持续而非脉冲?",
+    "围绕30天时间窗口与失败路径, 结合资金流趋势与新高位置, 判断谁的涨幅逻辑最扎实、排序应最高。"
+    "★新晋股(量价归因保送)需特别评估: 板块供需逻辑是否成立、涨幅是否已透支、是否有业绩支撑。",
 ]
 
 
@@ -114,6 +117,10 @@ def make_debate_round(llm: LLMHelper, top_k: int = 10):
 
         ledger["round_goal"] = ROUND_GOALS[min(rnd - 1, len(ROUND_GOALS) - 1)]
         stock_text = "\n\n".join(format_stock_brief(c) for c in finalists)
+        # 横向对比矩阵 (帮助 LLM 做相对排名, 首轮注入)
+        if rnd == 1:
+            from .judges import format_comparison_matrix
+            stock_text += "\n\n" + format_comparison_matrix(finalists)
 
         # 已有 claim 摘要 (供本轮参考)
         claim_brief = "\n".join(
@@ -169,6 +176,17 @@ def make_debate_round(llm: LLMHelper, top_k: int = 10):
         bear_raw = llm.call(BEAR_DEBATER_SYSTEM, bear_human, deep=True, max_chars=4000)
         _ingest_claims(ledger, extract_tagged_json(bear_raw, "DEBATE_STATE"), "bearish", "BEAR")
 
+        # ── 多头反驳 (看到空头攻击后回应, 纠正结构性后手优势) ──
+        bear_claims_brief = "\n".join(
+            f"[{c['claim_id']}] {c['stance']} {c['code']}: {c['claim']}"
+            for c in ledger.get("claims", []) if c.get("stance") == "bearish"
+        ) or "空头本轮未提新claim"
+        bull_rebuttal_human = (f"空头已提出以下攻击:\n{bear_claims_brief}\n\n"
+                               f"请作为多头回应: 哪些空头攻击你不同意(标记unresolved)? "
+                               f"哪些你认可(标记resolved)? 最多反驳3条最关键的。")
+        bull_rebuttal_raw = llm.call(BULL_DEBATER_SYSTEM, bull_rebuttal_human, deep=False, max_chars=2000)
+        _ingest_claims(ledger, extract_tagged_json(bull_rebuttal_raw, "DEBATE_STATE"), "bullish", "BULL")
+
         n_claims = len(ledger.get("claims", []))
         n_open = len(ledger.get("open_claim_ids", []))
         print(f"  claim 总数 {n_claims} | 未决 {n_open} | "
@@ -180,8 +198,11 @@ def make_debate_round(llm: LLMHelper, top_k: int = 10):
                "claims_snapshot": ledger.get("claims", [])}, as_json=True)
 
         ledger["round"] = rnd + 1
-        # 收敛: 达到轮次上限, 或本轮后无未决 claim 且已过首轮(无信息增量)
-        ledger["finished"] = (ledger["round"] > max_rounds) or (rnd >= 2 and n_open == 0)
+        # 收敛: 达到轮次上限, 或连续无新 claim 增量 (open claim 不再增长)
+        prev_open = ledger.get("prev_open_count", n_open + 999)  # 首轮必不收敛
+        ledger["prev_open_count"] = n_open
+        no_progress = (n_open <= prev_open) and rnd >= 2  # open 不再增长且已过2轮
+        ledger["finished"] = (ledger["round"] > max_rounds) or no_progress
         out["debate_ledger"] = ledger
         out["trace"] = [_trace("debate_round", f"round={rnd} claims={n_claims} open={n_open}")]
         return out
