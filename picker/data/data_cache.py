@@ -78,9 +78,10 @@ class KlineCache:
         }
         self._save_meta()
 
-    def batch_fetch(self, symbols: List[str], period: str = "1d", count: int = 60) -> Dict[str, pd.DataFrame]:
+    def batch_fetch(self, symbols: List[str], period: str = "1d", count: int = 90) -> Dict[str, pd.DataFrame]:
         """
         批量获取K线（缓存优先，API补缺）
+        count默认90根 (~4个月), 为60日回测验证预留足够未来数据。
 
         返回: {symbol: DataFrame}
         """
@@ -117,7 +118,7 @@ class KlineCache:
         return result
 
     def prefetch_all(self, whitelist_path: str = None,
-                     batch_size: int = 20, count: int = 60) -> int:
+                     batch_size: int = 20, count: int = 90) -> int:
         if whitelist_path is None:
             whitelist_path = paths.STOCK_WHITELIST
         """预取全部白名单的K线到缓存"""
@@ -155,7 +156,7 @@ class KlineCache:
 
 
 def compute_returns_from_cache(cache: KlineCache, symbols: List[str],
-                                lookback: int = 60) -> List[dict]:
+                                lookback: int = 90) -> List[dict]:
     """从缓存计算涨幅，返回股票涨幅列表"""
     from tickflow import TickFlow
     tf = TickFlow.free()

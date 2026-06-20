@@ -125,11 +125,9 @@ def _render_report(state) -> str:
     lines: List[str] = []
 
     lines.append("\n" + "═" * 70)
-    lines.append(f"  📈 30天涨幅竞争辩论榜 — {date}")
-    lines.append(f"  整体可信度: {review.get('overall_level', '-')} "
-                 f"({review.get('overall_confidence', '-')}) | "
-                 f"辩论 {review.get('debate_rounds', 0)} 轮 | "
-                 f"claim {review.get('total_claims', 0)} 条")
+    lines.append(f"  📈 量化选股榜 — {date}")
+    lines.append(f"  排序锚: chain+capital×2-delivery×0.5 | "
+                 f"候选 {len(cands)} 只 → TOP{len(ranking)}")
     lines.append("═" * 70)
 
     # ── 结论榜 ──

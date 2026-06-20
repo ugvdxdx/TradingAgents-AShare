@@ -106,19 +106,29 @@ def _llm_quick(prompt: str) -> str:
         return ""
 
 
-def _get_research_context(code: str, name: str) -> str:
-    """从研报库取该股相关的板块观点, 作为归因上下文。"""
+def _get_research_context(code: str, name: str, cutoff_date: str = "") -> str:
+    """从研报库取该股相关的板块观点, 作为归因上下文。
+
+    Args:
+        cutoff_date: 非空时仅查该日之前的研报 (回测防前视偏差); 空则查全部。
+    """
     import sqlite3
     db_path = paths.RESEARCH_DB
     if not os.path.exists(db_path):
         return ""
     conn = sqlite3.connect(db_path)
-    # 查该股的研报提及
+    # 查该股的研报提及 (回测模式按 cutoff_date 截断)
     mentions = []
-    for (raw,) in conn.execute(
-        "SELECT stock_mentions FROM general_knowledge WHERE stock_mentions IS NOT NULL "
-        "ORDER BY created_at DESC LIMIT 200"
-    ).fetchall():
+    if cutoff_date:
+        query = ("SELECT stock_mentions FROM general_knowledge "
+                 "WHERE stock_mentions IS NOT NULL AND created_at <= ? "
+                 "ORDER BY created_at DESC LIMIT 200")
+        rows = conn.execute(query, (cutoff_date + " 23:59:59",)).fetchall()
+    else:
+        query = ("SELECT stock_mentions FROM general_knowledge WHERE stock_mentions IS NOT NULL "
+                 "ORDER BY created_at DESC LIMIT 200")
+        rows = conn.execute(query).fetchall()
+    for (raw,) in rows:
         if not raw:
             continue
         try:
@@ -157,16 +167,24 @@ ATTR_CACHE_TTL_DAYS = 14
 
 
 def attribute_stock(code: str, name: str, return_pct: float, days: int, industry: str,
-                    use_cache: bool = True) -> dict:
+                    use_cache: bool = True, cutoff_date: str = "") -> dict:
     """对一只异动股做归因 (研报上下文 + LLM 判断, 可选网络搜索)。
 
     带缓存: 首次搜索后记录原因, 后续 N 天内直接读缓存, 不重复搜索。
 
+    Args:
+        cutoff_date: 回测截止日。非空时进入【回溯模式】:
+            - 跳过网络搜索 (搜索返回的是当前信息, 有前视偏差)
+            - 仅用 cutoff_date 前的研报上下文 + LLM 行业知识判断
+            - 不读写实时归因缓存 (避免污染)
+
     Returns:
         {reason_type, sector_tag, summary, is_sector_wide, cached, cached_date}
     """
-    # 0. 读缓存 (TTL 内的直接返回)
-    if use_cache:
+    is_backtest = bool(cutoff_date)
+
+    # 0. 读缓存 (仅实盘; 回测模式不读缓存, 每次重新判断)
+    if use_cache and not is_backtest:
         cache = _load_attr_cache()
         entry = cache.get(code)
         if entry and entry.get("cached_date"):
@@ -176,17 +194,22 @@ def attribute_stock(code: str, name: str, return_pct: float, days: int, industry
                 entry["cached"] = True
                 return entry
 
-    # 1. 研报上下文
-    research_ctx = _get_research_context(code, name)
+    # 1. 研报上下文 (回测模式按 cutoff_date 截断)
+    research_ctx = _get_research_context(code, name, cutoff_date=cutoff_date)
 
-    # 2. 网络搜索 (可能超时, 失败用研报兜底)
-    search_text = web_search(f"{name} {code} 股价上涨原因 2026年6月")
+    # 2. 网络搜索 (回测模式跳过, 避免前视偏差)
     context_parts = []
     if research_ctx:
         context_parts.append(research_ctx)
-    if search_text and len(search_text) > 50:
-        context_parts.append(f"网络搜索:\n{search_text[:1500]}")
-    context = "\n\n".join(context_parts) if context_parts else "(无额外信息, 请基于行业知识判断)"
+    if not is_backtest:
+        search_text = web_search(f"{name} {code} 股价上涨原因 {datetime.now().strftime('%Y年%m月')}")
+        if search_text and len(search_text) > 50:
+            context_parts.append(f"网络搜索:\n{search_text[:1500]}")
+    context = "\n\n".join(context_parts) if context_parts else (
+        f"(回测模式: 无{cutoff_date}前的研报记录, 请基于行业知识判断该股"
+        f"近{days}日涨幅{return_pct:.0f}%的原因)" if is_backtest
+        else "(无额外信息, 请基于行业知识判断)"
+    )
 
     # 3. LLM 归因
     prompt = ATTR_PROMPT.format(
@@ -207,11 +230,11 @@ def attribute_stock(code: str, name: str, return_pct: float, days: int, industry
         elif line.startswith("SUMMARY|"):
             parsed["summary"] = line.split("|", 1)[1].strip()
 
-    # 写入缓存 (即使归因为"未知"也缓存, 避免重复搜索)
     parsed["cached"] = False
-    parsed["cached_date"] = datetime.now().strftime("%Y-%m-%d")
+    parsed["cached_date"] = cutoff_date or datetime.now().strftime("%Y-%m-%d")
     parsed["name"] = name
-    if use_cache:
+    # 回测模式不写实时缓存 (避免污染); 实盘才写
+    if use_cache and not is_backtest:
         cache = _load_attr_cache()
         cache[code] = parsed
         _save_attr_cache(cache)

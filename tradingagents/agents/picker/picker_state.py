@@ -49,7 +49,13 @@ class StockProfile(TypedDict, total=False):
 # ══════════════════════════════════════════════════════════
 
 class Claim(TypedDict, total=False):
-    """单条结构化论点，可被引用、反驳、解决、标记未决。"""
+    """单条结构化论点，可被引用、反驳、解决、标记未决。
+
+    排序竞争导向: 每条 claim 论证的是"相对涨幅"而非绝对好坏。
+    - target_codes: 比较对, 如 [A, B], 论证 A vs B 谁涨幅更高
+    - verdict: 比较结论, ">="(A涨幅≥B) / "<"(A涨幅<B)
+    单股 claim 时 target_codes 可为空/单元素 (兼容旧格式)。
+    """
     claim_id: str                   # "BULL-3" / "BEAR-7"
     code: str                       # 针对哪只股 (空=泛论点)
     speaker: str                    # 发言者标签
@@ -59,6 +65,8 @@ class Claim(TypedDict, total=False):
     confidence: float               # 0~1
     status: str                     # open / addressed / resolved / unresolved
     target_claim_ids: List[str]     # 反驳了哪些 claim
+    target_codes: List[str]         # 比较对 (排序竞争): [A, B] 论证 A vs B
+    verdict: str                    # 比较结论: ">="(A≥B) / "<"(A<B)
     round_index: int
 
 
@@ -112,10 +120,9 @@ class PickerState(TypedDict, total=False):
     research_context: str           # 研报行业动量+市场情绪 (research.db, 回测安全)
     analyst_reports: Annotated[Dict[str, str], merge_dict]  # 并行写, dict 合并
     analyst_claims: Annotated[List[Claim], operator.add]    # 分析师阶段初始 claim
-    round1_promoted: List[str]      # 海选晋级 codes (50→20)
-    round2_promoted: List[str]      # 交叉辩论晋级 codes (20→10)
+    screen_promoted: List[str]     # 海选晋级 codes (n→30), 蛇形分3组各取10
     debate_ledger: DebateLedger     # claim 账本
-    final_ranking: List[RankItem]   # 最终排名 (10→排序)
+    final_ranking: List[RankItem]   # 最终排名 (10→排序), 排名辩论收窄到TOP10时产出
     risk_review: Dict[str, Any]     # 可信度评估 + 风险提示
 
     # ── 可追溯 ──

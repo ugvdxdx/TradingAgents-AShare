@@ -56,7 +56,7 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
         except Exception as e:
             print(f"  [capital] 更新失败(不影响流程): {e}")
 
-    pool = data_io.load_top_n(top_n, v3_cache=v3_cache_override)
+    pool = data_io.load_top_n(top_n, v3_cache=v3_cache_override, cutoff_date=cutoff or "")
 
     # 回写过热风险标记到候选池 (供 format_stock_brief 显示 + 辩论参考)
     if not cutoff:
@@ -96,10 +96,19 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
             n_partial += 1
         if not s.get("essence"):
             quality = "partial" if quality == "ok" else quality
+        # 量价动量信号 (回测验证的最强涨幅先行指标: r20>15%或距高点<5%的股后续涨幅显著更高)
+        df_k = df.sort_values("trade_date").reset_index(drop=True) if hasattr(df, "sort_values") else df
+        close = df_k["close"] if hasattr(df_k, "close") else None
+        r5 = r20 = dist_high = None
+        if close is not None and len(close) >= 21:
+            r5 = round((close.iloc[-1] / close.iloc[-6] - 1) * 100, 1)
+            r20 = round((close.iloc[-1] / close.iloc[-21] - 1) * 100, 1)
+            dist_high = round((close.iloc[-1] / close.iloc[-20:].max() - 1) * 100, 1)
         c = dict(s)
         c.update(
             tech_total=tech.total, tech_trend=tech.trend, tech_mom=tech.momentum,
             fund_5d=fund, data_quality=quality,
+            r5=r5, r20=r20, dist_high=dist_high,
         )
         candidates.append(c)
 

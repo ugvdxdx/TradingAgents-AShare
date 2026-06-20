@@ -1,16 +1,14 @@
-"""debate_picker v5 — LangGraph 图编排骨架 (M1)。
+"""debate_picker v5 — LangGraph 图编排 (两段式辩论漏斗)。
 
-7 阶段流程:
-  collect_data → [technical | fund | fundamental] (并行)
-              → screen_round1 (海选 50→20)
-              → debate_loop   (claim 驱动交叉辩论 20→10, 可循环)
-              → final_judge   (终极 PK 10→排名)
-              → risk_review   (可信度 + 风险)
-              → report_render (终端报告 + 落盘)
+候选池(V3 Top50 + 新晋股全部 + 研报热门股)统一在 stage1 汇入, 经排序竞争辩论收窄:
+  collect_data → incremental_info → [technical | fund | fundamental] (并行)
+              → screen_debate  (海选: 蛇形分3组 × 每组多轮辩论 → 30只)
+              → ranking_debate (排名辩论: 多轮 claim 攻防逐轮收窄 30→10, 末轮出排名)
+              → risk_review    (可信度 + 风险)
+              → report_render  (终端报告 + 落盘)
               → END
 
-M1 阶段: 所有节点为 stub, 仅验证图能 compile + 跑通到 END。
-后续里程碑逐节点替换为真实实现。
+辩论导向: 排序竞争 (比谁涨更多, 非多空对抗)。海选与排名辩论复用同一套 claim 攻防+裁决逻辑。
 """
 from __future__ import annotations
 
@@ -22,25 +20,29 @@ from langgraph.graph import END, START, StateGraph
 
 from . import analysts as analyst_nodes
 from . import debaters as debater_nodes
-from . import incremental as incremental_nodes
-from . import judges as judge_nodes
 from . import reporter as reporter_nodes
 from .llm_helper import LLMHelper
-from .picker_state import PickerState, new_debate_ledger
+from .picker_state import PickerState
 
 
 class PickerGraph:
-    """30 天涨幅竞争辩论图。"""
+    """量化选股图: 候选池 → 量化锚排序 → TOP10。
 
-    def __init__(self, config: Dict[str, Any] | None = None, max_debate_rounds: int = 3,
-                 top_n: int = 50, screen_mode: str = "hybrid",
-                 debate_top_k: int = 10, force_k: int = 6):
+    排序锚 = chain + capital×2 - delivery×0.5
+    (回测验证: 21期×530只×30日 Spearman=+0.555, 20/20正相关)
+    """
+
+    def __init__(self, config: Dict[str, Any] | None = None,
+                 top_n: int = 50, debate_top_k: int = 10):
+        """量化选股基线。
+
+        Args:
+            top_n: V3 Top-N 候选池规模 (不含新晋股/研报股加挂)。
+            debate_top_k: 最终排名规模 (TOP10)。
+        """
         self.config = config or {}
-        self.max_debate_rounds = max_debate_rounds
         self.top_n = top_n
-        self.screen_mode = screen_mode
         self.debate_top_k = debate_top_k
-        self.force_k = force_k
         self.llm = LLMHelper(self.config)
         self.graph = self._build_graph()
 
@@ -51,79 +53,37 @@ class PickerGraph:
     def _collect_data(self, state: PickerState) -> Dict[str, Any]:
         return analyst_nodes.collect_data(state, top_n=self.top_n)
 
-    def _analysts_done(self, state: PickerState) -> Dict[str, Any]:
-        """fan-in 汇合节点 (空操作, 仅用于同步三个并行分析师)。"""
-        return {}
-
-    # ──────────────────────────────────────────────
-    # 条件边: 辩论循环收敛
-    # ──────────────────────────────────────────────
-
-    def _should_continue_debate(self, state: PickerState) -> str:
-        ledger = state.get("debate_ledger") or {}
-        if ledger.get("finished"):
-            return "final_judge"
-        return "debate_round"
-
     # ──────────────────────────────────────────────
     # 图构建
     # ──────────────────────────────────────────────
 
     def _build_graph(self):
+        """量化选股基线拓扑 (极简, 无LLM辩论):
+        collect_data → quantum_rank → risk_review → report_render → END
+
+        - collect_data: V3缓存+K线+资金流 → 候选池(含chain/capital/delivery)
+        - quantum_rank: 按锚(chain+capital×2-delivery×0.5)排序取TOP10
+        - risk_review: 可信度+风险提示
+        - report_render: 终端报告+落盘
+
+        回测验证: 锚分Spearman=+0.555 (21期×530只×30日, 20/20正相关)。
+        增量信息/三分析师暂时跳过, 下一步尝试接入。
+        """
         g = StateGraph(PickerState)
 
         g.add_node("collect_data", self._collect_data)
-        g.add_node("incremental_info", incremental_nodes.make_incremental_info(self.llm))
-        g.add_node("technical_analyst", analyst_nodes.make_technical_analyst(self.llm))
-        g.add_node("fund_analyst", analyst_nodes.make_fund_analyst(self.llm))
-        g.add_node("fundamental_analyst", analyst_nodes.make_fundamental_analyst(self.llm))
-        g.add_node("analysts_done", self._analysts_done)
-        g.add_node("screen_round1", judge_nodes.make_screen_round1(self.llm))
-        g.add_node("debate_round", debater_nodes.make_debate_round(self.llm))
-        g.add_node("final_judge", judge_nodes.make_final_judge(self.llm))
+        g.add_node("quantum_rank", debater_nodes.make_ranking_debate(
+            self.llm, 1, self.debate_top_k))
         g.add_node("risk_review", reporter_nodes.make_risk_review())
         g.add_node("report_render", reporter_nodes.make_report_render())
 
-        # START → 数据采集 → 增量信息
         g.add_edge(START, "collect_data")
-        g.add_edge("collect_data", "incremental_info")
-
-        # 增量信息 → 三分析师并行 (fan-out)
-        g.add_edge("incremental_info", "technical_analyst")
-        g.add_edge("incremental_info", "fund_analyst")
-        g.add_edge("incremental_info", "fundamental_analyst")
-
-        # 三分析师 → 汇合 (fan-in)
-        g.add_edge(
-            ["technical_analyst", "fund_analyst", "fundamental_analyst"],
-            "analysts_done",
-        )
-
-        # 汇合 → 海选 → 辩论
-        g.add_edge("analysts_done", "screen_round1")
-        g.add_edge("screen_round1", "debate_round")
-
-        # 辩论循环: debate_round → (debate_round | final_judge)
-        g.add_conditional_edges(
-            "debate_round",
-            self._should_continue_debate,
-            {"debate_round": "debate_round", "final_judge": "final_judge"},
-        )
-
-        # 终极 PK → 风险 → 报告 → END
-        g.add_edge("final_judge", "risk_review")
+        g.add_edge("collect_data", "quantum_rank")
+        g.add_edge("quantum_rank", "risk_review")
         g.add_edge("risk_review", "report_render")
         g.add_edge("report_render", END)
 
         return g.compile()
-
-    # ──────────────────────────────────────────────
-    # 辅助
-    # ──────────────────────────────────────────────
-
-    @staticmethod
-    def _trace(node: str, note: str) -> dict:
-        return {"node": node, "note": note, "ts": datetime.now().isoformat()}
 
     def run(self, trade_date: str | None = None, cutoff_date: str | None = None,
             dry_run: bool = False) -> PickerState:
@@ -139,15 +99,13 @@ class PickerGraph:
             "dry_run": dry_run,
             "run_dir": run_dir,
             "metadata": {
-                "max_debate_rounds": self.max_debate_rounds,
-                "screen_mode": self.screen_mode,
                 "debate_top_k": self.debate_top_k,
-                "force_k": self.force_k,
             },
         }
         print(f"{'='*60}\n  debate_picker v5 — {trade_date}"
               f"{' (回测 cutoff=' + cutoff_date + ')' if cutoff_date else ''}\n"
-              f"  架构: 7阶段 LangGraph (3分析师 + 海选 + 交叉辩论 + 终极PK + 风控)\n"
+              f"  架构: 两段式辩论漏斗 "
+              f"(候选{self.top_n}+ → 量化锚排序 → TOP{self.debate_top_k}, 无LLM辩论)\n"
               f"  落盘: {run_dir}\n{'='*60}")
         result = self.graph.invoke(init)
         print(f"\n  ▶ 图执行完成")
