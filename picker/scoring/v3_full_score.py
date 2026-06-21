@@ -9,11 +9,18 @@
 工程保障：8线程并发、逐只落盘加锁、断点续跑、失败不落盘自动重试。
 缓存：.fundamental_v3_scores.json（复用，已缓存但缺 essence 的会重跑补齐）
 
+Prompt 升级 (2026-06):
+  - chain/delivery 边界判断规则 + 财务交叉验证 + 反例参考
+  - essence 质量禁则 (禁止空话/对仗/同义重复)
+  - 世界知识注入 (市场格局 + AI算力主线 + 退潮赛道 + 中报窗口)
+  - chain/delivery TTL 7 天自动过期重评 (capital 每日量化, 不依赖 LLM)
+
 ⚠️ 前视偏差：fundamentals 快照含最新已兑现叙事。本榜单用于【当前选股】是合理的
    （就是要用最新认知选未来），但不可再用历史涨幅自证。
 """
 import os, sys, json, re, time, threading
 from datetime import datetime, timedelta
+from typing import Dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # 项目根加进 sys.path (兼容从子目录直接运行 + 部分遗留裸 import)
@@ -64,13 +71,16 @@ def _client():
 
 
 def _llm(prompt):
-    """调用 LLM, 带自动重试 (针对并发连接层瞬时错误)。
+    """调用 LLM, 带自动重试。429 限流用长退避 + 抖动, 其他瞬时错误短退避。
 
-    原实现 except Exception: return None 会吞掉所有错误, 导致并发时
-    连接超时/重置被静默丢弃。这里改为: 瞬时错误重试最多 3 次, 仍失败才返回 None。
+    GLM/BigModel 账户有速率限制, 多 worker 并发时易触发 429
+    ("您的账户已达到速率限制")。原 3 次×1.5s 短退避不足以等限流窗口恢复。
+    现策略: 429 单独走 10-30s 长退避 + 随机抖动 (防多 worker 同步重试再撞限流),
+    最多 5 次; 其他错误仍 3 次短退避。
     """
+    import random as _rnd
     last_err = None
-    for attempt in range(3):
+    for attempt in range(5):
         try:
             resp = _client().chat.completions.create(
                 model=_MODEL,
@@ -82,12 +92,24 @@ def _llm(prompt):
             if content:
                 return content
             last_err = "empty content"
+            time.sleep(2)
+            continue
         except Exception as e:
-            last_err = f"{type(e).__name__}: {str(e)[:120]}"
-            # 瞬时错误: 短退避后重试
-            if attempt < 2:
+            err_str = str(e)
+            err_type = type(e).__name__
+            last_err = f"{err_type}: {err_str[:120]}"
+            if attempt >= 4:
+                break
+            # 429 限流: 长退避 (限流窗口需较长冷却) + 抖动 (防多 worker 同步)
+            is_rate_limit = ("429" in err_str or "RateLimit" in err_type
+                             or "速率限制" in err_str or "1302" in err_str)
+            if is_rate_limit:
+                wait = 10 * (attempt + 1) + _rnd.uniform(0, 8)  # ~10-58s 带抖动
+                time.sleep(wait)
+            else:
+                # 其他瞬时错误: 短退避
                 time.sleep(1.5 * (attempt + 1))
-    # 3 次都失败, 记录原因便于排查 (不再静默吞掉)
+    # 全部重试失败, 记录原因便于排查 (不再静默吞掉)
     if last_err:
         print(f"    [LLM] 放弃: {last_err}", flush=True)
     return None
@@ -95,30 +117,146 @@ def _llm(prompt):
 PROMPT_V3E = """你是A股量化研究员，对股票赛道动量评分并提炼30天涨幅辩论精华。
 
 ## 赛道动量评分（三子维度，各保留1位小数）
-- chain 产业链位置(0.0-10.0): AI算力最核心(1.6T光模块/HBM/CoWoS/AI主芯片)→8.5-10.0；AI上游关键材料/元件(电子特气/CMP/HBM前驱体/钨/光刻胶/MLCC高端粉体/TLVR电感/AI铜箔)→7.0-8.4；次核心(PCB/铜连接/液冷/光芯片/空芯光纤)→6.0-6.9；半导体设备材料→5.0-5.9；消费电子/汽车电子→3.0-4.9；产业链外独立成长→1.0-2.9；旧赛道退潮(锂电/白酒/地产/传统矿业)→0.0
-- delivery 业绩兑现度(0.0-10.0): 顶级大客户(英伟达/谷歌/华为/苹果)+产能扩张+业绩高增兑现→8.0-10.0；有客户业绩放量→5.5-7.9；有客户未放量→3.0-5.4；只有概念无订单→0.0-2.9
-- capital 资金关注度(0.0-5.0): 最热主线(AI算力/光模块/HBM)→4.0-5.0；二线(AI上游材料/被动元件/国产算力/半导体设备/机器人)→2.5-3.9；消费电子/汽车电子→1.5-2.4；冷门→0.0-1.4
+
+### chain 产业链位置 (0.0-10.0) — 从what_they_do判断真实业务，不要只看industry标签
+
+**档位规则**：
+- 9.0-10.0: AI算力最核心环节 (1.6T光模块/HBM/CoWoS/AI主芯片)，全球份额前3且有明确大客户
+- 8.5-8.9: AI算力核心但非第一梯队 (800G光模块/先进封装/算力芯片二线)
+- 7.0-8.4: AI上游关键材料/元件 (电子特气/CMP/HBM前驱体/钨/光刻胶/MLCC高端粉体/TLVR电感/AI铜箔/氮化铝基板)
+- 6.0-6.9: AI次核心配套 (PCB/铜连接/液冷/光芯片/空芯光纤/AI电源)
+- 5.0-5.9: 半导体设备/材料 (非AI专用但受益扩产)
+- 3.0-4.9: 消费电子/汽车电子/机器人零部件
+- 1.0-2.9: 产业链外独立成长 (创新药/军工/商业航天等非AI链)
+- 0.0-0.9: 旧赛道退潮 (锂电/白酒/地产/传统矿业)，诚实给低分
+
+**边界判断规则（必须遵守）**：
+1. 主业占比校准：公司来自AI链的营收占比<30% → chain上限扣1.5分（如消费电子厂兼做AI散热→最高按消费电子档+1.5，不得直接按AI次核心给分）
+2. 财务交叉验证：strengths声称"AI核心供应商"但ROE<5%/研发<3% → 上限扣1分（真核心应有持续研发投入）
+3. 旧赛道但新兴业务（关键反例）：传统主业但有研报背书的高增长AI新兴业务（如传统铜厂→AI铜箔/HVLP）→ 不低于3.0分，按新兴业务赛道给分
+4. research_catalysts加分：high_momentum_exposure≥3的旧赛道股 → chain不低于2.0分且上限+1分
+5. 产业链传导逻辑（见世界知识）必须纳入判断：如CPO推迟→利好可插拔光模块，氮化铝基板→新需求打开
+
+### delivery 业绩兑现度 (0.0-10.0) — 交叉验证财务数据，区分"真兑现"与"画饼"
+
+**档位规则**：
+- 8.0-10.0: 顶级大客户(英伟达/谷歌/华为/苹果/特斯拉)+产能扩张+业绩高增(营收增速>30%)
+- 5.5-7.9: 有明确客户且已放量(营收增速>15%)，或niche龙头净利率>15%且稳定增长
+- 3.0-5.4: 有客户但未放量(营收增速<15%)，或客户集中度高(单一客户>50%)
+- 0.0-2.9: 只有概念无订单，或growth_drivers全是"国产替代/一带一路/政策红利"等模板句
+
+**交叉验证规则（必须核对财务数据后给分）**：
+1. 利润率红线：净利率<5% → 说明公司是代工/组装模式，即使有英伟达/华为等大客户名也不超过6.0分
+2. 增速匹配：声称"业绩高增/爆发"但营收增速<15% → 上限减1.5分（真高增应有数据支撑）
+3. 客户名不可信：声称"英伟达供应商"但无具体产品名(如"800G光模块")/份额数据/订单金额 → 减1分（仅凭参加展会/送样测试不算）
+4. 模板句检测：growth_drivers只有"国产替代/一带一路/政策红利"等空话，无具体订单/产能/客户名 → 不超过3分
+5. ROE校验：ROE>20%且净利率>20%的真龙头 → 若其他条件满足可给到上限；ROE<3% → 上限扣2分
+6. 中报窗口加权（6月下旬-7月）：市场对业绩兑现度极度敏感，已预告高增的加分0.3，业绩存疑的从严（从低档）
+
+### capital 资金关注度 (0.0-5.0)
+此字段由量化系统计算（板块动量+量价因子），你只需判断LLM视角的板块热度，供交叉参考。量化capital会覆盖此值。
+- 4.0-5.0: 最热主线(AI算力/光模块/HBM/铜箔/战略金属)
+- 2.5-3.9: 二线热点(AI上游材料/被动元件/国产算力/半导体设备/机器人)
+- 1.5-2.4: 温和（消费电子/汽车电子/军工/电力电网）
+- 0.0-1.4: 冷门/资金流出（传统行业/消费/白酒/地产/油气）
 
 **sector_score 必须严格等于 chain + delivery + capital 之和（范围0.0-25.0，保留1位小数）。不要另算、不要归一化。** 用小数拉开同档位区分度。旧赛道退潮品种诚实给低分。
 
 ## 精华信息（服务30天涨幅竞争辩论，每项≤25字，字段不可重复）
-- chain_position: 产业链卡位一句话
-- core_catalyst: 30天内最强上涨催化（仅一条）
-- biggest_bull: 多头最强论据
-- biggest_bear: 空头最强攻击点
-- quality_redline: 财务质量底线(ROE/净利率/健康度)
+
+**质量禁则（违反的essence视为无效）**：
+- 禁止空话：biggest_bull不得使用"行业景气度高""政策支持""国产替代大趋势"等无具体数据的泛词
+- 禁止对仗：biggest_bear不得使用"竞争加剧""宏观不确定性""估值偏高"等任何股票都适用的套话
+- 禁止同义重复：bull和bear不能互相矛盾（如bull说"订单饱满"bear说"产能不足"→矛盾），也不能bull=bear换个说法
+- 必须具体：bull必须含具体数据（份额%/增速%/价格涨幅/客户名/产能数字），bear必须含具体风险点（库存/解禁/客户流失/技术路线被替代/毛利率下滑）
+
+**字段定义**：
+- chain_position: 产业链卡位一句话 (含市占率或排名，如"全球1.6T光模块份额28%第一")
+- core_catalyst: 30天内最强上涨催化（仅一条，含时间节点：如"7月中报预告净利润+120%"）
+- biggest_bull: 多头最强论据（必须含具体数据，禁止空话）
+- biggest_bear: 空头最强攻击点（必须含具体风险点，禁止任何股票都适用的套话）
+- quality_redline: 财务质量底线(ROE/净利率/现金流/负债中选最关键的一个数字)
 - catalyst_horizon: near(30天内有催化)/mid(1季内)/far(更远或无)
 
 严格输出JSON（essence每个key只出现一次，不要解释）:
 {"chain":数,"delivery":数,"capital":数,"sector_score":数,"brief":"40字内理由","essence":{"chain_position":"","core_catalyst":"","biggest_bull":"","biggest_bear":"","quality_redline":"","catalyst_horizon":"near"}}
 
-【推理要求】直接判断，推理控制在80字内：仅说明产业链档位归属和兑现度档位，不要复述评分规则原文，不要逐字数essence字数。
+【推理要求】直接判断，推理控制在100字内：说明chain档位+关键边界判断理由、delivery档位+财务交叉验证结论。不要复述评分规则原文。
 
 股票数据：
 """
 
 ESSENCE_KEYS = ["chain_position", "core_catalyst", "biggest_bull",
                 "biggest_bear", "quality_redline", "catalyst_horizon"]
+
+# 世界知识精简版缓存 (进程级, 避免每只股票读一次文件)
+_WORLD_KNOWLEDGE_SLIM: str = ""
+_WORLD_KNOWLEDGE_DATE: str = ""
+
+
+def _load_world_knowledge_slim() -> str:
+    """加载世界知识精简版 (注入 V3 评分 prompt)。
+
+    从 world_knowledge_2026_06.md 提取与"产业链位置 + 业绩兑现度"
+    直接相关的段落: 市场格局 / AI算力主线明细 / 退潮赛道 / 业绩窗口。
+    截取到 ~2000 字, 缓存在进程级变量中。
+
+    Returns:
+        精简版世界知识文本 (~2000 字), 或空字符串 (文件不存在时)。
+    """
+    global _WORLD_KNOWLEDGE_SLIM, _WORLD_KNOWLEDGE_DATE
+    if _WORLD_KNOWLEDGE_SLIM:
+        return _WORLD_KNOWLEDGE_SLIM
+
+    wk_path = paths.WORLD_KNOWLEDGE_MD
+    if not os.path.exists(wk_path):
+        return ""
+
+    try:
+        with open(wk_path, "r", encoding="utf-8") as f:
+            full = f.read()
+    except Exception:
+        return ""
+
+    # 提取更新时间
+    for line in full.split("\n")[:5]:
+        if "更新时间" in line:
+            _WORLD_KNOWLEDGE_DATE = line.strip()
+            break
+
+    # 提取关键段落: 只保留与 chain/delivery 评分直接相关的部分
+    # 匹配 ## 二级标题段, 跳过不相关的 (如"冷门板块与边缘趋势"只取标题)
+    sections = re.split(r"\n(?=## )", full)
+    keep_sections = []
+    keep_keywords = [
+        "市场盘面", "资金特征", "AI算力", "半导体", "主线",
+        "退潮", "冷门", "业绩窗口", "投资日历", "中报",
+        "新能源.*拐点", "中美贸易", "地缘",
+    ]
+    skip_keywords = [
+        "冷门板块与边缘趋势",  # 只取标题, 不取详情
+    ]
+
+    for sec in sections:
+        title = sec.split("\n")[0] if sec else ""
+        if any(re.search(kw, title) for kw in keep_keywords):
+            # 跳过段落改为仅取标题+首段
+            if any(kw in title for kw in skip_keywords):
+                lines = sec.strip().split("\n")
+                # 只保留标题 + 前2行 (够判断是冷门即可)
+                keep_sections.append("\n".join(lines[:3]))
+            else:
+                keep_sections.append(sec)
+
+    # 拼接并截取到 ~2000 字
+    slim = "\n\n".join(keep_sections)
+    # 进一步压缩: 删除过长段落中中间的行
+    if len(slim) > 2500:
+        # 保留头尾, 截断中间
+        slim = slim[:1200] + "\n\n... (世界知识中段已省略, 完整版见 data/reference/) ...\n\n" + slim[-800:]
+
+    _WORLD_KNOWLEDGE_SLIM = slim[:2500]
+    return _WORLD_KNOWLEDGE_SLIM
 
 
 def _parse(content):
@@ -135,6 +273,13 @@ def _parse(content):
     try:
         r = json.loads(m.group())
     except json.JSONDecodeError:
+        return None
+    # 防御: LLM 返回的 JSON 必须显式包含 chain/delivery 字段。
+    # 旧模型(deepseek-v4-pro)曾返回缺字段的 JSON (如只有 essence/sector_score),
+    # .get(key, 0) 会静默默认成 0 分写入缓存, 污染排名
+    # (实测: 688183 旧模型下被误判 0/0/0 → 从 #19 掉到 #530)。
+    # 要求字段必须存在, 否则视为解析失败 (保留旧分/触发重试)。
+    if "chain" not in r or "delivery" not in r:
         return None
     try:
         chain = round(float(r.get("chain", 0)), 1)
@@ -155,6 +300,8 @@ def _parse(content):
                                if isinstance(r.get("sector_score"), (int, float)) else None),
         "brief": str(r.get("brief", ""))[:60],
         "essence": essence,
+        "chain_scored_date": datetime.now().strftime("%Y-%m-%d"),
+        "delivery_scored_date": datetime.now().strftime("%Y-%m-%d"),
     }
 
 
@@ -258,18 +405,60 @@ def _call(code):
     t0 = time.time()
     # 注入归因提示 (若有)
     attr_hint = _load_attr_hint(code)
-    content = _llm(PROMPT_V3E + sj[:8000] + attr_hint)
-    return code, _parse(content), time.time() - t0
+    # 注入世界知识 (进程级缓存, 只读一次文件)
+    wk_slim = _load_world_knowledge_slim()
+    wk_section = ""
+    if wk_slim:
+        wk_date_line = f" ({_WORLD_KNOWLEDGE_DATE})" if _WORLD_KNOWLEDGE_DATE else ""
+        wk_section = f"\n\n【当前市场宏观背景 (来自世界知识{wk_date_line})】\n{wk_slim}\n请将以上宏观背景纳入 chain 产业链位置和 delivery 业绩兑现度的判断, 尤其注意产业链传导逻辑和中报窗口对兑现度的敏感度。"
+    prompt = PROMPT_V3E + wk_section + sj[:8000] + attr_hint
+    # 解析失败也重试 (并发下 GLM 偶发返回畸形/截断响应, 非空但解析失败;
+    # _llm 只在异常/空内容时重试, 这里对"有内容但解析失败"再给最多3次机会)。
+    # 实测: 并发下 ~20% 偶发解析失败, 串行重跑同股可成功 → 解析重试能收敛。
+    for _attempt in range(3):
+        content = _llm(prompt)
+        if not content:
+            continue
+        parsed = _parse(content)
+        if parsed:
+            return code, parsed, time.time() - t0
+    return code, None, time.time() - t0
+
+
+# chain/delivery TTL 天数 (超过后自动重评)
+CHAIN_TTL_DAYS = 7
+DELIVERY_TTL_DAYS = 7
 
 
 def needs_run(entry):
-    """没分 或 有分但缺完整essence → 需要跑"""
+    """没分 / 缺essence / chain过期 / delivery过期 → 需要跑
+
+    过期检查: chain_scored_date / delivery_scored_date 超过 TTL
+    天自动重评。不检查 capital (capital 每日量化更新, 不依赖 LLM)。
+    """
     if not entry or "sector_score" not in entry:
-        return True
+        return True, "缺分"
     ess = entry.get("essence")
     if not isinstance(ess, dict):
-        return True
-    return any(not ess.get(k) for k in ESSENCE_KEYS)
+        return True, "缺essence"
+    if any(not ess.get(k) for k in ESSENCE_KEYS):
+        return True, "缺essence"
+
+    # TTL 过期检查
+    # 注: 旧缓存无 chain_scored_date 字段 → 视为过期 (首次升级后会全量重评一次,
+    # 之后正常 TTL 每周只重评少数个股)。这是有意的: 旧缓存用的是弱 prompt + 无世界知识。
+    today = datetime.now().strftime("%Y-%m-%d")
+    from datetime import timedelta
+    cutoff = (datetime.now() - timedelta(days=CHAIN_TTL_DAYS)).strftime("%Y-%m-%d")
+    chain_date = entry.get("chain_scored_date", "")
+    delivery_date = entry.get("delivery_scored_date", "")
+
+    if not chain_date or chain_date < cutoff:
+        return True, "chain过期"
+    if not delivery_date or delivery_date < cutoff:
+        return True, "delivery过期"
+
+    return False, ""
 
 
 # ══════════════════════════════════════════════════════════
@@ -302,7 +491,7 @@ def _load_sub_sector_override():
     return dict(_SUB_SECTOR_OVERRIDE_DEFAULT)
 
 
-def _compute_price_factor(code):
+def _compute_price_factor(code, cutoff_date=""):
     """个股量价趋势因子 (短周期r5 + 长周期r20 双窗口判断)。
 
     单一 r20 窗口的问题: 无法区分"持续上涨"(健康)和"先涨后跌"(见顶回落)。
@@ -317,6 +506,9 @@ def _compute_price_factor(code):
     | 弱(<-10%) | 任何 | 趋势已破 | 0.6 |
     | 回调(-10~0%) | 企稳(>0) | 可能触底 | 0.9 |
     | 回调(-10~0%) | 继续跌 | 持续走弱 | 0.7 |
+
+    Args:
+        cutoff_date: 回测截止日。非空时截断 K线到该日再算 r5/r20 (无前视)。
     """
     try:
         import pickle as _pk
@@ -328,6 +520,10 @@ def _compute_price_factor(code):
                 if df is None or len(df) < 21:
                     return 1.0
                 df = df.sort_values("trade_date").reset_index(drop=True)
+                if cutoff_date:
+                    df = df[df["trade_date"] <= cutoff_date]
+                    if len(df) < 21:
+                        return 1.0
                 close = df["close"]
                 r20 = (close.iloc[-1] / close.iloc[-21] - 1) * 100
                 r5 = (close.iloc[-1] / close.iloc[-6] - 1) * 100 if len(close) >= 6 else 0
@@ -355,6 +551,113 @@ def _compute_price_factor(code):
         return 1.0
     except Exception:
         return 1.0
+
+
+# D2 因子缓存 (G 模式用: 每次更新 capital 时预算一次, 避免逐股重复算行业中位)
+_D2_SECTOR_MEDIAN_CACHE: Dict[str, float] = {}
+
+
+def _compute_d2_factor(code: str, cutoff_date="") -> float:
+    """D2 行业相对强度因子: 个股 r20 相对同行业中位数的偏离 → 0.6~1.3。
+
+    G 模式专用。回测验证: 结构性行情(主线明确)时, D2 能区分板块内领涨股。
+    实现简化: 用 _D2_SECTOR_MEDIAN_CACHE (由 update_capital 预算), 无缓存则返回 1.0。
+
+    Args:
+        cutoff_date: 回测截止日。非空时截断 K线到该日再算 r20。
+    """
+    try:
+        import pickle as _pk
+        for suffix in ["_SH.pkl", "_SZ.pkl"]:
+            path = os.path.join(KLINE_CACHE_DIR, f"{code}{suffix}")
+            if os.path.exists(path):
+                with open(path, "rb") as f:
+                    df = _pk.load(f)
+                    if df is None or len(df) < 21:
+                        return 1.0
+                    df = df.sort_values("trade_date").reset_index(drop=True)
+                    if cutoff_date:
+                        df = df[df["trade_date"] <= cutoff_date]
+                        if len(df) < 21:
+                            return 1.0
+                    close = df["close"]
+                    r20 = (close.iloc[-1] / close.iloc[-21] - 1) * 100
+                    industry = _get_industry(code)
+                    sector = _classify_sector(industry)
+                    sector_median = _D2_SECTOR_MEDIAN_CACHE.get(sector)
+                    if sector_median is None:
+                        return 1.0
+                    # r20 显著高于行业中位 → 强(>1.0), 显著低于 → 弱(<1.0)
+                    if r20 > sector_median + 15:
+                        return 1.15
+                    elif r20 < sector_median - 10:
+                        return 0.85
+                    return 1.0
+        return 1.0
+    except Exception:
+        return 1.0
+
+
+def _classify_sector(industry: str) -> str:
+    """用 keyword index 把 industry 归类到标准板块 (D2 用)。
+
+    平局裁决: 命中数相同时, 取命中关键词中"最长"的那个所属板块
+    (长关键词更精确, 如"算力芯片"比"半导体"更具体), 仍平则按板块名排序
+    (依赖 get_sector_keyword_index 已排序的 key 顺序, 保证跨进程确定性)。
+    """
+    if not industry:
+        return ""
+    try:
+        from tradingagents.research.normalize import get_sector_keyword_index
+        kw_index = get_sector_keyword_index()
+    except Exception:
+        return ""
+    best, best_hit, best_kw_len = "", 0, 0
+    for sec, kws in kw_index.items():
+        matched = [k for k in kws if k in industry]
+        h = len(matched)
+        if h <= 0:
+            continue
+        max_kw_len = max(len(k) for k in matched)
+        if h > best_hit or (h == best_hit and max_kw_len > best_kw_len):
+            best_hit, best_kw_len, best = h, max_kw_len, sec
+    return best
+
+
+def _build_d2_sector_median_cache(cutoff_date=""):
+    """预算所有板块的 r20 中位数 (G 模式: 每次 update_capital 调一次)。
+
+    Args:
+        cutoff_date: 回测截止日。非空时截断 K线到该日再算 r20。
+    """
+    import pickle as _pk
+    import statistics as _st
+    _D2_SECTOR_MEDIAN_CACHE.clear()
+    sector_r20s: Dict[str, list] = {}
+    for suffix_pat in ["_SZ.pkl", "_SH.pkl"]:
+        import glob as _glob
+        for p in _glob.glob(os.path.join(KLINE_CACHE_DIR, f"*{suffix_pat}")):
+            code = os.path.basename(p).replace(suffix_pat, "")
+            industry = _get_industry(code)
+            sector = _classify_sector(industry)
+            if not sector:
+                continue
+            try:
+                df = _pk.load(open(p, "rb"))
+                if df is None or len(df) < 21:
+                    continue
+                df = df.sort_values("trade_date").reset_index(drop=True)
+                if cutoff_date:
+                    df = df[df["trade_date"] <= cutoff_date]
+                    if len(df) < 21:
+                        continue
+                r20 = (df["close"].iloc[-1] / df["close"].iloc[-21] - 1) * 100
+                sector_r20s.setdefault(sector, []).append(r20)
+            except Exception:
+                continue
+    for sec, vals in sector_r20s.items():
+        if vals:
+            _D2_SECTOR_MEDIAN_CACHE[sec] = _st.median(vals)
 
 
 def _get_industry(code):
@@ -420,11 +723,16 @@ def _compute_capital_from_momentum(sector: str, momentum: dict) -> float:
     return 2.0
 
 
-def compute_capital_updates(mode="D"):
+def compute_capital_updates(mode="D", cutoff_date=""):
     """纯计算: 更新 capital 子维度, 返回更新后的 cache dict (不写文件)。
 
     供选股流程 (analysts.collect_data) 调用 — 只算不写, 避免文件竞争。
     update_capital() 会调用本函数再落盘。
+
+    Args:
+        cutoff_date: 回测截止日。非空时 pf/d2 按 cutoff 截断 K线重算 (量价无前视);
+                     base_capital 仍用当前板块 momentum 快照 (研报无可靠历史版, 故不重算)。
+                     为空时 (实盘) 全部用最新数据。
     """
     if not os.path.exists(V3_CACHE):
         return None
@@ -435,6 +743,7 @@ def compute_capital_updates(mode="D"):
 
     try:
         from tradingagents.research.consumer import get_sector_momentum
+        # base 不随 cutoff 重算 (研报无可靠历史版); pf/d2 随 cutoff 截断
         momentum = get_sector_momentum(days=14)
     except Exception:
         return None
@@ -449,17 +758,27 @@ def compute_capital_updates(mode="D"):
         return None
 
     def classify(industry):
+        # 平局裁决同 _classify_sector: 命中数相同时取命中关键词最长的板块,
+        # 保证跨进程确定性 (get_sector_keyword_index 已按板块名排序)。
         if not industry:
             return ""
-        best, best_hit = "", 0
+        best, best_hit, best_kw_len = "", 0, 0
         for sec, kws in kw_index.items():
-            h = sum(1 for k in kws if k in industry)
-            if h > best_hit:
-                best_hit, best = h, sec
+            matched = [k for k in kws if k in industry]
+            h = len(matched)
+            if h <= 0:
+                continue
+            max_kw_len = max(len(k) for k in matched)
+            if h > best_hit or (h == best_hit and max_kw_len > best_kw_len):
+                best_hit, best_kw_len, best = h, max_kw_len, sec
         return best
 
     override = _load_sub_sector_override() if mode in ("D", "d") else {}
     override_sorted = sorted(override.items(), key=lambda x: -len(x[0]))
+
+    # G 模式需要预算行业 r20 中位数缓存 (供 _compute_d2_factor 用)
+    if mode in ("G", "g"):
+        _build_d2_sector_median_cache(cutoff_date=cutoff_date)
 
     updated = 0
     for code, entry in cache.items():
@@ -478,9 +797,20 @@ def compute_capital_updates(mode="D"):
                     break
 
         if mode in ("B", "D", "b", "d"):
-            price_factor = _compute_price_factor(code)
+            # 旧公式: base × price_factor (r5/r20 双窗口)
+            price_factor = _compute_price_factor(code, cutoff_date=cutoff_date)
             new_capital = round(max(0, min(5.0, base_capital * price_factor)), 1)
+        elif mode in ("G", "g"):
+            # G 公式: base + D2(行业相对强度)×2 + price_factor×2
+            # 回测验证: 结构性行情(主线明确)时优于 A, 研报充分时切换到此模式
+            # 无封顶 (min(8.0) 会砍平 21% 的热门主升浪股, 与温和上涨股拿相同 capital;
+            #         回测: 无封顶 TOP10涨 +2.06pp, 最差期改善, Spearman 仅微降 -0.003)
+            price_factor = _compute_price_factor(code, cutoff_date=cutoff_date)
+            d2_factor = _compute_d2_factor(code, cutoff_date=cutoff_date)
+            new_capital = round(max(0, base_capital + d2_factor * 2 + price_factor * 2), 1)
         else:
+            # A 公式 (默认): 纯 base_capital, 不乘 price_factor
+            # 回测验证: 50cutoff 上 ρ 最优, TOP10 均涨高于 base×pf, 逻辑最简
             new_capital = round(base_capital, 1)
 
         old_capital = entry.get("capital", 0)
@@ -495,14 +825,16 @@ def compute_capital_updates(mode="D"):
     return cache, updated, momentum
 
 
-def update_capital(mode="D", persist=True):
+def update_capital(mode="D", persist=True, cutoff_date=""):
     """更新 capital 子维度。
 
     Args:
         mode: B/D/A 计算模式 (默认D)
         persist: True=写文件(全量评分用), False=只返回不写(选股流程用)
+        cutoff_date: 回测截止日。非空时 pf/d2 按 cutoff 截断 K线重算;
+                     base_capital 仍用当前 momentum 快照 (研报无可靠历史版)。
     """
-    result = compute_capital_updates(mode)
+    result = compute_capital_updates(mode, cutoff_date=cutoff_date)
     if result is None:
         print("  [capital] 数据不足, 跳过")
         return None
@@ -633,6 +965,18 @@ def detect_overheated(cache):
     # 保存风险缓存
     json.dump(risk_cache, open(OVERHEATED_CACHE, "w"), ensure_ascii=False, indent=1)
 
+    # chain高估 → 将该股 chain_scored_date 置为过期 (触发 LLM 重评)
+    chain_overvalued = 0
+    for c in candidates:
+        ri = risk_cache.get(c["code"], {})
+        if ri.get("risk_type") == "chain高估":
+            entry = cache.get(c["code"], {})
+            if isinstance(entry, dict):
+                entry["chain_scored_date"] = "2000-01-01"  # 强制过期, 立即重评
+                chain_overvalued += 1
+    if chain_overvalued:
+        print(f"  [过热检测] {chain_overvalued} 只标记 chain高估, 已触发 LLM 重评", flush=True)
+
     return cache
 
 
@@ -701,8 +1045,17 @@ def main():
         except Exception:
             cache = {}
 
-    todo = [c for c in codes if needs_run(cache.get(c))]
-    print(f"全量 {len(codes)} 只 | 已完整(含essence) {len(codes)-len(todo)} | 待跑 {len(todo)}", flush=True)
+    # needs_run 现在返回 (bool, reason); 统计各原因
+    todo_all = [(c, *needs_run(cache.get(c))) for c in codes]
+    todo = [c for c, need, _reason in todo_all if need]
+    # 统计细分
+    reason_counts = {"缺分": 0, "缺essence": 0, "chain过期": 0, "delivery过期": 0}
+    for _c, _need, _reason in todo_all:
+        if _need and _reason in reason_counts:
+            reason_counts[_reason] += 1
+    parts = [f"{v}只{k}" for k, v in reason_counts.items() if v > 0]
+    reason_summary = " / ".join(parts) if parts else ""
+    print(f"全量 {len(codes)} 只 | 已完整 {len(codes)-len(todo)} | 待跑 {len(todo)}  {f'({reason_summary})' if reason_summary else ''}", flush=True)
 
     MAX_WORKERS = int(os.environ.get("V3_WORKERS", "8"))
     lock = threading.Lock()

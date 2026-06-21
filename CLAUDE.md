@@ -7,8 +7,8 @@
 **核心交互方式**: 通过 Claude Code CLI 直接对话，无需前端。
 
 **两阶段选股流水线**：
-1. 阶段一（每周）：V3 基本面打分（`picker/scoring/v3_full_score.py`）— 全量评分 + essence + capital 动态更新
-2. 阶段二（每日）：30 天涨幅竞争辩论（`picker/pipeline/debate_picker_v5.py`）— LangGraph 7 阶段：三分析师并行 → 分组海选 Top50→20 → claim 驱动三段式辩论(多→空→多反驳) → 终极 PK → 风控复核 → 终端富文本报告
+1. 阶段一（每周+研报触发）：V3 基本面打分（`picker/scoring/v3_full_score.py`）— 每周全量评分 chain/delivery/essence；研报涉及个股时增量更新；capital 每日动态重算
+2. 阶段二（每日）：量化锚排序选股（`picker/pipeline/debate_picker_v5.py`）— LangGraph 4 节点纯量化基线：collect_data(全池采集) → quantum_rank(锚分排序取TOP5) → risk_review(可信度) → report_render(报告+🎯策略信号)。零 LLM 调用（回测证明 LLM 从头排序为负相关 -0.14，破坏量化信号）。三分析师+增量信息节点暂未接入，待优化。
 
 **核心机制**：
 - **新晋股发现**（`picker/discovery/scan_mispriced.py`）：量价扫描 + 网络搜索归因 + 板块扩散 + 冷股激活
@@ -87,10 +87,11 @@ data/                   # 运行时数据集中
   caches/               # 原 .xxx.json 点前缀缓存 (fundamental_v3_scores / overheated_risk / ...)
   whitelist/            # stock_whitelist / top500_whitelist
   reference/            # top500_and_leaders / world_knowledge_2026_06 / stocks_audit / ...
-  board_flow_cache.json / news_cache.json
+  news_cache.json
 fundamentals/           # 基本面 JSON (537只热股)
 cold_fundamentals/      # 冷股池 (167只无催化, 冬眠)
 kline_cache/  profiles/  .mf_cache/  .cache/   # 大缓存目录
+                          # .mf_cache/: mf.pkl(个股资金流) + board_flow_history.pkl(行业资金流历史)
 research.db             # 研报知识库
 
 ── 归档 (不进版本库) ──
@@ -103,6 +104,8 @@ docs/                   # 设计文档
 > - `debate_picker_v5.py` → `picker/pipeline/debate_picker_v5.py`
 > - `scan_mispriced.py` → `picker/discovery/scan_mispriced.py`
 > - `_gen_top500_fundamentals.py` → `picker/pipeline/gen_fundamentals.py`
+> - `refresh_fundamentals.py` → `picker/pipeline/refresh_fundamentals.py` **(新·研报触发彻底重写)**
+> - `run_daily_maintenance.py` → `picker/pipeline/run_daily_maintenance.py` **(新·每日维护统一入口)**
 > - `update_world_knowledge.py` → `picker/pipeline/update_world_knowledge.py`
 > - `run_daily_update.py` → `picker/pipeline/run_daily_update.py`
 > - `run_research_pipeline.py` → `picker/pipeline/run_research_pipeline.py`
@@ -133,6 +136,57 @@ docs/                   # 设计文档
 - `astock_provider.py` 使用 mootdx TCP 连接（端口 7709），懒加载单例
 - 所有 Agent 输出格式统一为 markdown/CSV 字符串
 
+## 基本面文件更新体系 (2026-06 重构)
+
+### 设计原则
+
+> **"研报提及 → 彻底重新生成"**（非增量追加），从 Web Search 开始，到 V3 打分结束。
+
+旧体系的 `update_fundamentals_from_research.py` 只做增量追加（列表追新条目，旧信息永不淘汰），
+已被 `refresh_fundamentals.py` 的完全重写替代。新体系综合 **Web Search + Tushare + 研报 + 世界知识**。
+
+### 四级更新层级
+
+| 层级 | 触发方式 | 模块 | 操作 | 成本 |
+|---|---|---|---|---|
+| **L0 每日量化** | 每日自动 | `v3_full_score.py:update_capital()` | 纯量价+板块动量重算 capital | 秒级，0 LLM |
+| **L1 研报触发** | 研报有新提及 | `refresh_fundamentals.py:refresh_one()` | Web+Tushare+研报 → LLM 完整重写 JSON + V3 重评 | ~30s/只 |
+| **L2 每周全量** | 每周一次 | `v3_full_score.py:main()` | 全部 537 只重评 chain/delivery/essence | ~10min |
+| **L3 冷启动** | 手动/新入池 | `gen_fundamentals.py` | 从 top500 列表批量生成新 JSON | 按需 |
+
+### 每日维护统一入口
+
+```bash
+# 推荐：统一编排器（按序执行所有步骤）
+uv run python3 picker/pipeline/run_daily_maintenance.py
+
+# 只刷新 fundamentals（研报触发）
+uv run python3 picker/pipeline/refresh_fundamentals.py
+
+# 刷新单只股票
+uv run python3 picker/pipeline/refresh_fundamentals.py --stock 300308
+```
+
+### 更新链路
+
+```
+run_daily_maintenance.py (统一编排器)
+  ├─ Step 1: 研报采集    (ResearchCollector → raw_feeds)
+  ├─ Step 2: 知识提取    (LLM extract → research.db)
+  ├─ Step 3: 彻底刷新    (refresh_fundamentals — Web+Tushare+研报 → 覆盖写)
+  ├─ Step 4: capital      (update_capital, 纯量化)
+  ├─ Step 5: 过热检测    (detect_overheated)
+  ├─ Step 6: 冷股激活    (r5>15% → 移回 hot)
+  ├─ Step 7: K线更新     (update_klines_daily)
+  └─ Step 8: 世界知识    (update_world_knowledge)
+```
+
+### 已废弃
+
+- `picker/pipeline/update_fundamentals_from_research.py` — 增量追加，被 `refresh_fundamentals.py` 替代
+- `picker/knowledge/fundamental_agent.py:analyze_one()` — 旧规则型生成（新浪/百科），写入能力已移除
+- `picker/paths.py:FUNDAMENTALS_COLD_DIR` — 原指向不存在的 `fundamentals_cold/`，统一为 `COLD_FUNDAMENTALS_DIR`
+
 ## 选股系统架构 (2026-06 量化锚重构)
 
 ### 核心发现 (回测验证)
@@ -153,37 +207,87 @@ docs/                   # 设计文档
 ```
 每日选股 (picker/pipeline/debate_picker_v5.py)
   ├─ collect_data
-  │    ├─ update_capital(persist=False)     ← capital动态更新, 0次LLM, 秒级
-  │    │    研报板块动量(14天) + 个股量价(双窗口r5+r20) → 重算capital
+  │    ├─ update_capital(persist=False, mode=G) ← capital动态更新(G模式), 0次LLM, 秒级
+  │    │    G模式: base_capital + D2(行业相对强度)×2 + price_factor×2 (无封顶)
   │    ├─ detect_overheated()               ← 过热股检测, 搜索验证+风险标记, 不改分
-  │    ├─ load_top_n(v3_cache=内存cache)    ← 候选池: V3 Top50 + 新晋股全部 + 研报热门股
-  │    │    三路统一在 stage1 汇入, 保留真实v3 (不设上限不截断)
-  │    └─ K线 + 资金流 → candidates (~100只)
+  │    ├─ load_top_n(v3_cache=内存cache)    ← 全池530只 (不预筛, 全部参与排序)
+  │    └─ K线 + 资金流 → candidates (~530只)
   ├─ quantum_rank                           ← 量化锚排序, 0次LLM, 秒级
-  │    锚 = chain + capital×2 - delivery×0.5 → 取 TOP10
-  └─ risk_review + report_render            ← 报告展示
+  │    锚 = chain + capital×2 - delivery×0.5 → 取 TOP5
+  └─ risk_review + report_render            ← 报告 + 🎯买1卖2策略信号 + 全量复盘落盘
 
-下一步: 尝试把增量信息(实时财务/新闻/量价信号)接入, 在锚基础上做调整。
+capital 模式 (CAPITAL_MODE 环境变量):
+  G(默认): base + D2×2 + pf×2 (无封顶, 仅 max(0,·) 防负) — 换手率2.2/天, 策略月均+31%
+    回测验证(125期): 无封顶 TOP10涨+2.06pp vs min(8.0), Spearman仅-0.003
+    (封顶会砍平21%热门主升浪股, 如中际旭创/新易盛, 与温和上涨股同分→区分度丧失)
+  D(旧):   base × pf (min5.0)    — 换手率3.0/天, 回测用
+  A:       base                  — ρ最优但换手0.1(策略不可用)
 ```
 
 ### V3 评分三子维度
 
 | 维度 | 更新频率 | 方式 | 排序预测力 | 说明 |
 |---|---|---|---|---|
-| chain (产业链位置) | 季度 | LLM | **+0.55** (强) | AI核心8.5+/AI上游材料7.0-8.4/次核心6.0-6.9/设备材料5.0-5.9 |
-| capital (资金热度) | **每日** | **量化** | **+0.50** (强) | 板块动量×个股量价, 模式D(默认): 细分拆分+双窗口 |
-| delivery (业绩兑现) | 季度 | LLM | +0.10 (弱) | 顶级客户+产能+高增兑现→8-10 |
+| chain (产业链位置) | 每周+研报触发 | LLM | **+0.55** (强) | AI核心8.5+/AI上游材料7.0-8.4/次核心6.0-6.9/设备材料5.0-5.9 |
+| capital (资金热度) | **每日** | **量化** | **+0.50** (强) | 板块动量+个股量价, 模式G(默认): base+D2×2+pf×2, 无封顶 |
+| delivery (业绩兑现) | 每周+研报触发 | LLM | +0.10 (弱) | 顶级客户+产能+高增兑现→8-10 |
 
 > delivery 预测力弱, 在锚公式里做 -0.5 负权重惩罚; chain+capital 是主信号。
+> capital 模式G的换手率(2.2/天)是策略可执行的必要条件; price_factor的真正价值是提供换手率而非排序质量。
 
-### 候选池三路来源 (统一 stage1)
+### PROMPT_V3E 升级 + 模型切换 (2026-06-22)
+
+**背景**: 原 PROMPT_V3E 过简(每子维度一行), chain/delivery 缺边界规则与交叉验证, 世界知识未注入评分, 且原模型 deepseek-v4-pro 在新 prompt 下 20% 解析失败。
+
+**改动** (全部在 `picker/scoring/v3_full_score.py`):
+1. **PROMPT_V3E 结构化**: chain 加 5 条边界规则(主业占比/财务交叉/旧赛道新兴业务/研报催化/产业链传导); delivery 加 6 条交叉验证(净利率红线<5%→≤6分/增速匹配/客户名不可信/模板句检测/ROE校验/中报窗口加权); essence 加质量禁则(禁空话/禁套话对仗/禁同义重复/必须含数据)
+2. **世界知识注入**: `_load_world_knowledge_slim()` 提取市场格局+AI算力主线+退潮赛道+业绩窗口(~1500字, 进程级缓存)注入评分 prompt
+3. **chain/delivery TTL 7天**: `_parse` 写入 `chain_scored_date`/`delivery_scored_date`, `needs_run()` 超期自动重评; `detect_overheated` 检出 chain高估→强制重评
+4. **模型切 GLM-5.2**: deepseek-v4-pro 返回缺字段/畸形 JSON → 20% 失败; GLM-5.2 结构化输出稳定(诊断 100% 成功)
+
+**失败处理 4 层防御** (实测 80%→100% 成功率):
+- `_parse`: 要求 JSON 必须含 chain/delivery 字段, 否则判失败(防缺字段静默成 0 分污染排名)
+- `_llm`: 429 限流(BigModel 速率限制)走长退避(10-58s)+随机抖动, 重试 5 次; 其他瞬时错误短退避
+- `_call`: 解析失败重试 LLM 最多 3 次(并发下偶发畸形响应, 串行重跑可成功)
+
+**验证结果** (546/546 全量重评):
+- essence bull/bear 含数据率: 26%/33% → **86%/80%**
+- 低净利(<5%)股 delivery 平均降 -1.26(利润率红线生效, 工业富联/浪潮信息等代工股被正确降分)
+- PCB/CCL 板块内 chain 区分度 σ: 0.24 → 1.05
+- **锚分回测**(同方法相对对比, 125期): 生产锚 Spearman +0.216→**+0.245**(+0.029), 正相关期 92→96/125, 新 prompt 安全上线
+  - 注: 绝对值低于历史 +0.555 因本对比用当前分数对齐全部 cutoff(前视近似), 非 cutoff 化 capital+快照 chain/delivery; 相对结论(新>旧)可靠
+
+### 行业归类与确定性 (2026-06 修复)
+
+**capital 的 base_capital 来自个股 industry 字段经板块归类后, 查研报 hot_sectors 排名**。
+归类质量直接影响 capital 准确性, 两类问题已修复:
+
+**① 确定性 (PYTHONHASHSEED 修复)**:
+- `normalize.py:get_sector_keyword_index()` 原用 `set()` 合并板块名 → key 顺序随进程哈希种子随机
+- 当 industry 在多个板块命中数相同(平局)时, classify 取到不同板块 → capital 随进程波动
+- 修复: `sorted(set(...))` 固定顺序 + classify 平局取命中关键词最长的板块(更精确)
+
+**② 归类细化 (蹭板块修复)**:
+- 原 `半导体设备/材料` 板块含 `半导体` 泛词 → 封测/代工/LED/显示/设计全被吸进来蹭 hot#0 的 base=5.0
+- 拆出 4 个独立板块: `半导体封测/代工` / `半导体设计` / `显示面板/LED` / `光伏`
+- 回测(125期): Spearman **+0.213→+0.224 (+0.011)**, TOP10 **+23.33%→+25.02% (+1.69pp)**
+- 典型: 三安光电(LED) capital 8.0→6.2, 排名 #5→#94
+
+**classify 平局裁决规则** (`_classify_sector`):
+命中数相同时, 取命中关键词中"最长"的板块(长词更精确, 如"算力芯片">"半导体"), 仍平则按板块名排序(跨进程确定)。
+
+### 候选池 (全池采集, 无召回预筛)
 
 ```
-load_top_n():
-  1. V3 Top50 (按sector_score降序) — 季度级静态锚
-  2. 新晋股全部 (板块供需型归因, 无上限) — 保留真实v3参与竞争
-  3. 研报热门股全部 (近14天博主多次看多, 无上限) — 保留真实v3
-  → 去重后 ~100只, 全部进入量化排序
+load_top_n(n=None):  # 生产固定全池
+  全池V3 530只 (按chain+capital入池排序) + 强制纳入 + 新晋股 + 研报热门股 → 去重后~530只
+  全部进入collect_data算tech/fund/r5/r20, 然后量化锚排序取TOP5
+
+回测验证(125期, G模式无封顶) — 召回消融实验:
+  top50/100/150/200 的 TOP10涨幅与全池无差异 (+0.00~+0.26pp)
+  → 召回预筛对选最强股无帮助, 反而会漏掉保送机制加挂的新晋股/研报股
+  → 全池的真正价值: 让 chain+capital 排序靠后的保送股能进入最终锚排序
+load_top_n 的 n 参数仅供测试脚本(scripts/test_deep_rank.py)做召回实验, 生产不传。
 ```
 
 ### 新晋股发现机制 (picker/discovery/scan_mispriced.py)
@@ -202,17 +306,39 @@ load_top_n():
 
 | 缓存文件 | 内容 | TTL |
 |---|---|---|
-| `data/caches/fundamental_v3_scores.json` | V3 评分 (chain/delivery/capital/essence) | 季度+每日capital |
+| `data/caches/fundamental_v3_scores.json` | V3 评分 (chain/delivery/capital/essence) | 每周全量+研报触发+每日capital |
+| `data/caches/v3_snapshots/YYYY-MM-DD.json` | **每日选股快照** (全池分数+TOP5/10推荐+理由) | 每日(同日覆盖) |
 | `data/caches/mispriced_attribution_cache.json` | 新晋股归因 (板块供需/个股事件) | 14天 |
 | `data/caches/overheated_risk_cache.json` | 过热股风险验证 | 7天 |
 | `data/caches/cold_stocks.json` | 冷股清单 | 手动 |
 | `data/caches/sub_sector_override.json` | 细分赛道 capital 拆分表 | scan_mispriced 维护 |
 | `data/reference/world_knowledge_2026_06.md` | 世界知识 (宏观+归因) | 每日更新 |
 
+> **每日快照** (`picker/snapshot.py`): 实盘选股后自动存档, 含全池 chain/delivery/capital + TOP推荐理由。
+> 回测按 cutoff 取 ≤ 该日 的最近快照, **消除 chain/delivery 前视偏差** (chain/delivery 每周更新, 用当前快照回测会偷看未来)。
+> 历史 cutoff 无快照时回退到当前 V3 cache (已知近似, 越早期越失真)。
+
 ### 回测/调试工具
 
 | 脚本 | 用途 |
 |---|---|
-| `scripts/validate_anchor.py` | 大规模验证锚分预测力 (21期×530只, 秒级) |
+| `scripts/validate_anchor.py` | 大规模验证锚分预测力 (21期×530只, 秒级; 注意: 用V3当前快照capital, 非cutoff重建) |
+| `scripts/compare_prompts.py` | 新旧 V3 prompt 对比 (chain/delivery变化+essence质量+delivery交叉验证+chain区分度) |
+| `scripts/backtest_compare_prompts.py` | 新旧 prompt 锚分回测对比 (同方法125期, 相对Spearman) |
+| `scripts/diag_v3_failure.py` | V3 评分失败根因诊断 (直调LLM打印原始返回) |
+| `scripts/eval_price_factors.py` | price_factor 变体回测 (D模式 base×pf, 125期, 含Spearman+TOP10) |
+| `scripts/build_price_factor_history.py` | 构建 pf 历史 (cutoff化, 无前视, 12变体+基线) |
+| `scripts/build_capital_history.py` | 构建 capital 历史 (cutoff化, 无前视, base_capital剥离) |
+| `scripts/experiment_capital_cap.py` | 封顶实验 (G模式, 扫描min(6~15/无)对Spearman/TOP10影响) |
+| `scripts/experiment_recall.py` | 召回消融实验 (全池 vs top50/100/200, 对比TOP10/Spearman) |
+| `scripts/experiment_delivery_weight.py` | delivery 权重实验 (扫描-0.5~+2.0, 结论:维持-0.5) |
+| `scripts/experiment_strategy_backtest.py` | 买1卖2 持仓轮动回测 (月化+分月, delivery权重对比) |
+| `scripts/experiment_perf_penalty.py` | 历史表现软降权实验 (串行无前视, 结论:不接入) |
+| `scripts/experiment_blacklist.py` | 黑名单规则实验 (串行无前视, 结论:不接入,错杀反转股) |
+| `picker/snapshot.py` | 每日快照读取 (回测按cutoff取历史chain/delivery, 消除前视) |
 | `scripts/test_deep_rank.py` | 深辩排序对比测试 (v5纯LLM/v6动量/v7量化锚, 含Spearman计算) |
 | `picker/data/data_cache.py` | K线缓存 (count=90根, 支持回测) |
+
+> **回测模式差异**: 生产用 G 模式(base+d2×2+pf×2, 无封顶), `eval_price_factors` 用 D 模式(base×pf, min5.0)。
+> D 模式 capital max=6.5 封顶几乎不触发; 封顶相关实验须用 `experiment_capital_cap.py`(G模式)。
+> **前视偏差**: capital(ppf/d2) 已 cutoff 化; chain/delivery 需用 `picker/snapshot.py` 取历史快照消除前视, 无快照时回退当前 V3 cache(近似)。
