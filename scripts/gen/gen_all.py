@@ -1,8 +1,24 @@
-import sys
-sys.path.insert(0, '.')
+#!/usr/bin/env python3
+"""批量生成 fundamentals 文件。
+已废弃旧 analyze_one() (规则型/新浪百科)，改为走 gen_fundamentals.generate_one() (LLM+Tushare)。
 
-from picker.knowledge.fundamental_agent import analyze_one
+用法:
+  uv run python3 scripts/gen/gen_all.py            # 全部生成
+  uv run python3 scripts/gen/gen_all.py --count 10  # 只生成前10只
+  uv run python3 scripts/gen/gen_all.py --codes 600519,000858  # 指定代码
+"""
+import sys
+import os
 import time
+import argparse
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from picker.pipeline.gen_fundamentals import (
+    generate_one, load_world_knowledge, load_reference_fundamentals,
+    parse_top500_file, mark_stock_done,
+)
+from picker import paths
 
 stocks = [
     ('601288', '农业银行'),
@@ -507,8 +523,77 @@ stocks = [
     ('601611', '中国核建'),
 ]
 
-for i, (code, name) in enumerate(stocks, 1):
-    print(f'[{i}/500] {code} {name}...', end=' ', flush=True)
-    result = analyze_one(code, name, force=True)
-    print('OK')
-    time.sleep(1)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='批量生成 fundamentals 文件')
+    parser.add_argument('--count', type=int, default=0, help='只生成前N只')
+    parser.add_argument('--codes', type=str, default='', help='只生成指定代码(逗号分隔)')
+    parser.add_argument('--force', action='store_true', help='强制覆盖已有文件')
+    args = parser.parse_args()
+
+    # 加载共享资源
+    print("加载世界知识...")
+    world_knowledge = load_world_knowledge()
+    print(f"  世界知识: {len(world_knowledge)} 字符")
+
+    print("加载参考文件...")
+    reference = load_reference_fundamentals()
+    print(f"  参考文件: {len(reference)} 字符")
+
+    # 从 top500 列表获取行业和市值信息
+    top500_map = {}
+    top500_path = paths.TOP500_AND_LEADERS
+    if os.path.exists(top500_path):
+        for s in parse_top500_file(top500_path):
+            top500_map[s['code']] = s
+
+    # 过滤
+    codes_arg = [c.strip() for c in args.codes.split(',') if c.strip()] if args.codes else []
+    todo = stocks
+    if codes_arg:
+        todo = [(c, n) for c, n in stocks if c in codes_arg]
+    if args.count > 0:
+        todo = todo[:args.count]
+
+    # 检查已有文件（除非 --force）
+    existing = set()
+    if not args.force:
+        fund_dir = paths.FUNDAMENTALS_DIR
+        os.makedirs(fund_dir, exist_ok=True)
+        for f in os.listdir(fund_dir):
+            if f.endswith('.json'):
+                existing.add(f.replace('.json', ''))
+
+    n_total = len(todo)
+    success = fail = skip = 0
+    for i, (code, name) in enumerate(todo, 1):
+        if code in existing:
+            skip += 1
+            print(f'[{i}/{n_total}] {code} {name}... 已存在，跳过')
+            continue
+
+        # 从 top500 获取行业和市值
+        info = top500_map.get(code, {})
+        industry = info.get('industry', '未知')
+        mcap_yi = info.get('mcap_yi', 0)
+
+        print(f'[{i}/{n_total}] {code} {name} ({industry}, {mcap_yi}亿)...', end=' ', flush=True)
+        try:
+            result = generate_one(code, name, industry, mcap_yi, world_knowledge, reference)
+            if result:
+                path = os.path.join(paths.FUNDAMENTALS_DIR, f'{code}.json')
+                import json
+                with open(path, 'w', encoding='utf-8') as f:
+                    json.dump(result, f, ensure_ascii=False, indent=2)
+                if code in top500_map:
+                    mark_stock_done(top500_path, code)
+                success += 1
+                print(f'✓ (s={success} f={fail} skip={skip})')
+            else:
+                fail += 1
+                print(f'✗ 生成失败 (s={success} f={fail} skip={skip})')
+        except Exception as e:
+            fail += 1
+            print(f'✗ {type(e).__name__}: {e}')
+        time.sleep(1)
+
+    print(f'\n完成: 成功 {success}, 失败 {fail}, 跳过 {skip}')

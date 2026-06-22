@@ -51,16 +51,15 @@ class KlineCache:
         return os.path.join(self.cache_dir, f"{safe_name}.pkl")
 
     def get(self, symbol: str) -> Optional[pd.DataFrame]:
-        """获取单只股票的缓存K线，过期返回None"""
+        """获取单只股票的缓存K线。
+
+        过期策略已作废: 历史 K 线是只增不改的事实数据, 24h 过期会导致
+        backfill 补采的长 K 线被判过期 → 重新拉 90 根覆盖 → 白补。
+        现在只要文件存在就返回 (缓存优先), 需要强制刷新时直接删 pkl。
+        """
         path = self._cache_path(symbol)
         if not os.path.exists(path):
             return None
-
-        cached_at = self._meta.get(symbol, {}).get('cached_at', 0)
-        hours_ago = (time.time() - cached_at) / 3600
-        if hours_ago > self.expiry_hours:
-            return None
-
         try:
             df = pd.read_pickle(path)
             return df

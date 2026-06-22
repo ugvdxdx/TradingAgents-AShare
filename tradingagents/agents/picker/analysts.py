@@ -35,28 +35,36 @@ def _dump(run_dir: str, name: str, content: Any, as_json: bool = False):
 # 阶段 1: 数据采集
 # ══════════════════════════════════════════════════════════
 
-def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
-    """加载 Top-N 候选 + 技术面 + 资金流 + 数据校验。"""
+def collect_data(state) -> Dict[str, Any]:
+    """加载全池候选 + 技术面 + 资金流 + 数据校验。
+
+    回测验证(125期, G模式): 召回预筛(top50/100) TOP10涨幅与全池无差异,
+    且 load_top_n 的保送机制(新晋股/研报热门/强制纳入)需全池才能生效 → 固定全池。
+    """
     run_dir = state["run_dir"]
     cutoff = state.get("cutoff_date")
-    print(f"\n{'='*60}\n📡 [阶段 1/7] 数据采集 (Top{top_n})\n{'='*60}")
+    print(f"\n{'='*60}\n📡 [阶段 1/4] 数据采集 (全池)\n{'='*60}")
 
     # ── 先更新 capital 子维度 (纯量化, 0次LLM, 几秒完成) ──
     # 只算不写文件 (persist=False), 避免与手动跑 _v3_full_score 的文件竞争
-    # 回测模式 (cutoff_date 非空) 跳过, 避免用未来数据污染
+    # 回测模式 (cutoff_date 非空): pf/d2 按 cutoff 截断 K线重算, base 用当前 momentum 快照
+    #   (研报无可靠历史版, 故 base 不重算; 这是回测的已知近似, 详见 CLAUDE.md)
+    # dry_run 跳过 detect_overheated: 该函数对未命中缓存的候选会发网络搜索+LLM,
+    # 违背 dry_run "跳过网络请求, 仅验证管道" 的语义。
     v3_cache_override = None
-    if not cutoff:
-        try:
-            from picker.scoring.v3_full_score import update_capital, detect_overheated
-            capital_mode = os.environ.get("CAPITAL_MODE", "D")
-            v3_cache_override = update_capital(mode=capital_mode, persist=False)
-            # 过热股检测: 高分但持续下跌的标的, 搜索验证 + 风险标记 (不改 V3 分)
-            if v3_cache_override:
-                v3_cache_override = detect_overheated(v3_cache_override)
-        except Exception as e:
-            print(f"  [capital] 更新失败(不影响流程): {e}")
+    try:
+        from picker.scoring.v3_full_score import update_capital, detect_overheated
+        # capital 计算模式: A=纯base_capital / D=base×pf(旧) / G=base+D2×2+pf×2(默认, 策略回测月均+31%)
+        capital_mode = os.environ.get("CAPITAL_MODE", "G")
+        v3_cache_override = update_capital(mode=capital_mode, persist=False, cutoff_date=cutoff or "")
+        # 过热股检测: 高分但持续下跌的标的, 搜索验证 + 风险标记 (不改 V3 分)
+        # dry_run 跳过: 未命中缓存的候选会触发真实网络搜索+LLM 调用
+        if v3_cache_override and not state.get("dry_run") and not cutoff:
+            v3_cache_override = detect_overheated(v3_cache_override)
+    except Exception as e:
+        print(f"  [capital] 更新失败(不影响流程): {e}")
 
-    pool = data_io.load_top_n(top_n, v3_cache=v3_cache_override, cutoff_date=cutoff or "")
+    pool = data_io.load_top_n(v3_cache=v3_cache_override, cutoff_date=cutoff or "")
 
     # 回写过热风险标记到候选池 (供 format_stock_brief 显示 + 辩论参考)
     if not cutoff:
@@ -77,7 +85,7 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
             pass
 
     mf_cache = data_io.load_mf_cache()
-    print(f"  V3 Top{top_n}: {pool[0]['v3']:.1f} ~ {pool[-1]['v3']:.1f} | 资金流缓存 {len(mf_cache)} 只")
+    print(f"  V3 全池 {len(pool)} 只: v3 {pool[0]['v3']:.1f} ~ {pool[-1]['v3']:.1f} | 资金流缓存 {len(mf_cache)} 只")
 
     candidates: List[dict] = []
     n_missing = n_partial = 0
@@ -123,7 +131,7 @@ def collect_data(state, top_n: int = 50) -> Dict[str, Any]:
 
 
 # ══════════════════════════════════════════════════════════
-# 阶段 2: 三分析师 (并行)
+# 阶段 2: 三分析师 (并行) — ⚠ 未接入当前4节点基线, 待"任务2"启用
 # ══════════════════════════════════════════════════════════
 
 def _fmt_technical(candidates: List[dict]) -> str:
@@ -167,7 +175,7 @@ def _fmt_incremental(candidates: List[dict], briefs: Dict[str, str]) -> str:
 
 def make_technical_analyst(llm: LLMHelper):
     def node(state) -> Dict[str, Any]:
-        print("  ▶ [阶段 2/7] 技术面分析师")
+        print("  ▶ [未接入] 技术面分析师")
         cands = state.get("candidates", [])
         if state.get("dry_run") or not cands:
             return {"analyst_reports": {"technical": "(dry-run)"},
@@ -188,7 +196,7 @@ def make_technical_analyst(llm: LLMHelper):
 
 def make_fund_analyst(llm: LLMHelper):
     def node(state) -> Dict[str, Any]:
-        print("  ▶ [阶段 2/7] 资金面分析师")
+        print("  ▶ [未接入] 资金面分析师")
         cands = state.get("candidates", [])
         if state.get("dry_run") or not cands:
             return {"analyst_reports": {"fund": "(dry-run)"},
@@ -216,7 +224,7 @@ def make_fund_analyst(llm: LLMHelper):
 
 def make_fundamental_analyst(llm: LLMHelper):
     def node(state) -> Dict[str, Any]:
-        print("  ▶ [阶段 2/7] 基本面/催化面分析师")
+        print("  ▶ [未接入] 基本面/催化面分析师")
         cands = state.get("candidates", [])
         if state.get("dry_run") or not cands:
             return {"analyst_reports": {"fundamental": "(dry-run)"},

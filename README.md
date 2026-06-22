@@ -179,7 +179,7 @@ research.db    fundamentals/*.json     .fundamental_v3_       results/picker_v5/
 | **④ 选股 Top50→10** | `uv run python3 picker/pipeline/debate_picker_v5.py --top-n 50` | LangGraph 7 阶段辩论。约 18 分钟 |
 | ④ 指定日期 | `uv run python3 picker/pipeline/debate_picker_v5.py --date 2026-06-16` | 回测/缓存数据 |
 | ④ 验证管道 | `uv run python3 picker/pipeline/debate_picker_v5.py --dry-run` | 跳过 LLM，仅验证数据流 |
-| **资金流预拉取** | `uv run python3 picker/pipeline/fetch_money_flow_all.py` | 全市场资金流缓存（`.mf_cache/`），辩论阶段秒读 |
+| **资金流预拉取** | `uv run python3 picker/pipeline/fetch_money_flow_all.py` | 增量拉取→单一缓存 `.mf_cache/mf.pkl`；热股(有基本面)留14个月，其余60天 |
 
 > 💡 **怎么说给 AI 听**：与其记命令，不如直接说"重生成全量基本面"、"评分完接着选股"、"从研报到选股全跑一遍"，AI 会按上表执行。
 
@@ -190,7 +190,7 @@ research.db    fundamentals/*.json     .fundamental_v3_       results/picker_v5/
 | **V3 全量打分** | `uv run python3 picker/scoring/v3_full_score.py` | 544 只 A 股基本面评分 + essence 精华（8 并发，~35 分钟） |
 | **30 天辩论选股** | `uv run python3 picker/pipeline/debate_picker_v5.py` | LangGraph 7 阶段：增量信息→三分析师→海选→claim 辩论→TOP10 |
 | **全量回测** | `uv run python3 picker/backtest/run_backtest.py` | V3 评分 vs 涨幅相关性回测 |
-| **资金流预拉取** | `uv run python3 picker/pipeline/fetch_money_flow_all.py` | 全市场资金流缓存（`.mf_cache/`），辩论阶段秒读 |
+| **资金流预拉取** | `uv run python3 picker/pipeline/fetch_money_flow_all.py` | 增量拉取→单一缓存 `.mf_cache/mf.pkl`；热股(有基本面)留14个月，其余60天 |
 | **个股基本面生成** | `uv run python3 picker/pipeline/gen_fundamentals.py` | Tushare 财报 + 板块研报 + 防污染规则驱动的 JSON 生成 |
 
 ### Tushare 财报集成（`picker/data/fundamentals_data.py`）

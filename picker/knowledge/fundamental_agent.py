@@ -1234,131 +1234,29 @@ def _generate_summary(profile: Dict, fin_health: Dict) -> str:
     return "；".join(summary_parts) if summary_parts else f"{name}当前处于{industry}行业，整体状况一般"
 
 
-def analyze_one(code: str, name: str, force: bool = False) -> Dict:
-    """分析单个股票"""
-    # 检查缓存
-    cache_path = f"fundamentals/{code}.json"
-    if not force:
-        try:
-            with open(cache_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            pass
-
-    # 获取业务画像
-    profile = get_business_profile(code, name)
-
-    # 如果没有业务描述，从百科抓取
-    if not profile.get("what_they_do"):
-        baike_desc = _fetch_baike_summary(name or code)
-        if baike_desc:
-            profile["what_they_do"] = baike_desc
-            baike_info = _extract_from_baike(baike_desc)
-            if baike_info.get("industry_position") and not profile.get("industry_position"):
-                profile["industry_position"] = baike_info["industry_position"]
-            if baike_info.get("strengths") and not profile.get("strengths"):
-                profile["strengths"] = baike_info["strengths"]
-            _save_profile(code, profile)
-        else:
-            wk = get_business_intelligence(code, name)
-            if wk and wk.get("strengths"):
-                profile["what_they_do"] = f"{name or code}，{wk.get('industry', profile.get('industry', ''))}行业。{'; '.join(wk['strengths'][:3])}"
-            else:
-                profile["what_they_do"] = f"{name or code}（{profile.get('industry','未知')}行业企业）"
-            _save_profile(code, profile)
-
-    # 获取财务数据
-    fin = fetch_financials(code)
-    has_fin_data = bool(fin.get("income") or fin.get("balance_sheet"))
-    
-    if not has_fin_data:
-        raw = {}
-        fin_health = {"health_rating": "N/A", "benchmark_ref": "",
-                      "highlights": [], "risks": [], "key_metrics": {}}
-        moat = ""
-        overall = "N/A"
-        g_score = 5.0
-    else:
-        raw = compute_metrics(fin)
-        industry = profile.get("industry", "")
-        fin_health = _assess_financial(raw, industry)
-        moat = _assess_moat(profile, raw)
-        geo = "CN"
-        
-        # 自动填充
-        world_knowledge = get_business_intelligence(code, profile.get("name", name))
-        if world_knowledge or not profile.get("industry_position"):
-            _auto_industry_position(profile, raw)
-        _auto_strengths(profile, fin_health, raw)
-        if not profile.get("weaknesses") or len(profile["weaknesses"]) == 0:
-            _auto_weaknesses(profile, fin_health)
-        if not profile.get("moat_level"):
-            profile["moat_level"] = moat
-        if not profile.get("growth_drivers") or len(profile["growth_drivers"]) == 0:
-            _auto_growth_drivers(profile, fin_health)
-        if not profile.get("headwinds") or len(profile["headwinds"]) == 0:
-            _auto_headwinds(profile, fin_health)
-        
-        # 获取地缘政治风险
-        _auto_geopolitical_risks(profile)
-        
-        g_score = _growth_score(profile, fin_health, raw, geo)
-
-    result = {
-        "code": code,
-        "name": name,
-        "fetch_date": datetime.now().isoformat(),
-        "market": _market_name(code),
-
-        "business_overview": {
-            "what_they_do": profile.get("what_they_do", ""),
-            "industry": profile.get("industry", "未知"),
-            "industry_position": profile.get("industry_position", ""),
-        },
-
-        "competitive_analysis": {
-            "strengths": profile.get("strengths", []),
-            "weaknesses": profile.get("weaknesses", []),
-            "moat_level": profile.get("moat_level", ""),
-        },
-
-        "financial_health": {
-            "key_metrics": fin_health.get("key_metrics", {}),
-            "health_rating": fin_health["health_rating"],
-            "benchmark_ref": fin_health["benchmark_ref"],
-            "highlights": fin_health["highlights"],
-            "risks": fin_health["risks"],
-        },
-
-        "growth_assessment": {
-            "growth_score": g_score,
-            "growth_drivers": profile.get("growth_drivers", []),
-            "headwinds": profile.get("headwinds", []),
-        },
-
-        "geopolitical_assessment": {
-            "risks": profile.get("geopolitical_risks", []),
-            "opportunities": profile.get("geopolitical_opportunities", []),
-            "industry_momentum": profile.get("industry_momentum", []),
-        },
-
-        "summary": _generate_summary(profile, fin_health),
-    }
-
-    # 保存缓存
-    try:
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(result, f, ensure_ascii=False, indent=2)
-    except:
-        pass
-
-    return result
-
+# ═══════════════════════════════════════════════════════════
+# DEPRECATED: analyze_one() 的写入能力已于 2026-06 废弃。
+# 旧规则型（新浪/百科 API）生成路径质量低于 gen_fundamentals.py（LLM+Tushare），
+# 且用硬编码相对路径不走 paths.py，容易写错目录。
+#
+# 保留 load_fundamentals() 作为只读工具（内部使用）。
+# 所有新生成请走 picker.pipeline.gen_fundamentals.generate_one() 或
+# picker.pipeline.refresh_fundamentals.refresh_one()。
+# ═══════════════════════════════════════════════════════════
 
 def load_fundamentals(code: str) -> Optional[Dict]:
-    """加载缓存的基本面数据"""
+    """加载缓存的基本面数据（只读，已废弃写入路径）。"""
+    from picker import paths
+    fund_path = os.path.join(paths.FUNDAMENTALS_DIR, f"{code}.json")
+    if not os.path.exists(fund_path):
+        # fallback: 冷股池
+        cold_path = os.path.join(paths.COLD_FUNDAMENTALS_DIR, f"{code}.json")
+        if os.path.exists(cold_path):
+            fund_path = cold_path
+        else:
+            return None
     try:
-        with open(f"fundamentals/{code}.json", "r", encoding="utf-8") as f:
+        with open(fund_path, "r", encoding="utf-8") as f:
             return json.load(f)
-    except:
+    except Exception:
         return None

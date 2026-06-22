@@ -1,14 +1,14 @@
-"""debate_picker v5 — LangGraph 图编排 (两段式辩论漏斗)。
+"""debate_picker v5 — 量化选股图编排 (纯量化基线)。
 
-候选池(V3 Top50 + 新晋股全部 + 研报热门股)统一在 stage1 汇入, 经排序竞争辩论收窄:
-  collect_data → incremental_info → [technical | fund | fundamental] (并行)
-              → screen_debate  (海选: 蛇形分3组 × 每组多轮辩论 → 30只)
-              → ranking_debate (排名辩论: 多轮 claim 攻防逐轮收窄 30→10, 末轮出排名)
-              → risk_review    (可信度 + 风险)
-              → report_render  (终端报告 + 落盘)
-              → END
+候选池(V3 全池 + 新晋股 + 研报热门股)统一在 stage1 汇入, 按量化锚排序收窄:
+  collect_data → quantum_rank → risk_review → report_render → END
 
-辩论导向: 排序竞争 (比谁涨更多, 非多空对抗)。海选与排名辩论复用同一套 claim 攻防+裁决逻辑。
+排序锚 = chain + capital×2 - delivery×0.5
+(回测验证: 21期×530只×30日 Spearman=+0.555, 20/20正相关)。
+无 LLM 辩论 — LLM 从头排序回测为负相关(-0.14), 会破坏量化信号。
+
+注: analysts/incremental 里的三分析师 + 增量信息节点暂未接入,
+    待"任务2: 增量信息用于风险调整"时再启用。
 """
 from __future__ import annotations
 
@@ -26,22 +26,21 @@ from .picker_state import PickerState
 
 
 class PickerGraph:
-    """量化选股图: 候选池 → 量化锚排序 → TOP10。
+    """量化选股图: 候选池 → 量化锚排序 → TOP5。
 
-    排序锚 = chain + capital×2 - delivery×0.5
-    (回测验证: 21期×530只×30日 Spearman=+0.555, 20/20正相关)
+    4 节点基线 (collect_data → quantum_rank → risk_review → report_render),
+    零 LLM 调用。排序锚 = chain + capital×2 - delivery×0.5
+    (回测验证: 21期×530只×30日 Spearman=+0.555, 20/20正相关)。
     """
 
     def __init__(self, config: Dict[str, Any] | None = None,
-                 top_n: int = 50, debate_top_k: int = 10):
+                 debate_top_k: int = 5):
         """量化选股基线。
 
         Args:
-            top_n: V3 Top-N 候选池规模 (不含新晋股/研报股加挂)。
-            debate_top_k: 最终排名规模 (TOP10)。
+            debate_top_k: 最终排名规模 (默认5, 策略回测最优)。
         """
         self.config = config or {}
-        self.top_n = top_n
         self.debate_top_k = debate_top_k
         self.llm = LLMHelper(self.config)
         self.graph = self._build_graph()
@@ -51,23 +50,23 @@ class PickerGraph:
     # ──────────────────────────────────────────────
 
     def _collect_data(self, state: PickerState) -> Dict[str, Any]:
-        return analyst_nodes.collect_data(state, top_n=self.top_n)
+        return analyst_nodes.collect_data(state)
 
     # ──────────────────────────────────────────────
     # 图构建
     # ──────────────────────────────────────────────
 
     def _build_graph(self):
-        """量化选股基线拓扑 (极简, 无LLM辩论):
+        """量化选股基线拓扑 (4 节点, 无LLM辩论):
         collect_data → quantum_rank → risk_review → report_render → END
 
         - collect_data: V3缓存+K线+资金流 → 候选池(含chain/capital/delivery)
-        - quantum_rank: 按锚(chain+capital×2-delivery×0.5)排序取TOP10
+        - quantum_rank: 按锚(chain+capital×2-delivery×0.5)排序取TOP_k
         - risk_review: 可信度+风险提示
-        - report_render: 终端报告+落盘
+        - report_render: 终端报告+落盘+🎯策略信号
 
         回测验证: 锚分Spearman=+0.555 (21期×530只×30日, 20/20正相关)。
-        增量信息/三分析师暂时跳过, 下一步尝试接入。
+        增量信息/三分析师节点暂未接入, 待"任务2"启用。
         """
         g = StateGraph(PickerState)
 
@@ -104,9 +103,50 @@ class PickerGraph:
         }
         print(f"{'='*60}\n  debate_picker v5 — {trade_date}"
               f"{' (回测 cutoff=' + cutoff_date + ')' if cutoff_date else ''}\n"
-              f"  架构: 两段式辩论漏斗 "
-              f"(候选{self.top_n}+ → 量化锚排序 → TOP{self.debate_top_k}, 无LLM辩论)\n"
+              f"  架构: 纯量化基线 "
+              f"(全池 → 量化锚排序 → TOP{self.debate_top_k}, 无LLM辩论)\n"
               f"  落盘: {run_dir}\n{'='*60}")
         result = self.graph.invoke(init)
+
+        # 实盘模式: 存每日快照 (全池分数 + TOP推荐 + 理由)
+        # 同日多次跑会覆盖, 只留最后一次。回测按 cutoff 取最近快照, 消除前视偏差。
+        if not cutoff_date and not dry_run:
+            self._save_daily_snapshot(trade_date, result)
+
         print(f"\n  ▶ 图执行完成")
         return result
+
+    @staticmethod
+    def _save_daily_snapshot(trade_date: str, result: PickerState):
+        """存每日选股快照: 全池 V3 分数 + TOP 推荐结果 + 推荐理由。
+
+        格式: data/caches/v3_snapshots/YYYY-MM-DD.json
+        同日覆盖 (一天只留最后一次)。回测用 cutoff ≤ T 的最近快照。
+        """
+        import json
+        from picker.paths import V3_SNAPSHOT_DIR
+        os.makedirs(V3_SNAPSHOT_DIR, exist_ok=True)
+        path = os.path.join(V3_SNAPSHOT_DIR, f"{trade_date}.json")
+
+        # 全池分数 (从 candidates 提取 chain/delivery/capital)
+        scores = {}
+        for c in result.get("candidates", []):
+            code = c.get("code", "")
+            if not code:
+                continue
+            scores[code] = {
+                "chain": c.get("chain", 0),
+                "delivery": c.get("delivery", 0),
+                "capital": c.get("capital", 0),
+            }
+
+        snapshot = {
+            "date": trade_date,
+            "scores": scores,  # {code: {chain, delivery, capital}}
+            "ranking": result.get("final_ranking", []),  # TOP5/10 含 key_thesis/key_risk
+        }
+        try:
+            json.dump(snapshot, open(path, "w"), ensure_ascii=False, indent=1)
+            print(f"  📸 每日快照已存: {path} ({len(scores)} 只股)")
+        except Exception as e:
+            print(f"  ⚠ 快照存储失败: {e}")

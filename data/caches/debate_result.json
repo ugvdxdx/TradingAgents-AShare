@@ -1,166 +1,79 @@
 {
-  "trade_date": "2026-06-19",
+  "trade_date": "2026-06-21",
   "cutoff_date": null,
-  "generated_at": "2026-06-19T18:27:24.452239",
+  "generated_at": "2026-06-21T21:35:27.004330",
   "ranking": [
     {
-      "code": "688041",
-      "name": "海光信息",
-      "score": 88.0,
-      "confidence": 0.85,
+      "rank": 1,
+      "code": "688141",
+      "name": "杰华特",
+      "score": 24.7,
+      "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "5日主力净流入连续全部为正（全候选唯一5/5全正，+9.7亿），20日涨幅仅6.8%为全候选最低意味着最大补涨空间，叠加信创集采70%国产化政策催化新鲜发酵中，国产算力替代窗口期下涨幅弹性最大。",
-      "key_risk": "制程受限于14/12nm落后英伟达2-3代，华为昇腾生态在国内政企市场份额超70%形成降维竞争压制。",
-      "supporting_claim_ids": [
-        "BULL-11"
-      ],
-      "risk_flags": [],
-      "rank": 1
-    },
-    {
-      "code": "300476",
-      "name": "胜宏科技",
-      "score": 87.0,
-      "confidence": 0.84,
-      "confidence_level": "高",
-      "key_thesis": "5日主力净流入+26.8亿冠绝全候选，且20日涨幅仅11.3%为PCB组最低形成显著补涨洼地，深度绑定英伟达Rubin架构（单机PCB价值量暴增233%）叠加覆铜板超级涨价周期，资金与补涨弹性双共振。",
-      "key_risk": "北美营收占比极高，7月7日美国拟加征12.5%最高档关税若落地将直接冲击出口毛利。",
-      "supporting_claim_ids": [
-        "BULL-1",
-        "BULL-9"
-      ],
-      "risk_flags": [],
-      "rank": 2
-    },
-    {
-      "code": "300502",
-      "name": "新易盛",
-      "score": 85.0,
-      "confidence": 0.83,
-      "confidence_level": "高",
-      "key_thesis": "ROE高达72.6%碾压中际旭创44.2%且5日资金+9.2亿vs中际旭创-12.4亿形成组内绝对优势，1.6T光模块进入量产爬坡爆发期驱动业绩指数级高增，多头成功论证光模块组内最强涨幅弹性。",
-      "key_risk": "7月7日美国拟加征12.5%最高档关税（海外营收占比超80%）构成未来30天最大不确定性事件。",
-      "supporting_claim_ids": [
-        "BULL-2",
-        "BULL-6",
-        "BULL-8",
-        "BULL-10"
-      ],
-      "risk_flags": [],
-      "rank": 3
-    },
-    {
-      "code": "300475",
-      "name": "香农芯创",
-      "score": 81.0,
-      "confidence": 0.75,
-      "confidence_level": "高",
-      "key_thesis": "动量加速值29.1为全候选最高且5日资金+21.8亿排名第二，独家绑定SK海力士直接享受HBM合约价暴涨58-63%的量价齐升红利，存储超级周期延续至2027年构成强催化支撑。",
-      "key_risk": "毛利率仅3.97%缺乏硬核技术护城河，5日涨幅39.9%存在短期透支风险，存储价格任何微幅回落即可能吞没利润。",
+      "key_thesis": "绑定头部代工厂，算力需求爆发有望驱动量价齐升",
+      "key_risk": "当期巨亏7亿且毛利率不足27%，财务健康度极差",
       "supporting_claim_ids": [],
-      "risk_flags": [
-        "透支风险"
-      ],
-      "rank": 4
+      "risk_flags": []
     },
     {
-      "code": "002463",
-      "name": "沪电股份",
-      "score": 79.0,
-      "confidence": 0.8,
-      "confidence_level": "高",
-      "key_thesis": "趋势指标32登顶PCB组最高且5日资金+15.8亿持续流入，受益于英伟达Rubin架构单机PCB价值量大涨233%及覆铜板超级涨价周期的顺畅传导，订单可见度延伸至2027年。",
-      "key_risk": "PE近70倍依赖极高增速支撑，泰国新厂投产初期产能利用率不足可能拖累毛利率。",
-      "supporting_claim_ids": [],
-      "risk_flags": [],
-      "rank": 5
-    },
-    {
-      "code": "002916",
-      "name": "深南电路",
-      "score": 77.0,
-      "confidence": 0.78,
-      "confidence_level": "高",
-      "key_thesis": "技术面评分78为全候选最高，PCB+封装基板双轮驱动深度绑定华为昇腾生态，AI服务器高端PCB稼动率满载叠加ABF载板国产替代逻辑催化量价齐升。",
-      "key_risk": "筹划定向增发可能带来短期抛压，广州封装基板二期产能释放期若良率不及预期将面临巨额折旧吞噬。",
-      "supporting_claim_ids": [],
-      "risk_flags": [],
-      "rank": 6
-    },
-    {
+      "rank": 2,
       "code": "300308",
       "name": "中际旭创",
-      "score": 74.0,
-      "confidence": 0.75,
+      "score": 24.7,
+      "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "V3基本面评分26.9全候选最高，全球光模块绝对龙头率先量产1.6T且净利率超30%，谷歌千万级MPO订单下达构成新鲜催化，趋势30+动量24双强共振维持完美多头形态。",
-      "key_risk": "5日主力净流出-12.4亿为全候选唯一负值，6/10-6/12连续三日累计流出-48.5亿，万亿市值下涨幅弹性受限。",
+      "key_thesis": "1.6T率先量产且净利率超30%，规模壁垒极高。",
+      "key_risk": "万亿市值面临中报验证，高估值易剧烈回调。",
       "supporting_claim_ids": [],
-      "risk_flags": [
-        "资金衰减"
-      ],
-      "rank": 7
+      "risk_flags": []
     },
     {
+      "rank": 3,
       "code": "688256",
       "name": "寒武纪",
-      "score": 62.0,
-      "confidence": 0.8,
+      "score": 24.6,
+      "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "A股唯一纯AI算力芯片标的受益于政务金融智算集群70%国产化率强制政策，6/18单日暴涨14.2%显示短期资金博弈情绪亢奋。",
-      "key_risk": "经营现金流-4.98亿为负构成质量红线硬伤，资金流恶化Δ-6.64亿且PS超125倍估值极度泡沫化，6/18暴涨日资金反而流出构成量价背离，30天窗口涨幅不可持续。",
-      "supporting_claim_ids": [
-        "BULL-3",
-        "BULL-7"
-      ],
-      "risk_flags": [
-        "质量红线",
-        "资金衰减",
-        "量价背离",
-        "透支风险"
-      ],
-      "rank": 8
+      "key_thesis": "A股唯一纯AI芯片标的，受益算力国产替代刚需",
+      "key_risk": "市销率超125倍估值极度泡沫化，面临戴维斯双杀",
+      "supporting_claim_ids": [],
+      "risk_flags": []
     },
     {
-      "code": "002371",
-      "name": "北方华创",
-      "score": 71.0,
-      "confidence": 0.76,
+      "rank": 4,
+      "code": "300502",
+      "name": "新易盛",
+      "score": 24.6,
+      "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "半导体设备平台型绝对龙头350亿在手订单锁定两年业绩，5日资金+17.7亿排名第四且趋势32登顶，大基金三期930亿加码设备投资构成中长期政策红利。",
-      "key_risk": "核心零部件进口依赖度超60%存在贸易战断供风险，经营现金流/净利仅0.39回款能力偏弱，催化不在当前最强算力硬件通胀主线上。",
+      "key_thesis": "毛利率与ROE冠绝全行业，业绩极度高增兑现",
+      "key_risk": "7月7日美国拟加征12.5%最高档关税政策扰动",
       "supporting_claim_ids": [],
-      "risk_flags": [],
-      "rank": 9
+      "risk_flags": []
     },
     {
-      "code": "300394",
-      "name": "天孚通信",
-      "score": 68.0,
-      "confidence": 0.72,
+      "rank": 5,
+      "code": "600246",
+      "name": "万通发展",
+      "score": 24.4,
+      "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "毛利率54%全产业链最高且光引擎平台型卡位受益于1.6T模块内部器件价值量从数美元跃升至数十美元，深度绑定头部光模块厂间接打入英伟达GB200供应链。",
-      "key_risk": "技术面评分66和趋势值20均为全候选最低，距20日高点回撤10.1%显示上行动能明显衰减，趋势修复存在不确定性。",
+      "key_thesis": "若重组成功，将直接切入高景气算力光模块红利。",
+      "key_risk": "跨界重组不确定性极高，70倍市销率泡沫易破裂。",
       "supporting_claim_ids": [],
-      "risk_flags": [],
-      "rank": 10
+      "risk_flags": []
     }
   ],
   "risk_review": {
-    "overall_confidence": 0.79,
+    "overall_confidence": 0.7,
     "overall_level": "高",
-    "data_integrity": 0.98,
-    "avg_rank_confidence": 0.79,
-    "debate_rounds": 2,
-    "total_claims": 11,
+    "data_integrity": 0.99,
+    "avg_rank_confidence": 0.7,
+    "debate_rounds": 0,
+    "total_claims": 0,
     "unresolved_claims": 0,
-    "risk_flag_summary": {
-      "透支风险": 2,
-      "资金衰减": 2,
-      "质量红线": 1,
-      "量价背离": 1
-    },
+    "risk_flag_summary": {},
     "disclaimer": "本结果由多智能体辩论自动生成, 仅供研究参考, 不构成投资建议。市场有风险, 决策需谨慎。"
   },
-  "run_dir": "results/picker_v5/2026-06-19_20260619_1809"
+  "run_dir": "results/picker_v5/2026-06-21_20260621_2135"
 }

@@ -66,30 +66,57 @@ from picker import paths as _paths
 _DISK_CACHE_DIR = _paths.MF_CACHE_DIR
 
 
+# 磁盘缓存文件 (单一持久文件, 不再按日期分文件)
+_DISK_CACHE_FILE = "mf.pkl"
+
+
 def _disk_cache_path() -> str:
-    """当天缓存文件路径，隔天自动失效"""
+    """磁盘缓存文件路径 (固定单一文件)"""
     os.makedirs(_DISK_CACHE_DIR, exist_ok=True)
-    return os.path.join(_DISK_CACHE_DIR, f"mf_{date.today().isoformat()}.pkl")
+    return os.path.join(_DISK_CACHE_DIR, _DISK_CACHE_FILE)
 
 
 def _load_disk_cache() -> Dict[str, dict]:
-    """加载当天磁盘缓存"""
+    """加载磁盘缓存。
+
+    磁盘 key 为纯股票代码 (如 '000001'); 内存 _CACHE 使用 '{code}_{days}'
+    形式 key (历史兼容 fetch_fund_flow 的按 days 区分)。这里做归一化: 把
+    每个纯 code 复制成全部常见 days 后缀, 保证内存层命中。
+    """
     p = _disk_cache_path()
-    if os.path.exists(p):
-        try:
-            with open(p, "rb") as f:
-                return pickle.load(f)
-        except Exception:
-            pass
-    return {}
+    if not os.path.exists(p):
+        return {}
+    try:
+        with open(p, "rb") as f:
+            raw = pickle.load(f)
+    except Exception:
+        return {}
+    out: Dict[str, dict] = {}
+    # 内存层支持按 days 查询的后缀 (fetch_fund_flow 常用 days 值)
+    for days in (60, 120, 300):
+        for code, rows in raw.items():
+            if isinstance(rows, list):
+                out[f"{code}_{days}"] = rows
+    return out
 
 
 def _save_disk_cache():
-    """将内存缓存持久化到磁盘"""
+    """将内存缓存持久化到磁盘 (纯 code key)。
+
+    内存 _CACHE 的 key 形如 '{code}_{days}', 落盘时剥掉后缀只保留纯 code,
+    同一 code 取最长列表 (数据最完整)。
+    """
     p = _disk_cache_path()
+    disk: Dict[str, list] = {}
+    for k, v in _CACHE.items():
+        if not isinstance(v, list):
+            continue
+        code = k.rsplit("_", 1)[0] if "_" in k else k
+        if code not in disk or len(v) > len(disk[code]):
+            disk[code] = v
     try:
         with open(p, "wb") as f:
-            pickle.dump(_CACHE, f)
+            pickle.dump(disk, f)
     except Exception:
         pass
 

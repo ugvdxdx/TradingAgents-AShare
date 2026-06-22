@@ -5,7 +5,6 @@
 """
 from __future__ import annotations
 
-import glob
 import json
 import os
 import pickle
@@ -21,6 +20,24 @@ MF_CACHE_DIR = paths.MF_CACHE_DIR
 
 
 # ══════════════════════════════════════════════════════════
+# 量化排序锚 (唯一真相源, debaters/review_log 共用)
+# ══════════════════════════════════════════════════════════
+
+def anchor_score(c: Dict[str, Any]) -> float:
+    """量化排序锚: chain + capital×2 - delivery×0.5。
+
+    回测验证(21期×530只×30日窗口): Spearman=+0.555, 20/20期正相关, 最低+0.34。
+    - chain(产业链卡位) + capital(资金热度)×2: 主信号(+0.54)
+    - delivery(业绩兑现)×(-0.5): 轻微惩罚, 业绩好但卡位差的股涨幅弹性低
+
+    ⚠ 排序锚的唯一真相源: debaters.make_ranking_debate 与 review_log.log_top50
+    均引用本函数, 改公式请同步回测验证 (scripts/validate_anchor.py)。
+    """
+    return (c.get("chain", 0) + c.get("capital", 0) * 2
+            - c.get("delivery", 0) * 0.5)
+
+
+# ══════════════════════════════════════════════════════════
 # V3 基本面 (打分 + essence)
 # ══════════════════════════════════════════════════════════
 
@@ -29,8 +46,8 @@ FORCE_INCLUDE_CODES: List[str] = ["001309", "600522"]
 
 # 新晋股归因缓存路径 (scan_mispriced.py 产出)
 ATTR_CACHE = paths.ATTR_CACHE
-# 新晋股全部纳入候选池 (不限上限; 海选辩论能消化更多候选)。
-# 旧值15会截断r20排名靠后的合格新晋股, 与"新晋股全部进入辩论"的设计相悖。
+# 新晋股全部纳入候选池 (不限上限; 量化锚排序能消化全池候选)。
+# 旧值15会截断r20排名靠后的合格新晋股, 与"新晋股全部参与排序"的设计相悖。
 MAX_RISING_STAR_INCLUDE = None
 
 
@@ -96,6 +113,11 @@ def _backtest_rising_stars(cutoff_date: str) -> List[Dict[str, Any]]:
                      "chain": v.get("chain", 0)})
 
     gems.sort(key=lambda x: -x["r20"])
+    # ⚠ 与实盘 _load_rising_stars 的数量差异是有意为之, 不是 bug:
+    #   - 实盘读预生成的 ATTR_CACHE (scan_mispriced 产出), 读取≈0 成本, 故全部入选
+    #   - 回测现场调 attribute_stock 对每只股发研报查询+LLM, 成本高, 故只取 r20 前15 归因
+    #     (回测目标是验证机制有效性, 15 只已足够覆盖最强异动股, 不影响结论方向)
+    # 强行对齐上限反而会让回测 LLM 调用数翻倍, 得不偿失。
     top_gems = gems[:15]
     print(f"  [回测新晋股] 发现 {len(gems)} 只异动股, 对前{len(top_gems)}只并发归因...")
 
@@ -113,7 +135,7 @@ def _backtest_rising_stars(cutoff_date: str) -> List[Dict[str, Any]]:
     with ThreadPoolExecutor(max_workers=8) as ex:
         for g, attr in ex.map(_attr_one, top_gems):
             # 回测模式研报覆盖不足, 归因常为"未知"。放宽: 板块供需型 OR 未知
-            # (宁可多进候选池, 由海选辩论竞争筛选; 排除明确的"个股事件/概念炒作")
+            # (宁可多进候选池, 由量化锚排序竞争筛选; 排除明确的"个股事件/概念炒作")
             rt = attr.get("reason_type", "未知")
             if rt in ("板块供需", "政策催化", "未知"):
                 g["attribution"] = attr
@@ -122,61 +144,26 @@ def _backtest_rising_stars(cutoff_date: str) -> List[Dict[str, Any]]:
     print(f"  [回测新晋股] 归因完成: {len(sector_wide)}/{len(top_gems)} 只入选 "
           f"(板块供需+未知, 排除个股事件/炒作)")
 
-    # 3. 构造 rising_star 结构 (与实盘 _load_rising_stars 输出一致)
-    try:
-        v3_cache_data = json.load(open(V3_CACHE))
-    except Exception:
-        v3_cache_data = {}
-
-    stars: List[Dict[str, Any]] = []
-    for g in sector_wide[:MAX_RISING_STAR_INCLUDE]:
-        code = g["code"]
-        v3_entry = v3_cache_data.get(code, {})
-        attr = g["attribution"]
-        real_chain = v3_entry.get("chain", 0)
-        real_essence = v3_entry.get("essence", {})
-
-        if real_chain > 0 and real_essence:
-            essence = dict(real_essence)
-            essence["chain_position"] = f"{essence.get('chain_position','')} + 回测归因: {attr.get('sector_tag','')}"
-            star = {
-                "code": code, "name": g["name"],
-                "v3": v3_entry.get("sector_score", 0),
-                "chain": real_chain,
-                "delivery": v3_entry.get("delivery", 0),
-                "capital": v3_entry.get("capital", 0),
-                "brief": v3_entry.get("brief", "") or attr.get("summary", ""),
-                "essence": essence,
-            }
-        else:
-            star = {
-                "code": code, "name": g["name"],
-                "v3": 0, "chain": 0, "delivery": 0, "capital": 0,
-                "brief": attr.get("summary", ""),
-                "essence": {
-                    "chain_position": f"回测新晋股: {attr.get('sector_tag','')}",
-                    "core_catalyst": attr.get("summary", ""),
-                    "biggest_bull": attr.get("summary", ""),
-                    "biggest_bear": f"板块供需逻辑待验证, {attr.get('sector_tag','')}",
-                    "quality_redline": "业绩兑现度待验证",
-                    "catalyst_horizon": "near",
-                },
-            }
-        star["screen_reason"] = "回测新晋股(现场归因)"
-        star["_rising_star"] = True
-        stars.append(star)
-    return stars
+    # 3. 返回轻量元信息 (code + 归因摘要), 算分由 load_top_n 统一处理
+    return [
+        {"code": g["code"], "_rising_star": True,
+         "_attribution_brief": f"回测归因: {g['attribution'].get('sector_tag', '')} — {g['attribution'].get('summary', '')}"}
+        for g in sector_wide[:MAX_RISING_STAR_INCLUDE]
+    ]
 
 
 def _load_rising_stars(cutoff_date: str = "") -> List[Dict[str, Any]]:
-    """从归因缓存加载量价新晋股 (板块供需型), 保送进入候选池。
+    """从归因缓存发现量价新晋股 (板块供需型), 返回轻量元信息列表。
+
+    ⚠ 本函数只负责"发现哪些 code 入池", 不构造分数。入池后由 load_top_n 统一调
+    _build_stock(code, v3_entry) 构造, chain/delivery/capital/essence 全部来自 V3 cache,
+    与普通股完全一致。归因信息(sector_tag/summary)仅追加到 brief 供展示。
 
     排序: 按近20日涨幅降序 (优先保送最强势的), 截断到 MAX_RISING_STAR_INCLUDE。
 
     Args:
-        cutoff_date: 回测截止日。非空时进入【回溯模式】: 不读实时归因缓存
-            (那是当前快照有前视偏差), 而是现场扫描截断K线发现异动股,
-            并调 attribute_stock(cutoff_date=...) 用研报+LLM现场归因。
+        cutoff_date: 回测截止日。非空时进入【回溯模式】: 现场扫描截断K线发现异动股,
+            并调 attribute_stock(cutoff_date=...) 用研报+LLM现场归因 (无前视偏差)。
     """
     if cutoff_date:
         return _backtest_rising_stars(cutoff_date)
@@ -198,12 +185,6 @@ def _load_rising_stars(cutoff_date: str = "") -> List[Dict[str, Any]]:
             continue
         if not _rising_star_trend_ok(code):
             continue
-        name = entry.get("name", "")
-        if not name:
-            try:
-                name = json.load(open(os.path.join(FUNDAMENTALS_DIR, f"{code}.json"))).get("name", "")
-            except Exception:
-                pass
         # 算近20日涨幅用于排序
         r20 = 0.0
         try:
@@ -213,58 +194,15 @@ def _load_rising_stars(cutoff_date: str = "") -> List[Dict[str, Any]]:
                 r20 = (df["close"].iloc[-1] / df["close"].iloc[-21] - 1) * 100
         except Exception:
             pass
-        candidates.append((r20, code, name, entry))
+        candidates.append((r20, code, entry))
 
     candidates.sort(key=lambda x: -x[0])
-    stars = []
-    # 加载 V3 cache (新晋股可能有真实评分)
-    try:
-        v3_cache_data = json.load(open(V3_CACHE))
-    except Exception:
-        v3_cache_data = {}
-
-    for r20, code, name, entry in candidates[:MAX_RISING_STAR_INCLUDE]:
-        v3_entry = v3_cache_data.get(code, {})
-        # 优先用 V3 真实评分 (chain/delivery/essence), 归因作为补充
-        real_chain = v3_entry.get("chain", 0)
-        real_essence = v3_entry.get("essence", {})
-
-        if real_chain > 0 and real_essence:
-            # V3 有评分 — 用真实 essence, 追加归因标记
-            essence = dict(real_essence)
-            essence["chain_position"] = f"{essence.get('chain_position','')} + 量价归因: {entry.get('sector_tag','')}"
-            # 保留真实 V3 分 (sector_score) 作为 v3, 仅靠 _rising_star 标记身份。
-            # 此前把 v3 清零会导致: 保送失败(未进前3)的新晋股 v3=0 沉到候选池底部,
-            # 既无法被分组海选选中, 也不能参与正常排序竞争 → 彻底沦为废票。
-            real_sector_score = v3_entry.get("sector_score", 0)
-            star = {
-                "code": code, "name": name,
-                "v3": real_sector_score,  # 保留真实分, 参与正常竞争
-                "chain": real_chain,
-                "delivery": v3_entry.get("delivery", 0),
-                "capital": v3_entry.get("capital", 0),
-                "brief": v3_entry.get("brief", "") or entry.get("summary", ""),
-                "essence": essence,
-            }
-        else:
-            # V3 无评分 — 用归因模板 (无真实分, 仅靠 _rising_star 保送机制)
-            star = {
-                "code": code, "name": name,
-                "v3": 0, "chain": 0, "delivery": 0, "capital": 0,
-                "brief": entry.get("summary", ""),
-                "essence": {
-                    "chain_position": f"新晋股: {entry.get('sector_tag', '')} (板块供需缺口驱动)",
-                    "core_catalyst": entry.get("summary", ""),
-                    "biggest_bull": entry.get("summary", ""),
-                    "biggest_bear": f"板块供需逻辑待验证, {entry.get('sector_tag', '')}涨价持续性存疑",
-                    "quality_redline": "业绩兑现度待中报验证",
-                    "catalyst_horizon": "near",
-                },
-            }
-        star["screen_reason"] = "量价新晋股保送"
-        star["_rising_star"] = True
-        stars.append(star)
-    return stars
+    # 返回轻量元信息 (code + 归因摘要, 算分由 load_top_n 统一处理)
+    return [
+        {"code": code, "_rising_star": True,
+         "_attribution_brief": f"量价归因: {entry.get('sector_tag', '')} — {entry.get('summary', '')}"}
+        for r20, code, entry in candidates[:MAX_RISING_STAR_INCLUDE]
+    ]
 
 
 # 研报热门股 (近期博主多次看多但不在 V3 Top50 的个股) 全部纳入 (不限上限)。
@@ -273,11 +211,11 @@ MAX_RESEARCH_HOT_INCLUDE = None
 
 def _load_research_hot_stocks(existing_codes: Optional[List[str]] = None,
                               cutoff_date: str = "") -> List[Dict[str, Any]]:
-    """加载研报热门股 (近14天 bullish 提及≥2 但不在现有候选池的个股)。
+    """发现研报热门股 (近14天 bullish 提及≥2 但不在现有候选池的个股)。
 
-    从 research.db 聚合近期博主看多的个股, 保送进入候选池 (与 V3/新晋股并列)。
-    保留真实 V3 分数 (若 V3 cache 有评分), 仅在缺失时用研报模板。
-    与新晋股一样: 身份靠 _research_hot 标记, 不靠 v3 清零区分。
+    ⚠ 本函数只负责"发现哪些 code 入池", 不构造分数。入池后由 load_top_n 统一调
+    _build_stock(code, v3_entry) 构造, 与普通股/新晋股完全一致。
+    研报信息(reasons/bullish_count)仅追加到 brief 供展示。
     """
     try:
         from tradingagents.research.consumer import get_dark_horse_stocks
@@ -291,12 +229,6 @@ def _load_research_hot_stocks(existing_codes: Optional[List[str]] = None,
     if not dark_horses:
         return []
 
-    # 加载 V3 cache (研报股可能有真实评分)
-    try:
-        v3_cache_data = json.load(open(V3_CACHE))
-    except Exception:
-        v3_cache_data = {}
-
     present = set(existing_codes or [])
     out: List[Dict[str, Any]] = []
     for dh in dark_horses[:MAX_RESEARCH_HOT_INCLUDE]:
@@ -304,42 +236,11 @@ def _load_research_hot_stocks(existing_codes: Optional[List[str]] = None,
         if code in present:
             continue
         present.add(code)
-        v3_entry = v3_cache_data.get(code, {})
-        real_chain = v3_entry.get("chain", 0)
-        real_essence = v3_entry.get("essence", {})
-
-        if real_chain > 0 and real_essence:
-            # V3 有评分 — 用真实 essence + 研报催化, 保留真实分
-            essence = dict(real_essence)
-            essence["chain_position"] = f"{essence.get('chain_position','')} + 研报{dh.get('bullish_count',0)}次看多"
-            out.append({
-                "code": code, "name": dh.get("name", ""),
-                "v3": v3_entry.get("sector_score", 0),  # 保留真实分
-                "chain": real_chain,
-                "delivery": v3_entry.get("delivery", 0),
-                "capital": v3_entry.get("capital", 0),
-                "brief": v3_entry.get("brief", "") or "; ".join(dh.get("reasons", [])[:2]),
-                "essence": essence,
-                "screen_reason": "研报热门股",
-                "_research_hot": True,
-            })
-        else:
-            # V3 无评分 — 用研报模板 (v3=0, 仅靠身份标记区分)
-            out.append({
-                "code": code, "name": dh.get("name", ""),
-                "v3": 0, "chain": 0, "delivery": 0, "capital": 0,
-                "brief": "; ".join(dh.get("reasons", [])[:2]),
-                "essence": {
-                    "chain_position": f"研报黑马: {dh.get('reasons', [''])[0][:20]}",
-                    "core_catalyst": "; ".join(dh.get("reasons", [])[:2]),
-                    "biggest_bull": f"研报{dh.get('bullish_count',0)}次看多",
-                    "biggest_bear": "研报看多但缺乏V3基本面验证",
-                    "quality_redline": "基本面数据待补充",
-                    "catalyst_horizon": "near",
-                },
-                "screen_reason": "研报热门股",
-                "_research_hot": True,
-            })
+        reasons = "; ".join(dh.get("reasons", [])[:2])
+        out.append({
+            "code": code, "_research_hot": True,
+            "_attribution_brief": f"研报{dh.get('bullish_count', 0)}次看多 — {reasons}",
+        })
     return out
 
 
@@ -432,7 +333,7 @@ def _build_stock(code: str, v: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def load_top_n(n: int = 50, include_codes: Optional[List[str]] = None,
+def load_top_n(n: Optional[int] = None, include_codes: Optional[List[str]] = None,
                v3_cache: Optional[dict] = None,
                cutoff_date: str = "") -> List[Dict[str, Any]]:
     """加载候选池, 附带 essence(定性精华) + brief + name。
@@ -448,14 +349,22 @@ def load_top_n(n: int = 50, include_codes: Optional[List[str]] = None,
     使每日排序反映最新行业热度。V3 本身不变。
 
     Args:
+        n: 召回规模。生产固定全池(n=None); 仅测试脚本传小 n 做召回实验。
+           回测验证(125期, G模式): 召回预筛 TOP10涨幅与全池无差异,
+           且保送机制需全池生效 → 生产不再预筛。
         v3_cache: 外部传入的 V3 cache (含 capital 动态更新), 避免读文件竞争。
                   为 None 则从文件读取。
         cutoff_date: 回测模式截止日 (传给研报查询); 实盘留空。
     """
     d = v3_cache if v3_cache is not None else json.load(open(V3_CACHE))
-    scored = [(c, v) for c, v in d.items() if "sector_score" in v]
-    scored.sort(key=lambda x: -x[1]["sector_score"])
-    stocks: List[Dict[str, Any]] = [_build_stock(code, v) for code, v in scored[:n]]
+    # 入池排序: chain + capital (去掉 delivery)
+    # 回测验证(50cutoff, 回溯V3分): 比 V3总分(chain+del+cap) TOP50均涨高 +1.0pp,
+    # delivery 在入池阶段是噪声 (详见 cognition/findings.md 第六章)。
+    # n=None (生产默认) = 全池, 不做召回预筛。
+    scored = [(c, v) for c, v in d.items()
+              if isinstance(v, dict) and "chain" in v]
+    scored.sort(key=lambda x: -(x[1].get("chain", 0) + x[1].get("capital", 0)))
+    stocks: List[Dict[str, Any]] = [_build_stock(code, v) for code, v in (scored if n is None else scored[:n])]
 
     # 强制纳入 (去重)
     force = list(FORCE_INCLUDE_CODES) + list(include_codes or [])
@@ -470,27 +379,39 @@ def load_top_n(n: int = 50, include_codes: Optional[List[str]] = None,
         stocks.append(_build_stock(code, v))
         present.add(code)
 
-    # 量价新晋股保送 (实盘读归因缓存; 回测现场扫描+归因, cutoff_date传入)
+    # 量价新晋股保送 (只取 code, 算分统一用 _build_stock)
     rising_stars = _load_rising_stars(cutoff_date=cutoff_date)
     for star in rising_stars:
-        if star["code"] not in present:
-            stocks.append(star)
-            present.add(star["code"])
+        code = star["code"]
+        if code in present:
+            continue
+        v = d.get(code, {"sector_score": 0})
+        s = _build_stock(code, v)
+        s["_rising_star"] = True
+        # 归因摘要追加到 brief (展示用, 不影响算分)
+        if star.get("_attribution_brief"):
+            s["brief"] = (s["brief"] + " | " + star["_attribution_brief"]).strip(" |")
+        stocks.append(s)
+        present.add(code)
 
-    # 研报热门股保送 (近14天博主多次看多但不在候选池的个股)
+    # 研报热门股保送 (只取 code, 算分统一用 _build_stock)
     research_hots = _load_research_hot_stocks(
         existing_codes=list(present), cutoff_date=cutoff_date)
     for rh in research_hots:
-        if rh["code"] not in present:
-            stocks.append(rh)
-            present.add(rh["code"])
-
-    # 行业动量调整 (方案3: 每日实时行业动量微调 V3)
-    for s in stocks:
-        # 身份标记股 (新晋股/研报股) 若有真实 V3 分应参与动量微调;
-        # 仅 v3=0 的模板型 (无V3数据) 跳过 (无基准分可调)。
-        if (s.get("_rising_star") or s.get("_research_hot")) and s.get("v3", 0) == 0:
+        code = rh["code"]
+        if code in present:
             continue
+        v = d.get(code, {"sector_score": 0})
+        s = _build_stock(code, v)
+        s["_research_hot"] = True
+        if rh.get("_attribution_brief"):
+            s["brief"] = (s["brief"] + " | " + rh["_attribution_brief"]).strip(" |")
+        stocks.append(s)
+        present.add(code)
+
+    # 行业动量调整 (每日实时行业动量微调 V3 ±10%, 使排序反映最新行业热度)
+    # 新晋股/研报股与普通股统一处理: 都用各自 v3 作基准, v3=0 的自然不受影响。
+    for s in stocks:
         # 只读一次 JSON 取 industry
         industry = ""
         try:
@@ -547,25 +468,23 @@ _MF_CACHE: Optional[Dict[str, list]] = None
 
 
 def load_mf_cache() -> Dict[str, list]:
-    """加载最新的 money_flow pickle 缓存 → {code: [daily_rows]}。"""
-    if not os.path.exists(MF_CACHE_DIR):
+    """加载 money_flow 缓存 → {code: [daily_rows]}。
+
+    缓存为单一持久文件 .mf_cache/mf.pkl, key 为纯股票代码。
+    """
+    fp = os.path.join(MF_CACHE_DIR, "mf.pkl")
+    if not os.path.exists(fp):
         return {}
-    files = sorted(glob.glob(os.path.join(MF_CACHE_DIR, "mf_*.pkl")), reverse=True)
-    for fp in files:
-        try:
-            with open(fp, "rb") as f:
-                raw = pickle.load(f)
-            out: Dict[str, list] = {}
-            for k, v in raw.items():
-                if isinstance(v, list) and len(v) >= 5:
-                    code = k.rsplit("_", 1)[0]
-                    if code not in out or len(v) > len(out[code]):
-                        out[code] = v
-            if out:
-                return out
-        except Exception:
-            continue
-    return {}
+    try:
+        with open(fp, "rb") as f:
+            raw = pickle.load(f)
+    except Exception:
+        return {}
+    out: Dict[str, list] = {}
+    for code, v in raw.items():
+        if isinstance(v, list) and len(v) >= 5:
+            out[code] = v
+    return out
 
 
 def fund_flow_5d(mf_cache: Dict[str, list], code: str,

@@ -31,14 +31,19 @@ REFERENCE_DIR = os.path.join(DATA_DIR, "reference")
 
 # 运行时大缓存目录 (原位保留在项目根, 仅路径收口到此)
 FUNDAMENTALS_DIR = os.path.join(PROJECT_ROOT, "fundamentals")
-FUNDAMENTALS_COLD_DIR = os.path.join(PROJECT_ROOT, "fundamentals_cold")  # 冷股存储
 COLD_FUNDAMENTALS_DIR = os.path.join(PROJECT_ROOT, "cold_fundamentals")  # 冷股池
+
+# 兼容别名：历史代码中引用的 FUNDAMENTALS_COLD_DIR（原指向不存在的 fundamentals_cold/）
+# 统一为 COLD_FUNDAMENTALS_DIR（实际冷股目录为 cold_fundamentals/）
+FUNDAMENTALS_COLD_DIR = COLD_FUNDAMENTALS_DIR
 KLINE_CACHE_DIR = os.path.join(PROJECT_ROOT, "kline_cache")
 MF_CACHE_DIR = os.path.join(PROJECT_ROOT, ".mf_cache")
+# 行业资金流历史 (由 mf.pkl 个股资金流按 fundamentals 行业汇总, 逐日时间序列)
+BOARD_FLOW_HISTORY = os.path.join(MF_CACHE_DIR, "board_flow_history.pkl")
 
-# 原位 data/ 下的运行时缓存 (board_flow / news 由 picker 包 4 层 dirname 引用,
+# 原位 data/ 下的运行时缓存 (news 由 picker 包 4 层 dirname 引用,
 # 同时也供 tradingagents/agents/picker 使用, 保持 data/ 下不动)
-BOARD_FLOW_CACHE = os.path.join(DATA_DIR, "board_flow_cache.json")
+# 行业资金流历史见上方 BOARD_FLOW_HISTORY (.mf_cache/board_flow_history.pkl)。
 NEWS_CACHE = os.path.join(DATA_DIR, "news_cache.json")
 
 
@@ -75,6 +80,10 @@ DEBATE_RESULT_PATH = _cache("debate_result.json")
 DEBATE_LOG_PATH = _cache("debate_log.json")
 FUNDAMENTAL_LLM_SCORES_PATH = _cache("fundamental_llm_scores.json")
 NEED_GENERATE_PATH = _cache("need_generate.json")
+
+# 每日选股快照目录: 每天一份, 含全池分数 + TOP5/10推荐结果 + 理由
+# 回测按 cutoff 取最近快照, 消除 chain/delivery 前视偏差
+V3_SNAPSHOT_DIR = os.path.join(CACHES_DIR, "v3_snapshots")
 V3_FULL_BACKTEST_PATH = _cache("v3_full_backtest.json")
 BACKTEST_CORRELATION_PATH = _cache("backtest_correlation.json")
 SUB_SECTOR_OVERRIDE_PATH = _cache("sub_sector_override.json")

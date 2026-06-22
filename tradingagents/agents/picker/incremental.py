@@ -461,7 +461,7 @@ def make_incremental_info(llm: LLMHelper):
         is_backtest = bool(state.get("cutoff_date"))
         mf_cache = data_io.load_mf_cache()
 
-        print(f"\n{'='*60}\n📡 [阶段 1.5/7] 增量信息采集"
+        print(f"\n{'='*60}\n📡 [未接入] 增量信息采集"
               f"{' (回测模式: 仅量化信号+本地数据)' if is_backtest else ''}\n{'='*60}")
 
         briefs: Dict[str, str] = {}

@@ -5,7 +5,7 @@
   纯量化, 不调LLM (回测: 锚分Spearman=+0.555 远超LLM的-0.14)。
 
 回测/调试工具 (scripts/test_deep_rank.py):
-  _run_debate_unit / _adjudicate / _finalize_ranking / _quantum_rank
+  _run_debate_unit / _adjudicate / _finalize_ranking
   这些函数仅供回测脚本对比"LLM辩论 vs 量化锚"的效果, 生产流程不调用。
   下一步尝试接入增量信息时可能复用。
 """
@@ -282,62 +282,21 @@ def _adjudicate(
 
 
 # ══════════════════════════════════════════════════════════
-# 节点: 海选辩论 (蛇形分3组 × 每组多轮 → 合并30只)
-# ══════════════════════════════════════════════════════════
-
-def make_screen_debate(llm: LLMHelper, n_groups: int = 3,
-                       rounds_per_group: int = 2, top_per_group: int = 10):
-    """海选节点: 候选池按量化锚(chain+capital×2-delivery×0.5)收窄。
-
-    纯量化, 不调LLM (回测验证: 量化锚Spearman=+0.555, LLM从头排序=负相关)。
-    蛇形分组后每组按锚分取前top_per_group晋级。
-    """
-    def node(state) -> Dict[str, Any]:
-        from . import data_io
-
-        cands = state.get("candidates", [])
-        meta = state.get("metadata") or {}
-        groups_n = int(meta.get("screen_groups", n_groups))
-        top_pg = int(meta.get("screen_top_per_group", top_per_group))
-
-        print(f"\n{'='*60}")
-        print(f"🗂️  [阶段] 海选 (量化锚排序, 蛇形分{groups_n}组 → 各取{top_pg}只)")
-        print(f"{'='*60}")
-
-        groups = data_io.snake_split(cands, groups_n)
-        promoted = []
-        for i, g in enumerate(groups):
-            top = sorted(g, key=lambda x: -_anchor_score(x))[:top_pg]
-            top_codes = [c["code"] for c in top]
-            promoted.extend(top_codes)
-            print(f"  G{i+1}({len(g)}只) → 锚选{len(top)}只: {' '.join(top_codes)}")
-            _dump(state["run_dir"], f"04_screen_g{i+1}.json",
-                  {"group_size": len(g), "promoted": top_codes,
-                   "top_anchors": [{"code": c["code"], "anchor": round(_anchor_score(c), 1)}
-                                   for c in top]}, as_json=True)
-
-        print(f"  ✅ 海选完成: {len(promoted)}只晋级")
-        _dump(state["run_dir"], "03_screen_result.json",
-              {"mode": "quantum_anchor", "groups": groups_n, "promoted": promoted}, as_json=True)
-        return {"screen_promoted": promoted,
-                "trace": [_trace("screen", f"量化锚晋级{len(promoted)}只")]}
-    return node
-
-
-# ══════════════════════════════════════════════════════════
 # 节点: 排名辩论 (30→10, 多轮收窄, 最后一轮产出最终排名)
 # ══════════════════════════════════════════════════════════
 
 def make_ranking_debate(llm: LLMHelper, max_rounds: int = 3, final_top_k: int = 10):
-    """排名节点: 海选晋级股 → 量化锚排序 → TOP10 最终排名。
+    """排名节点: 候选池 → 量化锚排序 → TOP_k 最终排名。
 
     纯量化, 不调LLM (回测验证: 量化锚Spearman=+0.555 远超LLM从头排序的-0.14)。
-    按anchor_score降序直接出排名, 多空论点从essence提取(供报告展示)。
+    按 anchor_score 降序直接出排名, 多空论点从 essence 提取(供报告展示)。
     """
     def node(state) -> Dict[str, Any]:
         from .picker_state import new_debate_ledger
 
         cands = {c["code"]: c for c in state.get("candidates", [])}
+        # screen_promoted 来自已废弃的 make_screen_debate (海选), 当前基线永远为空,
+        # 故走 else 分支用全池 candidates。保留读取仅为前向兼容, 不影响逻辑。
         promoted = state.get("screen_promoted") or []
         meta = state.get("metadata") or {}
         top_k = int(meta.get("debate_top_k", final_top_k))
@@ -350,7 +309,7 @@ def make_ranking_debate(llm: LLMHelper, max_rounds: int = 3, final_top_k: int = 
         n = len(finalists)
 
         print(f"\n{'='*60}")
-        print(f"📊 [阶段] 量化排名 ({n}只 → TOP{top_k}, 锚=chain+capital×2-delivery×0.5)")
+        print(f"📊 [阶段 2/4] 量化排名 ({n}只 → TOP{top_k}, 锚=chain+capital×2-delivery×0.5)")
         print(f"{'='*60}")
 
         ledger = new_debate_ledger(1)
@@ -387,127 +346,13 @@ def make_ranking_debate(llm: LLMHelper, max_rounds: int = 3, final_top_k: int = 
 
 
 def _anchor_score(c: Dict[str, Any]) -> float:
-    """量化排序锚: chain + capital×2 - delivery×0.5。
+    """量化排序锚 (薄封装, 真相源在 data_io.anchor_score)。
 
-    回测验证(21期×530只×30日窗口): Spearman=+0.555, 20/20期正相关, 最低+0.34。
-    - chain(产业链卡位) + capital(资金热度)×2: 主信号(+0.54)
-    - delivery(业绩兑现)×(-0.5): 轻微惩罚, 业绩好但卡位差的股涨幅弹性低(+0.014提升)
+    保留本函数: make_ranking_debate 内部调用, 以及 scripts/test_deep_rank.py 的导入兼容。
+    公式变更请改 data_io.anchor_score 并回测验证。
     """
-    return (c.get("chain", 0) + c.get("capital", 0) * 2
-            - c.get("delivery", 0) * 0.5)
-
-
-def _quantum_rank(finalists: List[Dict[str, Any]], ledger: Dict[str, Any],
-                  state: Dict[str, Any], top_k: int = 10) -> List[Dict[str, Any]]:
-    """量化锚排序: 按anchor_score降序出排名, 不依赖LLM裁决。
-
-    LLM辩论的claim仅用于:
-      1. 生成key_thesis/key_risk(报告展示)
-      2. 风险下调: 被高置信空头攻击且未反驳的 → 下调N位
-    """
-    from .judges import _confidence_level
-
-    # 1. 量化锚排序
-    base = sorted(finalists, key=lambda x: -_anchor_score(x))
-    base_rank = {c["code"]: i + 1 for i, c in enumerate(base)}
-
-    # 2. LLM风险下调 (空头claim, 不依赖resolved状态)
-    claims = ledger.get("claims", [])
-    bear_claims = {}
-    for cl in claims:
-        code = cl.get("code", "")
-        if cl.get("stance") == "bearish":
-            bear_claims.setdefault(code, []).append(
-                (cl.get("claim_id", ""), float(cl.get("confidence", 0.6) or 0.6)))
-    # 被多头明确反驳(target_claim_ids)的空头不计
-    bull_rebutted = set()
-    for cl in claims:
-        if cl.get("stance") == "bullish":
-            for tid in cl.get("target_claim_ids", []):
-                bull_rebutted.add(tid)
-
-    code_scores = {}
-    for code, bears in bear_claims.items():
-        score = 0
-        for cid, conf in bears:
-            if cid not in bull_rebutted:
-                score -= conf
-        code_scores[code] = score
-
-    max_drop = int((state.get("metadata") or {}).get("max_rank_drop", 4))
-    cmap = {c["code"]: c for c in finalists}
-    adjusted = []
-    for c in base:
-        code = c["code"]
-        delta = 0
-        score = code_scores.get(code, 0)
-        if score < -0.3:
-            delta = -min(int(abs(score) / 0.3) + 1, max_drop)
-        adjusted.append({
-            "code": code, "name": c["name"],
-            "anchor": round(_anchor_score(c), 1),
-            "v3": c.get("v3", 0),
-            "_base_rank": base_rank[code],
-            "_delta": delta,
-            "confidence": 0.7 if delta == 0 else max(0.4, 0.7 + score * 0.1),
-        })
-
-    adjusted.sort(key=lambda x: (x["_base_rank"] + x["_delta"], x["_base_rank"]))
-
-    # 3. 生成最终排名 (附LLM论点)
-    claims_by_code = {}
-    for cl in claims:
-        claims_by_code.setdefault(cl.get("code", ""), []).append(cl)
-    ranking = []
-    for i, a in enumerate(adjusted[:top_k]):
-        c = cmap.get(a["code"], {})
-        # 从claim里提取多空论点
-        bull_claims = [cl for cl in claims_by_code.get(a["code"], [])
-                       if cl.get("stance") == "bullish"]
-        bear_claims_c = [cl for cl in claims_by_code.get(a["code"], [])
-                         if cl.get("stance") == "bearish"]
-        thesis = bull_claims[0].get("claim", "") if bull_claims else c.get("essence", {}).get("biggest_bull", "")
-        risk = bear_claims_c[0].get("claim", "") if bear_claims_c else c.get("essence", {}).get("biggest_bear", "")
-        risk_flags = []
-        if a["_delta"] < 0:
-            risk_flags.append(f"LLM风险下调{abs(a['_delta'])}位")
-        ranking.append({
-            "rank": i + 1,
-            "code": a["code"], "name": a["name"],
-            "score": a["anchor"],
-            "confidence": round(a["confidence"], 2),
-            "confidence_level": _confidence_level(a["confidence"]),
-            "key_thesis": thesis,
-            "key_risk": risk,
-            "supporting_claim_ids": [cl.get("claim_id") for cl in bull_claims[:5]],
-            "risk_flags": risk_flags,
-        })
-    return ranking
-
-
-def _compute_funnel(n: int, top_k: int, rounds: int) -> List[int]:
-    """计算收窄漏斗: 从 n 经 rounds 轮平滑收窄到 top_k。
-
-    例: n=30, top_k=10, rounds=3 → [20, 14, 10]
-    保证严格递减, 末项 = top_k。
-    """
-    if n <= top_k or rounds <= 0:
-        return [top_k]
-    if rounds == 1:
-        return [top_k]
-    step = (n - top_k) / rounds
-    raw = [round(n - step * (i + 1)) for i in range(rounds)]
-    raw[-1] = top_k
-    out: List[int] = []
-    prev = n
-    for v in raw:
-        v = max(top_k, v)
-        if v < prev:
-            out.append(v)
-            prev = v
-    if not out or out[-1] != top_k:
-        out.append(top_k)
-    return out
+    from .data_io import anchor_score
+    return anchor_score(c)
 
 
 def _finalize_ranking(ranked_items: List[Dict[str, Any]],

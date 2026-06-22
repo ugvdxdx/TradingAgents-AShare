@@ -402,8 +402,6 @@ def _build_stock_json(code: str) -> Optional[str]:
         "geo_opportunities": geo.get("opportunities", [])[:4],
         "geo_risks": geo.get("risks", [])[:4],
         "momentum": geo.get("industry_momentum", []),
-        # 研报背书的高动量赛道暴露 (外部市场视角, 与公司自述隔离)
-        "research_catalysts": data.get("research_catalysts", {}),
         "summary": (data.get("summary", "") or "")[:600],
     }, ensure_ascii=False, indent=1)
 

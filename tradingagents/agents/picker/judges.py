@@ -1,9 +1,9 @@
 """debate_picker v5 — 候选股格式化与评判辅助函数。
 
-重构后辩论漏斗逻辑统一收敛到 debaters.py (统一辩论单元):
-  海选(make_screen_debate) + 排名辩论(make_ranking_debate)
-本模块只保留被 debaters.py 复用的格式化/辅助函数, 不再有独立节点。
-旧的 make_screen_round1 / make_final_judge 已废弃 (逻辑迁移到 debaters.py)。
+本模块只保留被 debaters.py (生产: make_ranking_debate 量化锚排序) 和
+reporter.py 复用的格式化/辅助函数 (format_stock_brief / format_comparison_matrix /
+_confidence_level 等), 不再有独立节点。
+旧的 make_screen_round1 / make_final_judge / 海选逻辑已废弃 (详见下方说明)。
 """
 from __future__ import annotations
 
@@ -146,8 +146,7 @@ def _apply_ranking(group: List[Dict[str, Any]], result: List[dict]) -> List[Dict
 # ══════════════════════════════════════════════════════════
 # 废弃节点说明
 # ══════════════════════════════════════════════════════════
-# 旧的 make_screen_round1 (分组海选) 和 make_final_judge (终极PK) 已废弃。
-# 辩论漏斗逻辑统一迁移到 debaters.py:
-#   - 海选    → debaters.make_screen_debate  (蛇形分3组×多轮→30只)
-#   - 排名辩论 → debaters.make_ranking_debate (30→10 逐轮收窄+最终排名)
-# 本文件仅保留被 debaters.py 复用的格式化/辅助函数 (上方已定义)。
+# 旧的 make_screen_round1 (分组海选) / make_screen_debate / make_final_judge
+# (终极PK) 已废弃 — LLM 辩论回测为负相关(-0.14), 重构为纯量化锚排序。
+# 当前生产路径仅 debaters.make_ranking_debate (量化锚 chain+capital×2-delivery×0.5)。
+# 本文件仅保留被 debaters.py / reporter.py 复用的格式化/辅助函数 (上方已定义)。

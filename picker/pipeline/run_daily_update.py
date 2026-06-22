@@ -140,11 +140,14 @@ def step2_extract():
 def step3_update_fundamentals(date_from_recent):
     """Step 3: 更新 fundamentals JSON
 
+    注意：此函数调用旧的增量追加逻辑 (update_fundamentals_from_research)。
+    推荐使用 run_daily_maintenance.py step3 走新的彻底重写逻辑 (refresh_fundamentals.py)。
+
     Args:
         date_from_recent: 只处理该日期之后有新提及的个股 (YYYY-MM-DD)
     """
     print('\n' + '=' * 60)
-    print('Step 3: 更新 fundamentals JSON')
+    print('Step 3: 更新 fundamentals JSON (旧·增量追加)')
     print('=' * 60)
 
     # 直接调用 update_fundamentals_from_research 的 main

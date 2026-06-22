@@ -37,12 +37,12 @@ GLOSSARY = {
 
 
 # ══════════════════════════════════════════════════════════
-# 阶段 6: 风控复核 (可信度评估 + 风险提示)
+# 阶段 3: 风控复核 (可信度评估 + 风险提示)
 # ══════════════════════════════════════════════════════════
 
 def make_risk_review():
     def node(state) -> Dict[str, Any]:
-        print(f"\n{'='*60}\n⚖️  [阶段 6/7] 可信度评估 + 风险提示\n{'='*60}")
+        print(f"\n{'='*60}\n⚖️  [阶段 3/4] 可信度评估 + 风险提示\n{'='*60}")
         ranking = state.get("final_ranking", [])
         cands = {c["code"]: c for c in state.get("candidates", [])}
 
@@ -82,12 +82,12 @@ def make_risk_review():
 
 
 # ══════════════════════════════════════════════════════════
-# 阶段 7: 终端富文本报告 + 归档
+# 阶段 4: 终端富文本报告 + 归档
 # ══════════════════════════════════════════════════════════
 
 def make_report_render():
     def node(state) -> Dict[str, Any]:
-        print(f"\n{'='*60}\n📊 [阶段 7/7] 最终报告\n{'='*60}")
+        print(f"\n{'='*60}\n📊 [阶段 4/4] 最终报告\n{'='*60}")
         report = _render_report(state)
         print(report)
         _dump(state["run_dir"], "report.md", report)
@@ -129,6 +129,26 @@ def _render_report(state) -> str:
     lines.append(f"  排序锚: chain+capital×2-delivery×0.5 | "
                  f"候选 {len(cands)} 只 → TOP{len(ranking)}")
     lines.append("═" * 70)
+
+    # ── 今日操作信号 (买1卖2策略) ──
+    try:
+        from tradingagents.agents.picker.strategy_signal import update_and_signal, format_signals
+        top_codes = [r["code"] for r in ranking]
+        code_to_name = {r["code"]: r.get("name", r["code"]) for r in ranking}
+        signals, _ = update_and_signal(date, top_codes)
+        lines.append("\n  ── 🎯 今日操作 (买1卖2) ──")
+        lines.append(format_signals(signals, code_to_name))
+        lines.append("─" * 70)
+    except Exception as e:
+        lines.append(f"\n  (策略信号生成失败: {e})")
+
+    # ── TOP50 复盘记录 (落盘, 不在报告显示) ──
+    try:
+        from tradingagents.agents.picker.review_log import log_top50
+        all_cands = list(cands.values())
+        log_top50(date, all_cands)
+    except Exception:
+        pass
 
     # ── 结论榜 ──
     lines.append(f"\n{'排名':<4}{'代码':<8}{'名称':<10}{'综合分':<7}{'置信度':<6}风险标签")

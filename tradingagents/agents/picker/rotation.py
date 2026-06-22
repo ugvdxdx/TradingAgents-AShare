@@ -16,17 +16,13 @@ from __future__ import annotations
 import json
 import os
 import re
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from picker import paths
 
-# 板块资金流离线缓存 (实时取不到时回退)
-_CACHE_PATH = paths.BOARD_FLOW_CACHE
-
 
 # ══════════════════════════════════════════════════════════
-# 1. 板块资金流 (多源回退: akshare → Tushare个股汇总 → 离线缓存 → 候选池推算)
+# 1. 板块资金流 (多源回退: 实时akshare → 历史文件最新日 → Tushare实时 → 候选池推算)
 # ══════════════════════════════════════════════════════════
 
 def _fetch_board_df(retries: int = 3):
@@ -125,16 +121,15 @@ def _infer_from_candidates() -> List[Dict[str, Any]]:
     纯离线, 不依赖任何网络接口, 作为最后一级回退。
     """
     import pickle
-    import glob as _glob
     mf_dir = paths.MF_CACHE_DIR
     if not os.path.exists(mf_dir):
         return []
-    # 找最新 mf_*.pkl
-    files = sorted(_glob.glob(os.path.join(mf_dir, "mf_*.pkl")), reverse=True)
-    if not files:
+    # 单一持久缓存文件
+    fp = os.path.join(mf_dir, "mf.pkl")
+    if not os.path.exists(fp):
         return []
     try:
-        with open(files[0], "rb") as f:
+        with open(fp, "rb") as f:
             raw = pickle.load(f)
     except Exception:
         return []
@@ -159,10 +154,9 @@ def _infer_from_candidates() -> List[Dict[str, Any]]:
 
     # 汇总: 取每只股最近1日主力净流入
     sector_net: Dict[str, float] = {}
-    for k, v in raw.items():
+    for code, v in raw.items():
         if not isinstance(v, list) or not v:
             continue
-        code = k.rsplit("_", 1)[0]
         ind = code_ind.get(code)
         if not ind:
             continue
@@ -178,66 +172,67 @@ def _infer_from_candidates() -> List[Dict[str, Any]]:
     return rows
 
 
-def _save_cache(rows: List[Dict[str, Any]]) -> None:
-    """实时获取成功时, 落盘结构化板块资金流 (带日期), 供离线回退。"""
-    try:
-        os.makedirs(os.path.dirname(_CACHE_PATH), exist_ok=True)
-        with open(_CACHE_PATH, "w") as f:
-            json.dump({"date": datetime.now().strftime("%Y-%m-%d"), "rows": rows},
-                      f, ensure_ascii=False, indent=1)
-    except Exception:
-        pass
+def _load_board_history_latest() -> Tuple[str, List[Dict[str, Any]]]:
+    """读行业资金流历史文件的最新交易日 → (date, rows)。
 
-
-def _load_cache() -> Tuple[str, List[Dict[str, Any]]]:
-    """读最近一次离线缓存。返回 (日期, rows); 无缓存返回 ("", [])。"""
+    历史文件由 fetch_money_flow_all.py 从 mf.pkl 热股按行业汇总生成。
+    返回的 rows 已按 main_net_yi 降序并编号 rank; 无文件返回 ("", [])。
+    """
+    import pickle
+    fp = paths.BOARD_FLOW_HISTORY
+    if not os.path.exists(fp):
+        return "", []
     try:
-        with open(_CACHE_PATH) as f:
-            d = json.load(f)
-        return d.get("date", ""), d.get("rows", []) or []
+        with open(fp, "rb") as f:
+            hist = pickle.load(f)
     except Exception:
         return "", []
+    if not isinstance(hist, dict) or not hist:
+        return "", []
+    latest = max(hist)
+    rows = sorted(hist[latest], key=lambda x: -x["main_net_yi"])
+    for i, r in enumerate(rows):
+        r["rank"] = i + 1
+        r["name"] = r.get("name") or r.get("industry", "")
+        r.setdefault("change_pct", 0.0)
+    return latest, rows
 
 
 def get_board_flow_ranking(top_n: int = 10) -> Tuple[str, List[Dict[str, Any]]]:
     """返回 (说明文本, 结构化行)。结构化行按主力净额降序。
 
-    实时获取成功 → 落盘缓存并返回; 失败 → 回退最近一次离线缓存; 都没有返回 ("", [])。
+    回退链: 实时 akshare → 历史文件最新日 → Tushare 实时 → 候选池推算。
     main_net_yi 单位: 亿元。
     """
     df = _fetch_board_df()
     if df is None:
-        # 第二级回退: Tushare 全市场个股资金流 → 行业汇总
+        # 第二级回退: 行业资金流历史文件最新日 (mf.pkl 热股汇总, 离线可靠)
+        h_date, h_rows = _load_board_history_latest()
+        if h_rows:
+            return f"行业板块资金流 (历史文件 {h_date}, 热股汇总)", h_rows
+        # 第三级回退: Tushare 全市场个股资金流 → 行业汇总 (实时)
         ts_rows = _fetch_board_from_tushare()
         if ts_rows:
-            _save_cache(ts_rows)
             return f"行业板块资金流 (Tushare个股汇总)", ts_rows
-        # 第三级回退: 离线缓存
-        date, rows = _load_cache()
-        if rows:
-            return f"行业板块资金流 (离线缓存 {date})", rows
         # 第四级回退: 候选池推算
         rows = _infer_from_candidates()
         if rows:
-            _save_cache(rows)
             return f"行业板块资金流 (由候选池个股资金流推算)", rows
-        return "(板块资金流获取失败, 无离线缓存)", []
+        return "(板块资金流获取失败, 无历史文件)", []
 
     # 兼容列名 (不同 akshare 版本列名一致, 但做防御)
     name_col = next((c for c in df.columns if c == "名称"), None)
     chg_col = next((c for c in df.columns if "涨跌幅" in c), None)
     net_col = next((c for c in df.columns if "主力净流入-净额" in c), None)
     if not (name_col and net_col):
+        h_date, h_rows = _load_board_history_latest()
+        if h_rows:
+            return f"行业板块资金流 (历史文件 {h_date}, 热股汇总, 实时列名异常)", h_rows
         ts_rows = _fetch_board_from_tushare()
         if ts_rows:
-            _save_cache(ts_rows)
             return f"行业板块资金流 (Tushare个股汇总, 实时列名异常)", ts_rows
-        date, rows = _load_cache()
-        if rows:
-            return f"行业板块资金流 (离线缓存 {date}, 实时列名异常)", rows
         rows = _infer_from_candidates()
         if rows:
-            _save_cache(rows)
             return f"行业板块资金流 (由候选池个股资金流推算, 实时列名异常)", rows
         return "(板块资金流列名异常)", []
 
@@ -261,7 +256,6 @@ def get_board_flow_ranking(top_n: int = 10) -> Tuple[str, List[Dict[str, Any]]]:
     rows.sort(key=lambda x: -x["main_net_yi"])
     for i, r in enumerate(rows):
         r["rank"] = i + 1
-    _save_cache(rows)
     return f"行业板块资金流 (共{len(rows)}个)", rows
 
 
