@@ -30,6 +30,7 @@ load_dotenv(override=True)
 
 from picker.scoring import fundamental_scorer as fs
 from picker import paths
+from picker.scoring.chain_tiers import get_chain_prompt, get_tier_version  # chain 分档动态化 (PROMPT_V3E 档位段 → chain_tier_map.json)
 
 V3_CACHE = paths.V3_CACHE
 FUNDAMENTALS_DIR = paths.FUNDAMENTALS_DIR
@@ -70,13 +71,17 @@ def _client():
     return _CLIENT_LOCAL.c
 
 
-def _llm(prompt):
+def _llm(prompt, max_tokens=2048):
     """调用 LLM, 带自动重试。429 限流用长退避 + 抖动, 其他瞬时错误短退避。
 
     GLM/BigModel 账户有速率限制, 多 worker 并发时易触发 429
     ("您的账户已达到速率限制")。原 3 次×1.5s 短退避不足以等限流窗口恢复。
     现策略: 429 单独走 10-30s 长退避 + 随机抖动 (防多 worker 同步重试再撞限流),
     最多 5 次; 其他错误仍 3 次短退避。
+
+    Args:
+        max_tokens: 输出上限。GLM-5.2 是推理模型, 大输出(如 tier_map JSON)需调高
+                    (默认 2048; chain_tiers 等大结构用 4096)。
     """
     import random as _rnd
     last_err = None
@@ -85,7 +90,7 @@ def _llm(prompt):
             resp = _client().chat.completions.create(
                 model=_MODEL,
                 messages=[{"role": "user", "content": prompt}],
-                temperature=0, max_tokens=2048, timeout=120,
+                temperature=0, max_tokens=max_tokens, timeout=120,
             )
             msg = resp.choices[0].message
             content = (msg.content or "") or (getattr(msg, "reasoning_content", "") or "")
@@ -410,7 +415,7 @@ def _call(code):
     if wk_slim:
         wk_date_line = f" ({_WORLD_KNOWLEDGE_DATE})" if _WORLD_KNOWLEDGE_DATE else ""
         wk_section = f"\n\n【当前市场宏观背景 (来自世界知识{wk_date_line})】\n{wk_slim}\n请将以上宏观背景纳入 chain 产业链位置和 delivery 业绩兑现度的判断, 尤其注意产业链传导逻辑和中报窗口对兑现度的敏感度。"
-    prompt = PROMPT_V3E + wk_section + sj[:8000] + attr_hint
+    prompt = get_chain_prompt() + wk_section + sj[:8000] + attr_hint
     # 解析失败也重试 (并发下 GLM 偶发返回畸形/截断响应, 非空但解析失败;
     # _llm 只在异常/空内容时重试, 这里对"有内容但解析失败"再给最多3次机会)。
     # 实测: 并发下 ~20% 偶发解析失败, 串行重跑同股可成功 → 解析重试能收敛。

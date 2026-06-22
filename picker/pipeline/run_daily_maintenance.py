@@ -9,6 +9,7 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
   Step 1: 研报采集        (ResearchCollector → raw_feeds)
   Step 2: 知识提取        (LLM extract → research.db)
   Step 2.5: 板块缺口发现  (热但池未覆盖的主题 → web search找股 → 生成+V3评分入池) [池子边界: 加热]
+  Step 2.6: chain tier更新 (用最新研报调整赛道→档位映射, 8档骨架不变; manual/auto)
   Step 3: 研报触发刷新    (refresh_fundamentals.py — Web+Tushare+研报 → 彻底重写)
   Step 4: capital 更新    (纯量化, 0 LLM)
   Step 5: 过热股检测      (高分滞涨搜索验证)
@@ -143,6 +144,22 @@ def step2_extract():
     return success > 0
 
 
+def step2c_update_chain_tiers(mode: str = "manual"):
+    """Step 2.6: chain tier_map 更新 — 用最新研报调整赛道→档位映射。
+
+    依赖 Step 2 的新鲜 research.db。保持 8 档骨架, LLM 根据热门/冷门/新兴赛道
+    调整 sectors 归属 + theme。manual 模式只输出 diff 供审核; auto 模式 diff有变化
+    即写入(归档旧版可回滚)。在 Step 2.5 缺口发现前执行, 让新评分用上最新档位。
+    """
+    print('\n' + '=' * 60)
+    print(f'Step 2.6: chain tier_map 更新 (mode={mode})')
+    print('=' * 60)
+
+    from picker.scoring.chain_tiers import update_chain_tiers
+    _candidate, _diff, applied = update_chain_tiers(mode=mode)
+    return applied
+
+
 def step2b_discover_gap(v3_threshold: float = 8.0):
     """Step 2.5: 板块缺口发现 — 研报热但池未覆盖的主题, web search 找股入池。
 
@@ -152,7 +169,6 @@ def step2b_discover_gap(v3_threshold: float = 8.0):
     print('\n' + '=' * 60)
     print(f'Step 2.5: 板块缺口发现 (V3>={v3_threshold} 入池)')
     print('=' * 60)
-
     from picker.discovery.discover_sector_gap import discover
     admitted = discover(v3_threshold=v3_threshold, days=14,
                         coverage_threshold=2, max_themes=8, max_per_theme=5)
@@ -399,6 +415,10 @@ def main():
     parser.add_argument('--skip-research', action='store_true', help='跳过整个研报链路 (step1-3 含缺口发现)')
     parser.add_argument('--skip-collect', action='store_true', help='只跳采集+提取 (step1-2), 保留缺口发现+刷新 (今天无新帖时用)')
     parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
+    parser.add_argument('--skip-chain-tiers', action='store_true', help='跳过 chain tier_map 更新 (step2.6)')
+    parser.add_argument('--chain-tiers-mode', dest='chain_tiers_mode', default='manual',
+                        choices=['manual', 'auto'],
+                        help='chain tier 更新模式: manual=只输出diff不写 / auto=diff有变化即写入(归档可回滚)')
     parser.add_argument('--discover-threshold', dest='discover_threshold', type=float, default=8.0,
                         help='缺口发现入池 V3 阈值 (默认 8.0)')
     parser.add_argument('--skip-cleanup', action='store_true', help='跳过冷门清理 (step6.5)')
@@ -471,6 +491,15 @@ def main():
         if not args.skip_collect:
             _run(1, step1_collect, date_from, date_to)
             _run(2, step2_extract)
+        # Step 2.6: chain tier_map 更新 (用最新研报调赛道→档位; 在缺口发现前, 让新评分用最新档位)
+        if not args.skip_chain_tiers and step in (0,):
+            try:
+                results['2.6'] = step2c_update_chain_tiers(args.chain_tiers_mode)
+            except Exception as e:
+                print(f'\n✗ Step 2.6 异常: {type(e).__name__}: {e}')
+                import traceback
+                traceback.print_exc()
+                results['2.6'] = False
         # Step 2.5: 板块缺口发现 (依赖 research.db 的主题; 只在全跑时执行)
         if not args.skip_discovery and step in (0,):
             try:

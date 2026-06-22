@@ -1,0 +1,380 @@
+"""chain 分档动态化 (赛道→档位映射, 随市场主线更新)。
+
+设计原理
+========
+chain 分档 = 稳定断点骨架 (8档 0-10 刻度) + 动态赛道映射 (哪档放哪些赛道)。
+市场主线变化时需要更新的是后者。本模块把"赛道→档位映射"从 PROMPT_V3E
+硬编码文本外部化为 data/reference/chain_tier_map.json, 使其可被
+update_chain_tiers.py (--mode manual/auto) 动态更新。
+
+两种应用模式 (A+B 并存, 方便对比):
+  - manual (方案A): LLM 生成候选 tier_map → 输出 diff → 人工确认 → 写入
+  - auto   (方案B): 检测主线位移 → 生成候选 → 回测 gate 验证不劣化 → 自动应用/回滚/告警
+
+阶段0 (本文件): load/render/get_chain_prompt —— 不改评分行为的地基。
+  种子 v1 从 PROMPT_V3E:121-131 抽取, render_chain_tiers_block 渲染后与原硬编码等价。
+阶段1+: build_candidate_tier_map / diff_tier_maps / 主线检测 / 回测 gate。
+"""
+
+import json
+import os
+from typing import Any, Dict, Optional, Tuple
+
+from picker.paths import CHAIN_TIER_MAP_PATH, CHAIN_TIER_ARCHIVE_DIR
+
+# ──────────────────────────────────────────────────────────────
+# 进程级缓存 (mtime 感知: tier_map 文件被 update_chain_tiers.py 改写后,
+# 同进程下次 load 自动刷新; 跨进程自然重读)
+# ──────────────────────────────────────────────────────────────
+_CHAIN_TIER_MAP_CACHE: Optional[Tuple[float, Dict[str, Any]]] = None
+
+
+def load_chain_tier_map() -> Optional[Dict[str, Any]]:
+    """读取 chain_tier_map.json。
+
+    Returns:
+        tier_map dict, 或 None (文件缺失/损坏时, 调用方回退到 PROMPT_V3E 硬编码)。
+    """
+    global _CHAIN_TIER_MAP_CACHE
+    path = CHAIN_TIER_MAP_PATH
+    if not os.path.exists(path):
+        return None
+    try:
+        mtime = os.path.getmtime(path)
+    except OSError:
+        return _CHAIN_TIER_MAP_CACHE[1] if _CHAIN_TIER_MAP_CACHE else None
+    if _CHAIN_TIER_MAP_CACHE and _CHAIN_TIER_MAP_CACHE[0] == mtime:
+        return _CHAIN_TIER_MAP_CACHE[1]
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            tm = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return _CHAIN_TIER_MAP_CACHE[1] if _CHAIN_TIER_MAP_CACHE else None
+    if not isinstance(tm, dict) or not tm.get("tiers"):
+        return _CHAIN_TIER_MAP_CACHE[1] if _CHAIN_TIER_MAP_CACHE else None
+    _CHAIN_TIER_MAP_CACHE = (mtime, tm)
+    return tm
+
+
+def reload_chain_tier_map() -> Optional[Dict[str, Any]]:
+    """强制清缓存重读 (同进程内更新 tier_map 后立即生效)。"""
+    global _CHAIN_TIER_MAP_CACHE
+    _CHAIN_TIER_MAP_CACHE = None
+    return load_chain_tier_map()
+
+
+# ──────────────────────────────────────────────────────────────
+# 渲染: tier_map → prompt 档位规则文本
+# ──────────────────────────────────────────────────────────────
+def render_chain_tiers_block(tier_map: Dict[str, Any]) -> str:
+    """渲染 tier_map 为 PROMPT_V3E 风格的档位规则文本块。
+
+    输出格式与 PROMPT_V3E:123-131 原文一致 (种子 v1 渲染后逐行等价):
+        **档位规则**：
+        - 9.0-10.0: AI算力最核心环节 (1.6T光模块/HBM/CoWoS/AI主芯片)，全球份额前3...
+        - ...
+    """
+    lines = ["**档位规则**："]
+    for t in tier_map.get("tiers", []):
+        rng = t.get("range", "")
+        label = t.get("label", "")
+        sectors = t.get("sectors") or []
+        criteria = t.get("criteria") or ""
+        inner = "/".join(s for s in sectors if s)
+        if inner and criteria:
+            # criteria 以"等"开头 (如"等非AI链") 表示 sectors 为举例, 合并进括号 (中文表达习惯)
+            if criteria.startswith("等"):
+                line = f"- {rng}: {label} ({inner}{criteria})"
+            else:
+                line = f"- {rng}: {label} ({inner})，{criteria}"
+        elif inner:
+            line = f"- {rng}: {label} ({inner})"
+        elif criteria:
+            line = f"- {rng}: {label} ({criteria})"
+        else:
+            line = f"- {rng}: {label}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+# PROMPT_V3E 中档位规则段的起止锚点 (用于等价替换)
+_BLOCK_START_MARKER = "**档位规则**："
+_BLOCK_END_MARKER = "\n\n**边界判断规则"
+
+
+def _splice_chain_block(prompt: str, rendered_block: str) -> str:
+    """把 prompt 中的档位规则段替换为 rendered_block。
+
+    锚点: 从 "**档位规则**：" 到 "\n\n**边界判断规则" 之前。
+    锚点缺失 (PROMPT_V3E 结构变动) 时返回原 prompt (安全回退)。
+    """
+    si = prompt.find(_BLOCK_START_MARKER)
+    ei = prompt.find(_BLOCK_END_MARKER)
+    if si == -1 or ei == -1 or ei <= si:
+        return prompt  # 锚点失效, 不动 prompt
+    return prompt[:si] + rendered_block + prompt[ei:]
+
+
+def get_chain_prompt() -> str:
+    """返回完整 V3E prompt, 档位块来自 chain_tier_map.json (动态)。
+
+    tier_map 缺失/损坏时无缝回退到 PROMPT_V3E 原文 (硬编码档位, 向后兼容,
+    保证旧环境无 chain_tier_map.json 也能正常评分)。
+    """
+    # 延迟 import 避免与 v3_full_score 循环依赖
+    from picker.scoring.v3_full_score import PROMPT_V3E
+
+    tm = load_chain_tier_map()
+    if not tm:
+        return PROMPT_V3E  # 回退: 无 tier_map
+    rendered = render_chain_tiers_block(tm)
+    spliced = _splice_chain_block(PROMPT_V3E, rendered)
+    return spliced or PROMPT_V3E
+
+
+def get_tier_version() -> str:
+    """当前生效的 chain tier 版本标识 (写入快照, 支撑回测分段与 A/B 对比)。"""
+    tm = load_chain_tier_map()
+    if not tm:
+        return "PROMPT_V3E-hardcoded"  # 回退路径的版本标记
+    return tm.get("version", "unknown")
+
+
+# ──────────────────────────────────────────────────────────────
+# diff / 持久化 (纯函数, candidate/manual 共用)
+# ──────────────────────────────────────────────────────────────
+def diff_tier_maps(old: Optional[Dict[str, Any]], new: Dict[str, Any]) -> str:
+    """生成人类可读的新旧 tier_map 差异 (供 manual 审核)。"""
+    if not old:
+        return f"【全新 tier_map】 theme={new.get('theme','?')} | {len(new.get('tiers',[]))} 档"
+    lines = []
+    if old.get("theme") != new.get("theme"):
+        lines.append(f"【主线变化】 {old.get('theme','?')}  →  {new.get('theme','?')}")
+    if old.get("theme_strength") != new.get("theme_strength"):
+        lines.append(f"【主线强度】 {old.get('theme_strength','?')}  →  {new.get('theme_strength','?')}")
+    old_by_range = {t.get("range"): t for t in old.get("tiers", [])}
+    new_by_range = {t.get("range"): t for t in new.get("tiers", [])}
+    all_ranges = list(old_by_range.keys()) + [r for r in new_by_range if r not in old_by_range]
+    for r in all_ranges:
+        ot = old_by_range.get(r)
+        nt = new_by_range.get(r)
+        o_sec = set(ot.get("sectors") or []) if ot else set()
+        n_sec = set(nt.get("sectors") or []) if nt else set()
+        added = sorted(n_sec - o_sec)
+        removed = sorted(o_sec - n_sec)
+        label_changed = bool(ot and nt and ot.get("label") != nt.get("label"))
+        if not ot:
+            lines.append(f"  [{r}] ✚新增档 {nt.get('label','')}  {added}")
+        elif not nt:
+            lines.append(f"  [{r}] ✖删除档")
+        elif added or removed or label_changed:
+            tag = f"[{r}] {nt.get('label','')}"
+            if label_changed:
+                tag += f" (label: {ot.get('label','')}→{nt.get('label','')})"
+            if added:
+                tag += f"  +{added}"
+            if removed:
+                tag += f"  -{removed}"
+            lines.append("  " + tag)
+    if not lines:
+        return "(无变化)"
+    return "\n".join(lines)
+
+
+def archive_current_tier_map(reason: str = "") -> Optional[str]:
+    """归档当前 tier_map 到 CHAIN_TIER_ARCHIVE_DIR (带时间戳+原因)。返回归档路径或 None。"""
+    from datetime import datetime
+    cur = load_chain_tier_map()
+    if not cur:
+        return None
+    os.makedirs(CHAIN_TIER_ARCHIVE_DIR, exist_ok=True)
+    ver = cur.get("version", "unknown")
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_reason = (reason or "archive").replace(" ", "_").replace("/", "-")
+    name = f"{ver}__{ts}__{safe_reason}.json".replace("/", "-")
+    path = os.path.join(CHAIN_TIER_ARCHIVE_DIR, name)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(cur, f, ensure_ascii=False, indent=2)
+    return path
+
+
+def save_chain_tier_map(tier_map: Dict[str, Any], generated_by: str = "", archive_reason: str = "") -> str:
+    """归档当前版本后写入新 tier map, 刷新进程缓存。返回写入路径。"""
+    from datetime import datetime
+    archive_current_tier_map(archive_reason or "before-save")  # 先归档旧版
+    tier_map["generated_at"] = datetime.now().strftime("%Y-%m-%d")
+    if generated_by:
+        tier_map["generated_by"] = generated_by
+    with open(CHAIN_TIER_MAP_PATH, "w", encoding="utf-8") as f:
+        json.dump(tier_map, f, ensure_ascii=False, indent=2)
+    reload_chain_tier_map()
+    return CHAIN_TIER_MAP_PATH
+
+
+# ──────────────────────────────────────────────────────────────
+# 阶段1: 候选生成 (从最新研报构建新 tier_map)
+# ──────────────────────────────────────────────────────────────
+
+# 8档骨架 (刻度断点, 稳定不变; 动态的是赛道→档位映射)
+_TIER_SKELETON_RANGES = ["9.0-10.0", "8.5-8.9", "7.0-8.4", "6.0-6.9",
+                         "5.0-5.9", "3.0-4.9", "1.0-2.9", "0.0-0.9"]
+
+
+def _gather_research_signals(days=14):
+    """从 research.db + 世界知识 汇总最新主线信号, 供 LLM 调整 tier_map。
+
+    Returns:
+        {hot_sectors, cold_sectors, emerging_sectors, top_viewpoints, world_knowledge_theme}
+    """
+    import sqlite3
+    from datetime import datetime, timedelta
+    from picker.paths import RESEARCH_DB, WORLD_KNOWLEDGE_MD
+    out = {"hot_sectors": [], "cold_sectors": [], "emerging_sectors": [],
+           "top_viewpoints": [], "world_knowledge_theme": ""}
+
+    # 研报板块动量 (复用 consumer 的聚合)
+    try:
+        from tradingagents.research.consumer import get_sector_momentum
+        m = get_sector_momentum(days=days)
+        out["hot_sectors"] = [{"sector": s["sector"], "bullish": s.get("bullish_count", 0)}
+                              for s in m.get("hot_sectors", [])[:10]]
+        out["cold_sectors"] = [{"sector": s["sector"], "bearish": s.get("bearish_count", 0)}
+                               for s in m.get("cold_sectors", [])[:5]]
+        out["emerging_sectors"] = [s["sector"] for s in m.get("emerging_sectors", [])[:5]]
+    except Exception:
+        pass
+
+    # 近期代表性看多观点 (细粒度, 反映具体主题)
+    try:
+        conn = sqlite3.connect(RESEARCH_DB)
+        cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+        rows = conn.execute(
+            "SELECT sector, viewpoint FROM sector_knowledge "
+            "WHERE sentiment='bullish' AND created_at >= ? AND viewpoint != '' "
+            "ORDER BY created_at DESC LIMIT 25", (cutoff,)
+        ).fetchall()
+        conn.close()
+        out["top_viewpoints"] = [f"[{r[0]}] {r[1]}" for r in rows]
+    except Exception:
+        pass
+
+    # 世界知识主线 (读首段/标题行)
+    try:
+        if os.path.exists(WORLD_KNOWLEDGE_MD):
+            with open(WORLD_KNOWLEDGE_MD, "r", encoding="utf-8") as f:
+                wk = f.read()
+            # 提取标题 + 一级章节, 概括主线
+            lines = [ln.strip() for ln in wk.split("\n") if ln.strip().startswith("#")][:15]
+            out["world_knowledge_theme"] = "\n".join(lines)
+    except Exception:
+        pass
+
+    return out
+
+
+def build_candidate_tier_map(days=14):
+    """LLM 根据最新研报 + 世界知识, 生成候选 tier_map。
+
+    保持 8 档骨架 (ranges/labels 稳定), 调整【赛道→档位】映射 + theme/theme_strength。
+    失败返回 None。
+    """
+    from picker.scoring.v3_full_score import _llm  # 带 429 退避
+
+    current = load_chain_tier_map()
+    if not current:
+        return None  # 无基准, 不构建 (阶段0要求种子存在)
+
+    signals = _gather_research_signals(days=days)
+    ranges = ", ".join(_TIER_SKELETON_RANGES)
+
+    prompt = f"""你是A股量化研究员。根据最新研报, 更新 chain 产业链分档的【赛道→档位】映射。
+
+## 当前 tier_map (8档骨架, ranges/labels 保持不变, 只调整 sectors 归属)
+{json.dumps(current, ensure_ascii=False, indent=1)}
+
+## 最新研报信号 (近{days}天)
+热门赛道 (bullish密集, 应在高档): {json.dumps(signals['hot_sectors'], ensure_ascii=False)}
+冷门赛道 (bearish密集, 应在低档): {json.dumps(signals['cold_sectors'], ensure_ascii=False)}
+新兴赛道 (近7天新出现): {signals['emerging_sectors']}
+代表性看多观点:
+{chr(10).join('- ' + v for v in signals['top_viewpoints'][:15])}
+
+## 世界知识主线
+{signals['world_knowledge_theme'][:600]}
+
+## 调整原则
+1. **8档 ranges + labels 保持不变** (9.0-10.0/8.5-8.9/.../0.0-0.9), 这是稳定骨架
+2. 根据研报热度调整每个赛道归属的档位:
+   - 热门赛道(bullish密集)上移到更高档, 冷门(bearish)下移
+   - 新出现的细分赛道(如金刚石散热/PCIe Retimer/玻璃基板)归入对应档位
+   - 主线核心(AI算力)锁定9.0-10.0档
+3. 更新 theme (一句话当前主线) 和 theme_strength (绝对主线/主线/多线均衡)
+4. sectors 用具体细分赛道名 (如"1.6T光模块"而非"光通信"), criteria 简洁
+5. 每档 sectors 不超过6个, 避免臃肿
+
+**第一行就以 `{{` 开始直接输出 JSON, 不要任何推理过程/前言/解释** (GLM 推理会占满token导致JSON截断)。
+输出完整 tier_map JSON, 结构: 最外层 `theme`/`theme_strength`/`tiers`, tiers 数组8个元素, 每个含 `range`/`label`/`sectors`/`criteria`。tiers 的 range 必须严格按顺序为: {ranges}。"""
+    # tier_map JSON 较大 (~2KB) + GLM 推理开销, 用 4096 防截断
+    raw = _llm(prompt, max_tokens=4096)
+    if not raw:
+        return None
+
+    # GLM 可能仍带推理前缀, 找最后一个完整 JSON 对象 (从首个 { 到末个 })
+    import re
+    # 去除可能的 ```json 代码块标记
+    raw2 = raw.strip()
+    if raw2.startswith("```"):
+        raw2 = raw2.split("```")[1] if "```" in raw2[3:] else raw2
+        if raw2.startswith("json"):
+            raw2 = raw2[4:]
+    m = re.search(r'\{.*\}', raw2, re.S)
+    if not m:
+        return None
+    try:
+        candidate = json.loads(m.group())
+    except json.JSONDecodeError:
+        return None
+
+    # 校验: 骨架一致 (8档 + ranges 完全匹配)
+    cand_ranges = [t.get("range") for t in candidate.get("tiers", [])]
+    if cand_ranges != _TIER_SKELETON_RANGES:
+        # 骨架被破坏 (LLM 改了 ranges), 拒绝 — 只接受赛道重映射
+        return None
+    if not candidate.get("theme") or not candidate.get("tiers"):
+        return None
+    return candidate
+
+
+def update_chain_tiers(mode="manual", days=14, force=False):
+    """构建候选 tier_map → diff → 按 mode 应用。
+
+    Args:
+        mode: 'manual' 只输出 diff 供审核(不写入); 'auto' diff有变化即写入(归档旧版, 可回滚)
+        force: True 时即使无变化也重新写入 (刷新 generated_at)
+    Returns:
+        (candidate, diff_text, applied: bool)
+    """
+    current = load_chain_tier_map()
+    candidate = build_candidate_tier_map(days=days)
+    if not candidate:
+        print("  [chain_tiers] 候选生成失败 (LLM/骨架校验), 跳过")
+        return None, "", False
+
+    diff = diff_tier_maps(current, candidate)
+    print(f"  [chain_tiers] 候选 theme: {candidate.get('theme','?')}")
+    print(f"  [chain_tiers] diff vs 当前:\n{diff if diff != '(无变化)' else '  (无变化)'}")
+
+    if diff == "(无变化)" and not force:
+        print("  [chain_tiers] 无变化, 不写入")
+        return candidate, diff, False
+
+    if mode == "auto":
+        from datetime import datetime
+        candidate["version"] = datetime.now().strftime("%Y-%m-%d") + "-auto"
+        path = save_chain_tier_map(candidate, generated_by=f"update_chain_tiers(auto,{mode})",
+                                   archive_reason=f"auto-update-{mode}")
+        print(f"  [chain_tiers] ✓ 已写入 (旧版已归档可回滚): {path}")
+        return candidate, diff, True
+    else:
+        print("  [chain_tiers] manual 模式: 未写入 (审核 diff 后用 --apply-chain-tiers 写入)")
+        return candidate, diff, False
