@@ -215,9 +215,10 @@ def save_chain_tier_map(tier_map: Dict[str, Any], generated_by: str = "", archiv
 # 阶段1: 候选生成 (从最新研报构建新 tier_map)
 # ──────────────────────────────────────────────────────────────
 
-# 8档骨架 (刻度断点, 稳定不变; 动态的是赛道→档位映射)
-_TIER_SKELETON_RANGES = ["9.0-10.0", "8.5-8.9", "7.0-8.4", "6.0-6.9",
-                         "5.0-5.9", "3.0-4.9", "1.0-2.9", "0.0-0.9"]
+# 6档【热度】骨架 (档位间有意重叠 — 热度x竞争力是连续的, 重叠让强竞争力股能跨档)
+# chain 语义: 赛道热度(theme级) × 个股核心竞争力。档=热度带, 档内分数由竞争力定。
+# 重叠区: 强竞争力的温热股可追平弱竞争力的热门股 (竞争力跨档)。
+_TIER_SKELETON_RANGES = ["8.5-10.0", "7.0-9.0", "5.5-7.5", "3.5-5.5", "2.0-4.0", "0.0-2.5"]
 
 
 def _gather_research_signals(days=14):
@@ -273,9 +274,10 @@ def _gather_research_signals(days=14):
 
 
 def build_candidate_tier_map(days=14):
-    """LLM 根据最新研报 + 世界知识, 生成候选 tier_map。
+    """LLM 根据最新研报, 生成候选 tier_map (6档热度骨架, 档间可重叠)。
 
-    保持 8 档骨架 (ranges/labels 稳定), 调整【赛道→档位】映射 + theme/theme_strength。
+    chain 语义 = 赛道热度(theme级) × 个股核心竞争力。档=热度带(可重叠),
+    赛道按【当前热度】归档(热主线→高档, 退潮→低档), 档内分数由竞争力定(评分时)。
     失败返回 None。
     """
     from picker.scoring.v3_full_score import _llm  # 带 429 退避
@@ -287,49 +289,44 @@ def build_candidate_tier_map(days=14):
     signals = _gather_research_signals(days=days)
     ranges = ", ".join(_TIER_SKELETON_RANGES)
 
-    prompt = f"""你是A股产业链分析师。更新 chain 分档的【赛道→档位】映射。
+    prompt = f"""你是A股量化研究员, 为"预测股票收益"维护 chain 分档(赛道→热度档映射)。
 
-## ⚠ 核心原则: 档位 = 产业链【位置核心度】, 不是热度
-chain 档位衡量赛道在产业链中的位置 (越不可替代/越靠近价值核心 → 越高档)。这是结构性判断,
-月级稳定。资金热度是 transient (已由 capital 子维度衡量, 不在本任务)。
-**禁止因"近期被研报看多"就把赛道上移** — 热度≠位置。一个支撑环节再热也进不了核心档。
+## 核心语义: chain = 赛道热度 × 个股竞争力 (目标是收益预测, 不是产业研究)
+- 档位反映赛道【当前热度】(theme级, 周-月尺度): 热主线赛道→高档(资金涌入推升股价), 退潮赛道→低档。
+- 档内具体分数由个股【核心竞争力】定(评分时另算): 龙头/高份额/技术壁垒 → 档内高分; 跟风 → 档内低分。
+- 档间有意重叠: 强竞争力的温热股可追平弱竞争力的热门股。
 
-## 8档位置语义 (固定, 决定赛道归哪个档)
-- 9.0-10.0 最核心: 直接决定AI算力输出、不可替代 (主芯片/1.6T光模块/HBM/CoWoS先进封装核心)
-- 8.5-8.9 核心配套/新兴高景气: 核心环节紧密配套或刚放量高景气
-- 7.0-8.4 上游关键材料/元件: 核心环节的必需输入 (特种材料/关键元件/半导体设备零部件)
-- 6.0-6.9 次核心配套: AI链支撑环节 (PCB/散热/连接/电源/光芯片)
-- 5.0-5.9 受益扩产: 非AI专用但受益半导体扩产
-- 3.0-4.9 终端/边缘: 消费电子/汽车电子/机器人零部件
-- 1.0-2.9 产业链外独立成长: 创新药/军工/商业航天/普通有色
-- 0.0-0.9 退潮/旧赛道: 锂电/白酒/地产/油气/传统矿业
+## 6档热度带 (固定, ranges/labels 不变, 档间重叠)
+- 8.5-10.0 最热主线·绝对龙头带: AI算力绝对主线, 资金极致集中, 业绩+逻辑双驱 (龙头拿9+, 二线8.5-9)
+- 7.0-9.0 热门主线·高景气带: AI链高景气环节, 业绩兑现中 (龙头8-9, 跟风7-8)
+- 5.5-7.5 温热·新兴升温带: 升温中的新主题, 逻辑先行业绩待验证 (龙头7-7.5, 概念5.5-6.5)
+- 3.5-5.5 中性·稳定需求带: 有需求但非当前热点 (龙头4.5-5.5, 一般3.5-4.5)
+- 2.0-4.0 偏冷·景气下行带: 资金流出/景气下行 (龙头3-4, 弱势2-3)
+- 0.0-2.5 冷门·退潮出清带: 旧赛道出清, 诚实给低分
 
-## 当前 tier_map (基准, 已含正确位置逻辑)
+## 当前 tier_map (基准 6档热度, 已含合理热度归档)
 {json.dumps(current, ensure_ascii=False, indent=1)}
 
-## 最新研报信号 (用途: 发现新赛道 + 识别位置变化, 严禁用于按热度排名)
-近{days}天活跃赛道: {json.dumps(signals['hot_sectors'], ensure_ascii=False)}
-走弱赛道: {json.dumps(signals['cold_sectors'], ensure_ascii=False)}
-新出现赛道 (需按【位置】归档): {signals['emerging_sectors']}
-代表性观点 (用于判断赛道在产业链中的位置):
+## 最新研报信号 (用于判断赛道【当前热度】, 调整归档)
+近{days}天活跃赛道(bullish密集 → 偏热): {json.dumps(signals['hot_sectors'], ensure_ascii=False)}
+走弱赛道(bearish密集 → 偏冷): {json.dumps(signals['cold_sectors'], ensure_ascii=False)}
+新升温赛道(近7天新出现 → 温热/新兴带): {signals['emerging_sectors']}
+代表性观点 (判断各赛道当前热度):
 {chr(10).join('- ' + v for v in signals['top_viewpoints'][:15])}
 
 ## 世界知识主线
 {signals['world_knowledge_theme'][:600]}
 
-## 调整规则 (保守 — 只在有清晰位置理由时改, 大部分赛道保持原档)
-1. 8档 ranges/labels/位置语义 不变
-2. 【新赛道归位】: emerging 或观点中新出现的细分赛道, 按【它在产业链中的位置】(非热度)归入对应档:
-   - 金刚石散热 → 6.0-6.9 (AI散热支撑材料, 非核心芯片)
-   - CoWoS/先进封装 → 9.0-10.0 (封装核心)
-   - PCIe Retimer → 7.0-8.4 (互连关键元件)
-3. 【位置变化】: 仅当赛道产业链位置确实改变时调整 (技术路线切换使某环节更核心/更边缘, 需观点佐证)。禁止因短期热度波动移动。
-4. 【主线描述】: theme 一句话当前主线; theme_strength = 绝对主线(单一主线碾压)/主线(明确主导有副线)/多线均衡(无单一主线)
-5. sectors 用具体细分名 (如"1.6T光模块"非"光通信"), criteria 简述位置/核心度理由
+## 调整规则 (按【热度】归档, 非产业链位置)
+1. 6档 ranges/labels 不变 (热度带, 档间重叠是有意的)
+2. 赛道按【当前热度】归入对应带: 热主线→8.5-10/7-9带; 新升温主题(如金刚石散热/PCIe Retimer)→5.5-7.5温热带(够热就别压低); 中性→3.5-5.5; 退潮→0-2.5
+3. 热度变化才移动: 赛道升温(冷→温/温→热)或降温才调档, 给出热度依据
+4. theme 一句话当前主线; theme_strength = 绝对主线(单一主线碾压)/主线(主导有副线)/多线均衡(无单一主线)
+5. sectors 用具体细分名 (如"1.6T光模块"非"光通信"); criteria 简述热度+龙头定位依据
 
 **第一行就以 `{{` 开始直接输出 JSON, 不要推理/前言** (GLM 推理会占满token致JSON截断)。
-输出完整 tier_map JSON: 最外层 theme/theme_strength/tiers, tiers 8个元素含 range/label/sectors/criteria。range 严格按顺序: {ranges}。"""
-    # tier_map JSON 较大 (~2KB) + GLM 推理开销, 用 4096 防截断
+输出完整 tier_map JSON: 最外层 theme/theme_strength/tiers, tiers 6个元素含 range/label/sectors/criteria。range 严格按顺序: {ranges}。"""
+    # tier_map JSON 较大 + GLM 推理开销, 用 4096 防截断
     raw = _llm(prompt, max_tokens=4096)
     if not raw:
         return None
