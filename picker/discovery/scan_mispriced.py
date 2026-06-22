@@ -61,15 +61,17 @@ ATTR_CACHE = paths.ATTR_CACHE
 # ══════════════════════════════════════════════════════════
 
 def web_search(query: str, num_results: int = 5) -> str:
-    """网络搜索, 返回结果摘要文本。可能超时, 失败返回空。"""
+    """网络搜索, 返回结果摘要文本。用智谱 web-search-pro (jina.ai 已失效)。
+
+    复用 refresh_fundamentals._web_search (带 429 限流退避)。
+    失败抛 RuntimeError (不静默返回空, 避免用降级数据偷偷决策)。
+    """
     try:
-        import urllib.request
-        import urllib.parse
-        url = f"https://s.jina.ai/{urllib.parse.quote(query)}"
-        req = urllib.request.Request(url, headers={"Accept": "text/plain"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return resp.read().decode("utf-8", errors="replace")[:3000]
-    except Exception:
+        from picker.pipeline.refresh_fundamentals import _web_search
+        return _web_search(query, num_results=num_results)
+    except Exception as e:
+        # 兼容旧调用方(期望空字符串而非异常): 记录后返回空
+        print(f"  [web_search] 失败: {str(e)[:100]}", flush=True)
         return ""
 
 

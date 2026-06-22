@@ -8,6 +8,7 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
 执行步骤（按依赖顺序）：
   Step 1: 研报采集        (ResearchCollector → raw_feeds)
   Step 2: 知识提取        (LLM extract → research.db)
+  Step 2.5: 板块缺口发现  (热但池未覆盖的主题 → web search找股 → 生成+V3评分入池)
   Step 3: 研报触发刷新    (refresh_fundamentals.py — Web+Tushare+研报 → 彻底重写)
   Step 4: capital 更新    (纯量化, 0 LLM)
   Step 5: 过热股检测      (高分滞涨搜索验证)
@@ -22,6 +23,7 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
   uv run python3 run_daily_maintenance.py --step 3         # 只刷新 fundamentals
   uv run python3 run_daily_maintenance.py --from 2026-06-18 --to 2026-06-21  # 指定日期范围
   uv run python3 run_daily_maintenance.py --skip-research  # 跳过研报采集/提取
+  uv run python3 run_daily_maintenance.py --skip-discovery # 跳过板块缺口发现
   uv run python3 run_daily_maintenance.py --capital-mode G # 使用G模式
 """
 import argparse
@@ -139,6 +141,23 @@ def step2_extract():
     return success > 0
 
 
+def step2b_discover_gap(v3_threshold: float = 8.0):
+    """Step 2.5: 板块缺口发现 — 研报热但池未覆盖的主题, web search 找股入池。
+
+    依赖 Step 2 产出的新鲜 sector_knowledge 主题; 产出的新股会被后续 Step 3/4
+    (refresh_fundamentals / capital) 自然覆盖。默认阈值 V3>=8.0 入池。
+    """
+    print('\n' + '=' * 60)
+    print(f'Step 2.5: 板块缺口发现 (V3>={v3_threshold} 入池)')
+    print('=' * 60)
+
+    from picker.discovery.discover_sector_gap import discover
+    admitted = discover(v3_threshold=v3_threshold, days=14,
+                        coverage_threshold=2, max_themes=8, max_per_theme=5)
+    print(f'缺口发现完成: 入池 {len(admitted)} 只')
+    return len(admitted) > 0
+
+
 def step3_refresh_fundamentals(date_from: str, dry_run: bool = False):
     """Step 3: 研报触发 fundamentals 彻底重写（替代旧增量追加）"""
     print('\n' + '=' * 60)
@@ -247,6 +266,9 @@ def main():
     parser.add_argument('--to', dest='date_to', default='', help='采集结束日 (YYYY-MM-DD，默认今天)')
     parser.add_argument('--capital-mode', dest='cap_mode', default='G', help='capital 模式 (G/D/A)')
     parser.add_argument('--skip-research', action='store_true', help='跳过研报采集/提取 (step1-3)')
+    parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
+    parser.add_argument('--discover-threshold', dest='discover_threshold', type=float, default=8.0,
+                        help='缺口发现入池 V3 阈值 (默认 8.0)')
     parser.add_argument('--dry-run', action='store_true', help='只输出不写文件')
     args = parser.parse_args()
 
@@ -274,6 +296,15 @@ def main():
     if not args.skip_research:
         _run(1, step1_collect, date_from, date_to)
         _run(2, step2_extract)
+        # Step 2.5: 板块缺口发现 (依赖 step2 的新鲜研报主题; 只在全跑或指定时执行)
+        if not args.skip_discovery and step in (0,):
+            try:
+                results['2.5'] = step2b_discover_gap(args.discover_threshold)
+            except Exception as e:
+                print(f'\n✗ Step 2.5 异常: {type(e).__name__}: {e}')
+                import traceback
+                traceback.print_exc()
+                results['2.5'] = False
         _run(3, step3_refresh_fundamentals, date_from, args.dry_run)
 
     # ── 量化链路 (Step 4-6) ──
@@ -291,7 +322,7 @@ def main():
     print(f"每日维护完成 ({elapsed/60:.1f}min)")
     success_count = sum(1 for v in results.values() if v)
     print(f"成功: {success_count}/{len(results)} 步骤")
-    for s, ok in sorted(results.items()):
+    for s, ok in sorted(results.items(), key=lambda x: str(x[0])):
         status = '✓' if ok else '✗'
         print(f"  Step {s}: {status}")
 
