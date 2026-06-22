@@ -659,7 +659,108 @@ def _reactivate_cold_stocks():
         print(f"\n  [冷股激活] 无异动 (冷股池 {len(cold_codes)} 只)")
 
 
-def _update_sub_sector_override(gems: list, meta: dict):
+def cleanup_to_cold_stocks(min_score=7.0, max_chain=4.0, max_capital=3.0,
+                           max_r20=5.0, research_days=30):
+    """池子清理 — 把热池里"无催化、长期垫底"的股移入冷池冬眠。
+
+    与 _reactivate_cold_stocks (冷→热) 对称的热→冷操作。三者构成池子边界管理:
+      - discover_sector_gap: 加热 (热门缺口补股)
+      - _reactivate_cold_stocks: 冷→热 (量价异动激活)
+      - cleanup_to_cold_stocks (本函数): 热→冷 (无催化清理)
+
+    判定"冷门"的 5 条 (全部满足才移, 严防误杀优质回调股):
+      1. sector_score < min_score  (综合分低)
+      2. chain < max_chain         (不在有意义的产业链上 — 保护优质AI股即使回调)
+      3. capital < max_capital     (非热门板块)
+      4. r20 < max_r20             (近20日没涨, 排除即将启动的)
+      5. 近 research_days 无研报提及 (无市场关注)
+
+    移动操作 (三步同步, 保持 cold_list 与目录一致):
+      fundamentals/{code}.json → cold_fundamentals/{code}.json
+      V3 cache 删除该条目 (冷股不进选股排序)
+      cold_stocks.json 追加该 code (供 _reactivate_cold_stocks 检查激活)
+    """
+    import shutil
+    V3 = paths.V3_CACHE
+    if not os.path.exists(V3):
+        print("\n  [冷门清理] 无 V3 cache, 跳过")
+        return []
+    cache = json.load(open(V3))
+
+    # 研报提及计数 (近 research_days)
+    cold_list_path = paths.COLD_STOCKS_PATH
+    cold_list = set(json.load(open(cold_list_path)) if os.path.exists(cold_list_path) else [])
+    mention_cnt = {}
+    try:
+        import sqlite3
+        from datetime import datetime, timedelta
+        conn = sqlite3.connect(paths.RESEARCH_DB)
+        cutoff = (datetime.now() - timedelta(days=research_days)).strftime("%Y-%m-%d")
+        rows = conn.execute(
+            "SELECT stock_mentions FROM general_knowledge "
+            "WHERE created_at >= ? AND stock_mentions IS NOT NULL", (cutoff,)
+        ).fetchall()
+        conn.close()
+        for (raw,) in rows:
+            try:
+                for m in json.loads(raw):
+                    c = str(m.get("code", "")).strip()[:6]
+                    if c:
+                        mention_cnt[c] = mention_cnt.get(c, 0) + 1
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    def _r20(code):
+        df = load_kline(code)
+        if df is None or len(df) < 21:
+            return None
+        df = df.sort_values("trade_date").reset_index(drop=True)
+        return round((df["close"].iloc[-1] / df["close"].iloc[-21] - 1) * 100, 1)
+
+    cleaned = []
+    for code, v in list(cache.items()):
+        if not isinstance(v, dict) or "chain" not in v:
+            continue
+        sc = v.get("sector_score", 0)
+        chain = v.get("chain", 0)
+        cap = v.get("capital", 0)
+        if sc >= min_score or chain >= max_chain or cap >= max_capital:
+            continue
+        r = _r20(code)
+        if r is None or r > max_r20:
+            continue
+        if mention_cnt.get(code, 0) > 0:
+            continue
+        # 执行移动 (三步同步)
+        src = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
+        dst = os.path.join(paths.COLD_FUNDAMENTALS_DIR, f"{code}.json")
+        if not os.path.exists(src):
+            continue
+        os.makedirs(paths.COLD_FUNDAMENTALS_DIR, exist_ok=True)
+        shutil.move(src, dst)
+        cache.pop(code, None)
+        cold_list.add(code)
+        name = ""
+        try:
+            name = json.load(open(dst)).get("name", "")
+        except Exception:
+            pass
+        cleaned.append((code, name, sc, r))
+
+    if cleaned:
+        json.dump(cache, open(V3, "w"), ensure_ascii=False, indent=1)
+        json.dump(sorted(cold_list), open(cold_list_path, "w"), ensure_ascii=False)
+        print(f"\n  [冷门清理] {len(cleaned)} 只移入冷池 (V3<{min_score}+chain<{max_chain}+cap<{max_capital}+r20<{max_r20}+无研报):")
+        for code, name, sc, r in cleaned:
+            print(f"    ↓ {code} {name:10} V3={sc} r20={r:+.1f}% → cold_fundamentals/")
+    else:
+        print(f"\n  [冷门清理] 无符合条件的股 (热池健康)")
+    return cleaned
+
+
+
     """发现"大类热门但个股滞涨"的细分赛道时, 更新拆分表。
 
     逻辑: 从 V3 cache 中找"chain 高(基本面强) + 近20日跌幅大"的股票,

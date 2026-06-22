@@ -8,11 +8,12 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
 执行步骤（按依赖顺序）：
   Step 1: 研报采集        (ResearchCollector → raw_feeds)
   Step 2: 知识提取        (LLM extract → research.db)
-  Step 2.5: 板块缺口发现  (热但池未覆盖的主题 → web search找股 → 生成+V3评分入池)
+  Step 2.5: 板块缺口发现  (热但池未覆盖的主题 → web search找股 → 生成+V3评分入池) [池子边界: 加热]
   Step 3: 研报触发刷新    (refresh_fundamentals.py — Web+Tushare+研报 → 彻底重写)
   Step 4: capital 更新    (纯量化, 0 LLM)
   Step 5: 过热股检测      (高分滞涨搜索验证)
-  Step 6: 冷股激活检查    (r5>15% → 移回 hot)
+  Step 6: 冷股激活检查    (r5>15% → 移回 hot) [池子边界: 冷→热]
+  Step 6.5: 冷门清理      (V3<7+chain<4+cap<3+r20<5+无研报 → 移入冷池) [池子边界: 热→冷]
   Step 7: K 线增量更新    (update_klines_daily)
   Step 8: 世界知识更新    (update_world_knowledge)
   Step 9: 每日快照        (snapshot)
@@ -201,14 +202,30 @@ def step5_overheated_detect():
 
 
 def step6_cold_reactivate():
-    """Step 6: 冷股激活检查"""
+    """Step 6: 冷股激活检查 (冷→热: 量价异动激活)"""
     print('\n' + '=' * 60)
-    print('Step 6: 冷股激活检查')
+    print('Step 6: 冷股激活检查 (冷→热)')
     print('=' * 60)
 
     from picker.discovery.scan_mispriced import _reactivate_cold_stocks
     _reactivate_cold_stocks()
     return True
+
+
+def step6b_cleanup_cold(min_score: float = 7.0):
+    """Step 6.5: 冷门清理 (热→冷: 无催化的垫底股移入冷池)
+
+    与 Step 6 (冷→热激活) 对称。三条池子边界管理:
+      Step 2.5 缺口补充(加热) / Step 6 冷股激活(冷→热) / Step 6.5 冷门清理(热→冷)
+    判定: V3<7 + chain<4 + capital<3 + r20<5 + 无研报提及 (全满足才移)。
+    """
+    print('\n' + '=' * 60)
+    print('Step 6.5: 冷门清理 (热→冷)')
+    print('=' * 60)
+
+    from picker.discovery.scan_mispriced import cleanup_to_cold_stocks
+    cleaned = cleanup_to_cold_stocks(min_score=min_score)
+    return len(cleaned) > 0
 
 
 def step7_update_klines():
@@ -270,6 +287,9 @@ def main():
     parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
     parser.add_argument('--discover-threshold', dest='discover_threshold', type=float, default=8.0,
                         help='缺口发现入池 V3 阈值 (默认 8.0)')
+    parser.add_argument('--skip-cleanup', action='store_true', help='跳过冷门清理 (step6.5)')
+    parser.add_argument('--cleanup-threshold', dest='cleanup_threshold', type=float, default=7.0,
+                        help='冷门清理 V3 阈值 (低于此值+其他条件 → 移入冷池, 默认 7.0)')
     parser.add_argument('--dry-run', action='store_true', help='只输出不写文件')
     args = parser.parse_args()
 
@@ -314,6 +334,15 @@ def main():
     _run(4, step4_capital_update, args.cap_mode)
     _run(5, step5_overheated_detect)
     _run(6, step6_cold_reactivate)
+    # Step 6.5: 冷门清理 (热→冷, 与 Step 6 对称; 只在全跑时执行)
+    if step in (0,) and not args.skip_cleanup:
+        try:
+            results['6.5'] = step6b_cleanup_cold(args.cleanup_threshold)
+        except Exception as e:
+            print(f'\n✗ Step 6.5 异常: {type(e).__name__}: {e}')
+            import traceback
+            traceback.print_exc()
+            results['6.5'] = False
 
     # ── 数据链路 (Step 7-9) ──
     _run(7, step7_update_klines)
