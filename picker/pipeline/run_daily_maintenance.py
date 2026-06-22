@@ -265,7 +265,8 @@ def main():
     parser.add_argument('--from', dest='date_from', default='', help='采集起始日 (YYYY-MM-DD，默认近3天)')
     parser.add_argument('--to', dest='date_to', default='', help='采集结束日 (YYYY-MM-DD，默认今天)')
     parser.add_argument('--capital-mode', dest='cap_mode', default='G', help='capital 模式 (G/D/A)')
-    parser.add_argument('--skip-research', action='store_true', help='跳过研报采集/提取 (step1-3)')
+    parser.add_argument('--skip-research', action='store_true', help='跳过整个研报链路 (step1-3 含缺口发现)')
+    parser.add_argument('--skip-collect', action='store_true', help='只跳采集+提取 (step1-2), 保留缺口发现+刷新 (今天无新帖时用)')
     parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
     parser.add_argument('--discover-threshold', dest='discover_threshold', type=float, default=8.0,
                         help='缺口发现入池 V3 阈值 (默认 8.0)')
@@ -293,10 +294,12 @@ def main():
                 results[s] = False
 
     # ── 研报链路 (Step 1-3) ──
+    # skip_research: 跳整个链路 (1-3); skip_collect: 只跳采集+提取 (1-2), 保留缺口发现+刷新
     if not args.skip_research:
-        _run(1, step1_collect, date_from, date_to)
-        _run(2, step2_extract)
-        # Step 2.5: 板块缺口发现 (依赖 step2 的新鲜研报主题; 只在全跑或指定时执行)
+        if not args.skip_collect:
+            _run(1, step1_collect, date_from, date_to)
+            _run(2, step2_extract)
+        # Step 2.5: 板块缺口发现 (依赖 research.db 的主题; 只在全跑时执行)
         if not args.skip_discovery and step in (0,):
             try:
                 results['2.5'] = step2b_discover_gap(args.discover_threshold)

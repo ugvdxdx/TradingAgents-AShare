@@ -49,47 +49,77 @@ RESEARCH_DB = paths.RESEARCH_DB
 # 1. 提取热点细分主题 (从近期 bullish sector_knowledge)
 # ══════════════════════════════════════════════════════════
 
-def _recent_bullish_viewpoints(days=14, limit=60):
-    """取近 N 天 bullish 的 sector_knowledge 观点文本。"""
+def _recent_bullish_viewpoints(days=20, limit=80):
+    """取近 N 天 bullish 的 sector_knowledge 观点文本。
+
+    days 默认 20 (≈14个交易日)。返回按时间倒序。
+    """
     if not os.path.exists(RESEARCH_DB):
         return []
     conn = sqlite3.connect(RESEARCH_DB)
     cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
     rows = conn.execute(
-        "SELECT sector, viewpoint FROM sector_knowledge "
+        "SELECT sector, viewpoint, created_at FROM sector_knowledge "
         "WHERE sentiment='bullish' AND created_at >= ? AND viewpoint != '' "
         "ORDER BY created_at DESC LIMIT ?",
         (cutoff, limit),
     ).fetchall()
     conn.close()
-    return [{"sector": r[0], "viewpoint": r[1]} for r in rows]
+    return [{"sector": r[0], "viewpoint": r[1], "date": (r[2] or "")[:10]} for r in rows]
 
 
-def extract_hot_themes(days=14, max_themes=8):
+def _theme_heat(theme, lookback_days=20, recent_days=5):
+    """主题热度时效检查 — 区分"持续热度"与"已降温"。
+
+    在 lookback_days (≈14交易日) 内查含 theme 的 bullish 观点, 拆分:
+      - total:  回看窗内总提及数 (热度强度)
+      - recent: 近 recent_days 内提及数 (是否仍持续)
+      - latest_date: 最近一次提及日期
+      - still_hot: 近 recent_days 内仍有提及 (未降温)
+
+    为什么需要这个: 回看14交易日会发现"10天前热过、现已冷却"的主题,
+    为已降温主题扩池会买在尾部。只对 still_hot 的主题发现股票。
+    """
+    if not os.path.exists(RESEARCH_DB) or not theme:
+        return {"total": 0, "recent": 0, "latest_date": "", "still_hot": False}
+    conn = sqlite3.connect(RESEARCH_DB)
+    base = datetime.now()
+    lookback_cutoff = (base - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
+    recent_cutoff = (base - timedelta(days=recent_days)).strftime("%Y-%m-%d")
+    rows = conn.execute(
+        "SELECT created_at FROM sector_knowledge "
+        "WHERE sentiment='bullish' AND created_at >= ? AND viewpoint LIKE ?",
+        (lookback_cutoff, f"%{theme}%"),
+    ).fetchall()
+    conn.close()
+    total = len(rows)
+    recent = sum(1 for (ca,) in rows if (ca or "")[:10] >= recent_cutoff)
+    latest = max(((ca or "")[:10] for (ca,) in rows), default="")
+    return {"total": total, "recent": recent, "latest_date": latest,
+            "still_hot": recent >= 1}
+
+
+def extract_hot_themes(days=20, max_themes=8):
     """LLM 从近期 bullish 观点中提取具体的细分主题词。
 
     返回 [{theme, related_sector, evidence}] — theme 是具体的(如"金刚石散热""PCIe Retimer"),
-    不是大类(如"AI电源")。
+    不是大类(如"AI电源")。days 默认 20 (≈14交易日)。
+
+    用简化 prompt (字符串数组格式) — 复杂 object 格式易导致 LLM 照抄模板/返回空。
     """
     from picker.scoring.v3_full_score import _llm  # 带 429 退避, 比 _llm_quick 稳
     views = _recent_bullish_viewpoints(days=days)
     if not views:
         return []
-    views_text = "\n".join(f"- [{v['sector']}] {v['viewpoint']}" for v in views[:60])
+    views_text = "\n".join(f"- [{v['sector']}] {v['viewpoint']}" for v in views[:25])
 
-    prompt = f"""你是A股行业研究员。以下是近{days}天研报的看多观点。请从中提取**具体的细分主题**(
-不是大类板块名, 而是具体到产品/材料/技术/环节的词), 这些主题当前热度高、资金关注。
+    prompt = f"""从研报观点提取{max_themes}个具体的细分主题词(产品/材料/技术级, 如金刚石散热/玻璃基板/PCIe Retimer, 不要大类板块名)。
 
 研报观点:
 {views_text}
 
-提取要求:
-- 主题词要具体(如"金刚石散热""PCIe Retimer""HBM前驱体""1.6T光模块""钼/钨战略金属"), 不要大类(如"AI算力""半导体")
-- 只提取观点中反复出现、有明确产业逻辑的主题(偶发提及的不算)
-- 每个主题关联一个大类板块(related_sector)
-
-严格输出JSON (不要解释):
-{{"themes":[{{"theme":"具体主题词","related_sector":"大类板块","why":"10字内热度依据"}}]}}
+第一行就直接输出JSON, 不要任何推理过程, 不要解释:
+{{"themes":["主题1","主题2"]}}
 """
     raw = _llm(prompt)
     if not raw:
@@ -102,11 +132,22 @@ def extract_hot_themes(days=14, max_themes=8):
         data = json.loads(m.group())
     except json.JSONDecodeError:
         return []
-    themes = data.get("themes", [])[:max_themes]
-    return [{"theme": t.get("theme", "").strip(),
-             "related_sector": t.get("related_sector", "").strip(),
-             "evidence": t.get("why", "").strip()}
-            for t in themes if t.get("theme", "").strip()]
+    # themes 可能是 ["str",...] 或 [{"theme":...}]
+    raw_themes = data.get("themes", [])[:max_themes]
+    _PLACEHOLDER = {"主题词", "具体主题词", "大类板块", "主题A", "主题B", "主题C",
+                    "热度依据", "依据", "related_sector", "theme", ""}
+    out = []
+    for t in raw_themes:
+        if isinstance(t, str):
+            theme = t.strip()
+        elif isinstance(t, dict):
+            theme = t.get("theme", "").strip()
+        else:
+            continue
+        if theme in _PLACEHOLDER or len(theme) < 2:
+            continue
+        out.append({"theme": theme, "related_sector": "", "evidence": ""})
+    return out
 
 
 # ══════════════════════════════════════════════════════════
@@ -245,7 +286,7 @@ def _generate_and_score(code, name, industry_hint, mcap_yi):
     return data, score
 
 
-def discover(v3_threshold=8.0, days=14, max_themes=8, coverage_threshold=2,
+def discover(v3_threshold=8.0, days=20, max_themes=8, coverage_threshold=2,
              max_per_theme=5, dry_run=False, only_theme=None):
     """主入口: 检测缺口主题 → 找股 → 评分 → 入池。
 
@@ -258,23 +299,46 @@ def discover(v3_threshold=8.0, days=14, max_themes=8, coverage_threshold=2,
     """
     print(f"{'═'*70}")
     print(f"  板块缺口驱动的股票发现")
-    print(f"  覆盖阈值<{coverage_threshold} 视为缺口 | V3>={v3_threshold} 入池 | 近{days}天研报")
+    print(f"  回看{days}天(≈14交易日) | 覆盖<{coverage_threshold}为缺口 | 近5天无提及=已降温跳过")
+    print(f"  V3>={v3_threshold} 入池")
     print(f"{'═'*70}")
 
     # ── 1. 主题 ──
     if only_theme:
         themes = [{"theme": only_theme, "related_sector": "", "evidence": "手动指定"}]
+        skip_recency = True  # 手动指定主题不校验时效 (用户已确认)
     else:
-        print("\n[1/4] 提取热点细分主题...", flush=True)
+        print("\n[1/5] 提取热点细分主题 (优先近5天仍活跃)...", flush=True)
         themes = extract_hot_themes(days=days, max_themes=max_themes)
         print(f"  提取到 {len(themes)} 个主题: {[t['theme'] for t in themes]}", flush=True)
+        skip_recency = False
 
     if not themes:
         print("  无主题, 退出")
         return []
 
-    # ── 2. 缺口检测 ──
-    print(f"\n[2/4] 检测池覆盖缺口 (阈值<{coverage_threshold})...", flush=True)
+    # ── 2. 热度时效过滤 (剔除已降温主题) ──
+    if not skip_recency:
+        print(f"\n[2/5] 热度时效检查 (近5天无提及=已降温)...", flush=True)
+        active = []
+        for t in themes:
+            heat = _theme_heat(t["theme"], lookback_days=days, recent_days=5)
+            t["heat"] = heat
+            if heat["still_hot"]:
+                active.append(t)
+                print(f"  🔥 [{t['theme']}] 回看{heat['total']}次 近5天{heat['recent']}次 (最近{heat['latest_date']}) — 持续热门", flush=True)
+            else:
+                print(f"  ○ [{t['theme']}] 回看{heat['total']}次 近5天0次 (最近{heat['latest_date']}) — 已降温, 跳过", flush=True)
+        themes = active
+        if not themes:
+            print("\n  所有主题均已降温, 无持续热门主题。退出。")
+            return []
+    else:
+        for t in themes:
+            t["heat"] = {"still_hot": True, "total": -1, "recent": -1, "latest_date": ""}
+
+    # ── 3. 缺口检测 ──
+    print(f"\n[3/5] 检测池覆盖缺口 (阈值<{coverage_threshold})...", flush=True)
     gap_themes = []
     for t in themes:
         cnt, hits = count_pool_coverage(t["theme"])
@@ -289,8 +353,8 @@ def discover(v3_threshold=8.0, days=14, max_themes=8, coverage_threshold=2,
         print("\n  无缺口主题, 候选池覆盖良好。退出。")
         return []
 
-    # ── 3. web search 找股 ──
-    print(f"\n[3/4] 为 {len(gap_themes)} 个缺口主题找候选股 (web search)...", flush=True)
+    # ── 4. web search 找股 ──
+    print(f"\n[4/5] 为 {len(gap_themes)} 个缺口主题找候选股 (web search)...", flush=True)
     all_candidates = []  # [(theme, {code,name,why,mcap})]
     seen_codes = set()
     for t in gap_themes:
@@ -326,8 +390,8 @@ def discover(v3_threshold=8.0, days=14, max_themes=8, coverage_threshold=2,
             print(f"  {s['code']} {s['name']:<10} ({s['mcap_yi']:.0f}亿) [{s['theme']}] {s.get('why','')}")
         return all_candidates
 
-    # ── 4. 生成 + 评分 + 入池决策 ──
-    print(f"\n[4/4] 生成 fundamentals + V3 评分 (阈值>={v3_threshold})...", flush=True)
+    # ── 5. 生成 + 评分 + 入池决策 ──
+    print(f"\n[5/5] 生成 fundamentals + V3 评分 (阈值>={v3_threshold})...", flush=True)
     admitted = []
     rejected = []
     cache = json.load(open(V3_CACHE)) if os.path.exists(V3_CACHE) else {}
@@ -372,7 +436,7 @@ def discover(v3_threshold=8.0, days=14, max_themes=8, coverage_threshold=2,
 def main():
     import argparse
     p = argparse.ArgumentParser()
-    p.add_argument("--days", type=int, default=14)
+    p.add_argument("--days", type=int, default=20, help="回看天数 (≈14交易日, 默认20)")
     p.add_argument("--threshold", type=float, default=8.0, help="V3 sector_score 入池阈值")
     p.add_argument("--coverage", type=int, default=2, help="池覆盖<此值视为缺口")
     p.add_argument("--max-themes", type=int, default=8)
