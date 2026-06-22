@@ -466,9 +466,20 @@ def generate_one(code: str, name: str, industry: str, mcap_yi: float,
             logger.warning(f"  JSON 解析失败")
             continue
 
-        # 补全必要字段
-        data.setdefault("code", code)
-        data.setdefault("name", name)
+        # 补全必要字段 — code/name 用权威覆盖 (非 setdefault)
+        # 原因: LLM 偶尔回显 code 当 name (如 "name":"002378"), setdefault 不覆盖会留下脏值。
+        data["code"] = code
+        # name 若传入为空或==code, 尝试查腾讯行情拿真名; 仍拿不到才退回 code
+        real_name = name
+        if not real_name or real_name == code:
+            try:
+                from tradingagents.dataflows.providers.astock_provider import tencent_quote
+                q = tencent_quote([code]).get(code, {})
+                if q.get("name"):
+                    real_name = q["name"]
+            except Exception:
+                pass
+        data["name"] = real_name
         data.setdefault("fetch_date", datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
         data.setdefault("market", "沪市" if code.startswith("6") else "深市")
 

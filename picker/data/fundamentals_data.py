@@ -101,13 +101,39 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
 
     ts_code = _code_to_ts_code(code)
 
-    # 三个接口带重试 (Tushare 限频 500次/分, 批量时易触发)
+    # Tushare pro_api 无原生 timeout, TCP 假死会无限阻塞 (实测导致 refresh 全流程挂死)。
+    # 用 SIGALRM 加硬超时 (仅主线程可用; 子线程调用时降级为无超时但不崩)。
+    import signal as _signal
+    class _TushareTimeout(Exception): pass
+    _has_signal = hasattr(_signal, "SIGALRM")
+    try:
+        _signal.getsignal(_signal.SIGALRM)  # 探测是否在主线程
+    except (ValueError, OSError):
+        _has_signal = False
+
     def _query_with_retry(fn, *args, **kwargs):
         for attempt in range(max_retries + 1):
             try:
-                df = fn(*args, **kwargs)
+                if _has_signal:
+                    old_handler = _signal.signal(_signal.SIGALRM,
+                                                 lambda *_: (_ for _ in ()).throw(_TushareTimeout()))
+                    _signal.alarm(20)  # 单次查询 20s 硬超时
+                try:
+                    df = fn(*args, **kwargs)
+                finally:
+                    if _has_signal:
+                        _signal.alarm(0)
+                        _signal.signal(_signal.SIGALRM, old_handler)
                 return df
+            except _TushareTimeout:
+                logger.warning(f"Tushare {fn.__name__}({ts_code}) 超时(20s), attempt {attempt+1}/{max_retries+1}")
+                if attempt < max_retries:
+                    time.sleep(1.5 * (attempt + 1))
+                else:
+                    return None
             except Exception as e:
+                if _has_signal:
+                    _signal.alarm(0)
                 if attempt < max_retries:
                     time.sleep(1.5 * (attempt + 1))
                 else:
