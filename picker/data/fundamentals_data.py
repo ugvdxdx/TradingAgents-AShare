@@ -56,13 +56,18 @@ def _get_pro_api():
 
 
 def _code_to_ts_code(code: str) -> str:
-    """6位代码 → Tushare ts_code (60xxxx→.SH, 其余→.SZ, 8/4开头北交所暂不支持)。"""
+    """6位代码 → Tushare ts_code。
+
+    60xxxx→.SH(沪) / 00xxxx+30xxxx→.SZ(深) / 8xxxxx+4xxxxx→.BJ(北交所)。
+    修复: 原 8/4 开头默认 .SZ 导致北交所股 (如 839725 惠丰钻石) Tushare 查不到 → 全信源缺失。
+    """
     code = str(code).strip().zfill(6)
     if code.startswith("6"):
         return f"{code}.SH"
     if code.startswith(("0", "3")):
         return f"{code}.SZ"
-    # 北交所(8/4) / 其它: 默认 .SZ, Tushare 无数据会自然返回空
+    if code.startswith(("8", "4")):
+        return f"{code}.BJ"
     return f"{code}.SZ"
 
 

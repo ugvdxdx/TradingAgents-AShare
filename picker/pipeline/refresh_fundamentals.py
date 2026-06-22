@@ -559,6 +559,9 @@ def refresh_one(code: str, world_knowledge: str = "",
             with open(fund_path, 'r', encoding='utf-8') as f:
                 existing_data = json.load(f)
             name = existing_data.get('name', '')
+            # 旧数据可能 name==code (历史 bug 污染), 这种 name 不要传给 prompt (会误导LLM)
+            if not name or name == code:
+                name = ''
             industry = existing_data.get('business_overview', {}).get('industry', '')
         except Exception:
             pass
@@ -630,9 +633,21 @@ def refresh_one(code: str, world_knowledge: str = "",
         print(f"    ✗ JSON 解析失败")
         return None
 
-    # 补全字段
-    new_data.setdefault('code', code)
-    new_data.setdefault('name', name)
+    # 补全字段 — code/name 用权威覆盖 (非 setdefault)
+    # 原因: LLM 偶尔回显 code 当 name; 且旧 fundamentals 若已被污染(name==code),
+    # 上游 name=existing_data.get('name') 会把 code 传进 prompt 形成恶性循环。
+    new_data['code'] = code
+    # name 若为空或==code (历史污染), 查腾讯行情拿真名
+    real_name = name
+    if not real_name or real_name == code:
+        try:
+            from tradingagents.dataflows.providers.astock_provider import tencent_quote
+            q = tencent_quote([code]).get(code, {})
+            if q.get("name"):
+                real_name = q["name"]
+        except Exception:
+            pass
+    new_data['name'] = real_name or code
     new_data.setdefault('fetch_date', datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
     new_data.setdefault('market', "沪市" if code.startswith("6") else "深市")
 
@@ -665,7 +680,7 @@ def _trigger_v3_rescore(code: str, fund_data: dict):
     """触发单只股票的 V3 评分更新（链式调用 v3_full_score）。"""
     from picker.scoring import v3_full_score as v3
 
-    prompt = v3.PROMPT_V3E + "\n" + json.dumps(fund_data, ensure_ascii=False, indent=2)
+    prompt = v3.get_chain_prompt() + "\n" + json.dumps(fund_data, ensure_ascii=False, indent=2)
     _ZHIPU_LIMITER.acquire()  # V3 重评也限速 (补全所有智谱调用点, 避免此点爆发连累全局)
     content = v3._llm(prompt)
     if not content:
