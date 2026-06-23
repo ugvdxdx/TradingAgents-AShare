@@ -415,10 +415,16 @@ def _load_attr_hint(code):
 
 
 # 异动股实时驱动缓存 (治本: chain不单靠可能滞后/漏业务的fundamentals what_they_do,
-# 对异动股实时搜"当前在炒什么", 纠正传统主业标签盖住新热门暴露的问题)
+# 对异动股实时搜"当前在炒什么/跌什么", 纠正传统主业标签盖住新热门暴露的问题)
+# 双向: 大涨搜上涨原因(纠正低估), 大跌搜下跌原因(判断基本面恶化vs技术回调)
 SURGE_DRIVER_CACHE = os.path.join(paths.DATA_DIR, "caches", "surge_driver_cache.json")
-SURGE_THRESHOLD_R20 = 15.0   # r20 > 此值视为异动, 触发实时搜索
+SURGE_THRESHOLD_R20 = 15.0   # |r20| > 此值视为异动, 触发实时搜索 (双向)
 SURGE_DRIVER_TTL_DAYS = 7    # 驱动缓存有效期
+# 全量重评兼容: 每进程搜索上限 (避免544只全量时web search拖垮; 缓存命中不计数)
+_MOVEMENT_SEARCHES_DONE = 0
+_MOVEMENT_SEARCH_CAP = int(os.environ.get("SURGE_DRIVER_MAX_SEARCHES", "30"))
+# 跳过开关 (手动全量重评时可设 V3_SKIP_SURGE_DRIVER=1 纯快速跑)
+_SKIP_MOVEMENT_DRIVER = os.environ.get("V3_SKIP_SURGE_DRIVER", "").strip() in ("1", "true", "yes")
 
 
 def _compute_r20(code):
@@ -447,53 +453,64 @@ def _get_stock_name(code):
         return code
 
 
-def _search_surge_driver(code, name):
-    """web search 异动原因 + LLM 提取核心驱动 (1-2句)。返回驱动文本或 ''。"""
+def _search_movement_driver(code, name, direction):
+    """web search 异动原因 + LLM 提取核心驱动。direction='上涨'/'下跌'。返回驱动文本或''。"""
     from picker.pipeline.refresh_fundamentals import _web_search
-    from picker.scoring.v3_full_score import _llm
-    from datetime import datetime as _dt
-    ym = _dt.now().strftime("%Y年%m月")
     try:
-        raw = _web_search(f"{name} {code} 上涨原因")
+        raw = _web_search(f"{name} {code} {direction}原因")
     except Exception:
         return ""
     if not raw or len(raw) < 60:
         return ""
-    prompt = f"""从搜索结果提取这只股票近期上涨的核心市场驱动(当前在炒它什么)。
+    if direction == "上涨":
+        task = "近期上涨的核心市场驱动(当前在炒它什么)"
+        ex = "AI算力带动特种光纤需求爆发,公司作为光通信龙头受益量价齐升"
+    else:
+        task = "近期下跌的核心原因"
+        ex = "存储价格见顶预期+存货减值风险,主力获利了结"
+    prompt = f"""从搜索结果提取这只股票{task}。
 
 股票: {name}({code})
 搜索结果:
 {raw[:2000]}
 
-第一行就直接输出1句核心驱动(如"AI算力带动特种光纤需求爆发,公司作为光通信龙头受益量价齐升"), 50字内。不要推理过程/分析步骤/前言, 直接给结论。"""
+第一行就直接输出1句核心原因(如"{ex}"), 50字内。不要推理过程/分析步骤/前言, 直接给结论。"""
     out = _llm(prompt, max_tokens=300)
     if not out:
         return ""
-    # GLM-5.2 可能仍带推理, 取最后非推理行
     import re as _re
     lines = [ln.strip() for ln in out.strip().split("\n") if ln.strip()
-             and not _re.match(r'^[\d\*\.\-\•]+\s*(分析|目标|要求|提取|步骤|关键|信息|解)', ln.strip())
+             and not _re.match(r'^[\d\*\.\-\•]+\s*(分析|目标|要求|提取|步骤|关键|信息|解|结果)', ln.strip())
              and len(ln.strip()) > 8]
     driver = lines[-1] if lines else out.strip()
-    # 去 markdown/总结 残留
-    driver = _re.sub(r'^[\d\*\.\-\•\s]*(总结|结论|核心|驱动)[\*\：:\s]*', '', driver).strip()
+    driver = _re.sub(r'^[\d\*\.\-\•\s]*(总结|结论|核心|驱动|原因)[\*\：:\s]*', '', driver).strip()
     driver = _re.sub(r'^[\d\*\.\-\•\s]+', '', driver).strip()
     return driver[:150] if driver else ""
 
 
-def _load_surge_driver(code):
-    """对近期异动股(r20>15%), 实时web search上涨原因并缓存, 返回注入文本。
+def _load_movement_driver(code):
+    """对异动股(|r20|>15%, 双向), 实时web search原因并缓存, 返回注入文本。
 
-    治本: chain评分不单靠可能滞后/漏业务的fundamentals what_they_do。对异动股
-    额外注入"当前市场在炒它什么"(实时搜索), 纠正传统主业标签盖住新热门暴露
-    (如中天科技fundamentals写海缆/储能, 实际驱动是AI特种光纤)。
-    缓存7天避免重复搜索。
+    治本: chain评分不单靠fundamentals what_they_do。对异动股额外注入"当前市场驱动":
+    - 大涨: 搜索上涨原因, 纠正"传统主业标签盖住新热门"(如中天科技海缆→实际AI光纤)
+    - 大跌: 搜索下跌原因, 让LLM判断"基本面恶化(chain/delivery下调) vs 技术回调(维持)"
+
+    全量重评兼容:
+    - 缓存优先 (7d TTL, 命中不搜索) → 日常daily run积累缓存, 全量重评多数命中
+    - 搜索上限 (_MOVEMENT_SEARCH_CAP, 默认30/进程) → 全量时超额则跳过, 下次daily再搜
+    - V3_SKIP_SURGE_DRIVER=1 → 完全跳过 (手动纯快速全量)
     """
-    r20 = _compute_r20(code)
-    if r20 is None or r20 < SURGE_THRESHOLD_R20:
-        return ""  # 未异动, 不搜
+    global _MOVEMENT_SEARCHES_DONE
+    if _SKIP_MOVEMENT_DRIVER:
+        return ""
 
-    # 读缓存
+    r20 = _compute_r20(code)
+    if r20 is None or abs(r20) < SURGE_THRESHOLD_R20:
+        return ""  # 未异动
+
+    direction = "上涨" if r20 > 0 else "下跌"
+
+    # 缓存优先
     cache = {}
     if os.path.exists(SURGE_DRIVER_CACHE):
         try:
@@ -501,33 +518,48 @@ def _load_surge_driver(code):
         except Exception:
             pass
     entry = cache.get(code)
-    # 缓存有效 + 仍异动 → 直接用
-    if entry and entry.get("r20", 0) >= SURGE_THRESHOLD_R20:
+    if entry:
         try:
             age = (datetime.now() - datetime.strptime(entry["date"], "%Y-%m-%d")).days
-            if age <= SURGE_DRIVER_TTL_DAYS:
+            same_dir = entry.get("direction") == direction
+            still_moving = abs(entry.get("r20", 0)) >= SURGE_THRESHOLD_R20
+            if age <= SURGE_DRIVER_TTL_DAYS and same_dir and still_moving:
                 drv = entry.get("driver", "")
                 if drv:
-                    return (f"\n\n【近期市场驱动 (实时搜索, {entry['date']}确认, r20={entry['r20']}%)】\n"
-                            f"{drv}\n请优先据此判断该股【当前赛道热度暴露(chain)】, "
-                            f"即使下方what_they_do未充分体现此业务, 也应按当前驱动归入对应热度档。")
+                    return _format_movement_injection(drv, direction, entry["r20"], entry["date"])
         except Exception:
             pass
 
-    # 缓存过期/无 → 实时搜
+    # 搜索上限检查 (全量兼容: 不让web search拖垮)
+    if _MOVEMENT_SEARCHES_DONE >= _MOVEMENT_SEARCH_CAP:
+        return ""  # 达上限, 跳过 (下次daily run再搜)
+
+    # 实时搜
     name = _get_stock_name(code)
-    driver = _search_surge_driver(code, name)
+    _MOVEMENT_SEARCHES_DONE += 1
+    driver = _search_movement_driver(code, name, direction)
     if not driver:
         return ""
-    # 写缓存
-    cache[code] = {"driver": driver, "date": datetime.now().strftime("%Y-%m-%d"), "r20": r20}
+    cache[code] = {"driver": driver, "date": datetime.now().strftime("%Y-%m-%d"),
+                   "r20": r20, "direction": direction}
     try:
         json.dump(cache, open(SURGE_DRIVER_CACHE, "w"), ensure_ascii=False, indent=1)
     except Exception:
         pass
-    return (f"\n\n【近期市场驱动 (实时搜索, r20={r20}%)】\n{driver}\n"
-            f"请优先据此判断该股【当前赛道热度暴露(chain)】, "
-            f"即使下方what_they_do未充分体现此业务, 也应按当前驱动归入对应热度档。")
+    return _format_movement_injection(driver, direction, r20, datetime.now().strftime("%Y-%m-%d"))
+
+
+def _format_movement_injection(driver, direction, r20, date):
+    """格式化异动驱动注入文本 (区分上涨/下跌的评分指引)。"""
+    if direction == "上涨":
+        return (f"\n\n【近期市场驱动 (实时搜索, {date}, r20=+{r20}%)】\n{driver}\n"
+                f"请优先据此判断该股【当前赛道热度暴露(chain)】, "
+                f"即使下方what_they_do未充分体现此业务, 也应按当前驱动归入对应热度档。")
+    else:
+        return (f"\n\n【近期持续下跌 (实时搜索, {date}, r20={r20}%)】\n下跌原因: {driver}\n"
+                f"请判断: 是【基本面恶化/赛道逻辑变化】(chain/delivery应下调) "
+                f"还是【技术性回调/获利了结/短期利空】(基本面没变, 维持评分)。"
+                f"若基本面实质恶化, delivery/chain须反映; 若仅技术回调, 维持原判。")
 
 
 def _call(code):
@@ -537,8 +569,8 @@ def _call(code):
     t0 = time.time()
     # 注入归因提示 (若有)
     attr_hint = _load_attr_hint(code)
-    # 注入异动股实时驱动 (治本: 对r20>15%的异动股实时搜当前驱动, 纠正fundamentals滞后/漏业务)
-    surge_driver = _load_surge_driver(code)
+    # 注入异动股实时驱动 (双向: 大涨搜上涨原因纠正低估/大跌搜下跌原因判断恶化vs回调)
+    surge_driver = _load_movement_driver(code)
     # 注入世界知识 (进程级缓存, 只读一次文件)
     wk_slim = _load_world_knowledge_slim()
     wk_section = ""
