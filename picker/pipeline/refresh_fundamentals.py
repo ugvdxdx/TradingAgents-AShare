@@ -584,6 +584,21 @@ def refresh_one(code: str, world_knowledge: str = "",
 
     print(f"  [{code}] {name} ({industry})")
 
+    # ── 1.5. 基础信息新鲜度检查: fetch_date <7天则跳过web search (信息没变, 省时间) ──
+    # 异动分析web search不动(在v3评分层), 这里只管"基础信息"web search
+    _FRESH_THRESHOLD_DAYS = 7
+    if do_web_search and existing_data:
+        fd = existing_data.get("fetch_date", "")[:10]  # YYYY-MM-DD
+        if fd:
+            try:
+                from datetime import datetime as _dt
+                age = (_dt.now() - _dt.strptime(fd, "%Y-%m-%d")).days
+                if age < _FRESH_THRESHOLD_DAYS:
+                    do_web_search = False
+                    print(f"    基础信息新鲜 (<{_FRESH_THRESHOLD_DAYS}天, fetch_date={fd}), 跳过web search")
+            except Exception:
+                pass
+
     # ── 2. Web Search ──
     web_result = ""
     if do_web_search:

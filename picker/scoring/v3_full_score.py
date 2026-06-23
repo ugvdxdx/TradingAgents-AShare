@@ -421,10 +421,9 @@ SURGE_DRIVER_CACHE = os.path.join(paths.DATA_DIR, "caches", "surge_driver_cache.
 SURGE_THRESHOLD_R20 = 15.0   # |r20| > 此值视为异动, 触发实时搜索 (双向)
 SURGE_DRIVER_TTL_DAYS = 7    # 驱动缓存有效期
 # 全量重评兼容: 每进程搜索上限 (避免544只全量时web search拖垮; 缓存命中不计数)
+# 不设跳过开关 — 异动分析对纠正fundamentals滞后很关键, 手动全量也跑 (靠缓存+上限管速度)
 _MOVEMENT_SEARCHES_DONE = 0
 _MOVEMENT_SEARCH_CAP = int(os.environ.get("SURGE_DRIVER_MAX_SEARCHES", "30"))
-# 跳过开关 (手动全量重评时可设 V3_SKIP_SURGE_DRIVER=1 纯快速跑)
-_SKIP_MOVEMENT_DRIVER = os.environ.get("V3_SKIP_SURGE_DRIVER", "").strip() in ("1", "true", "yes")
 
 
 def _compute_r20(code):
@@ -501,8 +500,6 @@ def _load_movement_driver(code):
     - V3_SKIP_SURGE_DRIVER=1 → 完全跳过 (手动纯快速全量)
     """
     global _MOVEMENT_SEARCHES_DONE
-    if _SKIP_MOVEMENT_DRIVER:
-        return ""
 
     r20 = _compute_r20(code)
     if r20 is None or abs(r20) < SURGE_THRESHOLD_R20:
