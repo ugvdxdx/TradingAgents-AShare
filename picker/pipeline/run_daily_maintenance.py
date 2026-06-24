@@ -174,8 +174,8 @@ def step2d_movement_analysis():
     print('Step 2.7: 异动分析 (预填movement driver缓存)')
     print('=' * 60)
 
-    from picker.scoring.v3_full_score import precompute_movement_drivers
-    result = precompute_movement_drivers()
+    from picker.discovery.attribution import precompute_pool_attribution
+    result = precompute_pool_attribution()
     return result.get("searched", 0) > 0 or result.get("skipped", 0) > 0
 
 
@@ -222,23 +222,6 @@ def step4_capital_update(capital_mode: str = "G"):
     from picker.scoring.v3_full_score import update_capital
     cache = update_capital(mode=capital_mode, persist=True)
     return cache is not None
-
-
-def step5_overheated_detect():
-    """Step 5: 过热股检测"""
-    print('\n' + '=' * 60)
-    print('Step 5: 过热股检测')
-    print('=' * 60)
-
-    from picker.scoring.v3_full_score import V3_CACHE, detect_overheated
-    if not os.path.exists(V3_CACHE):
-        print('V3_CACHE 不存在，跳过')
-        return False
-
-    import json
-    cache = json.load(open(V3_CACHE))
-    detect_overheated(cache)
-    return True
 
 
 def step6_cold_reactivate():
@@ -566,7 +549,6 @@ def main():
 
     # ── 量化链路 (Step 4-6) ──
     _run(4, step4_capital_update, args.cap_mode)
-    _run(5, step5_overheated_detect)
     _run(6, step6_cold_reactivate)
     # Step 6.5: 冷门清理 (热→冷, 与 Step 6 对称; 只在全跑时执行)
     if step in (0,) and not args.skip_cleanup:

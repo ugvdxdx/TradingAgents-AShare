@@ -540,19 +540,6 @@ def make_incremental_info(llm: LLMHelper):
             except Exception:
                 pass  # research.db 不存在时静默跳过
 
-            # 1c++. 过热风险标记 (detect_overheated 搜索验证的风险信息)
-            if not is_backtest:
-                try:
-                    from picker import paths as _paths
-                    oh_path = _paths.OVERHEATED_CACHE
-                    if os.path.exists(oh_path):
-                        oh_cache = json.load(open(oh_path))
-                        oh_entry = oh_cache.get(code)
-                        if oh_entry and oh_entry.get("risk_type") not in ("未知", "技术回调"):
-                            parts.append(f"【⚠过热风险】{oh_entry.get('risk_type','')} | {oh_entry.get('summary','')}")
-                except Exception:
-                    pass
-
             # 1c+++. 新晋股归因块 (弥补没有 fundamentals JSON 的信息缺口)
             if c.get("_rising_star"):
                 ess = c.get("essence", {})

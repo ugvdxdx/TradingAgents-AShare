@@ -14,7 +14,7 @@
   1. 从近期 bullish sector_knowledge 提取细分主题词 (LLM, 非大类板块名)
   2. 查每个主题在候选池(fundamentals)的覆盖度 → 0/低覆盖 = 缺口主题
   3. 对缺口主题: MCP web_search_prime 搜 "{主题} A股 龙头" → LLM 抽取股票代码
-  4. 校验代码存在(腾讯实时行情拿 name+mcap) → generate_one 生成 fundamentals → V3 评分
+  4. 校验代码存在(腾讯实时行情拿 name+mcap) → refresh_one 生成 fundamentals → V3 评分
   5. V3 达标(默认 sector_score>=8.0) → 写入 V3 cache 正式入池; 否则删除 fundamentals 文件
 
 安全设计:
@@ -274,16 +274,14 @@ def _validate_and_get_info(code):
 
 def _generate_and_score(code, name, industry_hint, mcap_yi):
     """生成 fundamentals + V3 评分。返回 (fundamentals_data, v3_score_dict) 或 (None, None)。"""
-    from picker.pipeline.gen_fundamentals import generate_one, load_world_knowledge, load_reference_fundamentals
-    wk = load_world_knowledge()
-    ref = load_reference_fundamentals()
-    data = generate_one(code, name, industry_hint, mcap_yi, wk, ref)
+    # refresh_one 自带 Web+Tushare+研报+LLM 重写并写入 fundamentals/; name/industry 经 hint 传入
+    # (全新股票无现有 JSON, 靠 hint 兜底而非退化为 code/"未知")。
+    # do_v3_rescore=False: V3 由下方 v3._call 显式触发并取回 score, 避免重复评分。
+    from picker.pipeline.refresh_fundamentals import refresh_one
+    data = refresh_one(code, name_hint=name, industry_hint=industry_hint,
+                        mcap_yi=mcap_yi, do_v3_rescore=False)
     if not data:
         return None, None
-    # 写 fundamentals 文件
-    path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
     # V3 评分 (复用带 4 层失败防御的 _call)
     from picker.scoring import v3_full_score as v3
     _code, score, _dt = v3._call(code)

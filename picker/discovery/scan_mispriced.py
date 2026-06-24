@@ -67,7 +67,7 @@ def web_search(query: str, num_results: int = 5) -> str:
     失败抛 RuntimeError (不静默返回空, 避免用降级数据偷偷决策)。
     """
     try:
-        from picker.pipeline.refresh_fundamentals import _web_search
+        from picker.common.web_search import _web_search
         return _web_search(query, num_results=num_results)
     except Exception as e:
         # 兼容旧调用方(期望空字符串而非异常): 记录后返回空
@@ -87,25 +87,8 @@ SECTOR_TAG|最相关的1-2个细分赛道关键词(如:六氟化钨/MLCC粉体/T
 SUMMARY|30字内一句话原因"""
 
 
-def _llm_quick(prompt: str) -> str:
-    """快速 LLM 调用 (复用 _v3_full_score 的 client)。"""
-    import threading
-    if not hasattr(_llm_quick, "_client"):
-        from openai import OpenAI
-        _llm_quick._client = OpenAI(
-            api_key=os.environ.get("TA_API_KEY", ""),
-            base_url=os.environ.get("TA_BASE_URL", ""),
-        )
-        _llm_quick._model = os.environ.get("TA_LLM_QUICK") or os.environ.get("TA_LLM_DEEP") or "deepseek-v4-pro"
-    try:
-        resp = _llm_quick._client.chat.completions.create(
-            model=_llm_quick._model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0, max_tokens=300, timeout=60,
-        )
-        return resp.choices[0].message.content or ""
-    except Exception:
-        return ""
+# _llm_quick 下沉到 picker.common.llm_client (re-export 保持向后兼容)
+from picker.common.llm_client import _llm_quick  # noqa: F401
 
 
 def _get_research_context(code: str, name: str, cutoff_date: str = "") -> str:
@@ -170,78 +153,17 @@ ATTR_CACHE_TTL_DAYS = 14
 
 def attribute_stock(code: str, name: str, return_pct: float, days: int, industry: str,
                     use_cache: bool = True, cutoff_date: str = "") -> dict:
-    """对一只异动股做归因 (研报上下文 + LLM 判断, 可选网络搜索)。
+    """[已迁移到 picker.discovery.attribution.attribute_stock_unified] 薄封装, 保持
+    sector_expansion / data_io 回测调用的旧签名兼容。
 
-    带缓存: 首次搜索后记录原因, 后续 N 天内直接读缓存, 不重复搜索。
-
-    Args:
-        cutoff_date: 回测截止日。非空时进入【回溯模式】:
-            - 跳过网络搜索 (搜索返回的是当前信息, 有前视偏差)
-            - 仅用 cutoff_date 前的研报上下文 + LLM 行业知识判断
-            - 不读写实时归因缓存 (避免污染)
-
-    Returns:
-        {reason_type, sector_tag, summary, is_sector_wide, cached, cached_date}
+    旧参数映射: return_pct (近 days 日涨幅) → r5; direction 固定"上涨" (scan 只处理上涨
+    新晋股); r20 无直接数据, 用 return_pct 近似 (归因 prompt 仅作上下文描述)。
     """
-    is_backtest = bool(cutoff_date)
-
-    # 0. 读缓存 (仅实盘; 回测模式不读缓存, 每次重新判断)
-    if use_cache and not is_backtest:
-        cache = _load_attr_cache()
-        entry = cache.get(code)
-        if entry and entry.get("cached_date"):
-            cached_dt = datetime.strptime(entry["cached_date"], "%Y-%m-%d")
-            age = (datetime.now() - cached_dt).days
-            if age < ATTR_CACHE_TTL_DAYS:
-                entry["cached"] = True
-                return entry
-
-    # 1. 研报上下文 (回测模式按 cutoff_date 截断)
-    research_ctx = _get_research_context(code, name, cutoff_date=cutoff_date)
-
-    # 2. 网络搜索 (回测模式跳过, 避免前视偏差)
-    context_parts = []
-    if research_ctx:
-        context_parts.append(research_ctx)
-    if not is_backtest:
-        search_text = web_search(f"{name} {code} 股价上涨原因 {datetime.now().strftime('%Y年%m月')}")
-        if search_text and len(search_text) > 50:
-            context_parts.append(f"网络搜索:\n{search_text[:1500]}")
-    context = "\n\n".join(context_parts) if context_parts else (
-        f"(回测模式: 无{cutoff_date}前的研报记录, 请基于行业知识判断该股"
-        f"近{days}日涨幅{return_pct:.0f}%的原因)" if is_backtest
-        else "(无额外信息, 请基于行业知识判断)"
+    from picker.discovery.attribution import attribute_stock_unified
+    return attribute_stock_unified(
+        code, name, r5=return_pct, r20=return_pct, industry=industry,
+        direction="上涨", use_cache=use_cache, cutoff_date=cutoff_date,
     )
-
-    # 3. LLM 归因
-    prompt = ATTR_PROMPT.format(
-        name=name, code=code, industry=industry, days=days,
-        return_pct=f"{return_pct:.0f}%", context=context,
-    )
-    result = _llm_quick(prompt)
-
-    parsed = {"reason_type": "未知", "sector_tag": "", "summary": "", "is_sector_wide": False}
-    for line in result.strip().split("\n"):
-        line = line.strip()
-        if line.startswith("REASON_TYPE|"):
-            rt = line.split("|", 1)[1].strip()
-            parsed["reason_type"] = rt
-            parsed["is_sector_wide"] = rt in ("板块供需", "政策催化")
-        elif line.startswith("SECTOR_TAG|"):
-            parsed["sector_tag"] = line.split("|", 1)[1].strip()
-        elif line.startswith("SUMMARY|"):
-            parsed["summary"] = line.split("|", 1)[1].strip()
-
-    parsed["cached"] = False
-    parsed["cached_date"] = cutoff_date or datetime.now().strftime("%Y-%m-%d")
-    parsed["name"] = name
-    # 回测模式不写实时缓存 (避免污染); 实盘才写
-    if use_cache and not is_backtest:
-        cache = _load_attr_cache()
-        cache[code] = parsed
-        _save_attr_cache(cache)
-
-    return parsed
 
 
 # ══════════════════════════════════════════════════════════
@@ -760,7 +682,7 @@ def cleanup_to_cold_stocks(min_score=7.0, max_chain=4.0, max_capital=3.0,
     return cleaned
 
 
-
+def _update_sub_sector_override(gems, meta):
     """发现"大类热门但个股滞涨"的细分赛道时, 更新拆分表。
 
     逻辑: 从 V3 cache 中找"chain 高(基本面强) + 近20日跌幅大"的股票,

@@ -74,7 +74,9 @@ def _cache(name: str) -> str:
 
 V3_CACHE = _cache("fundamental_v3_scores.json")
 ATTR_CACHE = _cache("mispriced_attribution_cache.json")
-OVERHEATED_CACHE = _cache("overheated_risk_cache.json")
+# 统一归因缓存别名: 异动生产/消费的单一真相源 (替代已废弃的 surge_driver_cache.json)
+UNIFIED_ATTR_CACHE = ATTR_CACHE
+# OVERHEATED_CACHE 已随 detect_overheated 全删而废弃 (风险标记链路移除)
 COLD_STOCKS_PATH = _cache("cold_stocks.json")
 DEBATE_RESULT_PATH = _cache("debate_result.json")
 DEBATE_LOG_PATH = _cache("debate_log.json")

@@ -43,7 +43,6 @@ def format_stock_brief(c: Dict[str, Any]) -> str:
     e = c.get("essence", {})
     star_tag = " ★新晋股(量价归因)" if c.get("_rising_star") else ""
     research_tag = " ☆研报热门" if c.get("_research_hot") else ""
-    risk_tag = f" ⚠过热[{c['_overheated_risk']}]" if c.get("_overheated_risk") else ""
     # 量价动量信号 (回测: r20>15% 或距高点<5% 的股后续涨幅显著更高)
     r20 = c.get("r20")
     r5 = c.get("r5")
@@ -61,7 +60,7 @@ def format_stock_brief(c: Dict[str, Any]) -> str:
     # 量化锚 (排序依据): chain + capital×2 - delivery×0.5
     anchor = c.get("chain", 0) + c.get("capital", 0) * 2 - c.get("delivery", 0) * 0.5
     return (
-        f"{c['code']} {c['name']} 锚={anchor:.1f}{star_tag}{research_tag}{risk_tag}{mom_tag} "
+        f"{c['code']} {c['name']} 锚={anchor:.1f}{star_tag}{research_tag}{mom_tag} "
         f"[链{c['chain']}+兑{c['delivery']}+资{c['capital']}]\n"
         f"  卡位:{e.get('chain_position', '')} | 催化:{e.get('core_catalyst', '')}\n"
         f"  多头:{e.get('biggest_bull', '')} | 空头:{e.get('biggest_bear', '')}\n"

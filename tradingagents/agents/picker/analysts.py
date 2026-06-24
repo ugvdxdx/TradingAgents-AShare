@@ -49,40 +49,16 @@ def collect_data(state) -> Dict[str, Any]:
     # 只算不写文件 (persist=False), 避免与手动跑 _v3_full_score 的文件竞争
     # 回测模式 (cutoff_date 非空): pf/d2 按 cutoff 截断 K线重算, base 用当前 momentum 快照
     #   (研报无可靠历史版, 故 base 不重算; 这是回测的已知近似, 详见 CLAUDE.md)
-    # dry_run 跳过 detect_overheated: 该函数对未命中缓存的候选会发网络搜索+LLM,
-    # 违背 dry_run "跳过网络请求, 仅验证管道" 的语义。
     v3_cache_override = None
     try:
-        from picker.scoring.v3_full_score import update_capital, detect_overheated
+        from picker.scoring.v3_full_score import update_capital
         # capital 计算模式: A=纯base_capital / D=base×pf(旧) / G=base+D2×2+pf×2(默认, 策略回测月均+31%)
         capital_mode = os.environ.get("CAPITAL_MODE", "G")
         v3_cache_override = update_capital(mode=capital_mode, persist=False, cutoff_date=cutoff or "")
-        # 过热股检测: 高分但持续下跌的标的, 搜索验证 + 风险标记 (不改 V3 分)
-        # dry_run 跳过: 未命中缓存的候选会触发真实网络搜索+LLM 调用
-        if v3_cache_override and not state.get("dry_run") and not cutoff:
-            v3_cache_override = detect_overheated(v3_cache_override)
     except Exception as e:
         print(f"  [capital] 更新失败(不影响流程): {e}")
 
     pool = data_io.load_top_n(v3_cache=v3_cache_override, cutoff_date=cutoff or "")
-
-    # 回写过热风险标记到候选池 (供 format_stock_brief 显示 + 辩论参考)
-    if not cutoff:
-        try:
-            from picker import paths as _paths
-            oh_path = _paths.OVERHEATED_CACHE
-            if os.path.exists(oh_path):
-                oh_cache = json.load(open(oh_path))
-                oh_marked = 0
-                for s in pool:
-                    oh = oh_cache.get(s["code"])
-                    if oh and oh.get("risk_type") not in ("未知", "技术回调", ""):
-                        s["_overheated_risk"] = oh.get("risk_type", "")
-                        oh_marked += 1
-                if oh_marked:
-                    print(f"  ⚠ 过热风险标记: {oh_marked} 只")
-        except Exception:
-            pass
 
     mf_cache = data_io.load_mf_cache()
     print(f"  V3 全池 {len(pool)} 只: v3 {pool[0]['v3']:.1f} ~ {pool[-1]['v3']:.1f} | 资金流缓存 {len(mf_cache)} 只")

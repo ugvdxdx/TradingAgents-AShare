@@ -287,24 +287,29 @@ def _gather_research_signals(days=14):
     except Exception:
         pass
 
-    # 异动分析信号 (price-confirmed: 实际有股在涨/跌 + web search 驱动)
+    # 异动分析信号 (price-confirmed: 实际有股在涨/跌 + web search 归因)
     # 比研报bullish count更硬 — 是价格验证的真实热度
+    # 读统一归因缓存 (替代已废弃的 surge_driver_cache.json)
     try:
-        surge_cache_path = os.path.join(DATA_DIR, "caches", "surge_driver_cache.json")
-        if os.path.exists(surge_cache_path):
-            sc = json.load(open(surge_cache_path))
+        from picker.discovery.attribution import ATTR_TTL_DAYS
+        from picker.paths import UNIFIED_ATTR_CACHE
+        if os.path.exists(UNIFIED_ATTR_CACHE):
+            sc = json.load(open(UNIFIED_ATTR_CACHE))
             today = datetime.now()
             for code, entry in sc.items():
                 try:
-                    age = (today - datetime.strptime(entry.get("date", "2000-01-01"), "%Y-%m-%d")).days
-                    if age > 7:
+                    cd = entry.get("cached_date") or entry.get("date", "2000-01-01")
+                    age = (today - datetime.strptime(str(cd)[:10], "%Y-%m-%d")).days
+                    if age > ATTR_TTL_DAYS:
                         continue  # 过期
-                    drv = entry.get("driver", "")
+                    summary = entry.get("summary") or entry.get("driver", "")
                     r20 = entry.get("r20", 0)
                     direction = entry.get("direction", "")
-                    if not drv:
+                    sector_tag = entry.get("sector_tag", "")
+                    if not summary:
                         continue
-                    item = f"{code} r20={r20}% {drv}"
+                    tag = f" [{sector_tag}]" if sector_tag else ""
+                    item = f"{code} r20={r20}%{tag} {summary}"
                     if direction == "上涨":
                         out["price_confirmed_hot"].append(item)
                     elif direction == "下跌":
