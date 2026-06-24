@@ -417,9 +417,13 @@ def _load_attr_hint(code):
 # 异动股实时驱动缓存 (治本: chain不单靠可能滞后/漏业务的fundamentals what_they_do,
 # 对异动股实时搜"当前在炒什么/跌什么", 纠正传统主业标签盖住新热门暴露的问题)
 # 双向: 大涨搜上涨原因(纠正低估), 大跌搜下跌原因(判断基本面恶化vs技术回调)
+# 涨跌不对称阈值: 大涨侧设更高(涨>=25%才是真异动), 大跌侧设更低(跌<=-18%就值得关注)
+# 同时要求 |r5|>=5% 过滤单日脉冲, 确保趋势有持续性
 SURGE_DRIVER_CACHE = os.path.join(paths.DATA_DIR, "caches", "surge_driver_cache.json")
-SURGE_THRESHOLD_R20 = 15.0   # |r20| > 此值视为异动, 触发实时搜索 (双向)
-SURGE_DRIVER_TTL_DAYS = 7    # 驱动缓存有效期
+SURGE_UP_THRESHOLD = 25.0       # 大涨异动阈值 (r20 >= 此值)
+SURGE_DOWN_THRESHOLD = -18.0    # 大跌异动阈值 (r20 <= 此值)
+SURGE_R5_CONFIRM = 5.0          # |r5| > 此值确认非单日脉冲
+SURGE_DRIVER_TTL_DAYS = 7       # 驱动缓存有效期
 # 全量重评兼容: 每进程搜索上限 (避免544只全量时web search拖垮; 缓存命中不计数)
 # 不设跳过开关 — 异动分析对纠正fundamentals滞后很关键, 手动全量也跑 (靠缓存+上限管速度)
 _MOVEMENT_SEARCHES_DONE = 0
@@ -439,6 +443,44 @@ def _compute_r20(code):
             except Exception:
                 pass
     return None
+
+
+def _compute_r5(code):
+    """近5日涨幅%, 无K线返回None。"""
+    import pickle as _pk
+    for suf in ["_SH.pkl", "_SZ.pkl"]:
+        p = os.path.join(KLINE_CACHE_DIR, f"{code}{suf}")
+        if os.path.exists(p):
+            try:
+                df = _pk.load(open(p, "rb")).sort_values("trade_date").reset_index(drop=True)
+                if len(df) >= 6:
+                    return round((df["close"].iloc[-1] / df["close"].iloc[-6] - 1) * 100, 1)
+            except Exception:
+                pass
+    return None
+
+
+def _is_movement_surging(code):
+    """异动判断: 涨跌不对称 + r5确认非单日脉冲。
+
+    条件 (同时满足):
+      大涨: r20 >= 25%  大跌: r20 <= -18%
+      |r5| >= 5% (趋势有持续性, 非单日脉冲)
+
+    Returns (is_surging, r20, r5) or (False, None, None)
+    """
+    r20 = _compute_r20(code)
+    if r20 is None:
+        return False, None, None
+    # 涨跌不对称判断
+    is_surging = r20 >= SURGE_UP_THRESHOLD or r20 <= SURGE_DOWN_THRESHOLD
+    if not is_surging:
+        return False, r20, None
+    # 确认非单日脉冲
+    r5 = _compute_r5(code)
+    if r5 is None or abs(r5) < SURGE_R5_CONFIRM:
+        return False, r20, r5
+    return True, r20, r5
 
 
 def _get_stock_name(code):
@@ -488,11 +530,15 @@ def _search_movement_driver(code, name, direction):
 
 
 def _load_movement_driver(code):
-    """对异动股(|r20|>15%, 双向), 实时web search原因并缓存, 返回注入文本。
+    """对异动股(涨跌不对称+r5确认), 实时web search原因并缓存, 返回注入文本。
 
     治本: chain评分不单靠fundamentals what_they_do。对异动股额外注入"当前市场驱动":
     - 大涨: 搜索上涨原因, 纠正"传统主业标签盖住新热门"(如中天科技海缆→实际AI光纤)
     - 大跌: 搜索下跌原因, 让LLM判断"基本面恶化(chain/delivery下调) vs 技术回调(维持)"
+
+    异动条件 (涨跌不对称 + 趋势确认):
+    - 大涨: r20 >= 25%  大跌: r20 <= -18%
+    - |r5| >= 5% (过滤单日脉冲)
 
     全量重评兼容:
     - 缓存优先 (7d TTL, 命中不搜索) → 日常daily run积累缓存, 全量重评多数命中
@@ -501,8 +547,8 @@ def _load_movement_driver(code):
     """
     global _MOVEMENT_SEARCHES_DONE
 
-    r20 = _compute_r20(code)
-    if r20 is None or abs(r20) < SURGE_THRESHOLD_R20:
+    is_surging, r20, _r5 = _is_movement_surging(code)
+    if not is_surging:
         return ""  # 未异动
 
     direction = "上涨" if r20 > 0 else "下跌"
@@ -519,7 +565,7 @@ def _load_movement_driver(code):
         try:
             age = (datetime.now() - datetime.strptime(entry["date"], "%Y-%m-%d")).days
             same_dir = entry.get("direction") == direction
-            still_moving = abs(entry.get("r20", 0)) >= SURGE_THRESHOLD_R20
+            still_moving = entry.get("r20", 0) >= SURGE_UP_THRESHOLD or entry.get("r20", 0) <= SURGE_DOWN_THRESHOLD
             if age <= SURGE_DRIVER_TTL_DAYS and same_dir and still_moving:
                 drv = entry.get("driver", "")
                 if drv:
@@ -557,6 +603,110 @@ def _format_movement_injection(driver, direction, r20, date):
                 f"请判断: 是【基本面恶化/赛道逻辑变化】(chain/delivery应下调) "
                 f"还是【技术性回调/获利了结/短期利空】(基本面没变, 维持评分)。"
                 f"若基本面实质恶化, delivery/chain须反映; 若仅技术回调, 维持原判。")
+
+
+# ══════════════════════════════════════════════════════════
+# 异动分析: 退场机制 + 维护预填 (供每日维护集成)
+# ══════════════════════════════════════════════════════════
+
+def _evict_movement_cache(cache, pool_codes=None):
+    """退场清理: 删除过期/非池/不再异动的缓存条目。
+
+    退场条件 (满足任一):
+      1. >7天旧 (TTL过期, 下次会重新搜)
+      2. 非池股票 (移入冷池/退市, 不再跟踪)
+      3. 不再异动(涨<25%且跌>-18%) 且 >3天 (趋势可能已结束, 给3天宽限防抖)
+    """
+    from datetime import timedelta
+    pool_set = set(pool_codes) if pool_codes else None
+    today = datetime.now()
+    evicted = 0
+    for code in list(cache.keys()):
+        entry = cache.get(code, {})
+        try:
+            age = (today - datetime.strptime(entry.get("date", "2000-01-01"), "%Y-%m-%d")).days
+        except Exception:
+            age = 999
+        # 退场
+        if age > SURGE_DRIVER_TTL_DAYS:
+            del cache[code]; evicted += 1; continue
+        if pool_set is not None and code not in pool_set:
+            del cache[code]; evicted += 1; continue
+        r20 = entry.get("r20", 0)
+        no_longer_surging = r20 < SURGE_UP_THRESHOLD and r20 > SURGE_DOWN_THRESHOLD
+        if no_longer_surging and age > 3:
+            del cache[code]; evicted += 1; continue
+    return evicted
+
+
+def precompute_movement_drivers(max_searches=None, verbose=True):
+    """维护步骤: 扫描全池异动股, 预填movement driver缓存。
+
+    供每日维护集成 (Step 2.7)。预填后, 评分(_call)直接读缓存(快), 避免inline搜索。
+    避免重复: 缓存有效(7d)+方向一致+仍异动 → 跳过。
+    退场: 写入前清理过期/非池/不再异动条目。
+    异动条件: 涨跌不对称(r20>=25%或<=-18%) + |r5|>=5%趋势确认。
+    """
+    global _MOVEMENT_SEARCHES_DONE
+    if max_searches is None:
+        max_searches = _MOVEMENT_SEARCH_CAP
+
+    pool_codes = _list_all_fundamental_codes()
+    cache = {}
+    if os.path.exists(SURGE_DRIVER_CACHE):
+        try:
+            cache = json.load(open(SURGE_DRIVER_CACHE))
+        except Exception:
+            cache = {}
+
+    # 1. 退场清理
+    evicted = _evict_movement_cache(cache, pool_codes)
+
+    # 2. 扫描异动股 (涨跌不对称 + r5趋势确认)
+    surging = []
+    for code in pool_codes:
+        is_surging, r20, _ = _is_movement_surging(code)
+        if is_surging:
+            surging.append((code, r20))
+    surging.sort(key=lambda x: -abs(x[1]))  # 按异动幅度降序
+
+    # 3. 预填: 跳过已缓存有效的, 搜索未缓存/过期/方向变的
+    searched = 0
+    skipped = 0
+    for code, r20 in surging:
+        direction = "上涨" if r20 > 0 else "下跌"
+        entry = cache.get(code)
+        if entry:
+            try:
+                age = (datetime.now() - datetime.strptime(entry["date"], "%Y-%m-%d")).days
+                same_dir = entry.get("direction") == direction
+                still_surging = entry.get("r20", 0) >= SURGE_UP_THRESHOLD or entry.get("r20", 0) <= SURGE_DOWN_THRESHOLD
+                if age <= SURGE_DRIVER_TTL_DAYS and same_dir and still_surging:
+                    skipped += 1
+                    continue  # 避免重复: 缓存有效
+            except Exception:
+                pass
+        if searched >= max_searches:
+            break
+        name = _get_stock_name(code)
+        driver = _search_movement_driver(code, name, direction)
+        if driver:
+            cache[code] = {"driver": driver, "date": datetime.now().strftime("%Y-%m-%d"),
+                           "r20": r20, "direction": direction}
+            searched += 1
+            if verbose:
+                print(f"    {code} {name[:8]:<8} r20={r20:+.0f}% [{direction}] → {driver[:40]}", flush=True)
+
+    # 4. 写回
+    try:
+        json.dump(cache, open(SURGE_DRIVER_CACHE, "w"), ensure_ascii=False, indent=1)
+    except Exception:
+        pass
+    _MOVEMENT_SEARCHES_DONE = searched  # 同步计数 (评分时不再重复搜这些)
+
+    if verbose:
+        print(f"  [异动分析] 池内异动 {len(surging)} 只 | 新搜 {searched} | 缓存命中跳过 {skipped} | 退场清理 {evicted}", flush=True)
+    return {"surging": len(surging), "searched": searched, "skipped": skipped, "evicted": evicted}
 
 
 def _call(code):

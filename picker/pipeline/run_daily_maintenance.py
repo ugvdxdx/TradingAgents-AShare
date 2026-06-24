@@ -9,7 +9,7 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
   Step 1: 研报采集        (ResearchCollector → raw_feeds)
   Step 2: 知识提取        (LLM extract → research.db)
   Step 2.5: 板块缺口发现  (热但池未覆盖的主题 → web search找股 → 生成+V3评分入池) [池子边界: 加热]
-  Step 2.6: chain tier更新 (用最新研报调整赛道→档位映射, 8档骨架不变; manual/auto)
+  Step 2.6: chain tier更新 (用最新研报调赛道→热度档映射, 6档可重叠骨架不变; manual/auto)
   Step 3: 研报触发刷新    (refresh_fundamentals.py — Web+Tushare+研报 → 彻底重写)
   Step 4: capital 更新    (纯量化, 0 LLM)
   Step 5: 过热股检测      (高分滞涨搜索验证)
@@ -147,9 +147,10 @@ def step2_extract():
 def step2c_update_chain_tiers(mode: str = "manual"):
     """Step 2.6: chain tier_map 更新 — 用最新研报调整赛道→档位映射。
 
-    依赖 Step 2 的新鲜 research.db。保持 8 档骨架, LLM 根据热门/冷门/新兴赛道
-    调整 sectors 归属 + theme。manual 模式只输出 diff 供审核; auto 模式 diff有变化
-    即写入(归档旧版可回滚)。在 Step 2.5 缺口发现前执行, 让新评分用上最新档位。
+    依赖 Step 2 的新鲜 research.db。保持 6 档可重叠热度骨架不变, LLM 按【赛道当前热度】
+    调整 sectors 归属 + theme (热主线→高档, 退潮→低档; 档内分数由竞争力定, 评分时另算)。
+    manual 模式只输出 diff 供审核; auto 模式 diff有变化即写入(归档旧版可回滚)。
+    在 Step 2.5 缺口发现前执行, 让新评分用上最新档位。
     """
     print('\n' + '=' * 60)
     print(f'Step 2.6: chain tier_map 更新 (mode={mode})')
@@ -158,6 +159,24 @@ def step2c_update_chain_tiers(mode: str = "manual"):
     from picker.scoring.chain_tiers import update_chain_tiers
     _candidate, _diff, applied = update_chain_tiers(mode=mode)
     return applied
+
+
+def step2d_movement_analysis():
+    """Step 2.7: 异动分析 — 扫描全池异动股, 预填movement driver缓存。
+
+    异动条件: 涨跌不对称(r20>=25%大涨 or r20<=-18%大跌) + |r5|>=5%趋势确认。
+    对异动股web search涨跌原因, 缓存供评分(_call)直接读(快, 避免inline搜索)。
+    避免重复: 缓存有效(7d)+方向一致 → 跳过。
+    退场: 清理过期/非池/不再异动条目。
+    治本: 纠正fundamentals滞后(传统主业标签盖住新热门暴露, 如中天科技海缆→实际AI光纤)。
+    """
+    print('\n' + '=' * 60)
+    print('Step 2.7: 异动分析 (预填movement driver缓存)')
+    print('=' * 60)
+
+    from picker.scoring.v3_full_score import precompute_movement_drivers
+    result = precompute_movement_drivers()
+    return result.get("searched", 0) > 0 or result.get("skipped", 0) > 0
 
 
 def step2b_discover_gap(v3_threshold: float = 8.0):
@@ -415,6 +434,7 @@ def main():
     parser.add_argument('--skip-research', action='store_true', help='跳过整个研报链路 (step1-3 含缺口发现)')
     parser.add_argument('--skip-collect', action='store_true', help='只跳采集+提取 (step1-2), 保留缺口发现+刷新 (今天无新帖时用)')
     parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
+    parser.add_argument('--skip-movement', action='store_true', help='跳过异动分析 (step2.7)')
     parser.add_argument('--skip-chain-tiers', action='store_true', help='跳过 chain tier_map 更新 (step2.6)')
     parser.add_argument('--chain-tiers-mode', dest='chain_tiers_mode', default='manual',
                         choices=['manual', 'auto'],
@@ -500,6 +520,15 @@ def main():
                 import traceback
                 traceback.print_exc()
                 results['2.6'] = False
+        # Step 2.7: 异动分析 (预填movement driver缓存, 评分时直接读; 避免重复+退场)
+        if not args.skip_movement and step in (0,):
+            try:
+                results['2.7'] = step2d_movement_analysis()
+            except Exception as e:
+                print(f'\n✗ Step 2.7 异常: {type(e).__name__}: {e}')
+                import traceback
+                traceback.print_exc()
+                results['2.7'] = False
         # Step 2.5: 板块缺口发现 (依赖 research.db 的主题; 只在全跑时执行)
         if not args.skip_discovery and step in (0,):
             try:
