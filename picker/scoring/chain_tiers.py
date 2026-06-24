@@ -2,10 +2,11 @@
 
 设计原理
 ========
-chain 分档 = 稳定断点骨架 (8档 0-10 刻度) + 动态赛道映射 (哪档放哪些赛道)。
-市场主线变化时需要更新的是后者。本模块把"赛道→档位映射"从 PROMPT_V3E
-硬编码文本外部化为 data/reference/chain_tier_map.json, 使其可被
-update_chain_tiers.py (--mode manual/auto) 动态更新。
+chain 分档 = 6 档可重叠【热度】骨架 (赛道热度×竞争力; 档=热度带, 档间有意重叠)
++ 动态赛道映射 (哪档放哪些赛道)。市场主线热度变化时需要更新的是后者。
+本模块把"赛道→档位映射"从 PROMPT_V3E 硬编码文本外部化为
+data/reference/chain_tier_map.json, 使其可被 update_chain_tiers.py
+(--mode manual/auto) 动态更新。
 
 两种应用模式 (A+B 并存, 方便对比):
   - manual (方案A): LLM 生成候选 tier_map → 输出 diff → 人工确认 → 写入
@@ -97,39 +98,58 @@ def render_chain_tiers_block(tier_map: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-# PROMPT_V3E 中档位规则段的起止锚点 (用于等价替换)
-_BLOCK_START_MARKER = "**档位规则**："
-_BLOCK_END_MARKER = "\n\n**边界判断规则"
+# PROMPT_V3E 中档位规则段的起止锚点 (用于等价替换)。
+# ⚠ 起始锚点只取 "**档位规则" (不含 **：) — PROMPT_V3E 改版后该行可能带括注
+#   (如 "**档位规则 (6档热度带...)...："), 死写 "**档位规则**：" 会导致 find 失败 →
+#   动态 tier_map 永远不注入, update_chain_tiers 变成空操作 (曾发生的静默 bug)。
+#   只取前缀即兼容 "**档位规则**：" 与 "**档位规则 (...)...**：" 两种写法。
+# 终止锚点取档位规则段之后的下一个块 (当前为 "**竞争力档内分化"); 注意不可取
+#   "**边界判断规则" — 它在竞争力块之后, 会把竞争力分化段一并吞掉。
+_BLOCK_START_MARKER = "**档位规则"
+_BLOCK_END_MARKER = "\n\n**竞争力档内分化"
+
+# 进程内"锚点失效已告警"标记 (避免每只股都刷一遍告警)
+_SPLICE_FALLBACK_WARNED = False
 
 
-def _splice_chain_block(prompt: str, rendered_block: str) -> str:
+def _splice_chain_block(prompt: str, rendered_block: str) -> Optional[str]:
     """把 prompt 中的档位规则段替换为 rendered_block。
 
-    锚点: 从 "**档位规则**：" 到 "\n\n**边界判断规则" 之前。
-    锚点缺失 (PROMPT_V3E 结构变动) 时返回原 prompt (安全回退)。
+    锚点命中 → 返回替换后的 prompt; 锚点缺失 (PROMPT_V3E 结构漂移) → 返回 None,
+    交由调用方决定回退策略 (见 get_chain_prompt)。返回 None 而非原 prompt, 是为
+    了让"动态注入失效"可被上层感知并告警, 而不是静默降级。
     """
     si = prompt.find(_BLOCK_START_MARKER)
     ei = prompt.find(_BLOCK_END_MARKER)
     if si == -1 or ei == -1 or ei <= si:
-        return prompt  # 锚点失效, 不动 prompt
+        return None  # 锚点失效 → 调用方回退并告警 (不静默)
     return prompt[:si] + rendered_block + prompt[ei:]
 
 
 def get_chain_prompt() -> str:
     """返回完整 V3E prompt, 档位块来自 chain_tier_map.json (动态)。
 
-    tier_map 缺失/损坏时无缝回退到 PROMPT_V3E 原文 (硬编码档位, 向后兼容,
+    tier_map 缺失/损坏时回退到 PROMPT_V3E 原文 (硬编码档位, 向后兼容,
     保证旧环境无 chain_tier_map.json 也能正常评分)。
+    tier_map 存在但 PROMPT_V3E 锚点对不上 (结构漂移) 时也回退, 但会告警 —
+    否则 update_chain_tiers 写了文件, 评分却永远用硬编码, 动态化形同虚设。
     """
+    global _SPLICE_FALLBACK_WARNED
     # 延迟 import 避免与 v3_full_score 循环依赖
     from picker.scoring.v3_full_score import PROMPT_V3E
 
     tm = load_chain_tier_map()
     if not tm:
-        return PROMPT_V3E  # 回退: 无 tier_map
+        return PROMPT_V3E  # 回退: 无 tier_map 文件 (首次部署前属正常)
     rendered = render_chain_tiers_block(tm)
     spliced = _splice_chain_block(PROMPT_V3E, rendered)
-    return spliced or PROMPT_V3E
+    if spliced is None:
+        if not _SPLICE_FALLBACK_WARNED:
+            _SPLICE_FALLBACK_WARNED = True
+            print("⚠ chain_tiers: PROMPT_V3E 档位块锚点失效, 动态 tier_map 未注入 → 回退硬编码。"
+                  "请检查 _BLOCK_START/END_MARKER 是否与 PROMPT_V3E 当前结构一致。", flush=True)
+        return PROMPT_V3E
+    return spliced
 
 
 def get_tier_version() -> str:
@@ -222,16 +242,23 @@ _TIER_SKELETON_RANGES = ["8.5-10.0", "7.0-9.0", "5.5-7.5", "3.5-5.5", "2.0-4.0",
 
 
 def _gather_research_signals(days=14):
-    """从 research.db + 世界知识 汇总最新主线信号, 供 LLM 调整 tier_map。
+    """从 research.db + 异动分析 + 世界知识 汇总最新主线信号, 供 LLM 调整 tier_map。
+
+    三信号融合:
+      1. 研报信号: hot/cold/emerging sectors (LLM 从研报提取)
+      2. 异动信号: price-confirmed 热门 (实际有股在涨 + web search 驱动) ← 比研报更硬
+      3. 世界知识: 宏观主线
 
     Returns:
-        {hot_sectors, cold_sectors, emerging_sectors, top_viewpoints, world_knowledge_theme}
+        {hot_sectors, cold_sectors, emerging_sectors, top_viewpoints,
+         world_knowledge_theme, price_confirmed_hot, price_confirmed_cold}
     """
     import sqlite3
     from datetime import datetime, timedelta
-    from picker.paths import RESEARCH_DB, WORLD_KNOWLEDGE_MD
+    from picker.paths import RESEARCH_DB, WORLD_KNOWLEDGE_MD, DATA_DIR
     out = {"hot_sectors": [], "cold_sectors": [], "emerging_sectors": [],
-           "top_viewpoints": [], "world_knowledge_theme": ""}
+           "top_viewpoints": [], "world_knowledge_theme": "",
+           "price_confirmed_hot": [], "price_confirmed_cold": []}
 
     # 研报板块动量 (复用 consumer 的聚合)
     try:
@@ -256,6 +283,35 @@ def _gather_research_signals(days=14):
         ).fetchall()
         conn.close()
         out["top_viewpoints"] = [f"[{r[0]}] {r[1]}" for r in rows]
+    except Exception:
+        pass
+
+    # 异动分析信号 (price-confirmed: 实际有股在涨/跌 + web search 驱动)
+    # 比研报bullish count更硬 — 是价格验证的真实热度
+    try:
+        surge_cache_path = os.path.join(DATA_DIR, "caches", "surge_driver_cache.json")
+        if os.path.exists(surge_cache_path):
+            sc = json.load(open(surge_cache_path))
+            today = datetime.now()
+            for code, entry in sc.items():
+                try:
+                    age = (today - datetime.strptime(entry.get("date", "2000-01-01"), "%Y-%m-%d")).days
+                    if age > 7:
+                        continue  # 过期
+                    drv = entry.get("driver", "")
+                    r20 = entry.get("r20", 0)
+                    direction = entry.get("direction", "")
+                    if not drv:
+                        continue
+                    item = f"{code} r20={r20}% {drv}"
+                    if direction == "上涨":
+                        out["price_confirmed_hot"].append(item)
+                    elif direction == "下跌":
+                        out["price_confirmed_cold"].append(item)
+                except Exception:
+                    pass
+            out["price_confirmed_hot"] = out["price_confirmed_hot"][:20]
+            out["price_confirmed_cold"] = out["price_confirmed_cold"][:10]
     except Exception:
         pass
 
@@ -314,6 +370,12 @@ def build_candidate_tier_map(days=14):
 代表性观点 (判断各赛道当前热度):
 {chr(10).join('- ' + v for v in signals['top_viewpoints'][:15])}
 
+## ⚡ 异动分析信号 (price-confirmed — 实际有股在涨/跌, 比研报bullish count更硬的验证)
+实际上涨股 + web search驱动 (这些主题的价格已验证热度, 应在高档):
+{chr(10).join('- ' + v for v in signals['price_confirmed_hot']) if signals['price_confirmed_hot'] else '(暂无异动数据)'}
+实际下跌股 + 原因 (这些主题价格走弱, 可能降温):
+{chr(10).join('- ' + v for v in signals['price_confirmed_cold']) if signals['price_confirmed_cold'] else '(暂无)'}
+
 ## 世界知识主线
 {signals['world_knowledge_theme'][:600]}
 
@@ -347,7 +409,7 @@ def build_candidate_tier_map(days=14):
     except json.JSONDecodeError:
         return None
 
-    # 校验: 骨架一致 (8档 + ranges 完全匹配)
+    # 校验: 骨架一致 (6档可重叠热度带 + ranges 完全匹配)
     cand_ranges = [t.get("range") for t in candidate.get("tiers", [])]
     if cand_ranges != _TIER_SKELETON_RANGES:
         # 骨架被破坏 (LLM 改了 ranges), 拒绝 — 只接受赛道重映射

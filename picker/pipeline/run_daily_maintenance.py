@@ -145,12 +145,12 @@ def step2_extract():
 
 
 def step2c_update_chain_tiers(mode: str = "manual"):
-    """Step 2.6: chain tier_map 更新 — 用最新研报调整赛道→档位映射。
+    """Step 2.6: chain tier_map 更新 — 融合研报+异动+缺口三信号调整热度档位。
 
-    依赖 Step 2 的新鲜 research.db。保持 6 档可重叠热度骨架不变, LLM 按【赛道当前热度】
-    调整 sectors 归属 + theme (热主线→高档, 退潮→低档; 档内分数由竞争力定, 评分时另算)。
-    manual 模式只输出 diff 供审核; auto 模式 diff有变化即写入(归档旧版可回滚)。
-    在 Step 2.5 缺口发现前执行, 让新评分用上最新档位。
+    依赖 Step 2 的 research.db + Step 2.7 异动缓存(price-confirmed) + Step 2.5 缺口主题。
+    保持 6 档可重叠热度骨架不变, LLM 按【赛道当前热度】(含异动验证)调整 sectors 归属。
+    在异动分析+缺口发现之后执行 — 三信号融合让热度档位更准确。
+    manual 模式只输出 diff; auto 模式 diff有变化即写入(归档可回滚)。
     """
     print('\n' + '=' * 60)
     print(f'Step 2.6: chain tier_map 更新 (mode={mode})')
@@ -511,16 +511,7 @@ def main():
         if not args.skip_collect:
             _run(1, step1_collect, date_from, date_to)
             _run(2, step2_extract)
-        # Step 2.6: chain tier_map 更新 (用最新研报调赛道→档位; 在缺口发现前, 让新评分用最新档位)
-        if not args.skip_chain_tiers and step in (0,):
-            try:
-                results['2.6'] = step2c_update_chain_tiers(args.chain_tiers_mode)
-            except Exception as e:
-                print(f'\n✗ Step 2.6 异常: {type(e).__name__}: {e}')
-                import traceback
-                traceback.print_exc()
-                results['2.6'] = False
-        # Step 2.7: 异动分析 (预填movement driver缓存, 评分时直接读; 避免重复+退场)
+        # Step 2.7: 异动分析 (先跑 — 产出price-confirmed热度供tier更新用)
         if not args.skip_movement and step in (0,):
             try:
                 results['2.7'] = step2d_movement_analysis()
@@ -529,7 +520,7 @@ def main():
                 import traceback
                 traceback.print_exc()
                 results['2.7'] = False
-        # Step 2.5: 板块缺口发现 (依赖 research.db 的主题; 只在全跑时执行)
+        # Step 2.5: 板块缺口发现 (先跑 — 产出新兴缺口主题供tier更新参考)
         if not args.skip_discovery and step in (0,):
             try:
                 results['2.5'] = step2b_discover_gap(args.discover_threshold)
@@ -537,6 +528,16 @@ def main():
                 print(f'\n✗ Step 2.5 异常: {type(e).__name__}: {e}')
                 import traceback
                 traceback.print_exc()
+                results['2.5'] = False
+        # Step 2.6: chain tier_map 更新 (最后跑 — 融合研报+异动+缺口三信号, 更新热度档位)
+        if not args.skip_chain_tiers and step in (0,):
+            try:
+                results['2.6'] = step2c_update_chain_tiers(args.chain_tiers_mode)
+            except Exception as e:
+                print(f'\n✗ Step 2.6 异常: {type(e).__name__}: {e}')
+                import traceback
+                traceback.print_exc()
+                results['2.6'] = False
                 results['2.5'] = False
         _run(3, step3_refresh_fundamentals, date_from, args.dry_run)
 
