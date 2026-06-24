@@ -479,16 +479,14 @@ def _build_refresh_prompt(code: str, name: str, industry: str,
     # ── 世界知识 ──
     wk_text = (world_knowledge or "")[:4000]
 
-    # ── 异动分析结论 (回流fundamentals: 让结构数据反映当前市场驱动) ──
+    # ── 异动分析结论段 (共用函数, 与 gen_fundamentals 一致) ──
     surge_section = ""
     if surge_driver:
-        surge_section = f"""
-## ⚡ 近期异动分析结论（实时web search, {datetime.now().strftime('%Y-%m-%d')}）
-该股近期有明显异动，市场核心驱动为：{surge_driver}
-**重要**: 请在 what_they_do（如旧文件未提及此业务/驱动）、growth_drivers（作为核心增长催化）、
-strengths（如有具体订单/新品/大单证据）中【充分反映】上述驱动信息。
-这是当前市场对该股的真实认知，比旧文件的结构描述更及时。
-"""
+        try:
+            from picker.scoring.v3_full_score import build_surge_fundamentals_section
+            surge_section = build_surge_fundamentals_section(surge_driver)
+        except Exception:
+            pass
 
     prompt = f"""请为以下股票重新生成完整的基本面分析 JSON（覆盖旧文件，非增量追加）。
 
@@ -747,19 +745,13 @@ def refresh_one(code: str, world_knowledge: str = "",
     if mentions:
         print(f"    研报提及: {len(mentions)} 条")
 
-    # ── 4.5. 异动分析结论 (回流fundamentals: 从surge_driver_cache读取) ──
+    # ── 4.5. 异动分析结论 (共用函数, 与 gen_fundamentals 一致) ──
     surge_driver = ""
     try:
-        surge_cache_path = os.path.join(paths.DATA_DIR, "caches", "surge_driver_cache.json")
-        if os.path.exists(surge_cache_path):
-            sc = json.load(open(surge_cache_path))
-            entry = sc.get(code)
-            if entry and entry.get("driver"):
-                from datetime import datetime as _dt
-                age = (_dt.now() - _dt.strptime(entry.get("date", "2000-01-01"), "%Y-%m-%d")).days
-                if age <= 7:
-                    surge_driver = entry["driver"]
-                    print(f"    异动结论: r20={entry.get('r20')}% [{entry.get('direction')}] {surge_driver[:50]}")
+        from picker.scoring.v3_full_score import get_surge_driver_for_code
+        surge_driver = get_surge_driver_for_code(code)
+        if surge_driver:
+            print(f"    异动结论已注入: {surge_driver[:50]}")
     except Exception:
         pass
 

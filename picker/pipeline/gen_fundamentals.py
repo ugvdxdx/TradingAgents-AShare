@@ -285,12 +285,14 @@ SYSTEM_PROMPT = """你是一位资深的A股研究总监，擅长将世界知识
 
 def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
                  world_knowledge: str, reference: str,
-                 real_financials: dict = None, industry_research: str = "") -> str:
+                 real_financials: dict = None, industry_research: str = "",
+                 surge_driver: str = "") -> str:
     """构建生成 fundamentals 的 prompt
 
-    新增两源注入 (解决财务靠LLM回忆不准 + 研报完全未注入的问题):
+    新增三源注入 (解决财务靠LLM回忆不准 + 研报完全未注入 + 异动业务遗漏的问题):
     - real_financials: Tushare 真实财报 dict, 直接填 key_metrics, 不让LLM推测
     - industry_research: research.db 板块研报文本, 标注[信源:中·板块级]供LLM参考
+    - surge_driver: 异动分析结论 (web search), 让what_they_do/growth_drivers反映当前市场驱动
     """
     
     # 截取世界知识（避免 prompt 过长）
@@ -320,6 +322,15 @@ def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
 （以上是该公司所在板块的研报观点, 信源可信度: 中。可参考其行业趋势/数据, 但【不得】据此虚构该股的份额/认证/订单等个股级强断言; 个股级强断言仍须遵循信源分级与防污染规则。)
 """
 
+    # ── 异动分析结论段 (共用函数, 与 refresh_fundamentals 一致) ──
+    surge_section = ""
+    if surge_driver:
+        try:
+            from picker.scoring.v3_full_score import build_surge_fundamentals_section
+            surge_section = build_surge_fundamentals_section(surge_driver)
+        except Exception:
+            pass
+
     prompt = f"""请为以下股票生成完整的基本面世界知识 JSON 文件。
 
 ## 股票信息
@@ -327,7 +338,7 @@ def build_prompt(code: str, name: str, industry: str, mcap_yi: float,
 - 名称: {name}
 - 行业: {industry}
 - 市值: {mcap_yi}亿元
-{fin_section}{research_section}
+{fin_section}{research_section}{surge_section}
 ## 当前世界知识（2026年6月）
 {wk_text}
 
@@ -450,9 +461,20 @@ def generate_one(code: str, name: str, industry: str, mcap_yi: float,
     except Exception as e:
         logger.warning(f"  板块研报拉取失败: {type(e).__name__}")
 
+    # ── 拉取异动分析结论 (共用函数, 与 refresh_fundamentals 一致) ──
+    surge_driver = ""
+    try:
+        from picker.scoring.v3_full_score import get_surge_driver_for_code
+        surge_driver = get_surge_driver_for_code(code)
+        if surge_driver:
+            logger.info(f"  ✓ 异动结论已注入: {surge_driver[:40]}")
+    except Exception:
+        pass
+
     prompt = build_prompt(code, name, industry, mcap_yi, world_knowledge, reference,
                           real_financials=real_financials,
-                          industry_research=industry_research)
+                          industry_research=industry_research,
+                          surge_driver=surge_driver)
 
     for attempt in range(max_retries + 1):
         logger.info(f"  调用 LLM 生成 {code} {name} (尝试 {attempt+1}/{max_retries+1})")

@@ -618,6 +618,43 @@ def _format_movement_injection(driver, direction, r20, date):
 # 异动分析: 退场机制 + 维护预填 (供每日维护集成)
 # ══════════════════════════════════════════════════════════
 
+
+def get_surge_driver_for_code(code):
+    """读取该股的异动分析结论 (供 fundamentals 生成/刷新两条链路共用)。
+
+    从 surge_driver_cache 读, 7天有效。返回 driver 文本或 ""。
+    gen_fundamentals.generate_one 和 refresh_fundamentals.refresh_one 都调本函数,
+    保证两条链路的异动注入一致 (全量生成 vs 研报刷新结果连贯)。
+    """
+    try:
+        if not os.path.exists(SURGE_DRIVER_CACHE):
+            return ""
+        sc = json.load(open(SURGE_DRIVER_CACHE))
+        entry = sc.get(code)
+        if not entry or not entry.get("driver"):
+            return ""
+        age = (datetime.now() - datetime.strptime(entry.get("date", "2000-01-01"), "%Y-%m-%d")).days
+        if age > SURGE_DRIVER_TTL_DAYS:
+            return ""
+        return entry["driver"]
+    except Exception:
+        return ""
+
+
+def build_surge_fundamentals_section(surge_driver):
+    """构建 fundamentals 生成/刷新 prompt 的异动注入段 (共用, 保证两条链路一致)。
+
+    gen_fundamentals 和 refresh_fundamentals 都调本函数 → 注入文案完全一致。
+    """
+    if not surge_driver:
+        return ""
+    return f"""
+## ⚡ 近期异动分析结论（实时web search）
+该股近期有明显异动，市场核心驱动为：{surge_driver}
+**重要**: 请在 what_they_do、growth_drivers、strengths 中【充分反映】上述驱动信息。
+这是当前市场对该股的真实认知，即使旧文件或行业标签未充分体现，也必须写入。
+"""
+
 def _evict_movement_cache(cache, pool_codes=None):
     """退场清理: 删除过期/非池/不再异动的缓存条目。
 
