@@ -13,7 +13,7 @@
 流程:
   1. 从近期 bullish sector_knowledge 提取细分主题词 (LLM, 非大类板块名)
   2. 查每个主题在候选池(fundamentals)的覆盖度 → 0/低覆盖 = 缺口主题
-  3. 对缺口主题: 智谱 web-search-pro 搜 "{主题} A股 龙头" → LLM 抽取股票代码
+  3. 对缺口主题: MCP web_search_prime 搜 "{主题} A股 龙头" → LLM 抽取股票代码
   4. 校验代码存在(腾讯实时行情拿 name+mcap) → generate_one 生成 fundamentals → V3 评分
   5. V3 达标(默认 sector_score>=8.0) → 写入 V3 cache 正式入池; 否则删除 fundamentals 文件
 

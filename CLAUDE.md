@@ -138,6 +138,8 @@ docs/                   # 设计文档
 - 定时分析通知通过环境变量配置，不依赖 DB 加密存储
 - `astock_provider.py` 使用 mootdx TCP 连接（端口 7709），懒加载单例
 - 所有 Agent 输出格式统一为 markdown/CSV 字符串
+- **研报空帖不积压**：圈子里的图片帖/链接卡（正文在图里抓不到）进 `raw_feeds` 时 `text` 为空。采集器(`collector.py`)自动将其标 `is_processed=1` 跳过提取，阈值 `MIN_TEXT_LEN=10`（与提取 SQL 共用）。故"待处理"计数只反映真实有效新研报，不会被无效帖积压成误导性的"100+待处理"。
+- **Web search 唯一链路**：所有联网搜索（异动分析/缺口发现/过热检测/fundamentals 刷新）**只用智谱 MCP `web_search_prime`**（Remote MCP Server, `open.bigmodel.cn/api/mcp/web_search_prime/mcp`），额度计入 GLM Coding Plan 套餐（Pro 1000次/月, Max 4000次/月）。**不要再尝试以下老链路（均不可用/不联网）：① `/paas/v4/tools` 的 `web-search-pro` 独立资源包（易 429 限流，与 coding plan 额度不通用）；② chat completions + `tools:[{type:"web_search"}]`（在 coding/paas 端点下 `tools` 参数只认 `function` 类型，web_search 被静默忽略，模型会回答"无法联网"）。** 正确协议为 MCP streamable HTTP（有状态会话：先 `initialize` 握手拿 `Mcp-Session-Id` → `notifications/initialized` → `tools/call`，进程级 `_McpSession` 复用 session）。套餐耗尽时报 `HTTP 429 + code:1113`（`_is_rate_limited` 已区分 1113 不可恢复 vs 1302 可重试）。规避：`--skip-movement --skip-discovery`。
 
 ## 基本面文件更新体系 (2026-06 重构)
 
@@ -166,6 +168,9 @@ uv run python3 picker/pipeline/run_daily_maintenance.py
 # 只采集 K线+资金流 (带新鲜度预检, 不跑研报/评分)
 uv run python3 picker/pipeline/run_daily_maintenance.py --data-only
 
+# 只执行某一步: --step 1(采集) / 2(提取) / 3(fundamentals) / 4(capital) / 9(快照)
+uv run python3 picker/pipeline/run_daily_maintenance.py --step 4
+
 # 只刷新 fundamentals（研报触发）
 uv run python3 picker/pipeline/refresh_fundamentals.py
 
@@ -174,6 +179,9 @@ uv run python3 picker/pipeline/refresh_fundamentals.py --stock 300308
 
 # chain 档位映射更新 (manual=只出diff / auto=写入归档)
 uv run python3 picker/pipeline/run_daily_maintenance.py --chain-tiers-mode auto
+
+# 跳过依赖 web search 的步骤(异动+缺口发现) —— coding plan 搜索额度耗尽时用
+uv run python3 picker/pipeline/run_daily_maintenance.py --skip-movement --skip-discovery
 ```
 
 ### 更新链路
@@ -182,9 +190,10 @@ uv run python3 picker/pipeline/run_daily_maintenance.py --chain-tiers-mode auto
 run_daily_maintenance.py (统一编排器)
   ├─ 主进程: 研报链路 ────────────┐   ┌─ 子进程: 数据采集 (并行)
   │   Step 1: 研报采集            │   │   K线更新 (update_klines_daily)
-  │   Step 2: 知识提取            │   │   资金流 (fetch_money_flow_all)
-  │   Step 2.5: 板块缺口发现 (加热)│   │   (两者带新鲜度预检, 已最新则跳过)
-  │   Step 2.6: chain 档位更新     │   └────────────────────────────────
+  │   Step 2: 知识提取 (LLM)      │   │   资金流 (fetch_money_flow_all)
+  │   Step 2.7: 异动分析 (web)    │   │   (两者带新鲜度预检, 已最新则跳过)
+  │   Step 2.5: 板块缺口发现 (web)│   └────────────────────────────────
+  │   Step 2.6: chain 档位更新     │   ← 2.7异动+2.5缺口为tier提供信号, 故先跑
   │   Step 3: 彻底刷新 (研报触发)  │
   │   Step 4: capital (纯量化)     │
   │   Step 5: 过热检测             │
@@ -192,6 +201,21 @@ run_daily_maintenance.py (统一编排器)
   │   Step 6.5: 冷门清理 (热→冷)   │
   │   Step 8: 世界知识             │
   └─ Step 9: 每日快照 (snapshot)
+```
+
+**子任务单独跑**（`--step N` 控制单步, `0=全流程`）：
+
+```bash
+# 单步: --step 1(采集) / 2(提取) / 3(fundamentals刷新) / 4(capital) / 9(快照)
+uv run python3 picker/pipeline/run_daily_maintenance.py --step 4
+
+# 全流程但跳过依赖 web search 的步骤(异动+缺口发现) —— 资源包耗尽时用
+uv run python3 picker/pipeline/run_daily_maintenance.py --skip-movement --skip-discovery
+
+# 指定采集日期范围 / 跳过采集 / 只跑数据采集
+uv run python3 picker/pipeline/run_daily_maintenance.py --step 1 --from 2026-06-18 --to 2026-06-24
+uv run python3 picker/pipeline/run_daily_maintenance.py --skip-collect
+uv run python3 picker/pipeline/run_daily_maintenance.py --data-only
 ```
 
 ### 已废弃

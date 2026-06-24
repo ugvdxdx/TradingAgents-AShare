@@ -61,7 +61,7 @@ ATTR_CACHE = paths.ATTR_CACHE
 # ══════════════════════════════════════════════════════════
 
 def web_search(query: str, num_results: int = 5) -> str:
-    """网络搜索, 返回结果摘要文本。用智谱 web-search-pro (jina.ai 已失效)。
+    """网络搜索, 返回结果摘要文本。用 MCP web_search_prime (计入 GLM Coding Plan 额度)。
 
     复用 refresh_fundamentals._web_search (带 429 限流退避)。
     失败抛 RuntimeError (不静默返回空, 避免用降级数据偷偷决策)。

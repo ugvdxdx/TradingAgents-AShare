@@ -29,6 +29,11 @@ DEFAULT_API_URL = (
 DEFAULT_APP_ID = 'appv5zuapfz7716'
 DEFAULT_COMMUNITY_ID = 'c_62a95f0db904a_yYyOAuyh3445'
 
+# 正文最短有效长度: 短于此 (含空/图片帖/链接卡) 直接标记已处理跳过提取,
+# 避免无信息帖积压在 is_processed=0 误导 "待处理" 计数。
+# 提取层 SQL (run_daily_*.py) 用同一阈值过滤, 保持一致。
+MIN_TEXT_LEN = 10
+
 
 class ResearchCollector:
     """小鹅通圈子数据采集器，支持增量更新。"""
@@ -259,12 +264,14 @@ class ResearchCollector:
                     """, (json.dumps(content, ensure_ascii=False), text, feed_id))
                     update_count += 1
                 else:
-                    # 插入新记录
+                    # 无效正文 (空/图片帖/链接卡) 直接标记已处理跳过提取,
+                    # 不积压在 is_processed=0 误导 "待处理" 计数。
+                    is_processed = 0 if (text and len(text) > MIN_TEXT_LEN) else 1
                     db.execute("""
                         INSERT INTO raw_feeds
                             (feed_id, community_id, author_id, author_name,
-                             title, content, text, created_at)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                             title, content, text, created_at, is_processed)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         feed_id,
                         self.community_id,
@@ -274,6 +281,7 @@ class ResearchCollector:
                         json.dumps(content, ensure_ascii=False),
                         text,
                         created_at,
+                        is_processed,
                     ))
                     new_count += 1
 

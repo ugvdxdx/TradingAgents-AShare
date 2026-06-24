@@ -195,16 +195,20 @@ def step2b_discover_gap(v3_threshold: float = 8.0):
     return len(admitted) > 0
 
 
-def step3_refresh_fundamentals(date_from: str, dry_run: bool = False):
-    """Step 3: 研报触发 fundamentals 彻底重写（替代旧增量追加）"""
+def step3_refresh_fundamentals(date_from: str, dry_run: bool = False, workers: int = 5):
+    """Step 3: 研报触发 fundamentals 彻底重写（替代旧增量追加）
+
+    Args:
+        workers: 并发线程数 (LLM 为 IO 密集, 线程池并行刷新; 默认 5, 串行用 1)。
+    """
     print('\n' + '=' * 60)
-    print(f'Step 3: 研报触发 fundamentals 彻底重写 (since {date_from})')
+    print(f'Step 3: 研报触发 fundamentals 彻底重写 (since {date_from}, workers={workers})')
     print('=' * 60)
 
     from picker.pipeline.refresh_fundamentals import refresh_from_research
 
     days = (datetime.now() - datetime.strptime(date_from, '%Y-%m-%d')).days
-    result = refresh_from_research(days=days, dry_run=dry_run)
+    result = refresh_from_research(days=days, dry_run=dry_run, workers=workers)
     print(f'刷新完成: 更新 {result["updated"]}, 失败 {result["failed"]}')
     return result['updated'] > 0
 
@@ -402,18 +406,29 @@ def step8_world_knowledge():
     print('=' * 60)
 
     try:
+        # update_world_knowledge.main() 内部用 argparse 读 sys.argv,
+        # 会把本脚本的 --skip-* 等参数误当自己的 → 调用前清空 argv 隔离
+        import sys as _sys
+        _orig_argv = _sys.argv[:]
+        _sys.argv = [_sys.argv[0]]
         from picker.pipeline.update_world_knowledge import main as update_wk
         update_wk()
+        _sys.argv = _orig_argv
         return True
     except Exception as e:
+        _sys.argv = _orig_argv
         print(f'⚠ 世界知识更新失败: {e}')
         return False
 
 
-def step9_snapshot():
-    """Step 9: 创建每日评分快照"""
+def step9_rescore():
+    """Step 9: V3 评分缓存刷新 (needs_run 的 chain/delivery/essence 重评)。
+
+    注意: 这里刷新的是评分缓存 fundamental_v3_scores.json (供选股直接用),
+    不是 v3_snapshots/ 快照 —— 后者由选股流水线 debate_picker_v5 选股时自动写。
+    """
     print('\n' + '=' * 60)
-    print('Step 9: 每日评分快照')
+    print('Step 9: V3 评分缓存刷新 (needs_run 重评)')
     print('=' * 60)
 
     try:
@@ -421,7 +436,7 @@ def step9_snapshot():
         v3_main()
         return True
     except Exception as e:
-        print(f'⚠ 快照失败: {e}')
+        print(f'⚠ 评分刷新失败: {e}')
         return False
 
 
@@ -451,6 +466,8 @@ def main():
                         help='跳过新鲜度预检 (强制采集)')
     parser.add_argument('--data-only', action='store_true', help='只采集 K线+资金流 (带新鲜度预检), 不跑研报/评分')
     parser.add_argument('--dry-run', action='store_true', help='只输出不写文件')
+    parser.add_argument('--workers', '-w', type=int, default=5,
+                        help='Step 3 fundamentals 刷新并发线程数 (默认5; LLM为IO密集, 串行用1)')
     args = parser.parse_args()
 
     today = datetime.now().strftime('%Y-%m-%d')
@@ -539,7 +556,7 @@ def main():
                 traceback.print_exc()
                 results['2.6'] = False
                 results['2.5'] = False
-        _run(3, step3_refresh_fundamentals, date_from, args.dry_run)
+        _run(3, step3_refresh_fundamentals, date_from, args.dry_run, args.workers)
 
     # ── 收集数据采集子进程结果 (研报跑完后join) ──
     if data_procs:
@@ -563,7 +580,7 @@ def main():
 
     # ── 世界知识 (Step 8); K线已前移到并行采集阶段 ──
     _run(8, step8_world_knowledge)
-    # _run(9, step9_snapshot)  # V3 全量评分需较长时间，默认每天选股时才跑
+    _run(9, step9_rescore)  # V3 评分缓存刷新 (needs_run 重评); 快照由选股时写
 
     elapsed = time.time() - t0
     print(f"\n{'='*60}")

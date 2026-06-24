@@ -117,6 +117,8 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
         _has_signal = False
 
     def _query_with_retry(fn, *args, **kwargs):
+        # Tushare pro_api 的方法是 functools.partial 包装, 无 __name__, 兜底取底层函数名
+        fn_name = getattr(fn, "__name__", None) or getattr(getattr(fn, "func", None), "__name__", "tushare_api")
         for attempt in range(max_retries + 1):
             try:
                 if _has_signal:
@@ -131,7 +133,7 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
                         _signal.signal(_signal.SIGALRM, old_handler)
                 return df
             except _TushareTimeout:
-                logger.warning(f"Tushare {fn.__name__}({ts_code}) 超时(20s), attempt {attempt+1}/{max_retries+1}")
+                logger.warning(f"Tushare {fn_name}({ts_code}) 超时(20s), attempt {attempt+1}/{max_retries+1}")
                 if attempt < max_retries:
                     time.sleep(1.5 * (attempt + 1))
                 else:
@@ -142,7 +144,7 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
                 if attempt < max_retries:
                     time.sleep(1.5 * (attempt + 1))
                 else:
-                    logger.warning(f"Tushare {fn.__name__}({ts_code}) 失败: {type(e).__name__}: {e}")
+                    logger.warning(f"Tushare {fn_name}({ts_code}) 失败: {type(e).__name__}: {e}")
                     return None
 
     try:
