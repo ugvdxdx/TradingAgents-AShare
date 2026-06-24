@@ -118,6 +118,12 @@ WORLD_KNOWLEDGE_MD = _ref(REFERENCE_DIR, "world_knowledge_2026_06.md")
 STOCKS_AUDIT = _ref(REFERENCE_DIR, "stocks_audit.json")
 XIAOE_FEED_DATA = _ref(REFERENCE_DIR, "xiaoe_feed_data.json")
 
+# chain 分档映射 (赛道→档位, 随市场主线动态更新; 见 picker/scoring/chain_tiers.py)
+# 种子 v1 从 PROMPT_V3E:121-131 抽取, render_chain_tiers_block 渲染后与原硬编码等价。
+CHAIN_TIER_MAP_PATH = _ref(REFERENCE_DIR, "chain_tier_map.json")
+# 历史版本归档 (manual/auto 产出的每次变更都归档, 支撑 A/B 对比与回测分段)
+CHAIN_TIER_ARCHIVE_DIR = os.path.join(REFERENCE_DIR, "chain_tier_archive")
+
 
 def ensure_caches_dir() -> None:
     """确保 caches 目录存在 (写入缓存前调用)。"""

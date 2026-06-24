@@ -68,6 +68,18 @@ def _is_hot(code: str) -> bool:
     return os.path.exists(os.path.join(paths.FUNDAMENTALS_DIR, f"{code}.json"))
 
 
+def _scan_fundamentals() -> list:
+    """扫描 fundamentals/ 目录, 返回全部热股 code (热股池唯一真相源)。
+
+    以 fundamentals/ 为准而非 白名单∩fundamentals: 白名单外的新股 (次新/小代码
+    未进 stock_whitelist) 也要覆盖, 否则资金流会漏掉它们。
+    """
+    fdir = paths.FUNDAMENTALS_DIR
+    if not os.path.isdir(fdir):
+        return []
+    return [f[:-5] for f in os.listdir(fdir) if f.endswith(".json")]
+
+
 # ══════════════════════════════════════════════════════════
 # 单文件读写
 # ══════════════════════════════════════════════════════════
@@ -232,7 +244,7 @@ def incr_update(codes: list, existing: dict) -> dict:
     uptodate = 0      # 已是最新, 跳过
     failed = 0
     n_hot = sum(1 for c in codes if _is_hot(c))
-    print(f"白名单 {len(codes)} 只 (热股 {n_hot} → {HOT_DAYS}日 / 其余 {len(codes)-n_hot} → {NORMAL_DAYS}日)")
+    print(f"待更新 {len(codes)} 只 (热股 {n_hot} → {HOT_DAYS}日 / 其余 {len(codes)-n_hot} → {NORMAL_DAYS}日)")
 
     for i, code in enumerate(codes):
         target_days = HOT_DAYS if _is_hot(code) else NORMAL_DAYS
@@ -427,10 +439,15 @@ def main():
 
     with open(paths.STOCK_WHITELIST) as f:
         wl = json.load(f)
-    codes = [s["code"] for s in wl]
-    hot_codes = [c for c in codes if _is_hot(c)]
-    cold_codes = [c for c in codes if not _is_hot(c)]
-    print(f"白名单: {len(codes)} 只 (热股 {len(hot_codes)} / 非热股 {len(cold_codes)})")
+    wl_codes = [s["code"] for s in wl]
+    # 热股池以 fundamentals/ 为唯一真相源: 白名单外的新股 (次新/小代码) 也要覆盖,
+    # 不再用 白名单∩fundamentals, 否则会漏掉 ~10 只没进 stock_whitelist 的热股。
+    fund_set = set(_scan_fundamentals())
+    hot_codes = sorted(fund_set)
+    cold_codes = [c for c in wl_codes if c not in fund_set]
+    off_wl = len(fund_set - set(wl_codes))
+    print(f"白名单: {len(wl_codes)} 只 | 热股池 fundamentals/: {len(hot_codes)} 只"
+          f" (含白名单外 {off_wl} 只新股) | 非热股 {len(cold_codes)} 只")
 
     # 1. 加载单一缓存
     existing = _load_single()
@@ -459,7 +476,7 @@ def main():
     print(f"  已保存: {path} ({len(result)} 只)")
 
     # 6. 抽查深度
-    for c in codes[:3]:
+    for c in wl_codes[:3]:
         rows = result.get(c, [])
         if rows:
             print(f"    {c} ({'热股' if _is_hot(c) else '普通'}): "

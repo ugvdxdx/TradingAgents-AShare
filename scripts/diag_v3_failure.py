@@ -29,7 +29,7 @@ for code in FAILED_CODES:
     wk_section = ""
     if wk_slim:
         wk_section = f"\n\n【当前市场宏观背景 (来自世界知识)】\n{wk_slim}\n请将以上宏观背景纳入 chain 和 delivery 判断。"
-    full_prompt = v3.PROMPT_V3E + wk_section + sj[:8000] + attr_hint
+    full_prompt = v3.get_chain_prompt() + wk_section + sj[:8000] + attr_hint
 
     print(f"\n{'='*80}")
     print(f"【{code}】 prompt 总长 = {len(full_prompt)} 字符")

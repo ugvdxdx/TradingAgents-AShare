@@ -1,65 +1,65 @@
 {
-  "trade_date": "2026-06-21",
+  "trade_date": "2026-06-23",
   "cutoff_date": null,
-  "generated_at": "2026-06-21T21:35:27.004330",
+  "generated_at": "2026-06-23T11:39:16.578192",
   "ranking": [
     {
       "rank": 1,
-      "code": "688141",
-      "name": "杰华特",
-      "score": 24.7,
+      "code": "002851",
+      "name": "麦格米特",
+      "score": 25.6,
       "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "绑定头部代工厂，算力需求爆发有望驱动量价齐升",
-      "key_risk": "当期巨亏7亿且毛利率不足27%，财务健康度极差",
+      "key_thesis": "单机柜电源价值量从3千跃升至3万元以上",
+      "key_risk": "净利率仅2.1%且经营现金流-1.39亿，回款恶化",
       "supporting_claim_ids": [],
       "risk_flags": []
     },
     {
       "rank": 2,
-      "code": "300308",
-      "name": "中际旭创",
-      "score": 24.7,
+      "code": "688141",
+      "name": "杰华特",
+      "score": 25.4,
       "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "1.6T率先量产且净利率超30%，规模壁垒极高。",
-      "key_risk": "万亿市值面临中报验证，高估值易剧烈回调。",
+      "key_thesis": "具DrMOS技术储备，精准卡位AIDC高功率PSU升级。",
+      "key_risk": "2025年净亏7.17亿，毛利率仅26%深陷价格战泥潭。",
       "supporting_claim_ids": [],
       "risk_flags": []
     },
     {
       "rank": 3,
-      "code": "688256",
-      "name": "寒武纪",
-      "score": 24.6,
+      "code": "601138",
+      "name": "工业富联",
+      "score": 25.1,
       "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "A股唯一纯AI芯片标的，受益算力国产替代刚需",
-      "key_risk": "市销率超125倍估值极度泡沫化，面临戴维斯双杀",
+      "key_thesis": "独供英伟达GB200机柜，包揽北美四大云厂商订单",
+      "key_risk": "净利率仅3.9%，上游CCL涨价严重挤压代工毛利",
       "supporting_claim_ids": [],
       "risk_flags": []
     },
     {
       "rank": 4,
-      "code": "300502",
-      "name": "新易盛",
-      "score": 24.6,
+      "code": "301205",
+      "name": "联特科技",
+      "score": 25.1,
       "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "毛利率与ROE冠绝全行业，业绩极度高增兑现",
-      "key_risk": "7月7日美国拟加征12.5%最高档关税政策扰动",
+      "key_thesis": "外销占比超70%，直接对接海外AI数据中心需求",
+      "key_risk": "经营现金流-2.06亿，受龙头价格战挤压利润",
       "supporting_claim_ids": [],
       "risk_flags": []
     },
     {
       "rank": 5,
-      "code": "600246",
-      "name": "万通发展",
-      "score": 24.4,
+      "code": "300308",
+      "name": "中际旭创",
+      "score": 24.9,
       "confidence": 0.7,
       "confidence_level": "高",
-      "key_thesis": "若重组成功，将直接切入高景气算力光模块红利。",
-      "key_risk": "跨界重组不确定性极高，70倍市销率泡沫易破裂。",
+      "key_thesis": "净利率30.28%且深度绑定英伟达等北美大厂",
+      "key_risk": "382亿高营收基数下增速回落引发双杀",
       "supporting_claim_ids": [],
       "risk_flags": []
     }
@@ -67,7 +67,7 @@
   "risk_review": {
     "overall_confidence": 0.7,
     "overall_level": "高",
-    "data_integrity": 0.99,
+    "data_integrity": 1.0,
     "avg_rank_confidence": 0.7,
     "debate_rounds": 0,
     "total_claims": 0,
@@ -75,5 +75,5 @@
     "risk_flag_summary": {},
     "disclaimer": "本结果由多智能体辩论自动生成, 仅供研究参考, 不构成投资建议。市场有风险, 决策需谨慎。"
   },
-  "run_dir": "results/picker_v5/2026-06-21_20260621_2135"
+  "run_dir": "results/picker_v5/2026-06-23_20260623_1139"
 }

@@ -114,23 +114,16 @@ def detect_latest_trade_date(tf, reference_code: str = "000001", count: int = 10
 
 
 def get_hot_codes():
-    """热股 = 在 V3 池且有 fundamentals JSON 的股 (与 backfill_klines.get_all_codes 一致)。
+    """热股池 = fundamentals/ 目录下所有股 (唯一真相源)。
 
-    只有热股进入选股候选池, 刷新它们的 K线即可; 非热股无基本面, 不参与排序。
+    以 fundamentals/ 为准, 不再用 V3池 ∩ fundamentals: 刚进 fundamentals 但还没评
+    V3 的新股每天也要检测并补齐 K线 (用户要求: fundamentals 文件夹中才是全部热股)。
+    新股 (无 pkl) 会被 update_one 拉 count 根 (默认90 ≈ 4.5个月, 超过近两个月要求)。
     """
-    import json
-    try:
-        v3 = json.load(open(paths.V3_CACHE))
-    except Exception:
-        v3 = {}
-    v3_codes = {c for c, v in v3.items() if isinstance(v, dict) and "sector_score" in v}
-    fund_codes = set()
-    for d in (paths.FUNDAMENTALS_DIR, paths.FUNDAMENTALS_COLD_DIR):
-        if os.path.isdir(d):
-            for f in os.listdir(d):
-                if f.endswith(".json"):
-                    fund_codes.add(f[:-5])
-    return sorted(v3_codes & fund_codes)
+    fdir = paths.FUNDAMENTALS_DIR
+    if not os.path.isdir(fdir):
+        return []
+    return sorted(f[:-5] for f in os.listdir(fdir) if f.endswith(".json"))
 
 
 def update_one(code: str, ref_latest: str, count: int, tf) -> str:
@@ -218,8 +211,10 @@ def main():
             print(f"  [{i}/{len(codes)}] 更新{done} 已最新{uptodate} 失败{fail} | "
                   f"{rate:.1f}只/s ETA {eta:.0f}s", flush=True)
 
-        # tickflow free tier 限速: 逐只调用加间隔
-        time.sleep(0.3)
+        # tickflow free tier 限速 60/min → 间隔须 >= 1.0s; 取 1.1s 留余量 (旧 0.3s=200/min 触发 ~8% 限流失败)
+        # 只对真正发请求的 (done/fail) 限速; uptodate 未联网, 跳过 sleep (日常维护多数已最新)
+        if result != "uptodate":
+            time.sleep(1.1)
 
     elapsed = time.time() - t0
     fail_rate = fail / len(codes) if codes else 0
