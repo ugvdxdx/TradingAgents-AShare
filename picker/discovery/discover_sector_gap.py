@@ -135,7 +135,8 @@ def extract_hot_themes(days=20, max_themes=8):
     # themes 可能是 ["str",...] 或 [{"theme":...}]
     raw_themes = data.get("themes", [])[:max_themes]
     _PLACEHOLDER = {"主题词", "具体主题词", "大类板块", "主题A", "主题B", "主题C",
-                    "热度依据", "依据", "related_sector", "theme", ""}
+                    "主题1", "主题2", "主题3", "热度依据", "依据",
+                    "related_sector", "theme", ""}
     out = []
     for t in raw_themes:
         if isinstance(t, str):
@@ -145,6 +146,9 @@ def extract_hot_themes(days=20, max_themes=8):
         else:
             continue
         if theme in _PLACEHOLDER or len(theme) < 2:
+            continue
+        # 严格校验: theme 必须在源观点文本里真实出现 (防 LLM 限流/偷懒时照抄模板或编造)
+        if theme not in views_text:
             continue
         out.append({"theme": theme, "related_sector": "", "evidence": ""})
     return out
@@ -352,6 +356,18 @@ def discover(v3_threshold=8.0, days=20, max_themes=8, coverage_threshold=2,
     if not gap_themes:
         print("\n  无缺口主题, 候选池覆盖良好。退出。")
         return []
+
+    # 写 gap themes 缓存 (供 tier 更新 Step 2.6 读取 — 三信号融合)
+    try:
+        gap_cache_path = os.path.join(paths.DATA_DIR, "caches", "gap_themes_cache.json")
+        gap_cache = {
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "themes": [{"theme": t["theme"], "pool_count": t.get("pool_count", 0),
+                        "heat": t.get("heat", {})} for t in gap_themes],
+        }
+        json.dump(gap_cache, open(gap_cache_path, "w"), ensure_ascii=False, indent=1)
+    except Exception:
+        pass
 
     # ── 4. web search 找股 ──
     print(f"\n[4/5] 为 {len(gap_themes)} 个缺口主题找候选股 (web search)...", flush=True)

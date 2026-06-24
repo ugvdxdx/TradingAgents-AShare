@@ -258,7 +258,8 @@ def _gather_research_signals(days=14):
     from picker.paths import RESEARCH_DB, WORLD_KNOWLEDGE_MD, DATA_DIR
     out = {"hot_sectors": [], "cold_sectors": [], "emerging_sectors": [],
            "top_viewpoints": [], "world_knowledge_theme": "",
-           "price_confirmed_hot": [], "price_confirmed_cold": []}
+           "price_confirmed_hot": [], "price_confirmed_cold": [],
+           "gap_themes": []}
 
     # 研报板块动量 (复用 consumer 的聚合)
     try:
@@ -312,6 +313,17 @@ def _gather_research_signals(days=14):
                     pass
             out["price_confirmed_hot"] = out["price_confirmed_hot"][:20]
             out["price_confirmed_cold"] = out["price_confirmed_cold"][:10]
+    except Exception:
+        pass
+
+    # 缺口发现信号 (热门但池未覆盖的主题 → 应加入tier_map的新兴赛道)
+    try:
+        gap_cache_path = os.path.join(DATA_DIR, "caches", "gap_themes_cache.json")
+        if os.path.exists(gap_cache_path):
+            gc = json.load(open(gap_cache_path))
+            age = (datetime.now() - datetime.strptime(gc.get("date", "2000-01-01"), "%Y-%m-%d")).days
+            if age <= 7:
+                out["gap_themes"] = [t.get("theme", "") for t in gc.get("themes", []) if t.get("theme")]
     except Exception:
         pass
 
@@ -375,6 +387,9 @@ def build_candidate_tier_map(days=14):
 {chr(10).join('- ' + v for v in signals['price_confirmed_hot']) if signals['price_confirmed_hot'] else '(暂无异动数据)'}
 实际下跌股 + 原因 (这些主题价格走弱, 可能降温):
 {chr(10).join('- ' + v for v in signals['price_confirmed_cold']) if signals['price_confirmed_cold'] else '(暂无)'}
+
+## 🔍 缺口发现信号 (热门但池未覆盖的主题 — 新兴赛道, 应加入tier_map对应热度档)
+{', '.join(signals['gap_themes']) if signals['gap_themes'] else '(暂无缺口数据)'}
 
 ## 世界知识主线
 {signals['world_knowledge_theme'][:600]}

@@ -428,6 +428,9 @@ SURGE_DRIVER_TTL_DAYS = 7       # 驱动缓存有效期
 # 不设跳过开关 — 异动分析对纠正fundamentals滞后很关键, 手动全量也跑 (靠缓存+上限管速度)
 _MOVEMENT_SEARCHES_DONE = 0
 _MOVEMENT_SEARCH_CAP = int(os.environ.get("SURGE_DRIVER_MAX_SEARCHES", "30"))
+# surge cache 内存缓存 (避免544只全量重评时每只都读文件)
+_SURGE_CACHE_MEM = None
+_SURGE_CACHE_MTIME = 0
 
 
 def _compute_r20(code):
@@ -553,13 +556,17 @@ def _load_movement_driver(code):
 
     direction = "上涨" if r20 > 0 else "下跌"
 
-    # 缓存优先
-    cache = {}
-    if os.path.exists(SURGE_DRIVER_CACHE):
-        try:
-            cache = json.load(open(SURGE_DRIVER_CACHE))
-        except Exception:
-            pass
+    # 缓存优先 (内存缓存, mtime感知 — 避免每只股都读文件)
+    global _SURGE_CACHE_MEM, _SURGE_CACHE_MTIME
+    cache = _SURGE_CACHE_MEM or {}
+    try:
+        mt = os.path.getmtime(SURGE_DRIVER_CACHE) if os.path.exists(SURGE_DRIVER_CACHE) else 0
+        if mt != _SURGE_CACHE_MTIME:
+            cache = json.load(open(SURGE_DRIVER_CACHE)) if mt else {}
+            _SURGE_CACHE_MEM = cache
+            _SURGE_CACHE_MTIME = mt
+    except Exception:
+        pass
     entry = cache.get(code)
     if entry:
         try:
@@ -585,8 +592,10 @@ def _load_movement_driver(code):
         return ""
     cache[code] = {"driver": driver, "date": datetime.now().strftime("%Y-%m-%d"),
                    "r20": r20, "direction": direction}
+    _SURGE_CACHE_MEM = cache  # 同步内存缓存
     try:
         json.dump(cache, open(SURGE_DRIVER_CACHE, "w"), ensure_ascii=False, indent=1)
+        _SURGE_CACHE_MTIME = os.path.getmtime(SURGE_DRIVER_CACHE)
     except Exception:
         pass
     return _format_movement_injection(driver, direction, r20, datetime.now().strftime("%Y-%m-%d"))
@@ -724,8 +733,8 @@ def _call(code):
     if wk_slim:
         wk_date_line = f" ({_WORLD_KNOWLEDGE_DATE})" if _WORLD_KNOWLEDGE_DATE else ""
         wk_section = f"\n\n【当前市场宏观背景 (来自世界知识{wk_date_line})】\n{wk_slim}\n请将以上宏观背景纳入 chain 产业链位置和 delivery 业绩兑现度的判断, 尤其注意产业链传导逻辑和中报窗口对兑现度的敏感度。"
-    # surge_driver 放在 sj 之前 → LLM 先看到"当前市场在炒什么", 再读what_they_do
-    prompt = get_chain_prompt() + wk_section + surge_driver + sj[:8000] + attr_hint
+    # surge_driver 紧跟档位规则 → LLM 看到"热度档系统"+"该股当前实际驱动"相邻, 再读宏观+基本面
+    prompt = get_chain_prompt() + surge_driver + wk_section + sj[:8000] + attr_hint
     # 解析失败也重试 (并发下 GLM 偶发返回畸形/截断响应, 非空但解析失败;
     # _llm 只在异常/空内容时重试, 这里对"有内容但解析失败"再给最多3次机会)。
     # 实测: 并发下 ~20% 偶发解析失败, 串行重跑同股可成功 → 解析重试能收敛。
