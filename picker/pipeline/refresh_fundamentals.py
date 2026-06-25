@@ -47,7 +47,7 @@ from picker import paths
 
 
 # Web Search 下沉到 picker.common.web_search (re-export 保持向后兼容)
-from picker.common.web_search import _web_search  # noqa: F401
+from picker.common.web_search import _web_search, _ZHIPU_LIMITER  # noqa: F401
 
 
 # ═══════════════════════════════════════════════════════════
@@ -525,15 +525,20 @@ def refresh_one(code: str, world_knowledge: str = "",
         print(f"    研报提及: {len(mentions)} 条")
 
     # ── 4.5. 异动归因结论 (统一归因缓存 → attribution 渲染注入段) ──
+    # 黑名单股 (概念炒作/错归因, 冷却中) 不注入, 避免错误归因污染 fundamentals
+    from picker.discovery.movement_blacklist import is_blacklisted
     surge_section = ""
-    try:
-        from picker.discovery.attribution import get_attribution_for_code, build_attribution_section
-        _attr = get_attribution_for_code(code)
-        surge_section = build_attribution_section(_attr)
-        if surge_section:
-            print(f"    异动结论已注入: {(_attr or {}).get('summary', '')[:50]}")
-    except Exception:
-        pass
+    if is_blacklisted(code):
+        print(f"    异动归因跳过: 在异动黑名单内 (冷却中)")
+    else:
+        try:
+            from picker.discovery.attribution import get_attribution_for_code, build_attribution_section
+            _attr = get_attribution_for_code(code)
+            surge_section = build_attribution_section(_attr)
+            if surge_section:
+                print(f"    异动结论已注入: {(_attr or {}).get('summary', '')[:50]}")
+        except Exception:
+            pass
 
     # ── 5. LLM 重写 ──
     if not world_knowledge:

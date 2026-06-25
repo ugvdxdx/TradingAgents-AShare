@@ -12,10 +12,10 @@
 
 **核心机制**：
 - **chain 赛道热度×竞争力**（`picker/scoring/chain_tiers.py`）：chain=赛道热度(theme级)×个股竞争力，6档可重叠热度带(热主线→高档/退潮→低档)；档位映射外部化为 `chain_tier_map.json`，每日用最新研报动态更新(manual/auto)，注入评分 prompt
-- **新晋股发现**（`picker/discovery/scan_mispriced.py`）：量价扫描 + 板块扩散 + 冷股激活 + 冷门清理(热→冷)。归因(网络搜索+LLM分类)统一到 `picker/discovery/attribution.py`
+- **新晋股发现**（`picker/discovery/scan_mispriced.py`）：量价扫描 + 板块扩散 + 冷股激活 + 冷门清理(热→冷) + 异动黑名单(概念炒作/错归因, 默认冷却30天)。归因(网络搜索+LLM分类)统一到 `picker/discovery/attribution.py`
 - **统一异动归因**（`picker/discovery/attribution.py`，2026-06 重构）：合并原 scan ATTR 与 v3 surge 两套归因为一套 — 双向(涨/跌)+结构化(REASON_TYPE/SECTOR_TAG/SUMMARY)+统一 schema+单一缓存(`mispriced_attribution_cache.json`, TTL 14天)。公共 LLM/web search 工具下沉 `picker/common/`。异动经 fundamentals JSON 单一载体回流评分，v3 评分不再 inline 注入
 - **板块缺口发现**（`picker/discovery/discover_sector_gap.py`）：研报热但池未覆盖的主题 → 智谱web search找股 → refresh_one 生成基本面+V3评分入池
-- **池子边界管理**（三操作闭环）：Step 2.5 缺口补充(加热) / Step 6 冷股激活(冷→热) / Step 6.5 冷门清理(热→冷)
+- **池子边界管理**（四操作闭环）：Step 2.5 缺口补充(加热) / Step 6 冷股激活(冷→热) / Step 6.5 冷门清理(热→冷) / 异动黑名单(概念炒作错归因, 30天冷却, scan/precompute/refresh三处拦截, 见 `picker/discovery/movement_blacklist.py`)
 - **capital 动态更新**（`picker/scoring/v3_full_score.py:update_capital`）：每次选股前用研报板块动量 + 个股量价(双窗口)重算 capital，纯量化 0 次 LLM
 - **冷股池**（`cold_fundamentals/`）：无催化股票冬眠，新晋股逻辑可激活
 
@@ -349,16 +349,18 @@ load_top_n 的 n 参数仅供测试脚本(scripts/test_deep_rank.py)做召回实
 ### 新晋股发现 + 池子边界管理 (picker/discovery/scan_mispriced.py)
 
 ```
-量价扫描 (近5日>15% & V3<15) → 归因(14天缓存) → 板块扩散(强度过滤)
+量价扫描 (近5日>15% & 近20日>10%趋势确认, 不限V3分 — 高分龙头亦纳入; --trend-window/threshold可调) → 归因(14天缓存) → 板块扩散(强度过滤)
   ├─ 板块供需型 (保送进候选池, 保留真实v3)
   ├─ 个股事件型 (不扩散)
   └─ 冷股激活 _reactivate_cold_stocks (冷→热: r5>15% 自动移回 fundamentals/)
-池子边界三操作闭环 (每日维护):
+池子边界四操作闭环 (每日维护):
   ├─ 加热     discover_sector_gap (Step 2.5): 研报热但池未覆盖 → web search找股入池
   ├─ 冷→热    _reactivate_cold_stocks (Step 6): 量价异动激活冷股
-  └─ 热→冷    cleanup_to_cold_stocks (Step 6.5): V3<7+chain<4+cap<3+r20<5+无研报 → 移入冷池
-       (chain<4 保护优质AI股即使回调也不误杀; 三步同步: 移JSON+删V3 cache+加cold_list)
+  ├─ 热→冷    cleanup_to_cold_stocks (Step 6.5): V3<7+chain<4+cap<3+r20<5+无研报 → 移入冷池
+  └─ 拉黑     movement_blacklist (人工): 概念炒作/错归因股冷却30天, 三处拦截(scan/precompute/refresh_one)
+异动黑名单 CLI: scan_mispriced.py --blacklist CODE / --blacklist-type 概念炒作 / --list-blacklist
 归因支持回测模式: cutoff_date 非空时跳过网络搜索(前视偏差), 用研报+LLM现场判断
+归因空壳防空壳锁死: attribute_stock_unified缓存命中(内层) + precompute跳过(外层) 两层均检查summary, 空壳(summary空)不视为有效、必重新归因 (2026-06-25修复: 原仅查age+direction致首次失败的空壳永久锁死, 单测use_cache=False绕过缓存掩盖了此bug)
 ```
 
 ### 关键文件说明
@@ -370,6 +372,7 @@ load_top_n 的 n 参数仅供测试脚本(scripts/test_deep_rank.py)做召回实
 | `data/caches/fundamental_v3_scores.json` | V3 评分 (chain/delivery/capital/essence) | 每周全量+研报触发+每日capital |
 | `data/caches/v3_snapshots/YYYY-MM-DD.json` | **每日选股快照** (全池分数+TOP5/10推荐+理由) | 每日(同日覆盖) |
 | `data/caches/mispriced_attribution_cache.json` | 统一异动归因 (原ATTR+surg合并, 双向; = UNIFIED_ATTR_CACHE) | 14天 |
+| `data/caches/movement_blacklist.json` | 异动黑名单 (概念炒作/错归因股, 冷却期拦截scan/precompute/refresh) | 30天到期自动解除 |
 | `data/caches/overheated_risk_cache.json` | ⚠已废弃 (detect_overheated 全删, 风险标记链路移除) | — |
 | `data/caches/cold_stocks.json` | 冷股清单 | 手动 |
 | `data/caches/sub_sector_override.json` | 细分赛道 capital 拆分表 | scan_mispriced 维护 |

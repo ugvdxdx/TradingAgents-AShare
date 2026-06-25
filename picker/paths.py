@@ -78,6 +78,8 @@ ATTR_CACHE = _cache("mispriced_attribution_cache.json")
 UNIFIED_ATTR_CACHE = ATTR_CACHE
 # OVERHEATED_CACHE 已随 detect_overheated 全删而废弃 (风险标记链路移除)
 COLD_STOCKS_PATH = _cache("cold_stocks.json")
+# 异动黑名单: 概念炒作/错误归因股, 冷却期内不进异动扫描/归因/fundamentals注入 (见 picker/discovery/movement_blacklist.py)
+MOVEMENT_BLACKLIST_PATH = _cache("movement_blacklist.json")
 DEBATE_RESULT_PATH = _cache("debate_result.json")
 DEBATE_LOG_PATH = _cache("debate_log.json")
 FUNDAMENTAL_LLM_SCORES_PATH = _cache("fundamental_llm_scores.json")

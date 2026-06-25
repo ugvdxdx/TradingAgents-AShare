@@ -106,29 +106,31 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
 
     ts_code = _code_to_ts_code(code)
 
-    # Tushare pro_api 无原生 timeout, TCP 假死会无限阻塞 (实测导致 refresh 全流程挂死)。
-    # 用 SIGALRM 加硬超时 (仅主线程可用; 子线程调用时降级为无超时但不崩)。
+    # Tushare pro_api 的 HTTP 层本身有 30s timeout (requests.post(timeout=30)),
+    # 但历史上有 TCP 假死导致的更长卡顿。主线程额外用 SIGALRM 加 20s 硬超时兜底。
+    # 关键: signal 只能在主线程用。原代码用 getsignal() 探测不可靠 (getsignal 在子线程
+    # 不抛异常), 导致子线程里仍调用 signal() → ValueError: signal only works in main thread,
+    # 使并行刷新 (--workers>1) 的 Tushare 财报全部失败。改用 threading.main_thread() 精确判断:
+    # 主线程→SIGALRM 硬超时; 子线程→不设超时, 依赖 requests 自身的 30s timeout (足够安全)。
     import signal as _signal
+    import threading as _threading
     class _TushareTimeout(Exception): pass
-    _has_signal = hasattr(_signal, "SIGALRM")
-    try:
-        _signal.getsignal(_signal.SIGALRM)  # 探测是否在主线程
-    except (ValueError, OSError):
-        _has_signal = False
+    _can_signal = (hasattr(_signal, "SIGALRM")
+                   and _threading.current_thread() is _threading.main_thread())
 
     def _query_with_retry(fn, *args, **kwargs):
         # Tushare pro_api 的方法是 functools.partial 包装, 无 __name__, 兜底取底层函数名
         fn_name = getattr(fn, "__name__", None) or getattr(getattr(fn, "func", None), "__name__", "tushare_api")
         for attempt in range(max_retries + 1):
             try:
-                if _has_signal:
+                if _can_signal:
                     old_handler = _signal.signal(_signal.SIGALRM,
                                                  lambda *_: (_ for _ in ()).throw(_TushareTimeout()))
                     _signal.alarm(20)  # 单次查询 20s 硬超时
                 try:
                     df = fn(*args, **kwargs)
                 finally:
-                    if _has_signal:
+                    if _can_signal:
                         _signal.alarm(0)
                         _signal.signal(_signal.SIGALRM, old_handler)
                 return df
@@ -139,7 +141,7 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
                 else:
                     return None
             except Exception as e:
-                if _has_signal:
+                if _can_signal:
                     _signal.alarm(0)
                 if attempt < max_retries:
                     time.sleep(1.5 * (attempt + 1))

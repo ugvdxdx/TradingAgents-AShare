@@ -93,7 +93,7 @@ uv run python3 picker/backtest/picker/backtest/run_backtest.py
 
 ## ⚙️ 前置条件
 
-1. **fundamentals JSON** — `fundamentals/{code}.json`，通过 `picker/pipeline/gen_fundamentals.py` 生成（见 fundamentals-generator skill）
+1. **fundamentals JSON** — `fundamentals/{code}.json`，通过 `picker/pipeline/refresh_fundamentals.py` 生成（见 fundamentals-generator skill）
 2. **LLM API** — `.env` 中 `TA_API_KEY` + `TA_BASE_URL`
 
 ## 📁 相关文件
@@ -104,7 +104,7 @@ uv run python3 picker/backtest/picker/backtest/run_backtest.py
 | `picker/scoring/v3_full_score.py` | ★ 全量 V3 打分 + essence（8 并发+断点续跑） |
 | `picker/backtest/picker/backtest/run_backtest.py` | 全量回测（V3 vs 涨幅 Spearman 相关性） |
 | `data/caches/fundamental_v3_scores.json` | ★ V3 评分缓存（544只，含 essence），唯一权威缓存 |
-| `picker/pipeline/gen_fundamentals.py` | 个股基本面 JSON 生成器（见 fundamentals-generator skill） |
+| `picker/pipeline/refresh_fundamentals.py` | 个股基本面 JSON 生成器（见 fundamentals-generator skill） |
 
 ## 🔧 环境变量
 

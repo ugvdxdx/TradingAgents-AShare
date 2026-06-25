@@ -144,7 +144,7 @@ def step2_extract():
     return success > 0
 
 
-def step2c_update_chain_tiers(mode: str = "manual"):
+def step2c_update_chain_tiers(mode: str = "auto"):
     """Step 2.6: chain tier_map 更新 — 融合研报+异动+缺口三信号调整热度档位。
 
     依赖 Step 2 的 research.db + Step 2.7 异动缓存(price-confirmed) + Step 2.5 缺口主题。
@@ -434,9 +434,9 @@ def main():
     parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
     parser.add_argument('--skip-movement', action='store_true', help='跳过异动分析 (step2.7)')
     parser.add_argument('--skip-chain-tiers', action='store_true', help='跳过 chain tier_map 更新 (step2.6)')
-    parser.add_argument('--chain-tiers-mode', dest='chain_tiers_mode', default='manual',
+    parser.add_argument('--chain-tiers-mode', dest='chain_tiers_mode', default='auto',
                         choices=['manual', 'auto'],
-                        help='chain tier 更新模式: manual=只输出diff不写 / auto=diff有变化即写入(归档可回滚)')
+                        help='chain tier 更新模式: manual=只输出diff不写 / auto=diff有变化即写入(归档可回滚, 默认)')
     parser.add_argument('--discover-threshold', dest='discover_threshold', type=float, default=8.0,
                         help='缺口发现入池 V3 阈值 (默认 8.0)')
     parser.add_argument('--skip-cleanup', action='store_true', help='跳过冷门清理 (step6.5)')

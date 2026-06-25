@@ -1236,12 +1236,12 @@ def _generate_summary(profile: Dict, fin_health: Dict) -> str:
 
 # ═══════════════════════════════════════════════════════════
 # DEPRECATED: analyze_one() 的写入能力已于 2026-06 废弃。
-# 旧规则型（新浪/百科 API）生成路径质量低于 gen_fundamentals.py（LLM+Tushare），
+# 旧规则型（新浪/百科 API）生成路径质量低于 LLM+Tushare 路径，
 # 且用硬编码相对路径不走 paths.py，容易写错目录。
 #
 # 保留 load_fundamentals() 作为只读工具（内部使用）。
-# 所有新生成请走 picker.pipeline.gen_fundamentals.generate_one() 或
-# picker.pipeline.refresh_fundamentals.refresh_one()。
+# 所有新生成请走 picker.pipeline.refresh_fundamentals.refresh_one()
+# (gen_fundamentals.py 已于 2026-06 删除, 功能并入 refresh_fundamentals)。
 # ═══════════════════════════════════════════════════════════
 
 def load_fundamentals(code: str) -> Optional[Dict]:

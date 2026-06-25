@@ -280,7 +280,7 @@ def attribute_stock_unified(code, name, r5, r20, industry, direction,
                 age = (datetime.now() - datetime.strptime(entry["cached_date"], "%Y-%m-%d")).days
             except Exception:
                 age = ATTR_TTL_DAYS + 1
-            if age < ATTR_TTL_DAYS:
+            if age < ATTR_TTL_DAYS and entry.get("summary"):  # 空壳(summary空)=无效, 需重新归因
                 entry["cached"] = True
                 return entry
 
@@ -342,16 +342,19 @@ def precompute_pool_attribution(max_searches=None, verbose=True):
 
     pool_codes = _list_all_fundamental_codes()
     cache = _load_attr_cache()
+    from picker.discovery.movement_blacklist import is_blacklisted  # 局部 import 避免循环依赖
 
     # 1. 扫描异动股 (按异动幅度降序)
     surging = []
     for code in pool_codes:
+        if is_blacklisted(code):
+            continue  # 异动黑名单 (冷却中): 不预填归因, 缓存不会被重新写入
         is_s, r20, r5 = is_movement_surging(code)
         if is_s:
             surging.append((code, r20, r5))
     surging.sort(key=lambda x: -abs(x[1]))
 
-    # 2. 预填: 跳过已缓存有效+方向一致的
+    # 2. 预填: 跳过已缓存有效(有summary)+方向一致的 (空壳=无效, 需重新归因)
     searched = skipped = 0
     for code, r20, r5 in surging:
         direction = "上涨" if r20 > 0 else "下跌"
@@ -360,7 +363,7 @@ def precompute_pool_attribution(max_searches=None, verbose=True):
             try:
                 cd = entry.get("cached_date") or entry.get("date", "")
                 age = (datetime.now() - datetime.strptime(cd[:10], "%Y-%m-%d")).days
-                if age <= ATTR_TTL_DAYS and entry.get("direction") == direction:
+                if age <= ATTR_TTL_DAYS and entry.get("direction") == direction and entry.get("summary"):
                     skipped += 1
                     continue
             except Exception:

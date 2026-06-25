@@ -42,45 +42,42 @@ research.db 板块研报 (consumer.get_industry_research_brief)
 ## 🎯 快速上手
 
 **直接对我说：**
-- "重生成全量基本面"
-- "重生成 603308 和 300394 的基本面"
-- "只刷新 603308 的财务数据"（用 `--fh-only`）
+- "全量更新基本面"（= 刷新 fundamentals/ 池内所有股票）
+- "重生成 300308 的基本面"
+- "刷新近 3 天有研报的基本面"
 
 ## 🐍 核心命令
 
 ```bash
-# 全量重生成 (544只, 约544×3分钟, 含Tushare财报+研报+防污染)
-uv run python3 picker/pipeline/gen_fundamentals.py --force
+# 全量重写 fundamentals/ 池内所有股票 (Web+Tushare财报+研报+防污染, 并行)
+uv run python3 picker/pipeline/refresh_fundamentals.py --all --workers 5
 
-# 只重生成指定股票
-uv run python3 picker/pipeline/gen_fundamentals.py --codes 603308,300394 --force
+# 只刷新指定股票
+uv run python3 picker/pipeline/refresh_fundamentals.py --stock 300308
 
-# 只补缺失的(不覆盖已有)
-uv run python3 picker/pipeline/gen_fundamentals.py
+# 断点续跑(跳过近 6h 已刷新的, 避免重复)
+uv run python3 picker/pipeline/refresh_fundamentals.py --all --skip-recent-hours 6
 
-# 试跑前 N 只验证
-uv run python3 picker/pipeline/gen_fundamentals.py --count 10
+# 研报触发批量刷新(近3天有研报提及的个股)
+uv run python3 picker/pipeline/refresh_fundamentals.py
 
-# 从指定代码开始(断点续跑)
-uv run python3 picker/pipeline/gen_fundamentals.py --start-from 600019
-
-# 只刷新财务数据(慢层增量, 比全量便宜)
-uv run python3 picker/pipeline/gen_fundamentals.py --codes 603308 --fh-only
-
-# 干跑(只打印不生成)
-uv run python3 picker/pipeline/gen_fundamentals.py --dry-run
+# 跳过网络搜索(省 web search 额度, 仅用 Tushare+研报+LLM)
+uv run python3 picker/pipeline/refresh_fundamentals.py --all --no-web
 ```
 
 ## 📋 参数说明
 
 | 参数 | 说明 |
 |:---|:---|
-| `--codes 603308,300394` | 只生成指定代码(逗号分隔) |
-| `--force` | 覆盖已有 fundamentals JSON(不加则跳过已存在) |
-| `--count N` | 只处理前 N 只 |
-| `--start-from 600019` | 从指定代码开始(跳过之前的, 用于断点续跑) |
-| `--fh-only` | 只刷新 financial_health 部分(Tushare财报, 比全量便宜) |
-| `--dry-run` | 只打印待生成列表, 不实际调用 LLM |
+| `--all` | 全量重写 fundamentals/ 池内所有股票 |
+| `--stock 300308` | 只刷新指定代码 |
+| `--skip-recent-hours 6` | 跳过最近 N 小时已刷新的(断点续跑) |
+| `--days 3` | 研报触发模式下, 只处理近 N 天有研报提及的(默认3) |
+| `--max N` | 最多刷新 N 只(0=全部) |
+| `--no-web` | 跳过网络搜索(省 web search 额度) |
+| `--no-v3` | 刷新后不触发 V3 重评 |
+| `--workers N` | 并发线程数(默认1, LLM为IO密集建议5) |
+| `--dry-run` | 只看不写 |
 
 ## 🛡️ 防污染规则（核心）
 
@@ -99,7 +96,7 @@ LLM 生成时对「一供/份额XX%/锁定/独家/唯一」等强断言强制信
 
 ## ⚙️ 前置条件
 
-1. **股票清单** — `_top500_and_leaders.txt`（代码/名称/行业/市值）
+1. **股票池** — `fundamentals/` 目录下已有的 JSON（全量刷新 = 刷新这些文件；新发现股票由 discovery 模块经 `refresh_one(name_hint=...)` 生成）
 2. **Tushare** — `.env` 中 `TUSHARE_TOKEN`（财报数据，失败时回退LLM填）
 3. **research.db** — 存在则有板块研报注入，不存在则跳过（不崩）
 4. **LLM API** — `.env` 中 `TA_API_KEY` + `TA_BASE_URL`
@@ -109,12 +106,11 @@ LLM 生成时对「一供/份额XX%/锁定/独家/唯一」等强断言强制信
 
 | 文件 | 用途 |
 |:---|:---|
-| `picker/pipeline/gen_fundamentals.py` | ★ 主生成脚本(SYSTEM_PROMPT含防污染规则 + build_prompt注入两源) |
+| `picker/pipeline/refresh_fundamentals.py` | ★ 主重写脚本(REFRESH_SYSTEM_PROMPT含防污染规则 + Web+Tushare+研报注入) |
 | `picker/data/fundamentals_data.py` | Tushare 真实财报拉取(`fetch_real_financials`) |
 | `tradingagents/research/consumer.py` | `get_industry_research_brief()` 板块研报注入 |
-| `_top500_and_leaders.txt` | 股票清单(代码/名称/行业/市值), 带进度标记 |
 | `_world_knowledge_2026_06.md` | 宏观世界知识(地缘评估用) |
-| `fundamentals/{code}.json` | ★ 产出(544只个股基本面JSON) |
+| `fundamentals/{code}.json` | ★ 产出(个股基本面JSON) |
 
 ## 🔧 环境变量
 

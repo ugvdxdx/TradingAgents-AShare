@@ -171,10 +171,9 @@ research.db    fundamentals/*.json     .fundamental_v3_       results/picker_v5/
 | ① 仅提取 | `uv run python3 picker/pipeline/run_daily_update.py --step 2` | 只把帖子 LLM 提取为结构化知识 |
 | ① 仅注入 | `uv run python3 picker/pipeline/run_daily_update.py --step 3` | 只把研报提炼写回 fundamentals JSON |
 | ① 研报全量回填 | `uv run python3 picker/pipeline/run_research_pipeline.py` | 一次性历史回填（区别于日常增量） |
-| **② 重生成基本面** | `uv run python3 picker/pipeline/gen_fundamentals.py --force` | 全量 544 只（Tushare财报+研报+防污染）。约 544×3 分钟 |
-| ② 仅指定股票 | `uv run python3 picker/pipeline/gen_fundamentals.py --codes 603308,300394 --force` | 只重生指定代码 |
-| ② 仅补缺失 | `uv run python3 picker/pipeline/gen_fundamentals.py` | 不加 `--force` 则跳过已存在的 |
-| ② 试跑前 N 只 | `uv run python3 picker/pipeline/gen_fundamentals.py --count 10` | 先验证再全量 |
+| **② 重生成基本面** | `uv run python3 picker/pipeline/refresh_fundamentals.py --all --workers 5` | 全量重写 fundamentals/ 池内所有股票（Web+Tushare财报+研报+防污染） |
+| ② 仅指定股票 | `uv run python3 picker/pipeline/refresh_fundamentals.py --stock 300308` | 只刷新指定代码 |
+| ② 断点续跑 | `uv run python3 picker/pipeline/refresh_fundamentals.py --all --skip-recent-hours 6` | 跳过近 6h 已刷新的，避免重复 |
 | **③ 全量评分** | `uv run python3 picker/scoring/v3_full_score.py` | 544 只 V3 评分（8 并发，~35 分钟）。复用缓存，已评的跳过 |
 | **④ 选股 Top50→10** | `uv run python3 picker/pipeline/debate_picker_v5.py --top-n 50` | LangGraph 7 阶段辩论。约 18 分钟 |
 | ④ 指定日期 | `uv run python3 picker/pipeline/debate_picker_v5.py --date 2026-06-16` | 回测/缓存数据 |
@@ -191,17 +190,17 @@ research.db    fundamentals/*.json     .fundamental_v3_       results/picker_v5/
 | **30 天辩论选股** | `uv run python3 picker/pipeline/debate_picker_v5.py` | LangGraph 7 阶段：增量信息→三分析师→海选→claim 辩论→TOP10 |
 | **全量回测** | `uv run python3 picker/backtest/run_backtest.py` | V3 评分 vs 涨幅相关性回测 |
 | **资金流预拉取** | `uv run python3 picker/pipeline/fetch_money_flow_all.py` | 增量拉取→单一缓存 `.mf_cache/mf.pkl`；热股(有基本面)留14个月，其余60天 |
-| **个股基本面生成** | `uv run python3 picker/pipeline/gen_fundamentals.py` | Tushare 财报 + 板块研报 + 防污染规则驱动的 JSON 生成 |
+| **个股基本面生成** | `uv run python3 picker/pipeline/refresh_fundamentals.py --stock 300308` | Web+Tushare 财报 + 板块研报 + 防污染规则驱动的 JSON 生成 |
 
 ### Tushare 财报集成（`picker/data/fundamentals_data.py`）
 
-基本面 JSON 的财务数字（营收/净利/毛利率/ROE 等）直接来自 Tushare 真实财报，不再依赖 LLM 回忆——后者会取错财报期（实测曾把真实营收 153 亿错记成 107 亿）。`picker/pipeline/gen_fundamentals.py` 生成时自动调用，需配置 `TUSHARE_TOKEN`。失败时回退到 LLM 填写（退化到旧行为，不会崩）。
+基本面 JSON 的财务数字（营收/净利/毛利率/ROE 等）直接来自 Tushare 真实财报，不再依赖 LLM 回忆——后者会取错财报期（实测曾把真实营收 153 亿错记成 107 亿）。`picker/pipeline/refresh_fundamentals.py:refresh_one()` 生成时自动调用，需配置 `TUSHARE_TOKEN`。失败时回退到 LLM 填写（退化到旧行为，不会崩）。
 
 ### 板块研报注入 & 防污染规则
 
 **研报注入**：基本面生成时，通过 `tradingagents/research/consumer.py` 的 `get_industry_research_brief()` 按个股所属行业从 `research.db` 取板块研报（如 PCB 股取 PCB 板块研报），注入 prompt 并标注「板块级·信源中」。冷门股（未被研报直接点名的）也能获得板块视角。
 
-**防污染规则**（`picker/pipeline/gen_fundamentals.py` 的 SYSTEM_PROMPT）：对「一供/份额 XX%/锁定/独家」等强断言强制信源分级（高=公告/券商、中=行业媒体、低=雪球自媒体），**信源低且与他源矛盾的强断言直接删除**。避免自媒体乐观叙事污染基本面数据。
+**防污染规则**（`picker/pipeline/refresh_fundamentals.py` 的 REFRESH_SYSTEM_PROMPT）：对「一供/份额 XX%/锁定/独家」等强断言强制信源分级（高=公告/券商、中=行业媒体、低=雪球自媒体），**信源低且与他源矛盾的强断言直接删除**。避免自媒体乐观叙事污染基本面数据。
 
 ### 辩论系统 v5 — 增量信息驱动的 claim 竞争辩论
 
@@ -277,7 +276,7 @@ research.db
   │  get_dark_horse_stocks()      → 研报黑马 (海选保送)
   │  get_research_risk_signals()  → 研报风险 (海选排雷)
   ▼
-基本面生成 (picker/pipeline/gen_fundamentals.py)  ← 注入板块研报 (信源:中)
+基本面生成 (picker/pipeline/refresh_fundamentals.py)  ← 注入板块研报 (信源:中)
 辩论选股 (picker/pipeline/debate_picker_v5.py)             ← 注入个股研报信号
 ```
 
@@ -406,7 +405,7 @@ a-stock-data/               # 数据端点参考文档
 ── 选股流水线工具 (picker 包, 路径统一经 picker/paths.py) ──
 picker/pipeline/debate_picker_v5.py         # ④ 30天涨幅辩论选股 — LangGraph 7阶段
 picker/scoring/v3_full_score.py           # ③ V3 全量基本面评分 + essence 精华 (544只，8并发)
-picker/pipeline/gen_fundamentals.py # ② 个股基本面 JSON 生成 (Tushare财报+研报+防污染)
+picker/pipeline/refresh_fundamentals.py # ② 个股基本面 JSON 重写 (Web+Tushare财报+研报+防污染)
 picker/data/fundamentals_data.py        #   Tushare 真实财报拉取模块 (②的依赖)
 picker/scoring/fundamental_scorer.py       #   V3 评分引擎 (三子维度 + essence, ③的依赖)
 picker/pipeline/run_daily_update.py         # ① 每日研报增量更新 (采集→提取→注入)

@@ -55,6 +55,8 @@ V3_CACHE = paths.V3_CACHE
 # 归因缓存: 搜索过的上涨原因记录于此, 避免每日重复搜索
 ATTR_CACHE = paths.ATTR_CACHE
 
+from picker.discovery.movement_blacklist import is_blacklisted
+
 
 # ══════════════════════════════════════════════════════════
 # 网络搜索归因 (搜索异动股上涨原因, 判断个股事件 vs 板块行情)
@@ -229,14 +231,16 @@ def scan_price_momentum(
     meta: dict,
     days: int = 5,
     threshold: float = 15.0,
-    score_cutoff: float = 15.0,
+    trend_window: int = 20,
+    trend_threshold: float = 10.0,
 ) -> list:
-    """扫描量价异动但评分偏低的标的。
+    """扫描量价异动标的 (不限 V3 分高低, 高分龙头亦纳入)。
 
     Args:
-        days: 回看天数 (近 N 日涨幅)
-        threshold: 涨幅触发阈值 (%)
-        score_cutoff: V3 分低于此值才算"低估"
+        days: 短窗回看天数 (近 N 日涨幅, 触发用)
+        threshold: 短窗涨幅触发阈值 (%)
+        trend_window: 趋势确认窗口 (默认20日)
+        trend_threshold: 趋势窗口涨幅下限 (%, 默认10; 过滤短炒脉冲/一日游)
 
     Returns:
         新晋股列表, 按"涨幅/评分比"降序 (性价比最高的在前)
@@ -246,13 +250,16 @@ def scan_price_momentum(
         if not isinstance(v, dict) or "sector_score" not in v:
             continue
         score = v["sector_score"]
-        if score >= score_cutoff:
-            continue  # 分数够高, 不算新晋股
+        if is_blacklisted(code):
+            continue  # 异动黑名单 (冷却中): 不进 gems, 避免被归因/板块扩散保送
 
         df = load_kline(code)
         r = calc_returns(df, days)
         if r is None or r < threshold:
             continue
+        rt = calc_returns(df, trend_window)
+        if rt is None or rt < trend_threshold:
+            continue  # 中期未确认, 过滤短炒脉冲/一日游
 
         name = meta.get(code, {}).get("name", "")
         industry = meta.get(code, {}).get("industry", "")
@@ -264,6 +271,7 @@ def scan_price_momentum(
             "delivery": v.get("delivery", 0),
             "capital": v.get("capital", 0),
             f"r{days}": r,
+            f"r{trend_window}": rt,
             "industry": industry,
             # 性价比 = 涨幅 / (评分+1), 越大越被低估
             "misprice_ratio": r / (score + 1),
@@ -381,8 +389,6 @@ def sector_expansion(
         if not isinstance(v, dict) or "sector_score" not in v:
             continue
         score = v["sector_score"]
-        if score >= 15.0:
-            continue
         df = load_kline(code)
         r = calc_returns(df, days)
         if r is None:
@@ -442,17 +448,50 @@ def check_research_coverage(codes: list) -> dict:
 def main():
     parser = argparse.ArgumentParser(description="新晋股发现 (Rising Stars Scanner)")
     parser.add_argument("--days", type=int, default=5, help="回看天数 (默认5)")
-    parser.add_argument("--threshold", type=float, default=15.0, help="涨幅触发阈值%% (默认15)")
-    parser.add_argument("--score-cutoff", type=float, default=15.0, help="V3分低于此值算低估 (默认15)")
+    parser.add_argument("--threshold", type=float, default=15.0, help="短窗涨幅触发阈值%% (默认15)")
+    parser.add_argument("--trend-window", type=int, default=20, help="趋势确认窗口天数 (默认20)")
+    parser.add_argument("--trend-threshold", type=float, default=10.0, help="趋势窗口涨幅下限%% (默认10, 过滤短炒脉冲)")
     parser.add_argument("--expansion-threshold", type=float, default=10.0, help="板块扩散涨幅阈值%% (默认10)")
     parser.add_argument("--rescore", action="store_true", help="扫描后自动重评分新晋股")
     parser.add_argument("--top", type=int, default=20, help="最多展示新晋股数 (默认20)")
     parser.add_argument("--refresh-cache", action="store_true", help="忽略归因缓存, 强制重新搜索")
     parser.add_argument("--no-attribution", action="store_true", help="跳过搜索归因 (纯量化扫描)")
+    parser.add_argument("--blacklist", action="append", default=[], metavar="CODE", help="加入异动黑名单 (可多次; 默认冷却30天)")
+    parser.add_argument("--blacklist-type", default=None, help="按归因 reason_type 批量拉黑 (如: 概念炒作)")
+    parser.add_argument("--blacklist-reason", default="概念炒作-LLM错误归因", help="拉黑原因")
+    parser.add_argument("--blacklist-days", type=int, default=30, help="冷却天数 (默认30)")
+    parser.add_argument("--list-blacklist", action="store_true", help="列出当前有效黑名单")
     args = parser.parse_args()
 
+    # ── 黑名单运维命令 (独立操作, 处理后不继续扫描) ──
+    if args.list_blacklist:
+        from picker.discovery.movement_blacklist import load_blacklist_detail
+        bl = load_blacklist_detail()
+        if not bl:
+            print("黑名单为空")
+        else:
+            print(f"异动黑名单 ({len(bl)} 只, 已剔除过期):")
+            for c, e in sorted(bl.items(), key=lambda x: x[1].get("expires_at", "")):
+                print(f"  {c} {e.get('name','')[:10]:<10} [{e.get('reason_type','')}] "
+                      f"到期 {e.get('expires_at','')} | {e.get('reason','')[:40]}")
+        return
+    if args.blacklist_type:
+        from picker.discovery.movement_blacklist import blacklist_by_reason_type, purge_from_attr_cache
+        codes = blacklist_by_reason_type(args.blacklist_type, args.blacklist_reason, args.blacklist_days)
+        purged = purge_from_attr_cache(codes)
+        print(f"已按类型[{args.blacklist_type}]拉黑 {len(codes)} 只: {codes}")
+        print(f"已从归因缓存删除 {purged} 条")
+        return
+    if args.blacklist:
+        from picker.discovery.movement_blacklist import add_many_to_blacklist, purge_from_attr_cache
+        items = [(c, args.blacklist_reason) for c in args.blacklist]
+        codes = add_many_to_blacklist(items, days=args.blacklist_days)
+        purged = purge_from_attr_cache(codes)
+        print(f"已拉黑 {len(codes)} 只: {codes} | 归因缓存删除 {purged} 条")
+        return
+
     print("═" * 70)
-    print(f"新晋股扫描 (近{args.days}日涨幅>{args.threshold}% & V3<{args.score_cutoff})")
+    print(f"新晋股扫描 (近{args.days}日涨幅>{args.threshold}% & 近{args.trend_window}日>{args.trend_threshold}%)")
     print("═" * 70)
 
     scores = load_v3_scores()
@@ -460,13 +499,13 @@ def main():
     print(f"  评分库: {len(scores)} 只, fundamentals: {len(meta)} 只")
 
     # A. 量价扫描
-    gems = scan_price_momentum(scores, meta, args.days, args.threshold, args.score_cutoff)
+    gems = scan_price_momentum(scores, meta, args.days, args.threshold, args.trend_window, args.trend_threshold)
     print(f"\n══ A. 新晋股候选: {len(gems)} 只 ══")
-    print(f"{'#':>3} {'code':7} {'name':10} {'V3':>5} {'chain':>5} {'r'+str(args.days):>7} {'性价比':>6}  {'行业':24}")
-    print("-" * 90)
+    print(f"{'#':>3} {'code':7} {'name':10} {'V3':>5} {'chain':>5} {'r'+str(args.days):>7} {'r'+str(args.trend_window):>7} {'性价比':>6}  {'行业':24}")
+    print("-" * 98)
     for i, g in enumerate(gems[:args.top], 1):
         print(f"{i:>3} {g['code']:7} {g['name']:10} {g['score']:5.1f} {g['chain']:5.1f} "
-              f"{g[f'r{args.days}']:+6.1f}% {g['misprice_ratio']:6.1f}  {g['industry'][:22]}")
+              f"{g[f'r{args.days}']:+6.1f}% {g[f'r{args.trend_window}']:+6.1f}% {g['misprice_ratio']:6.1f}  {g['industry'][:22]}")
 
     # B. 板块扩散 (含搜索归因)
     if gems:
