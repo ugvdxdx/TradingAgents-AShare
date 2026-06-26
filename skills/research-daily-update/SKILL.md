@@ -64,6 +64,7 @@ uv run python3 picker/pipeline/run_daily_maintenance.py
 
 > **执行顺序**：采集并行启动 → 2.7 异动 → 2.5 缺口 → 2.6 tier → 3 fundamentals → 4 capital → 5 过热 → 6 冷股激活 → 6.5 清理 → 8 世界知识 → 9 快照。
 > 2.7/2.5/2.6 有依赖关系：异动和缺口为 tier 更新提供信号，故先跑。
+> **Step 3 刷新列表** = 研报提及 ∪ **上涨**异动（下跌异动股不入刷新——它们用于感知行业动向，喂给 Step 2.6 chain_tiers 的 `price_confirmed_cold` 发现板块风险）。若某下跌股同时被研报提及，仍会刷新且其下跌结论作为 headwinds 注入。
 
 ## 🔧 子任务单独跑
 

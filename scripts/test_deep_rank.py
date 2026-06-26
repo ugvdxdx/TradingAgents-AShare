@@ -156,7 +156,7 @@ def _v7_ranking(sample, state, ledger):
 
     # 1. chain+capital 降序 = 基础排名
     # 回测验证: chain+capital Spearman=+0.60, 优于V3总分(+0.52)
-    # delivery子维度预测力弱(+0.10), 包含在V3总分里反而稀释信号
+    # surge子维度预测力弱(+0.10), 包含在V3总分里反而稀释信号
     for c in sample:
         c["_anchor_score"] = c.get("chain", 0) + c.get("capital", 0)
     base = sorted(sample, key=lambda x: -x.get("_anchor_score", 0))

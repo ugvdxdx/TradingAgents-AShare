@@ -4,15 +4,20 @@
 读 build_price_factor_history.py 的产出 (含 _base_capital) + capital_history.json,
 对每个变体组合成完整 capital, 算排序质量, 一次性输出对比表。
 
-capital = base_capital(板块动量, 无前视) × price_factor(变体, 无前视)
-排序锚: anchor = chain + capital×2 - delivery×0.5
+capital = base_capital(板块动量, 无前视) + d2(行业相对强度)×2 + price_factor(变体, 无前视)×2
+        (G 模式公式 base+d2×2+pf×2 无封顶; price_factor 用各变体值)
+排序锚: anchor = chain + capital×2 + surge×SURGE_WEIGHT
 评估: 全池 Spearman / TOP10 实盘30日涨幅 / 逐期 ↑↓
 
+⚠ 此脚本原基于已废弃的 D 模式 (capital = base_capital × pf, min5.0 封顶);
+  现统一改用 G 模式公式 base+d2×2+pf×2 (pf 替换为各变体值), 仍测试 pf 变体
+  对排序的贡献, 但 pf 在 G 公式下权重×2 且无封顶, 结论与原 D 模式不可直接对比。
+
 ⚠ 前视偏差声明:
-  - capital (base_capital × price_factor): 无前视 (cutoff 截断 K线/资金流/板块动量)
-  - chain/delivery: 用 V3 cache 当前快照 (季度LLM打分, 无历史版本), 有前视。
+  - capital (base+d2×2+pf×2): 无前视 (cutoff 截断 K线/资金流/板块动量)
+  - chain/surge: 用 V3 cache 当前快照 (季度LLM打分, 无历史版本), 有前视。
     这意味着 Spearman 绝对值偏乐观, 但【变体间相对对比】仍有效 (所有变体共享同一
-    chain/delivery, 前视是常数偏移, 不改变变体排序)。price_factor 的结论可信。
+    chain/surge/d2, 前视是常数偏移, 不改变变体排序)。price_factor 的结论可信。
 
 用法:
     uv run python3 scripts/eval_price_factors.py
@@ -29,6 +34,9 @@ from typing import Dict, List
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
+from picker.scoring.v3_full_score import (
+    _compute_d2_factor, _build_d2_sector_median_cache,
+)
 
 KLINE_DIR = paths.KLINE_CACHE_DIR
 PF_HISTORY = os.path.join(paths.CACHES_DIR, "price_factor_history.json")
@@ -79,8 +87,9 @@ def real_returns(code, cutoff):
 def evaluate(pf_history: dict, cap_history: dict, cutoffs: List[str]) -> Dict[str, dict]:
     """对每个变体, 在每个 cutoff 算排序质量。
 
-    capital = base_capital(cutoff) × price_factor(变体, cutoff)
-    anchor = chain + capital×2 - delivery×0.5
+    capital = base_capital(cutoff) + d2(cutoff)×2 + price_factor(变体, cutoff)×2
+            (G 模式公式, 无封顶; price_factor 替换为变体值)
+    anchor = chain + capital×2 + surge×SURGE_WEIGHT
     """
     variants = set()
     for cutoff_data in pf_history.values():
@@ -98,7 +107,10 @@ def evaluate(pf_history: dict, cap_history: dict, cutoffs: List[str]) -> Dict[st
         # 若无, 回退到 capital_history (注意: 那是 final capital, 会引入双重计算偏差)
         base_cap_map = pf_at.get("_base_capital") or cap_history.get(cutoff, {})
 
-        # 算每只股的 ret + chain/delivery (静态)
+        # 预算该 cutoff 的板块 r20 中位数缓存 (G 模式 d2 因子需要)
+        _build_d2_sector_median_cache(cutoff_date=cutoff)
+
+        # 算每只股的 ret + chain/surge + d2 (cutoff 化, 无前视)
         stock_data = {}
         for code, v in V3.items():
             if not isinstance(v, dict) or "chain" not in v:
@@ -108,8 +120,9 @@ def evaluate(pf_history: dict, cap_history: dict, cutoffs: List[str]) -> Dict[st
                 continue
             stock_data[code] = {
                 "ret": ret, "chain": v.get("chain", 0),
-                "delivery": v.get("delivery", 0),
+                "surge": v.get("surge", 0),
                 "base_capital": base_cap_map.get(code, v.get("capital", 0)),
+                "d2": _compute_d2_factor(code, cutoff_date=cutoff),
             }
         if len(stock_data) < 10:
             continue
@@ -118,16 +131,15 @@ def evaluate(pf_history: dict, cap_history: dict, cutoffs: List[str]) -> Dict[st
             pf_map = pf_at.get(vname)
             if not pf_map:
                 continue
-            # 组合 capital + anchor
-            # capital = base_capital(纯板块动量) × price_factor(变体)
+            # 组合 capital + anchor (G 模式公式: base + d2×2 + pf×2, 无封顶)
             anchors = []
             rets = []
             for code, sd in stock_data.items():
                 pf = pf_map.get(code)
                 if pf is None:
                     continue
-                capital = max(0, min(5.0, sd["base_capital"] * pf))
-                anchor = sd["chain"] + capital * 2 - sd["delivery"] * 0.5
+                capital = max(0, sd["base_capital"] + sd["d2"] * 2 + pf * 2)
+                anchor = sd["chain"] + capital * 2 - sd["surge"] * 0.5
                 anchors.append(anchor)
                 rets.append(sd["ret"])
             if len(anchors) < 10:

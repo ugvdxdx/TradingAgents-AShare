@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 from picker.scoring import v3_full_score as v3
-from picker.scoring import fundamental_scorer as fs
+from picker.scoring import fundamentals_loader as fs
 
 # 从上次失败名单抽样
 FAILED_CODES = ["000333", "000408", "000625", "000776", "002747", "688183", "000960"]
@@ -28,7 +28,7 @@ for code in FAILED_CODES:
     wk_slim = v3._load_world_knowledge_slim()
     wk_section = ""
     if wk_slim:
-        wk_section = f"\n\n【当前市场宏观背景 (来自世界知识)】\n{wk_slim}\n请将以上宏观背景纳入 chain 和 delivery 判断。"
+        wk_section = f"\n\n【当前市场宏观背景 (来自世界知识)】\n{wk_slim}\n请将以上宏观背景纳入 chain 和 surge 判断。"
     full_prompt = v3.get_chain_prompt() + wk_section + sj[:8000] + attr_hint
 
     print(f"\n{'='*80}")
@@ -53,6 +53,6 @@ for code in FAILED_CODES:
     # 尝试解析
     parsed = v3._parse(raw)
     if parsed:
-        print(f"  ✅ 解析成功: chain={parsed['chain']} delivery={parsed['delivery']} capital={parsed['capital']}")
+        print(f"  ✅ 解析成功: chain={parsed['chain']} surge={parsed['surge']} capital={parsed['capital']}")
     else:
         print(f"  ❌ 解析失败 — 见上方原始返回找原因 (截断? markdown包裹? 无JSON?)")

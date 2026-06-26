@@ -197,6 +197,12 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
                 npft = _safe_float(inc_row.get("n_income_attr_p"))
                 result["revenue_yi"] = round(rev / 1e8, 2) if rev is not None else None
                 result["net_profit_yi"] = round(npft / 1e8, 2) if npft is not None else None
+                # 研发费用 (income.rd_exp, 单位元) → 研发费用率 rd_ratio_pct
+                rd_exp = _safe_float(inc_row.get("rd_exp"))
+                if rd_exp is not None:
+                    result["rd_expense_yi"] = round(rd_exp / 1e8, 2)
+                    if rev is not None and rev != 0:
+                        result["rd_ratio_pct"] = round(rd_exp / rev * 100, 2)
 
         # 经营现金流
         if cashflow is not None and len(cashflow) > 0:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""新旧 Prompt 锚分回测对比 — 同一方法论下, 比较两套 chain/delivery 分数的排序预测力。
+"""新旧 Prompt 锚分回测对比 — 同一方法论下, 比较两套 chain/surge 分数的排序预测力。
 
-⚠ 前视偏差: 本脚本用【当前】的 chain/delivery 分数对齐所有历史 cutoff (无法取历史
-   chain/delivery 快照), 与 validate_anchor.py 同一已知近似。但作为新旧 prompt 的
+⚠ 前视偏差: 本脚本用【当前】的 chain/surge 分数对齐所有历史 cutoff (无法取历史
+   chain/surge 快照), 与 validate_anchor.py 同一已知近似。但作为新旧 prompt 的
    【相对】对比是有效的 (同方法、同 cutoff、同股票池, 只换分数来源)。
 
 用法: python3 scripts/backtest_compare_prompts.py
@@ -57,12 +57,12 @@ def get_cutoffs(step=2):
     return out
 
 
-# 关键因子 (CLAUDE.md 记录的最优锚: chain + capital×2 - delivery×0.5)
+# 关键因子 (CLAUDE.md 记录的最优锚: chain + capital×2 + surge×SURGE_WEIGHT)
 FACTORS = {
     "V3总分(sector_score)": lambda v: v.get("sector_score", 0),
     "chain only": lambda v: v.get("chain", 0),
     "chain+capital×2": lambda v: v.get("chain", 0) + v.get("capital", 0) * 2,
-    "锚:chain+cap×2-del×0.5": lambda v: v.get("chain", 0) + v.get("capital", 0) * 2 - v.get("delivery", 0) * 0.5,
+    "锚:chain+cap×2-del×0.5": lambda v: v.get("chain", 0) + v.get("capital", 0) * 2 - v.get("surge", 0) * 0.5,
 }
 
 
@@ -104,7 +104,7 @@ def main():
     print(f"{'='*90}")
     print(f"  新旧 Prompt 锚分回测对比 ({len(cutoffs)}个时间点 × 全池 × {HOLD}日窗口)")
     print(f"  旧: deepseek-v4-pro + 旧prompt | 新: GLM-5.2 + 新prompt")
-    print(f"  ⚠ 同方法相对对比 (chain/delivery 用当前分数, 有前视近似)")
+    print(f"  ⚠ 同方法相对对比 (chain/surge 用当前分数, 有前视近似)")
     print(f"{'='*90}")
 
     print("  回测中 (旧→新)...", flush=True)

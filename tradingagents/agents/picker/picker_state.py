@@ -29,7 +29,7 @@ class StockProfile(TypedDict, total=False):
     # ── 基本面打分 (V3) ──
     v3: float                       # V3 综合基本面分 (sector_score)
     chain: float                    # 产业链卡位子维度
-    delivery: float                 # 业绩兑现子维度
+    surge: float                 # 爆发分子维度(30天超额收益概率)
     capital: float                  # 资金/热度子维度
     # ── 基本面精简信息 (essence, V3 LLM 提炼的定性精华) ──
     essence: Dict[str, Any]         # chain_position/core_catalyst/biggest_bull/

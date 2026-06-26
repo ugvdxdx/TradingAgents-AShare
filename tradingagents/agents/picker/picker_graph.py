@@ -3,7 +3,7 @@
 候选池(V3 全池 + 新晋股 + 研报热门股)统一在 stage1 汇入, 按量化锚排序收窄:
   collect_data → quantum_rank → risk_review → report_render → END
 
-排序锚 = chain + capital×2 - delivery×0.5
+排序锚 = chain + capital×2 + surge×SURGE_WEIGHT
 (回测验证: 21期×530只×30日 Spearman=+0.555, 20/20正相关)。
 无 LLM 辩论 — LLM 从头排序回测为负相关(-0.14), 会破坏量化信号。
 
@@ -29,7 +29,7 @@ class PickerGraph:
     """量化选股图: 候选池 → 量化锚排序 → TOP5。
 
     4 节点基线 (collect_data → quantum_rank → risk_review → report_render),
-    零 LLM 调用。排序锚 = chain + capital×2 - delivery×0.5
+    零 LLM 调用。排序锚 = chain + capital×2 + surge×SURGE_WEIGHT
     (回测验证: 21期×530只×30日 Spearman=+0.555, 20/20正相关)。
     """
 
@@ -60,8 +60,8 @@ class PickerGraph:
         """量化选股基线拓扑 (4 节点, 无LLM辩论):
         collect_data → quantum_rank → risk_review → report_render → END
 
-        - collect_data: V3缓存+K线+资金流 → 候选池(含chain/capital/delivery)
-        - quantum_rank: 按锚(chain+capital×2-delivery×0.5)排序取TOP_k
+        - collect_data: V3缓存+K线+资金流 → 候选池(含chain/capital/surge)
+        - quantum_rank: 按锚(chain+capital×2+surge×SURGE_WEIGHT)排序取TOP_k
         - risk_review: 可信度+风险提示
         - report_render: 终端报告+落盘+🎯策略信号
 
@@ -128,7 +128,7 @@ class PickerGraph:
         os.makedirs(V3_SNAPSHOT_DIR, exist_ok=True)
         path = os.path.join(V3_SNAPSHOT_DIR, f"{trade_date}.json")
 
-        # 全池分数 (从 candidates 提取 chain/delivery/capital)
+        # 全池分数 (从 candidates 提取 chain/surge/capital)
         scores = {}
         for c in result.get("candidates", []):
             code = c.get("code", "")
@@ -136,13 +136,13 @@ class PickerGraph:
                 continue
             scores[code] = {
                 "chain": c.get("chain", 0),
-                "delivery": c.get("delivery", 0),
+                "surge": c.get("surge", 0),
                 "capital": c.get("capital", 0),
             }
 
         snapshot = {
             "date": trade_date,
-            "scores": scores,  # {code: {chain, delivery, capital}}
+            "scores": scores,  # {code: {chain, surge, capital}}
             "ranking": result.get("final_ranking", []),  # TOP5/10 含 key_thesis/key_risk
         }
         try:

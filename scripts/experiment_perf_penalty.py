@@ -24,8 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates, _get_industry,
 )
 
 CAP_HISTORY = os.path.join(paths.CACHES_DIR, "capital_history.json")
@@ -96,13 +95,11 @@ def count_trading_days(d1, d2):
 
 def main():
     from tradingagents.research.normalize import get_sector_keyword_index
-    from tradingagents.research.consumer import get_sector_momentum
 
     cap_hist = json.load(open(CAP_HISTORY, encoding="utf-8"))
     cutoffs = sorted(cap_hist.keys())
 
     kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
     industry_map = {code: _get_industry(code) for code in V3
                     if isinstance(V3[code], dict) and "chain" in V3[code]}
     sector_map = {code: classify(ind, kw_index) for code, ind in industry_map.items()}
@@ -116,41 +113,22 @@ def main():
     # base_anchors[cutoff] = {code: {anchor, ret}}
     base_anchors = {}
     for ci, cutoff in enumerate(cutoffs, 1):
-        mom = get_sector_momentum(days=14)
-        if not mom.get("hot_sectors"):
+        # G 模式 capital (base+d2×2+pf×2 无封顶), 与生产同源; pf/d2 按 cutoff 截断无前视
+        cap_result = compute_capital_updates(cutoff_date=cutoff)
+        cap_dict = cap_result[0] if cap_result else None
+        if not cap_dict:
             continue
-        sr20: Dict[str, list] = {}
-        cr: Dict[str, tuple] = {}
-        for code in industry_map:
-            rv = r5r20_at(code, cutoff)
-            if rv is None:
-                continue
-            cr[code] = rv
-            s = sector_map.get(code)
-            if s:
-                sr20.setdefault(s, []).append(rv[1])
-        sm = {s: statistics.median(v) for s, v in sr20.items() if v}
 
         sd = {}
         for code in industry_map:
-            rv = cr.get(code)
-            if rv is None:
+            entry = cap_dict.get(code)
+            if not isinstance(entry, dict):
+                continue
+            capital = entry.get("capital")
+            if capital is None:
                 continue
             v = V3[code]
-            r5, r20 = rv
-            pf = (1.3 if r20 > 20 and r5 > 5 else (0.9 if r20 > 20 and r5 < -5 else (1.1 if r20 > 20 else
-                  ((1.0 + r20 * 0.01) if r20 > 0 and r5 > 0 else (0.9 if r20 > 0 else
-                  (0.9 if r20 > -10 and r5 > 0 else (0.7 if r20 > -10 else 0.6)))))))
-            s = sector_map.get(code, "")
-            base = _compute_capital_from_momentum(s, mom)
-            for kw, cv in override_sorted:
-                if kw in industry_map[code]:
-                    base = cv
-                    break
-            d2 = 1.15 if sm.get(s) and r20 > sm[s] + 15 else (
-                 0.85 if sm.get(s) and r20 < sm[s] - 10 else 1.0)
-            capital = max(0, base + d2 * 2 + pf * 2)
-            anchor = v.get("chain", 0) + capital * 2 - v.get("delivery", 0) * 0.5
+            anchor = v.get("chain", 0) + capital * 2 - v.get("surge", 0) * 0.5
             sd[code] = anchor
         base_anchors[cutoff] = sd
         if ci % 40 == 0:

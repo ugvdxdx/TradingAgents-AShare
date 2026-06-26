@@ -23,18 +23,25 @@ MF_CACHE_DIR = paths.MF_CACHE_DIR
 # 量化排序锚 (唯一真相源, debaters/review_log 共用)
 # ══════════════════════════════════════════════════════════
 
-def anchor_score(c: Dict[str, Any]) -> float:
-    """量化排序锚: chain + capital×2 - delivery×0.5。
+SURGE_WEIGHT = 1.0  # 爆发分 surge 在排序锚的权重 (替换原 surge 的 -0.5)。
+# surge 全池 Spearman=+0.082 正向 (experiment_surge_weight.py 证实 -0.5 是基于
+# 新晋股子池 -0.33 的错误外推); surge 专为 30 天超额收益设计, 正交于 chain/capital,
+# 故用 +1.0 等权。待实盘积累后用 scripts/experiment_surge_weight.py 扫
+# W∈{0,+0.5,+1.0,+1.5,+2.0} 按 Spearman+TOP10 回测固化。
 
-    回测验证(21期×530只×30日窗口): Spearman=+0.555, 20/20期正相关, 最低+0.34。
-    - chain(产业链卡位) + capital(资金热度)×2: 主信号(+0.54)
-    - delivery(业绩兑现)×(-0.5): 轻微惩罚, 业绩好但卡位差的股涨幅弹性低
+
+def anchor_score(c: Dict[str, Any]) -> float:
+    """量化排序锚: chain + capital×2 + surge×SURGE_WEIGHT。
+
+    - chain(赛道热度×竞争力) + capital(资金热度)×2: 主信号 (回测 ρ=+0.555, 20/20期正相关)
+    - surge(爆发分)×SURGE_WEIGHT: 30天超额收益概率 = 成长性加速拐点 × 催化近度,
+      与 chain(赛道热度一阶)/capital(量价一阶滞后)正交, 提供二阶导 alpha
 
     ⚠ 排序锚的唯一真相源: debaters.make_ranking_debate 与 review_log.log_top50
     均引用本函数, 改公式请同步回测验证 (scripts/validate_anchor.py)。
     """
     return (c.get("chain", 0) + c.get("capital", 0) * 2
-            - c.get("delivery", 0) * 0.5)
+            + c.get("surge", 0) * SURGE_WEIGHT)
 
 
 # ══════════════════════════════════════════════════════════
@@ -156,7 +163,7 @@ def _load_rising_stars(cutoff_date: str = "") -> List[Dict[str, Any]]:
     """从归因缓存发现量价新晋股 (板块供需型), 返回轻量元信息列表。
 
     ⚠ 本函数只负责"发现哪些 code 入池", 不构造分数。入池后由 load_top_n 统一调
-    _build_stock(code, v3_entry) 构造, chain/delivery/capital/essence 全部来自 V3 cache,
+    _build_stock(code, v3_entry) 构造, chain/surge/capital/essence 全部来自 V3 cache,
     与普通股完全一致。归因信息(sector_tag/summary)仅追加到 brief 供展示。
 
     排序: 按近20日涨幅降序 (优先保送最强势的), 截断到 MAX_RISING_STAR_INCLUDE。
@@ -326,7 +333,7 @@ def _build_stock(code: str, v: Dict[str, Any]) -> Dict[str, Any]:
         "name": name,
         "v3": v.get("sector_score", 0),
         "chain": v.get("chain", 0),
-        "delivery": v.get("delivery", 0),
+        "surge": v.get("surge", 0),
         "capital": v.get("capital", 0),
         "essence": v.get("essence", {}),
         "brief": v.get("brief", ""),
@@ -357,9 +364,9 @@ def load_top_n(n: Optional[int] = None, include_codes: Optional[List[str]] = Non
         cutoff_date: 回测模式截止日 (传给研报查询); 实盘留空。
     """
     d = v3_cache if v3_cache is not None else json.load(open(V3_CACHE))
-    # 入池排序: chain + capital (去掉 delivery)
-    # 回测验证(50cutoff, 回溯V3分): 比 V3总分(chain+del+cap) TOP50均涨高 +1.0pp,
-    # delivery 在入池阶段是噪声 (详见 cognition/findings.md 第六章)。
+    # 入池排序: chain + capital (不含 surge)
+    # 回测验证(50cutoff, 回溯V3分): 比 V3总分(chain+surge+cap) TOP50均涨高 +1.0pp,
+    # surge 入池阶段暂不参与 (待 experiment_surge_weight.py 回测验证后再定)。
     # n=None (生产默认) = 全池, 不做召回预筛。
     scored = [(c, v) for c, v in d.items()
               if isinstance(v, dict) and "chain" in v]

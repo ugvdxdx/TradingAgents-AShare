@@ -7,8 +7,8 @@
   本实验用 G 模式(无封顶) + cutoff 重建数据, 量化验证这个结论。
 
 实验设计:
-  召回排序键 = chain + capital (load_top_n 实际用的入池排序, 去掉 delivery)
-  最终排序键 = chain + capital×2 - delivery×0.5 (quantum_rank 锚)
+  召回排序键 = chain + capital (load_top_n 实际用的入池排序, 去掉 surge)
+  最终排序键 = chain + capital×2 + surge×SURGE_WEIGHT (quantum_rank 锚)
   对比 top_n ∈ {50, 100, 150, 200, 全池}:
     - 在召回阶段取 chain+capital top_n 子集
     - 在子集内按锚排序取 TOP10
@@ -30,8 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates, _get_industry,
 )
 
 PF_HISTORY = os.path.join(paths.CACHES_DIR, "price_factor_history.json")
@@ -136,7 +135,6 @@ def main():
     cutoffs = sorted(cap_history.keys())
 
     kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
 
     # 预读 industry
     industry_map = {code: _get_industry(code) for code in V3
@@ -147,7 +145,7 @@ def main():
     print("  召回阶段消融实验 (G模式无封顶): 全池 vs 召回筛选")
     print("=" * 78)
     print(f"  cutoff 数: {len(cutoffs)} | 召回规模: {TOP_N_VALUES}")
-    print(f"  召回排序: chain+capital | 最终锚: chain+capital×2-delivery×0.5\n")
+    print(f"  召回排序: chain+capital | 最终锚: chain+capital×2+surge×SURGE_WEIGHT\n")
 
     # results[top_n] = {rhos, top10, pool_sizes, hit_in_top10}
     results = {n: {"top10": [], "pool_sizes": [], "rhos": []} for n in TOP_N_VALUES}
@@ -157,42 +155,25 @@ def main():
         if not momentum.get("hot_sectors"):
             continue
 
-        # 预算板块 r20 中位 (d2)
-        sector_r20s: Dict[str, list] = {}
-        code_r5r20: Dict[str, tuple] = {}
-        for code in industry_map:
-            rv = r5r20_at(code, cutoff)
-            if rv is None:
-                continue
-            code_r5r20[code] = rv
-            sec = sector_map.get(code)
-            if sec:
-                sector_r20s.setdefault(sec, []).append(rv[1])
-        sector_median = {sec: statistics.median(v) for sec, v in sector_r20s.items() if v}
+        # G 模式 capital (base + d2×2 + pf×2 无封顶), cutoff 化无前视
+        cap_cache = compute_capital_updates(cutoff_date=cutoff)
+        cap_dict = cap_cache[0] if cap_cache else {}
+        if not cap_dict:
+            continue
 
-        # 算全池 G 模式 capital + 收益
-        all_stocks = {}  # code -> {ret, chain, delivery, capital, recall_key}
+        # 算全池 capital + 收益
+        all_stocks = {}  # code -> {ret, chain, surge, capital, recall_key}
         for code in industry_map:
-            rv = code_r5r20.get(code)
-            if rv is None:
+            capital = cap_dict.get(code, {}).get("capital")
+            if capital is None:
                 continue
             ret = real_returns(code, cutoff)
             if ret is None:
                 continue
             v = V3[code]
-            r5, r20 = rv
-            pf = price_factor_g(r5, r20)
-            sec = sector_map.get(code, "")
-            base = _compute_capital_from_momentum(sec, momentum)
-            for keyword, cap_val in override_sorted:
-                if keyword in industry_map[code]:
-                    base = cap_val
-                    break
-            d2 = d2_factor(r20, sector_median.get(sec))
-            capital = max(0, base + d2 * 2 + pf * 2)
             all_stocks[code] = {
                 "ret": ret, "chain": v.get("chain", 0),
-                "delivery": v.get("delivery", 0),
+                "surge": v.get("surge", 0),
                 "capital": capital,
                 "recall_key": v.get("chain", 0) + capital,  # 召回排序键
             }
@@ -213,7 +194,7 @@ def main():
             anchors = []
             rets = []
             for code, sd in pool:
-                anchor = sd["chain"] + sd["capital"] * 2 - sd["delivery"] * 0.5
+                anchor = sd["chain"] + sd["capital"] * 2 - sd["surge"] * 0.5
                 anchors.append(anchor)
                 rets.append(sd["ret"])
             if len(anchors) < 10:

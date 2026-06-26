@@ -6,7 +6,7 @@
 
 机制:
   对 is_star 的股: chain_eff = chain × coef
-  anchor = chain_eff + capital×2 - delivery×0.5
+  anchor = chain_eff + capital×2 + surge×SURGE_WEIGHT
   非 star: 不变
 
 为什么乘法而非加法 (区别于 analyze_rising_star_boost):
@@ -48,14 +48,14 @@ THRESHOLD_PP = 1.0
 # ══════════════════════════════════════════════════════════
 
 def anchor_base(r: dict) -> float:
-    return r["chain"] + r["capital"] * 2 - r["delivery"] * 0.5
+    return r["chain"] + r["capital"] * 2 - r["surge"] * 0.5
 
 
 def make_chainmul(coef: float) -> Callable[[dict], float]:
     """star 股 chain × coef, 非 star 基线锚。"""
     def fn(r: dict) -> float:
         if r["is_star"]:
-            return r["chain"] * coef + r["capital"] * 2 - r["delivery"] * 0.5
+            return r["chain"] * coef + r["capital"] * 2 - r["surge"] * 0.5
         return anchor_base(r)
     return fn
 

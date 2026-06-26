@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""delivery 权重消融实验: 扫描锚公式里 delivery 的权重系数。
+"""surge 权重消融实验: 扫描锚公式里 surge 的权重系数。
 
 背景:
-  当前锚 = chain + capital×2 - delivery×0.5 (delivery 负权重)
-  但回测显示全池 delivery vs 30日涨幅 Spearman = +0.082 (正向! 95/125 期正向)
+  当前锚 = chain + capital×2 + surge×SURGE_WEIGHT (surge 负权重)
+  但回测显示全池 surge vs 30日涨幅 Spearman = +0.082 (正向! 95/125 期正向)
   负权重的依据是"新晋股子池"(-0.33), 被错误推广到全池。
 
 本实验:
   - G 模式 capital (无封顶, cutoff 化)
-  - 扫描 delivery 权重: -0.5(当前) / -0.2 / 0 / +0.3 / +0.5
-  - 锚 = chain + capital×2 + delivery×W
+  - 扫描 surge 权重: -0.5(当前) / -0.2 / 0 / +0.3 / +0.5
+  - 锚 = chain + capital×2 + surge×W
   - 对比 Spearman + TOP10 涨幅 + 最差期
 
 用法:
-  uv run python3 scripts/experiment_delivery_weight.py
+  uv run python3 scripts/experiment_surge_weight.py
 """
 import json
 import os
@@ -26,8 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates, _get_industry,
 )
 
 PF_HISTORY = os.path.join(paths.CACHES_DIR, "price_factor_history.json")
@@ -122,66 +121,39 @@ def classify(industry, kw_index):
 
 
 def main():
-    from tradingagents.research.normalize import get_sector_keyword_index
-    from tradingagents.research.consumer import get_sector_momentum
-
     cap_history = json.load(open(CAP_HISTORY, encoding="utf-8"))
     cutoffs = sorted(cap_history.keys())
 
-    kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
-
     industry_map = {code: _get_industry(code) for code in V3
                     if isinstance(V3[code], dict) and "chain" in V3[code]}
-    sector_map = {code: classify(ind, kw_index) for code, ind in industry_map.items()}
 
     print("=" * 78)
-    print("  delivery 权重消融实验 (G模式无封顶)")
+    print("  surge 权重消融实验 (G模式无封顶)")
     print("=" * 78)
-    print(f"  cutoff 数: {len(cutoffs)} | 锚 = chain + capital×2 + delivery×W")
+    print(f"  cutoff 数: {len(cutoffs)} | 锚 = chain + capital×2 + surge×W")
     print(f"  权重 W: {WEIGHTS}\n")
 
     results = {w: {"rhos": [], "top5": [], "top10": []} for w in WEIGHTS}
 
     for ci, cutoff in enumerate(cutoffs, 1):
-        momentum = get_sector_momentum(days=14)
-        if not momentum.get("hot_sectors"):
+        # G 模式 capital (base+d2×2+pf×2 无封顶), cutoff 化无前视; base 已含板块动量, 不需 sub_sector_override
+        cap_cache = compute_capital_updates(cutoff_date=cutoff)
+        cap_dict = cap_cache[0] if cap_cache else {}
+        if not cap_dict:
             continue
-
-        sector_r20s: Dict[str, list] = {}
-        code_r5r20: Dict[str, tuple] = {}
-        for code in industry_map:
-            rv = r5r20_at(code, cutoff)
-            if rv is None:
-                continue
-            code_r5r20[code] = rv
-            sec = sector_map.get(code)
-            if sec:
-                sector_r20s.setdefault(sec, []).append(rv[1])
-        sector_median = {sec: statistics.median(v) for sec, v in sector_r20s.items() if v}
 
         stock_data = {}
         for code in industry_map:
-            rv = code_r5r20.get(code)
-            if rv is None:
+            capital = cap_dict.get(code, {}).get("capital")
+            if capital is None:
                 continue
             ret = real_returns(code, cutoff)
             if ret is None:
                 continue
             v = V3[code]
-            r5, r20 = rv
-            pf = price_factor_g(r5, r20)
-            sec = sector_map.get(code, "")
-            base = _compute_capital_from_momentum(sec, momentum)
-            for keyword, cap_val in override_sorted:
-                if keyword in industry_map[code]:
-                    base = cap_val
-                    break
-            d2 = d2_factor(r20, sector_median.get(sec))
-            capital = max(0, base + d2 * 2 + pf * 2)
             stock_data[code] = {
                 "ret": ret, "chain": v.get("chain", 0),
-                "delivery": v.get("delivery", 0), "capital": capital,
+                "surge": v.get("surge", 0), "capital": capital,
             }
         if len(stock_data) < 10:
             continue
@@ -190,7 +162,7 @@ def main():
         for w in WEIGHTS:
             anchors = []
             for sd in stock_data.values():
-                anchors.append(sd["chain"] + sd["capital"] * 2 + sd["delivery"] * w)
+                anchors.append(sd["chain"] + sd["capital"] * 2 + sd["surge"] * w)
             rho = spearman(anchors, rets)
             results[w]["rhos"].append(rho)
             order = sorted(range(len(anchors)), key=lambda i: -anchors[i])

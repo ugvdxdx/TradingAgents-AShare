@@ -76,7 +76,7 @@ def run(hold_days=30, step=2):
                 "code": code, "ret": r,
                 "v3": v["sector_score"],
                 "chain": v.get("chain", 0),
-                "delivery": v.get("delivery", 0),
+                "surge": v.get("surge", 0),
                 "capital": v.get("capital", 0),
             })
         periods[cutoff] = rows
@@ -86,7 +86,7 @@ def run(hold_days=30, step=2):
         "V3总分(sector_score)": lambda r: r["v3"],
         "chain only": lambda r: r["chain"],
         "capital only": lambda r: r["capital"],
-        "delivery only": lambda r: r["delivery"],
+        "surge only": lambda r: r["surge"],
         "chain+capital(等权)": lambda r: r["chain"] + r["capital"],
         "chain+capital×1.5": lambda r: r["chain"] + r["capital"] * 1.5,
         "chain+capital×2": lambda r: r["chain"] + r["capital"] * 2,

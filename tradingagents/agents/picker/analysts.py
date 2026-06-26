@@ -52,9 +52,8 @@ def collect_data(state) -> Dict[str, Any]:
     v3_cache_override = None
     try:
         from picker.scoring.v3_full_score import update_capital
-        # capital 计算模式: A=纯base_capital / D=base×pf(旧) / G=base+D2×2+pf×2(默认, 策略回测月均+31%)
-        capital_mode = os.environ.get("CAPITAL_MODE", "G")
-        v3_cache_override = update_capital(mode=capital_mode, persist=False, cutoff_date=cutoff or "")
+        # capital: G 模式 (base+d2×2+pf×2 无封顶, 策略回测月均+31%)
+        v3_cache_override = update_capital(persist=False, cutoff_date=cutoff or "")
     except Exception as e:
         print(f"  [capital] 更新失败(不影响流程): {e}")
 
@@ -131,7 +130,7 @@ def _fmt_fundamental(candidates: List[dict]) -> str:
     for c in candidates:
         e = c.get("essence", {})
         lines.append(
-            f"{c['code']} {c['name']} V3={c['v3']:.1f} [链{c['chain']}+兑{c['delivery']}+资{c['capital']}]\n"
+            f"{c['code']} {c['name']} V3={c['v3']:.1f} [链{c['chain']}+爆{c['surge']}+资{c['capital']}]\n"
             f"  卡位:{e.get('chain_position', '')} | 催化:{e.get('core_catalyst', '')}\n"
             f"  多头:{e.get('biggest_bull', '')} | 空头:{e.get('biggest_bear', '')}\n"
             f"  红线:{e.get('quality_redline', '')} | horizon:{e.get('catalyst_horizon', 'mid')}"

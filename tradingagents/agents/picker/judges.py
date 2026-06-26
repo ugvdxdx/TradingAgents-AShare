@@ -12,6 +12,8 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List
 
+from .data_io import anchor_score  # 排序锚唯一真相源: chain+capital×2+surge×SURGE_WEIGHT
+
 
 def _trace(node: str, note: str) -> dict:
     return {"node": node, "note": note, "ts": datetime.now().isoformat()}
@@ -57,11 +59,11 @@ def format_stock_brief(c: Dict[str, Any]) -> str:
         if dist_high is not None:
             mom_parts.append(f"距高点{dist_high:+.0f}%")
         mom_tag = f" {fire}{break_tag}({', '.join(mom_parts)})"
-    # 量化锚 (排序依据): chain + capital×2 - delivery×0.5
-    anchor = c.get("chain", 0) + c.get("capital", 0) * 2 - c.get("delivery", 0) * 0.5
+    # 量化锚 (排序依据, 真相源 data_io.anchor_score): chain + capital×2 + surge×SURGE_WEIGHT
+    anchor = anchor_score(c)
     return (
         f"{c['code']} {c['name']} 锚={anchor:.1f}{star_tag}{research_tag}{mom_tag} "
-        f"[链{c['chain']}+兑{c['delivery']}+资{c['capital']}]\n"
+        f"[链{c['chain']}+爆{c['surge']}+资{c['capital']}]\n"
         f"  卡位:{e.get('chain_position', '')} | 催化:{e.get('core_catalyst', '')}\n"
         f"  多头:{e.get('biggest_bull', '')} | 空头:{e.get('biggest_bear', '')}\n"
         f"  红线:{e.get('quality_redline', '')} | horizon:{e.get('catalyst_horizon', 'mid')}\n"
@@ -107,18 +109,18 @@ def format_comparison_matrix(finalists: List[Dict[str, Any]]) -> str:
         groups[guess_sector(c)].append(c)
 
     lines = ["【候选股横向对比矩阵】(按板块分组, 按锚分降序)"]
-    lines.append("  锚=chain+capital×2-delivery×0.5 (回测Spearman+0.555, 排序依据)")
+    lines.append("  锚=chain+capital×2+surge×SURGE_WEIGHT (anchor_score 真相源, 回测Spearman+0.555)")
     for sector, stocks in sorted(groups.items(), key=lambda x: -len(x[1])):
         lines.append(f"\n  ▸ {sector} ({len(stocks)}只):")
         # 按anchor降序排
-        for c in sorted(stocks, key=lambda x: -(x.get("chain", 0) + x.get("capital", 0) * 2 - x.get("delivery", 0) * 0.5)):
+        for c in sorted(stocks, key=lambda x: -(anchor_score(x))):
             star = "★" if c.get("_rising_star") else ("☆" if c.get("_research_hot") else " ")
-            anchor = c.get("chain", 0) + c.get("capital", 0) * 2 - c.get("delivery", 0) * 0.5
+            anchor = anchor_score(c)
             r20 = c.get("r20")
             r20s = f"r20={r20:+.0f}%" if r20 is not None else ""
             lines.append(
                 f"    {star} {c['code']} {c['name']:8} 锚={anchor:4.1f} "
-                f"[链{c['chain']}+资{c['capital']}+兑{c['delivery']}] {r20s} 资金{c['fund_5d']:+.1f}亿"
+                f"[链{c['chain']}+资{c['capital']}+爆{c['surge']}] {r20s} 资金{c['fund_5d']:+.1f}亿"
             )
         if len(stocks) >= 2:
             lines.append(f"    ⚡ 同板块竞争: {', '.join(c['name'] for c in stocks)}")
@@ -147,5 +149,5 @@ def _apply_ranking(group: List[Dict[str, Any]], result: List[dict]) -> List[Dict
 # ══════════════════════════════════════════════════════════
 # 旧的 make_screen_round1 (分组海选) / make_screen_debate / make_final_judge
 # (终极PK) 已废弃 — LLM 辩论回测为负相关(-0.14), 重构为纯量化锚排序。
-# 当前生产路径仅 debaters.make_ranking_debate (量化锚 chain+capital×2-delivery×0.5)。
+# 当前生产路径仅 debaters.make_ranking_debate (量化锚 chain+capital×2+surge×SURGE_WEIGHT)。
 # 本文件仅保留被 debaters.py / reporter.py 复用的格式化/辅助函数 (上方已定义)。

@@ -83,7 +83,7 @@ def build_star_samples(cutoffs: List[str], hold_days: int = 30
             stars.append({
                 "code": code, "ret": ret, "r5": r5, "r10": r10, "r20": r20,
                 "chain": v.get("chain", 0), "capital": v.get("capital", 0),
-                "delivery": v.get("delivery", 0), "v3": ss,
+                "surge": v.get("surge", 0), "v3": ss,
                 "vol_ratio": vol_ratio, "dist_high20": dist_high20,
             })
         periods[cutoff] = stars
@@ -98,7 +98,7 @@ METRICS: Dict[str, Callable[[dict], float]] = {
     # 基本面单因子
     "chain": lambda s: s["chain"],
     "capital": lambda s: s["capital"],
-    "delivery": lambda s: s["delivery"],
+    "surge": lambda s: s["surge"],
     "v3": lambda s: s["v3"],
     # 量价单因子
     "r5": lambda s: s["r5"],
@@ -106,12 +106,12 @@ METRICS: Dict[str, Callable[[dict], float]] = {
     "r20": lambda s: s["r20"],
     "vol_ratio": lambda s: s["vol_ratio"],
     # 基本面组合 (全池锚系)
-    "anchor": lambda s: s["chain"] + s["capital"] * 2 - s["delivery"] * 0.5,
-    "chain+capital-delivery": lambda s: s["chain"] + s["capital"] - s["delivery"],
-    "chain-delivery": lambda s: s["chain"] - s["delivery"],
+    "anchor": lambda s: s["chain"] + s["capital"] * 2 - s["surge"] * 0.5,
+    "chain+capital-surge": lambda s: s["chain"] + s["capital"] - s["surge"],
+    "chain-surge": lambda s: s["chain"] - s["surge"],
     "chain×2+capital": lambda s: s["chain"] * 2 + s["capital"],
-    "chain×2+capital-delivery": lambda s: s["chain"] * 2 + s["capital"] - s["delivery"],
-    "chain×3-delivery": lambda s: s["chain"] * 3 - s["delivery"],
+    "chain×2+capital-surge": lambda s: s["chain"] * 2 + s["capital"] - s["surge"],
+    "chain×3-surge": lambda s: s["chain"] * 3 - s["surge"],
     # chain + 量价 (归一化, 让 chain 主导、r20 做 tiebreak)
     "chain/5+r20/50": lambda s: s["chain"] / 5 + s["r20"] / 50,
     "chain/10+r20/50": lambda s: s["chain"] / 10 + s["r20"] / 50,

@@ -86,11 +86,10 @@ FUNDAMENTAL_LLM_SCORES_PATH = _cache("fundamental_llm_scores.json")
 NEED_GENERATE_PATH = _cache("need_generate.json")
 
 # 每日选股快照目录: 每天一份, 含全池分数 + TOP5/10推荐结果 + 理由
-# 回测按 cutoff 取最近快照, 消除 chain/delivery 前视偏差
+# 回测按 cutoff 取最近快照, 消除 chain/surge 前视偏差
 V3_SNAPSHOT_DIR = os.path.join(CACHES_DIR, "v3_snapshots")
 V3_FULL_BACKTEST_PATH = _cache("v3_full_backtest.json")
 BACKTEST_CORRELATION_PATH = _cache("backtest_correlation.json")
-SUB_SECTOR_OVERRIDE_PATH = _cache("sub_sector_override.json")
 
 # 旧名兼容: 部分模块用 LLM_CACHE_FILE 变量名
 LLM_CACHE_FILE = FUNDAMENTAL_LLM_SCORES_PATH

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""买1卖2 策略持仓轮动回测: 对比 delivery 权重的月化收益。
+"""买1卖2 策略持仓轮动回测: 对比 surge 权重的月化收益。
 
 策略规则 (买1卖2):
   - 买入: 某股进入 TOP5 即买入 (买1, 无需确认)
@@ -25,8 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates, _get_industry,
 )
 
 PF_HISTORY = os.path.join(paths.CACHES_DIR, "price_factor_history.json")
@@ -131,14 +130,13 @@ def main():
     cutoffs = sorted(cap_history.keys())
 
     kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
 
     industry_map = {code: _get_industry(code) for code in V3
                     if isinstance(V3[code], dict) and "chain" in V3[code]}
     sector_map = {code: classify(ind, kw_index) for code, ind in industry_map.items()}
 
     print("=" * 78)
-    print("  买1卖2 策略持仓轮动回测 (对比 delivery 权重)")
+    print("  买1卖2 策略持仓轮动回测 (对比 surge 权重)")
     print("=" * 78)
     print(f"  cutoff 数: {len(cutoffs)} | 权重: {WEIGHTS}")
     print(f"  规则: 进入TOP5买入, 连续2次cutoff不在TOP5才卖出\n")
@@ -146,62 +144,48 @@ def main():
     # 每个 cutoff 每个权重算出 TOP5
     top5_history = {w: {} for w in WEIGHTS}  # w -> {cutoff: [codes]}
 
-    # 快照覆盖情况 (回测用历史快照的 chain/delivery, 无快照则回退当前 V3 cache)
+    # 快照覆盖情况 (回测用历史快照的 chain/surge, 无快照则回退当前 V3 cache)
     from picker.snapshot import get_snapshot_at, snapshot_coverage
     snap_lo, snap_hi, snap_n = snapshot_coverage()
     print(f"  快照覆盖: {snap_lo}~{snap_hi} ({snap_n}份) | 无快照的cutoff回退当前V3 cache(前视近似)\n")
 
     for ci, cutoff in enumerate(cutoffs, 1):
-        momentum = get_sector_momentum(days=14)
+        momentum = get_sector_momentum(cutoff_date=cutoff, days=14)
         if not momentum.get("hot_sectors"):
             continue
-        # 按 cutoff 取历史快照的 chain/delivery (消除前视偏差)
+        # 按 cutoff 取历史快照的 chain/surge (消除前视偏差)
         snap_scores, snap_src = get_snapshot_at(cutoff)
-        sector_r20s: Dict[str, list] = {}
-        code_r5r20: Dict[str, tuple] = {}
-        for code in industry_map:
-            rv = r5r20_at(code, cutoff)
-            if rv is None:
-                continue
-            code_r5r20[code] = rv
-            sec = sector_map.get(code)
-            if sec:
-                sector_r20s.setdefault(sec, []).append(rv[1])
-        sector_median = {sec: statistics.median(v) for sec, v in sector_r20s.items() if v}
+        # G 模式 capital (base + d2×2 + pf×2 无封顶), cutoff 化无前视
+        # compute_capital_updates 内部已含板块动量 base, 不再需要 sub_sector_override 拆分降温
+        cap_result = compute_capital_updates(cutoff_date=cutoff)
+        cap_dict = cap_result[0] if cap_result else {}
+        if not cap_dict:
+            continue
 
         stock_data = {}
         for code in industry_map:
-            rv = code_r5r20.get(code)
-            if rv is None:
+            cap_entry = cap_dict.get(code)
+            if not isinstance(cap_entry, dict) or "capital" not in cap_entry:
                 continue
-            # chain/delivery 优先用历史快照, 无快照回退 V3 cache
+            capital = cap_entry["capital"]
+            # chain/surge 优先用历史快照, 无快照回退 V3 cache
             sv = snap_scores.get(code, {})
             if sv:
                 chain_v = sv.get("chain", 0)
-                delivery_v = sv.get("delivery", 0)
+                surge_v = sv.get("surge", 0)
             else:
                 chain_v = V3.get(code, {}).get("chain", 0)
-                delivery_v = V3.get(code, {}).get("delivery", 0)
-            r5, r20 = rv
-            pf = price_factor_g(r5, r20)
-            sec = sector_map.get(code, "")
-            base = _compute_capital_from_momentum(sec, momentum)
-            for keyword, cap_val in override_sorted:
-                if keyword in industry_map[code]:
-                    base = cap_val
-                    break
-            d2 = d2_factor(r20, sector_median.get(sec))
-            capital = max(0, base + d2 * 2 + pf * 2)
+                surge_v = V3.get(code, {}).get("surge", 0)
             stock_data[code] = {
                 "chain": chain_v,
-                "delivery": delivery_v, "capital": capital,
+                "surge": surge_v, "capital": capital,
             }
         if len(stock_data) < 10:
             continue
 
         for w in WEIGHTS:
             scored = sorted(stock_data.items(),
-                            key=lambda x: -(x[1]["chain"] + x[1]["capital"] * 2 + x[1]["delivery"] * w))
+                            key=lambda x: -(x[1]["chain"] + x[1]["capital"] * 2 + x[1]["surge"] * w))
             top5_history[w][cutoff] = [c for c, _ in scored[:5]]
 
         if ci % 40 == 0:
@@ -268,7 +252,7 @@ def main():
         annualized = cumulative ** (1 / max(n_months / 12, 0.01)) - 1 if cumulative > 0 else -1
         avg_turnover = n_buys_total / max(n_periods, 1)
 
-        print(f"\n  ══ delivery 权重 W={w:+.1f} ══")
+        print(f"\n  ══ surge 权重 W={w:+.1f} ══")
         print(f"  累计收益: {(cumulative - 1) * 100:+.2f}%")
         print(f"  持仓交易日: {total_days} ({n_months:.1f} 月)")
         print(f"  月化收益: {monthly:+.2f}%")

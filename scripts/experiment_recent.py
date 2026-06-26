@@ -5,7 +5,7 @@
 本脚本用 10 日窗口, 把 cutoff 推到 2026-06-04, 覆盖最近的行情。
 代价: 10 日窗口噪声更大, 结论仅供参考。
 
-对比 delivery 权重 W=-0.5 vs W=+1.0 在最近 1.5 个月的表现。
+对比 surge 权重 W=-0.5 vs W=+1.0 在最近 1.5 个月的表现。
 """
 import json
 import os
@@ -18,8 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates, _get_industry,
 )
 
 CAP_HISTORY = os.path.join(paths.CACHES_DIR, "capital_history.json")
@@ -82,7 +81,6 @@ def main():
     from tradingagents.research.consumer import get_sector_momentum
 
     kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
     industry_map = {code: _get_industry(code) for code in V3
                     if isinstance(V3[code], dict) and "chain" in V3[code]}
     sector_map = {code: classify(ind, kw_index) for code, ind in industry_map.items()}
@@ -109,44 +107,25 @@ def main():
         momentum = get_sector_momentum(days=14)
         if not momentum.get("hot_sectors"):
             continue
-        sector_r20s: Dict[str, list] = {}
-        code_r5r20: Dict[str, tuple] = {}
-        for code in industry_map:
-            rv = r5r20_at(code, cutoff)
-            if rv is None:
-                continue
-            code_r5r20[code] = rv
-            sec = sector_map.get(code)
-            if sec:
-                sector_r20s.setdefault(sec, []).append(rv[1])
-        sector_median = {sec: statistics.median(v) for sec, v in sector_r20s.items() if v}
+        # G 模式 capital (base + d2×2 + pf×2 无封顶), cutoff 化无前视
+        cap_cache = compute_capital_updates(cutoff_date=cutoff)
+        cap_dict = cap_cache[0] if cap_cache else {}
+        if not cap_dict:
+            continue
 
         stock_data = {}
         for code in industry_map:
-            rv = code_r5r20.get(code)
-            if rv is None:
+            capital = cap_dict.get(code, {}).get("capital")
+            if capital is None:
                 continue
             v = V3[code]
-            r5, r20 = rv
-            pf = (1.3 if r20 > 20 and r5 > 5 else (0.9 if r20 > 20 and r5 < -5 else (1.1 if r20 > 20 else
-                  ((1.0 + r20 * 0.01) if r20 > 0 and r5 > 0 else (0.9 if r20 > 0 else
-                  (0.9 if r20 > -10 and r5 > 0 else (0.7 if r20 > -10 else 0.6)))))))
-            sec = sector_map.get(code, "")
-            base = _compute_capital_from_momentum(sec, momentum)
-            for kw, cv in override_sorted:
-                if kw in industry_map[code]:
-                    base = cv
-                    break
-            d2 = 1.15 if sector_median.get(sec) and r20 > sector_median[sec] + 15 else (
-                 0.85 if sector_median.get(sec) and r20 < sector_median[sec] - 10 else 1.0)
-            capital = max(0, base + d2 * 2 + pf * 2)
-            stock_data[code] = {"chain": v.get("chain", 0), "delivery": v.get("delivery", 0), "capital": capital}
+            stock_data[code] = {"chain": v.get("chain", 0), "surge": v.get("surge", 0), "capital": capital}
 
         if len(stock_data) < 10:
             continue
         for w in WEIGHTS:
             scored = sorted(stock_data.items(),
-                            key=lambda x: -(x[1]["chain"] + x[1]["capital"] * 2 + x[1]["delivery"] * w))
+                            key=lambda x: -(x[1]["chain"] + x[1]["capital"] * 2 + x[1]["surge"] * w))
             top5_hist[w][cutoff] = [(c, d) for c, d in scored[:5]]
 
     # 算 TOP5 的 HOLD 日涨幅

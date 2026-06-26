@@ -268,7 +268,7 @@ def scan_price_momentum(
             "name": name,
             "score": score,
             "chain": v.get("chain", 0),
-            "delivery": v.get("delivery", 0),
+            "surge": v.get("surge", 0),
             "capital": v.get("capital", 0),
             f"r{days}": r,
             f"r{trend_window}": rt,
@@ -563,9 +563,6 @@ def main():
             print(f"  ✓ 已删除, 请手动运行 _v3_full_score.py")
 
     print(f"\n{'═' * 70}")
-    # 更新细分赛道拆分表 (供 capital 模式D 使用)
-    if gems:
-        _update_sub_sector_override(gems, meta)
     # 冷股激活检查 (新晋股逻辑的逆操作)
     _reactivate_cold_stocks()
     print("扫描完成")
@@ -719,107 +716,6 @@ def cleanup_to_cold_stocks(min_score=7.0, max_chain=4.0, max_capital=3.0,
     else:
         print(f"\n  [冷门清理] 无符合条件的股 (热池健康)")
     return cleaned
-
-
-def _update_sub_sector_override(gems, meta):
-    """发现"大类热门但个股滞涨"的细分赛道时, 更新拆分表。
-
-    逻辑: 从 V3 cache 中找"chain 高(基本面强) + 近20日跌幅大"的股票,
-    如果它们被归入热门大类板块(如光通信/AI算力), 说明该细分赛道已降温,
-    在拆分表中标记低 capital。
-
-    与 _load_rising_stars 互补: 新晋股逻辑找"低分但涨得好"的,
-    本函数找"高分但滞涨"的, 两者共同修正评分与市场的偏差。
-
-    输出: .sub_sector_override.json (供 _v3_full_score.py 模式D 加载)
-    """
-    override_path = paths.SUB_SECTOR_OVERRIDE_PATH
-    # 加载现有 (从默认值开始)
-    try:
-        from picker.scoring.v3_full_score import _SUB_SECTOR_OVERRIDE_DEFAULT
-        override = dict(_SUB_SECTOR_OVERRIDE_DEFAULT)
-    except Exception:
-        override = {}
-    if os.path.exists(override_path):
-        try:
-            saved = json.load(open(override_path))
-            override.update(saved)  # 用户/之前保存的覆盖默认
-        except Exception:
-            pass
-
-    # 获取热门大类板块
-    from tradingagents.research.normalize import get_sector_keyword_index
-    kw_index = get_sector_keyword_index()
-    HOT_SECTORS = set()
-    try:
-        from tradingagents.research.consumer import get_sector_momentum
-        momentum = get_sector_momentum(days=14)
-        HOT_SECTORS = {s["sector"] for s in momentum.get("hot_sectors", [])}
-    except Exception:
-        pass
-    if not HOT_SECTORS:
-        print(f"  [拆分表] 无板块动量数据, 跳过")
-        return
-
-    # 从 V3 cache 找滞涨股: chain>=6 (基本面强) + r20<-5 (明显下跌)
-    v3_path = paths.V3_CACHE
-    if not os.path.exists(v3_path):
-        return
-    v3 = json.load(open(v3_path))
-
-    def classify(industry):
-        if not industry: return ""
-        best, h = "", 0
-        for sec, kws in kw_index.items():
-            hits = sum(1 for k in kws if k in industry)
-            if hits > h: h, best = hits, sec
-        return best
-
-    new_overrides = {}
-    # 统计每个细分标签下的滞涨股数量 (避免个别股拖累整个标签)
-    tag_laggard_count = {}
-    tag_industries = {}  # tag → [industry样本] (调试用)
-    for code, entry in v3.items():
-        if not isinstance(entry, dict) or entry.get("chain", 0) < 6:
-            continue
-        industry = meta.get(code, {}).get("industry", "")
-        if not industry:
-            continue
-        big_sector = classify(industry)
-        if big_sector not in HOT_SECTORS:
-            continue
-        df = load_kline(code)
-        if df is None or len(df) < 21:
-            continue
-        df = df.sort_values("trade_date").reset_index(drop=True)
-        r20 = (df["close"].iloc[-1] / df["close"].iloc[-21] - 1) * 100
-        if r20 > -5:
-            continue
-        # 提取细分标签
-        tag = ""
-        if "（" in industry:
-            tag = industry.split("（")[1].split("）")[0][:8]
-        elif "(" in industry:
-            tag = industry.split("(")[1].split(")")[0][:8]
-        if not tag or len(tag) < 2:
-            tag = industry[:8].strip()
-        # 过滤太泛的标签
-        if tag in ("半导体", "通信设备", "电子元器件", "元器件", "化工", "印制电路板"):
-            continue
-        tag_laggard_count[tag] = tag_laggard_count.get(tag, 0) + 1
-        tag_industries.setdefault(tag, []).append(industry[:20])
-
-    # 只有≥3只滞涨股的标签才算群体性降温 (避免个股拖累)
-    for tag, count in tag_laggard_count.items():
-        if count >= 3 and tag not in override:
-            new_overrides[tag] = 1.5
-            override[tag] = 1.5
-
-    if new_overrides:
-        json.dump(override, open(override_path, "w"), ensure_ascii=False, indent=1)
-        print(f"  [拆分表] 新增 {len(new_overrides)} 个降温细分赛道: {list(new_overrides.keys())}")
-    else:
-        print(f"  [拆分表] 无新增 (现有 {len(override)} 个)")
 
 
 if __name__ == "__main__":

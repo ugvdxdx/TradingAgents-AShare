@@ -48,7 +48,7 @@ def log_top50(trade_date: str, candidates: List[Dict[str, Any]]) -> List[Dict]:
             "name": c.get("name", "")[:10],
             "anchor": round(_anchor_score(c), 1),
             "chain": c.get("chain", 0),
-            "delivery": c.get("delivery", 0),
+            "surge": c.get("surge", 0),
             "capital": c.get("capital", 0),
             "v3": c.get("v3", 0),
             "tech_total": round(c.get("tech_total", 0), 1),

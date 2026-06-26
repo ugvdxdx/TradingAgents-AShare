@@ -2,7 +2,7 @@
 """
 J-TradingAgents 量化选股系统
 
-纯量化排序 (无LLM辩论), 按锚分 chain+capital×2-delivery×0.5 选 TOP10。
+纯量化排序 (无LLM辩论), 按锚分 chain+capital×2+surge×SURGE_WEIGHT 选 TOP10。
 回测验证: 21期×530只×30日 Spearman=+0.555, 20/20期正相关。
 
 流程: collect_data → quantum_rank → risk_review → report_render

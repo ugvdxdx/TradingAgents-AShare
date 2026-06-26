@@ -26,7 +26,6 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
   uv run python3 run_daily_maintenance.py --from 2026-06-18 --to 2026-06-21  # 指定日期范围
   uv run python3 run_daily_maintenance.py --skip-research  # 跳过研报采集/提取
   uv run python3 run_daily_maintenance.py --skip-discovery # 跳过板块缺口发现
-  uv run python3 run_daily_maintenance.py --capital-mode G # 使用G模式
 """
 import argparse
 import os
@@ -213,14 +212,14 @@ def step3_refresh_fundamentals(date_from: str, dry_run: bool = False, workers: i
     return result['updated'] > 0
 
 
-def step4_capital_update(capital_mode: str = "G"):
-    """Step 4: capital 动态更新 (纯量化, 0 LLM)"""
+def step4_capital_update():
+    """Step 4: capital 动态更新 (G 模式, 纯量化, 0 LLM)"""
     print('\n' + '=' * 60)
-    print(f'Step 4: capital 动态更新 (模式{capital_mode})')
+    print('Step 4: capital 动态更新 (G 模式)')
     print('=' * 60)
 
     from picker.scoring.v3_full_score import update_capital
-    cache = update_capital(mode=capital_mode, persist=True)
+    cache = update_capital(persist=True)
     return cache is not None
 
 
@@ -405,7 +404,7 @@ def step8_world_knowledge():
 
 
 def step9_rescore():
-    """Step 9: V3 评分缓存刷新 (needs_run 的 chain/delivery/essence 重评)。
+    """Step 9: V3 评分缓存刷新 (needs_run 的 chain/surge/essence 重评)。
 
     注意: 这里刷新的是评分缓存 fundamental_v3_scores.json (供选股直接用),
     不是 v3_snapshots/ 快照 —— 后者由选股流水线 debate_picker_v5 选股时自动写。
@@ -428,7 +427,6 @@ def main():
     parser.add_argument('--step', type=int, default=0, help='只执行指定步骤 (1-9, 0=全部)')
     parser.add_argument('--from', dest='date_from', default='', help='采集起始日 (YYYY-MM-DD，默认近3天)')
     parser.add_argument('--to', dest='date_to', default='', help='采集结束日 (YYYY-MM-DD，默认今天)')
-    parser.add_argument('--capital-mode', dest='cap_mode', default='G', help='capital 模式 (G/D/A)')
     parser.add_argument('--skip-research', action='store_true', help='跳过整个研报链路 (step1-3 含缺口发现)')
     parser.add_argument('--skip-collect', action='store_true', help='只跳采集+提取 (step1-2), 保留缺口发现+刷新 (今天无新帖时用)')
     parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
@@ -548,7 +546,7 @@ def main():
             results[f'数据-{k}'] = ok
 
     # ── 量化链路 (Step 4-6) ──
-    _run(4, step4_capital_update, args.cap_mode)
+    _run(4, step4_capital_update)
     _run(6, step6_cold_reactivate)
     # Step 6.5: 冷门清理 (热→冷, 与 Step 6 对称; 只在全跑时执行)
     if step in (0,) and not args.skip_cleanup:

@@ -1389,5 +1389,192 @@
   "r5": -24.7,
   "cached_date": "2026-06-25",
   "name": "百润股份"
+ },
+ "000811": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 51.2,
+  "r5": 32.5,
+  "cached_date": "2026-06-26",
+  "name": "冰轮环境"
+ },
+ "002378": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 38.4,
+  "r5": 10.4,
+  "cached_date": "2026-06-25",
+  "name": "章源钨业"
+ },
+ "001309": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 34.0,
+  "r5": 25.6,
+  "cached_date": "2026-06-27",
+  "name": "德明利"
+ },
+ "000725": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 32.8,
+  "r5": 13.2,
+  "cached_date": "2026-06-25",
+  "name": "京东方Ａ"
+ },
+ "000783": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 28.4,
+  "r5": 26.1,
+  "cached_date": "2026-06-25",
+  "name": "长江证券"
+ },
+ "002379": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "下跌",
+  "r20": -27.2,
+  "r5": -7.3,
+  "cached_date": "2026-06-25",
+  "name": "宏桥控股"
+ },
+ "603938": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 63.6,
+  "r5": 25.7,
+  "cached_date": "2026-06-27",
+  "name": "三孚股份"
+ },
+ "688669": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 59.3,
+  "r5": 31.2,
+  "cached_date": "2026-06-26",
+  "name": "聚石化学"
+ },
+ "301188": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 58.1,
+  "r5": 18.3,
+  "cached_date": "2026-06-26",
+  "name": "力诺药包"
+ },
+ "002741": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 55.1,
+  "r5": 26.6,
+  "cached_date": "2026-06-26",
+  "name": "光华科技"
+ },
+ "603929": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 55.1,
+  "r5": 9.9,
+  "cached_date": "2026-06-26",
+  "name": "亚翔集成"
+ },
+ "301611": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 54.4,
+  "r5": 20.7,
+  "cached_date": "2026-06-26",
+  "name": "珂玛科技"
+ },
+ "688361": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 41.5,
+  "r5": 31.9,
+  "cached_date": "2026-06-26",
+  "name": "中科飞测"
+ },
+ "603738": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 41.0,
+  "r5": 9.8,
+  "cached_date": "2026-06-26",
+  "name": "XD泰晶科"
+ },
+ "300604": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 40.8,
+  "r5": 17.4,
+  "cached_date": "2026-06-26",
+  "name": "长川科技"
+ },
+ "603800": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 39.9,
+  "r5": 7.5,
+  "cached_date": "2026-06-26",
+  "name": "洪田股份"
+ },
+ "300857": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 39.0,
+  "r5": 28.1,
+  "cached_date": "2026-06-26",
+  "name": "协创数据"
  }
 }

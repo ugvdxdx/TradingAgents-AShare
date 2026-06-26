@@ -3,2722 +3,2722 @@
  "scores": {
   "300308": {
    "chain": 9.8,
-   "delivery": 9.5,
+   "surge": 9.5,
    "capital": 9.9
   },
   "300502": {
    "chain": 9.5,
-   "delivery": 9.0,
+   "surge": 9.0,
    "capital": 9.9
   },
   "300394": {
    "chain": 9.5,
-   "delivery": 9.5,
+   "surge": 9.5,
    "capital": 9.6
   },
   "601138": {
    "chain": 9.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 9.3
   },
   "688498": {
    "chain": 8.8,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.9
   },
   "002409": {
    "chain": 8.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 9.9
   },
   "300548": {
    "chain": 8.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 9.6
   },
   "688256": {
    "chain": 8.8,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 9.3
   },
   "000977": {
    "chain": 9.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 8.5
   },
   "002281": {
    "chain": 8.0,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.6
   },
   "300870": {
    "chain": 8.0,
-   "delivery": 5.8,
+   "surge": 5.8,
    "capital": 9.6
   },
   "002851": {
    "chain": 7.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 9.9
   },
   "301205": {
    "chain": 7.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 9.9
   },
   "688313": {
    "chain": 8.5,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 8.8
   },
   "688183": {
    "chain": 8.8,
-   "delivery": 8.8,
+   "surge": 8.8,
    "capital": 8.4
   },
   "600183": {
    "chain": 8.5,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 8.7
   },
   "688082": {
    "chain": 7.3,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 9.9
   },
   "300666": {
    "chain": 7.2,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 9.9
   },
   "603083": {
    "chain": 7.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 9.6
   },
   "688072": {
    "chain": 7.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.6
   },
   "688729": {
    "chain": 7.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 9.6
   },
   "000938": {
    "chain": 8.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 8.5
   },
   "300408": {
    "chain": 8.8,
-   "delivery": 8.8,
+   "surge": 8.8,
    "capital": 8.2
   },
   "002916": {
    "chain": 8.5,
-   "delivery": 8.2,
+   "surge": 8.2,
    "capital": 8.4
   },
   "688012": {
    "chain": 7.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 9.4
   },
   "688141": {
    "chain": 7.0,
-   "delivery": 2.8,
+   "surge": 2.8,
    "capital": 9.9
   },
   "688200": {
    "chain": 7.0,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.9
   },
   "688809": {
    "chain": 7.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.4
   },
   "002371": {
    "chain": 7.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 9.2
   },
   "301611": {
    "chain": 7.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.2
   },
   "300054": {
    "chain": 7.0,
-   "delivery": 7.2,
+   "surge": 7.2,
    "capital": 9.6
   },
   "300604": {
    "chain": 7.2,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.3
   },
   "300442": {
    "chain": 8.0,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 8.5
   },
   "000988": {
    "chain": 7.2,
-   "delivery": 6.2,
+   "surge": 6.2,
    "capital": 9.2
   },
   "301696": {
    "chain": 8.5,
-   "delivery": 9.0,
+   "surge": 9.0,
    "capital": 7.9
   },
   "688146": {
    "chain": 6.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 9.9
   },
   "688361": {
    "chain": 7.2,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 9.2
   },
   "600498": {
    "chain": 6.5,
-   "delivery": 3.2,
+   "surge": 3.2,
    "capital": 9.9
   },
   "301377": {
    "chain": 7.5,
-   "delivery": 7.2,
+   "surge": 7.2,
    "capital": 8.7
   },
   "600176": {
    "chain": 7.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 8.7
   },
   "688120": {
    "chain": 6.8,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 9.4
   },
   "300567": {
    "chain": 6.8,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 9.2
   },
   "002463": {
    "chain": 7.5,
-   "delivery": 8.8,
+   "surge": 8.8,
    "capital": 8.4
   },
   "301200": {
    "chain": 7.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 8.4
   },
   "601869": {
    "chain": 6.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 9.9
   },
   "605376": {
    "chain": 7.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 8.4
   },
   "688019": {
    "chain": 7.0,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 8.9
   },
   "688783": {
    "chain": 6.0,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 9.9
   },
   "001257": {
    "chain": 7.5,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 8.3
   },
   "001389": {
    "chain": 8.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 7.3
   },
   "688630": {
    "chain": 7.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 8.8
   },
   "000657": {
    "chain": 7.5,
-   "delivery": 5.8,
+   "surge": 5.8,
    "capital": 8.2
   },
   "002436": {
    "chain": 7.0,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 8.7
   },
   "600549": {
    "chain": 7.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 8.2
   },
   "688519": {
    "chain": 7.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 8.7
   },
   "002602": {
    "chain": 7.5,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 8.1
   },
   "603993": {
    "chain": 7.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 8.1
   },
   "688126": {
    "chain": 6.0,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 9.6
   },
   "688820": {
    "chain": 7.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 8.1
   },
   "603979": {
    "chain": 7.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 8.0
   },
   "688037": {
    "chain": 7.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 8.5
   },
   "300475": {
    "chain": 8.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.9
   },
   "600105": {
    "chain": 5.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 9.9
   },
   "688041": {
    "chain": 9.3,
-   "delivery": 8.2,
+   "surge": 8.2,
    "capital": 6.1
   },
   "688195": {
    "chain": 7.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 7.9
   },
   "000636": {
    "chain": 6.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 8.8
   },
   "300750": {
    "chain": 7.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 7.8
   },
   "600584": {
    "chain": 6.8,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 8.5
   },
   "002080": {
    "chain": 6.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 8.7
   },
   "002138": {
    "chain": 6.8,
-   "delivery": 7.4,
+   "surge": 7.4,
    "capital": 8.4
   },
   "603256": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 8.7
   },
   "603186": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 8.7
   },
   "002428": {
    "chain": 6.8,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 8.3
   },
   "002378": {
    "chain": 6.8,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 8.3
   },
   "300274": {
    "chain": 7.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 7.6
   },
   "688411": {
    "chain": 6.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 8.6
   },
   "688525": {
    "chain": 8.5,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 6.6
   },
   "002046": {
    "chain": 5.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 9.6
   },
   "000426": {
    "chain": 7.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 7.5
   },
   "300395": {
    "chain": 6.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 8.5
   },
   "605117": {
    "chain": 7.4,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 7.6
   },
   "000831": {
    "chain": 7.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 7.9
   },
   "002384": {
    "chain": 6.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 8.4
   },
   "002484": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 8.4
   },
   "603986": {
    "chain": 8.0,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 6.9
   },
   "000960": {
    "chain": 6.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 8.3
   },
   "002155": {
    "chain": 6.8,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 8.0
   },
   "002850": {
    "chain": 7.0,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 7.8
   },
   "300476": {
    "chain": 7.5,
-   "delivery": 8.8,
+   "surge": 8.8,
    "capital": 7.3
   },
   "300919": {
    "chain": 7.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.8
   },
   "301358": {
    "chain": 7.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.8
   },
   "603659": {
    "chain": 7.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 7.8
   },
   "603799": {
    "chain": 7.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.8
   },
   "688802": {
    "chain": 8.7,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.1
   },
   "300014": {
    "chain": 6.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 8.2
   },
   "000021": {
    "chain": 8.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.6
   },
   "300450": {
    "chain": 6.8,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.8
   },
   "600961": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 8.0
   },
   "601168": {
    "chain": 7.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.5
   },
   "603459": {
    "chain": 7.8,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 6.7
   },
   "600392": {
    "chain": 6.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.9
   },
   "600885": {
    "chain": 6.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 7.9
   },
   "688234": {
    "chain": 5.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 8.8
   },
   "688629": {
    "chain": 8.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.8
   },
   "002074": {
    "chain": 7.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 7.2
   },
   "002430": {
    "chain": 5.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 8.7
   },
   "301308": {
    "chain": 8.0,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 6.2
   },
   "600111": {
    "chain": 7.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 7.2
   },
   "600601": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.7
   },
   "688668": {
    "chain": 7.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.5
   },
   "002273": {
    "chain": 6.0,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 7.9
   },
   "300576": {
    "chain": 7.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.9
   },
   "688700": {
    "chain": 7.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.4
   },
   "300748": {
    "chain": 6.8,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.1
   },
   "603228": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.3
   },
   "603629": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.3
   },
   "002938": {
    "chain": 6.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.7
   },
   "301511": {
    "chain": 6.8,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.9
   },
   "601061": {
    "chain": 6.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.2
   },
   "688008": {
    "chain": 8.9,
-   "delivery": 9.2,
+   "surge": 9.2,
    "capital": 4.8
   },
   "001309": {
    "chain": 7.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.9
   },
   "002056": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 8.9
   },
   "002156": {
    "chain": 7.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.9
   },
   "300037": {
    "chain": 6.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.9
   },
   "300285": {
    "chain": 6.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 6.9
   },
   "301217": {
    "chain": 6.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 6.9
   },
   "600160": {
    "chain": 6.5,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 6.9
   },
   "601208": {
    "chain": 6.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 6.9
   },
   "605589": {
    "chain": 6.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 6.9
   },
   "688766": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.9
   },
   "300001": {
    "chain": 5.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.8
   },
   "600547": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.8
   },
   "688702": {
    "chain": 8.8,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 4.5
   },
   "688795": {
    "chain": 7.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 5.8
   },
   "600522": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 8.7
   },
   "002636": {
    "chain": 4.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 8.7
   },
   "605358": {
    "chain": 4.0,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 9.2
   },
   "600353": {
    "chain": 4.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 8.7
   },
   "600497": {
    "chain": 5.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.6
   },
   "301071": {
    "chain": 3.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 9.6
   },
   "301638": {
    "chain": 4.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 8.5
   },
   "601991": {
    "chain": 4.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 8.5
   },
   "600869": {
    "chain": 4.0,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 8.9
   },
   "002709": {
    "chain": 7.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.8
   },
   "600011": {
    "chain": 5.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.8
   },
   "600406": {
    "chain": 5.2,
-   "delivery": 5.8,
+   "surge": 5.8,
    "capital": 7.6
   },
   "601868": {
    "chain": 5.0,
-   "delivery": 2.8,
+   "surge": 2.8,
    "capital": 7.8
   },
   "603893": {
    "chain": 7.0,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 5.8
   },
   "300397": {
    "chain": 4.0,
-   "delivery": 1.0,
+   "surge": 1.0,
    "capital": 8.8
   },
   "603738": {
    "chain": 4.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 8.8
   },
   "001267": {
    "chain": 4.2,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 8.5
   },
   "600246": {
    "chain": 3.5,
-   "delivery": 1.0,
+   "surge": 1.0,
    "capital": 9.2
   },
   "600050": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 8.1
   },
   "688521": {
    "chain": 6.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 6.1
   },
   "301165": {
    "chain": 8.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 4.5
   },
   "603019": {
    "chain": 7.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.5
   },
   "688187": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.0
   },
   "601179": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.9
   },
   "688347": {
    "chain": 5.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 6.9
   },
   "600172": {
    "chain": 3.0,
-   "delivery": 0.5,
+   "surge": 0.5,
    "capital": 9.4
   },
   "000539": {
    "chain": 3.8,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 8.6
   },
   "600900": {
    "chain": 4.8,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 7.6
   },
   "601126": {
    "chain": 4.8,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 7.6
   },
   "601985": {
    "chain": 4.8,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.6
   },
   "000973": {
    "chain": 3.5,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 8.8
   },
   "002028": {
    "chain": 4.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 7.8
   },
   "300136": {
    "chain": 5.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 6.8
   },
   "301269": {
    "chain": 6.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.8
   },
   "600089": {
    "chain": 4.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 7.8
   },
   "688110": {
    "chain": 6.0,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 6.3
   },
   "603906": {
    "chain": 4.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 7.8
   },
   "001289": {
    "chain": 4.8,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 7.4
   },
   "003031": {
    "chain": 8.2,
-   "delivery": 7.2,
+   "surge": 7.2,
    "capital": 4.0
   },
   "300124": {
    "chain": 5.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.2
   },
   "600219": {
    "chain": 5.0,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 7.2
   },
   "603920": {
    "chain": 5.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.7
   },
   "002837": {
    "chain": 8.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 4.0
   },
   "300620": {
    "chain": 7.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 4.5
   },
   "601877": {
    "chain": 4.2,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.8
   },
   "300033": {
    "chain": 6.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 5.5
   },
   "600886": {
    "chain": 4.8,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 7.2
   },
   "000066": {
    "chain": 4.0,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 7.9
   },
   "000958": {
    "chain": 4.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 7.4
   },
   "002594": {
    "chain": 4.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 7.4
   },
   "300223": {
    "chain": 5.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.9
   },
   "300661": {
    "chain": 5.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.9
   },
   "300835": {
    "chain": 4.0,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 7.9
   },
   "600021": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.4
   },
   "600580": {
    "chain": 4.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.9
   },
   "600795": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.4
   },
   "600863": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.4
   },
   "600027": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.4
   },
   "000408": {
    "chain": 5.0,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 6.8
   },
   "600362": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 8.3
   },
   "600726": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 8.3
   },
   "000630": {
    "chain": 3.5,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 8.3
   },
   "603688": {
    "chain": 2.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 9.3
   },
   "002050": {
    "chain": 4.8,
-   "delivery": 6.8,
+   "surge": 6.8,
    "capital": 6.9
   },
   "300757": {
    "chain": 5.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 6.2
   },
   "600578": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.2
   },
   "600674": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.2
   },
   "600930": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.2
   },
   "601899": {
    "chain": 4.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 7.2
   },
   "003816": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.2
   },
   "688249": {
    "chain": 5.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 6.6
   },
   "000060": {
    "chain": 3.5,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 8.0
   },
   "600995": {
    "chain": 4.3,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 7.2
   },
   "688300": {
    "chain": 7.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 4.0
   },
   "000725": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 6.9
   },
   "300373": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.9
   },
   "300433": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 6.9
   },
   "301666": {
    "chain": 6.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 4.9
   },
   "600292": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 7.9
   },
   "600378": {
    "chain": 4.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.9
   },
   "600388": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 6.9
   },
   "600460": {
    "chain": 4.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 6.9
   },
   "603260": {
    "chain": 4.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 6.9
   },
   "688981": {
    "chain": 5.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.9
   },
   "300497": {
    "chain": 4.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 6.9
   },
   "600268": {
    "chain": 3.8,
-   "delivery": 3.8,
+   "surge": 3.8,
    "capital": 7.6
   },
   "002422": {
    "chain": 5.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 5.8
   },
   "688235": {
    "chain": 5.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "600236": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.7
   },
   "600226": {
    "chain": 2.5,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 8.7
   },
   "601958": {
    "chain": 7.2,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 4.0
   },
   "002185": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 6.6
   },
   "300857": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.6
   },
   "601600": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 6.6
   },
   "603259": {
    "chain": 5.0,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 6.1
   },
   "688396": {
    "chain": 4.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.6
   },
   "002475": {
    "chain": 5.2,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "600276": {
    "chain": 5.2,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.8
   },
   "688111": {
    "chain": 5.2,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.8
   },
   "601633": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.4
   },
   "688469": {
    "chain": 4.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.4
   },
   "000807": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.3
   },
   "002379": {
    "chain": 4.5,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 6.3
   },
   "600707": {
    "chain": 4.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 6.2
   },
   "601066": {
    "chain": 4.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.2
   },
   "603501": {
    "chain": 5.8,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 4.9
   },
   "688781": {
    "chain": 4.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 6.2
   },
   "600023": {
    "chain": 3.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 7.2
   },
   "601727": {
    "chain": 4.0,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 6.7
   },
   "301656": {
    "chain": 3.2,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 7.4
   },
   "000878": {
    "chain": 3.0,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 7.6
   },
   "600143": {
    "chain": 4.8,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.8
   },
   "600988": {
    "chain": 4.0,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 6.6
   },
   "688331": {
    "chain": 4.8,
-   "delivery": 6.8,
+   "surge": 6.8,
    "capital": 5.8
   },
   "002600": {
    "chain": 4.5,
-   "delivery": 5.8,
+   "surge": 5.8,
    "capital": 6.0
   },
   "688048": {
    "chain": 7.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 3.5
   },
   "002001": {
    "chain": 5.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.4
   },
   "002747": {
    "chain": 3.5,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 6.9
   },
   "601127": {
    "chain": 3.5,
-   "delivery": 5.8,
+   "surge": 5.8,
    "capital": 6.9
   },
   "601688": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.9
   },
   "002821": {
    "chain": 4.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.8
   },
   "603568": {
    "chain": 2.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 7.8
   },
   "300832": {
    "chain": 4.8,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.4
   },
   "600703": {
    "chain": 3.8,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 6.4
   },
   "688796": {
    "chain": 5.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.2
   },
   "300672": {
    "chain": 4.0,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 6.1
   },
   "300776": {
    "chain": 3.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 6.6
   },
   "002179": {
    "chain": 4.2,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.8
   },
   "603929": {
    "chain": 7.0,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 3.0
   },
   "688002": {
    "chain": 3.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 6.5
   },
   "002352": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.4
   },
   "002648": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.4
   },
   "600196": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.4
   },
   "601298": {
    "chain": 4.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 5.4
   },
   "601456": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "601607": {
    "chain": 4.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 5.4
   },
   "603233": {
    "chain": 4.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.4
   },
   "688506": {
    "chain": 4.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "600570": {
    "chain": 4.8,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.1
   },
   "000100": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.3
   },
   "000963": {
    "chain": 4.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "002532": {
    "chain": 3.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 6.3
   },
   "600025": {
    "chain": 5.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 4.8
   },
   "600685": {
    "chain": 4.0,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.8
   },
   "601021": {
    "chain": 4.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.8
   },
   "688017": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.3
   },
   "600418": {
    "chain": 2.8,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 6.9
   },
   "600489": {
    "chain": 2.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 7.2
   },
   "002049": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.1
   },
   "300316": {
    "chain": 3.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 6.1
   },
   "300866": {
    "chain": 3.8,
-   "delivery": 4.8,
+   "surge": 4.8,
    "capital": 5.8
   },
   "600030": {
    "chain": 4.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.6
   },
   "600482": {
    "chain": 3.8,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.8
   },
   "600511": {
    "chain": 3.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 6.1
   },
   "601117": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 6.1
   },
   "688375": {
    "chain": 3.8,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "002241": {
    "chain": 3.8,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.8
   },
   "002429": {
    "chain": 3.8,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.8
   },
   "000776": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 6.0
   },
   "000933": {
    "chain": 3.2,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 6.3
   },
   "002222": {
    "chain": 6.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 3.0
   },
   "600096": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.0
   },
   "688409": {
    "chain": 6.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 3.0
   },
   "688808": {
    "chain": 6.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 3.0
   },
   "002023": {
    "chain": 4.0,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 5.5
   },
   "002353": {
    "chain": 2.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.9
   },
   "002653": {
    "chain": 4.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "002698": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 4.9
   },
   "600018": {
    "chain": 4.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "600085": {
    "chain": 4.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "600150": {
    "chain": 3.6,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "600426": {
    "chain": 4.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 4.9
   },
   "600500": {
    "chain": 2.5,
-   "delivery": 1.0,
+   "surge": 1.0,
    "capital": 6.9
   },
   "600733": {
    "chain": 2.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 6.9
   },
   "688775": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 4.9
   },
   "689009": {
    "chain": 4.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 4.9
   },
   "002414": {
    "chain": 3.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 5.8
   },
   "002558": {
    "chain": 3.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.8
   },
   "300418": {
    "chain": 3.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 5.8
   },
   "600010": {
    "chain": 2.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 6.8
   },
   "600309": {
    "chain": 3.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.8
   },
   "600372": {
    "chain": 3.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 5.8
   },
   "600612": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 6.8
   },
   "600875": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 4.8
   },
   "600893": {
    "chain": 3.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 5.8
   },
   "600998": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.8
   },
   "601211": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "300811": {
    "chain": 5.8,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 3.5
   },
   "300769": {
    "chain": 1.5,
-   "delivery": 0.5,
+   "surge": 0.5,
    "capital": 7.8
   },
   "302132": {
    "chain": 3.8,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "600760": {
    "chain": 3.8,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.4
   },
   "601698": {
    "chain": 3.8,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 5.4
   },
   "000688": {
    "chain": 2.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 6.6
   },
   "000338": {
    "chain": 3.2,
-   "delivery": 4.2,
+   "surge": 4.2,
    "capital": 5.8
   },
   "001391": {
    "chain": 3.8,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.2
   },
   "002625": {
    "chain": 3.8,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.2
   },
   "300803": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.5
   },
   "601881": {
    "chain": 3.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 5.5
   },
   "000166": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.4
   },
   "000768": {
    "chain": 3.5,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 5.4
   },
   "000999": {
    "chain": 3.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "002416": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "600009": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.4
   },
   "600012": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.4
   },
   "600588": {
    "chain": 3.5,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 5.4
   },
   "600642": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 4.4
   },
   "600690": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.4
   },
   "601995": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.4
   },
   "603939": {
    "chain": 3.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.4
   },
   "688220": {
    "chain": 4.0,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 4.9
   },
   "688166": {
    "chain": 4.0,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 4.9
   },
   "002008": {
    "chain": 5.8,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 3.0
   },
   "300751": {
    "chain": 2.0,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 6.8
   },
   "688036": {
    "chain": 3.6,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.2
   },
   "300782": {
    "chain": 3.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 5.2
   },
   "600118": {
    "chain": 3.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 5.2
   },
   "600956": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 4.2
   },
   "601598": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.2
   },
   "603025": {
    "chain": 3.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.2
   },
   "600399": {
    "chain": 3.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 5.2
   },
   "600517": {
    "chain": 3.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.1
   },
   "600673": {
    "chain": 2.8,
-   "delivery": 2.8,
+   "surge": 2.8,
    "capital": 5.8
   },
   "600999": {
    "chain": 3.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.6
   },
   "601901": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.1
   },
   "603195": {
    "chain": 3.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 5.1
   },
   "001280": {
    "chain": 6.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 2.5
   },
   "300364": {
    "chain": 2.5,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 6.0
   },
   "301526": {
    "chain": 5.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 3.0
   },
   "000538": {
    "chain": 3.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.4
   },
   "002736": {
    "chain": 3.0,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 5.4
   },
   "300115": {
    "chain": 3.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 4.9
   },
   "600332": {
    "chain": 3.0,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 5.4
   },
   "601952": {
    "chain": 3.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "688472": {
    "chain": 3.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 4.9
   },
   "688818": {
    "chain": 3.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 4.9
   },
   "688598": {
    "chain": 1.5,
-   "delivery": 0.5,
+   "surge": 0.5,
    "capital": 6.9
   },
   "301371": {
    "chain": 2.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "600487": {
    "chain": 5.8,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 2.5
   },
   "603806": {
    "chain": 2.3,
-   "delivery": 3.2,
+   "surge": 3.2,
    "capital": 6.0
   },
   "600036": {
    "chain": 3.2,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.1
   },
   "000792": {
    "chain": 0.8,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 7.4
   },
   "002126": {
    "chain": 4.0,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 4.2
   },
   "002311": {
    "chain": 2.8,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "600926": {
    "chain": 3.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 4.7
   },
   "601038": {
    "chain": 3.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.2
   },
   "688585": {
    "chain": 3.0,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 5.2
   },
   "000975": {
    "chain": 1.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 6.6
   },
   "601319": {
    "chain": 2.8,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.3
   },
   "002230": {
    "chain": 5.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 2.5
   },
   "601336": {
    "chain": 2.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.5
   },
   "688322": {
    "chain": 6.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 2.0
   },
   "001965": {
    "chain": 2.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 6.0
   },
   "000568": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "002946": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "600004": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "600519": {
    "chain": 2.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.4
   },
   "600887": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "601098": {
    "chain": 2.5,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 5.4
   },
   "601601": {
    "chain": 3.2,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 4.7
   },
   "601816": {
    "chain": 2.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.4
   },
   "601919": {
    "chain": 2.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "603288": {
    "chain": 2.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "688303": {
    "chain": 2.5,
-   "delivery": 1.0,
+   "surge": 1.0,
    "capital": 5.4
   },
   "002064": {
    "chain": 2.4,
-   "delivery": 3.8,
+   "surge": 3.8,
    "capital": 5.4
   },
   "605090": {
    "chain": 3.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 4.8
   },
   "002805": {
    "chain": 1.8,
-   "delivery": 0.5,
+   "surge": 0.5,
    "capital": 6.0
   },
   "000596": {
    "chain": 2.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.2
   },
   "000895": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.2
   },
   "001872": {
    "chain": 2.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 5.2
   },
   "300957": {
    "chain": 2.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.2
   },
   "300972": {
    "chain": 2.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.2
   },
   "600233": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.2
   },
   "000893": {
    "chain": 2.2,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.4
   },
   "002555": {
    "chain": 1.8,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 5.8
   },
   "601009": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.1
   },
   "601012": {
    "chain": 2.4,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 5.2
   },
   "601059": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.1
   },
   "601166": {
    "chain": 2.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.1
   },
   "601398": {
    "chain": 2.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.1
   },
   "601728": {
    "chain": 5.8,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 1.8
   },
   "603605": {
    "chain": 1.8,
-   "delivery": 5.8,
+   "surge": 5.8,
    "capital": 5.8
   },
   "000783": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.1
   },
   "000729": {
    "chain": 2.3,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.2
   },
   "002142": {
    "chain": 2.8,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 4.7
   },
   "300760": {
    "chain": 5.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 2.0
   },
   "601628": {
    "chain": 2.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.5
   },
   "688385": {
    "chain": 4.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 3.0
   },
   "002299": {
    "chain": 2.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "002714": {
    "chain": 2.2,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 5.2
   },
   "600438": {
    "chain": 2.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 4.9
   },
   "600598": {
    "chain": 2.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.4
   },
   "600809": {
    "chain": 2.2,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 5.2
   },
   "601018": {
    "chain": 2.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "601788": {
    "chain": 2.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.4
   },
   "600989": {
    "chain": 2.4,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 4.9
   },
   "000839": {
    "chain": 1.5,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 5.8
   },
   "600845": {
    "chain": 5.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.8
   },
   "001213": {
    "chain": 1.8,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 5.4
   },
   "002128": {
    "chain": 3.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 4.2
   },
   "002568": {
    "chain": 2.0,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 5.2
   },
   "600901": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 4.7
   },
   "601288": {
    "chain": 2.5,
-   "delivery": 2.9,
+   "surge": 2.9,
    "capital": 4.7
   },
   "601939": {
    "chain": 2.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 4.7
   },
   "601963": {
    "chain": 2.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 4.7
   },
   "300085": {
    "chain": 3.0,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 4.2
   },
   "000001": {
    "chain": 2.0,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.1
   },
   "600919": {
    "chain": 2.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.1
   },
   "601318": {
    "chain": 2.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 5.1
   },
   "601328": {
    "chain": 2.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 5.1
   },
   "601988": {
    "chain": 2.0,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 5.1
   },
   "300059": {
    "chain": 1.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 5.5
   },
   "600941": {
    "chain": 5.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.5
   },
   "603296": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 2.5
   },
   "688301": {
    "chain": 5.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 1.5
   },
   "601088": {
    "chain": 2.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 4.4
   },
   "601236": {
    "chain": 1.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 5.4
   },
   "688223": {
    "chain": 2.0,
-   "delivery": 0.5,
+   "surge": 0.5,
    "capital": 4.9
   },
   "601100": {
    "chain": 4.8,
-   "delivery": 7.2,
+   "surge": 7.2,
    "capital": 2.0
   },
   "688271": {
    "chain": 5.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.8
   },
   "000063": {
    "chain": 4.2,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 2.5
   },
   "002157": {
    "chain": 1.5,
-   "delivery": 1.0,
+   "surge": 1.0,
    "capital": 5.2
   },
   "600803": {
    "chain": 2.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 4.2
   },
   "601838": {
    "chain": 2.0,
-   "delivery": 8.0,
+   "surge": 8.0,
    "capital": 4.7
   },
   "600938": {
    "chain": 2.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 4.2
   },
   "601225": {
    "chain": 2.2,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 4.4
   },
   "601699": {
    "chain": 1.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 5.1
   },
   "000425": {
    "chain": 4.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 2.0
   },
   "001286": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 2.0
   },
   "002236": {
    "chain": 5.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 1.5
   },
   "300806": {
    "chain": 4.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 2.0
   },
   "600660": {
    "chain": 4.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 2.0
   },
   "603129": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 2.0
   },
   "603268": {
    "chain": 4.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 2.0
   },
   "601096": {
    "chain": 4.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 2.0
   },
   "601965": {
    "chain": 4.5,
-   "delivery": 6.8,
+   "surge": 6.8,
    "capital": 2.0
   },
   "300179": {
    "chain": 4.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 2.0
   },
   "002181": {
    "chain": 1.5,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 4.9
   },
   "600188": {
    "chain": 2.0,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 4.4
   },
   "601898": {
    "chain": 2.2,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 4.2
   },
   "002203": {
    "chain": 3.8,
-   "delivery": 3.0,
+   "surge": 3.0,
    "capital": 2.5
   },
   "600000": {
    "chain": 1.2,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 5.1
   },
   "688777": {
    "chain": 4.8,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 1.5
   },
   "601169": {
    "chain": 1.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 4.7
   },
   "600026": {
    "chain": 2.0,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 4.2
   },
   "000333": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.5
   },
   "002415": {
    "chain": 4.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 1.5
   },
   "300012": {
    "chain": 4.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.5
   },
   "300628": {
    "chain": 4.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 1.5
   },
   "601857": {
    "chain": 1.8,
-   "delivery": 2.0,
+   "surge": 2.0,
    "capital": 4.2
   },
   "603308": {
    "chain": 4.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.5
   },
   "002920": {
    "chain": 3.8,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 2.0
   },
   "601231": {
    "chain": 3.8,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 2.0
   },
   "601689": {
    "chain": 3.8,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 2.0
   },
   "688188": {
    "chain": 3.8,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 2.0
   },
   "300015": {
    "chain": 4.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 1.0
   },
   "600415": {
    "chain": 4.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.0
   },
   "600066": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 2.0
   },
   "000708": {
    "chain": 4.2,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.2
   },
   "002595": {
    "chain": 4.2,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.2
   },
   "600031": {
    "chain": 3.8,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.5
   },
   "000559": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.5
   },
   "000837": {
    "chain": 3.5,
-   "delivery": 1.5,
+   "surge": 1.5,
    "capital": 1.5
   },
   "002460": {
    "chain": 3.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.5
   },
   "002831": {
    "chain": 3.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 1.5
   },
   "300083": {
    "chain": 3.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 1.5
   },
   "300759": {
    "chain": 4.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.0
   },
   "301345": {
    "chain": 3.5,
-   "delivery": 7.5,
+   "surge": 7.5,
    "capital": 1.5
   },
   "301603": {
    "chain": 4.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.0
   },
   "600741": {
    "chain": 3.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.5
   },
   "603337": {
    "chain": 3.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.5
   },
   "603766": {
    "chain": 3.5,
-   "delivery": 5.8,
+   "surge": 5.8,
    "capital": 1.5
   },
   "000625": {
    "chain": 3.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 1.5
   },
   "002078": {
    "chain": 3.8,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 1.0
   },
   "603298": {
    "chain": 3.8,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.0
   },
   "000157": {
    "chain": 3.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.0
   },
   "002444": {
    "chain": 3.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.0
   },
   "301498": {
    "chain": 3.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.0
   },
   "600323": {
    "chain": 4.0,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 0.5
   },
   "603733": {
    "chain": 3.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 1.0
   },
   "688302": {
    "chain": 3.5,
-   "delivery": 1.0,
+   "surge": 1.0,
    "capital": 1.0
   },
   "601390": {
    "chain": 3.5,
-   "delivery": 1.8,
+   "surge": 1.8,
    "capital": 0.8
   },
   "000651": {
    "chain": 3.0,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.0
   },
   "300979": {
    "chain": 3.0,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.0
   },
   "688172": {
    "chain": 3.0,
-   "delivery": 1.0,
+   "surge": 1.0,
    "capital": 1.0
   },
   "301048": {
    "chain": 3.0,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 1.0
   },
   "000598": {
    "chain": 2.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 1.0
   },
   "002027": {
    "chain": 2.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.0
   },
   "002318": {
    "chain": 2.5,
-   "delivery": 6.0,
+   "surge": 6.0,
    "capital": 1.0
   },
   "300144": {
    "chain": 2.5,
-   "delivery": 7.0,
+   "surge": 7.0,
    "capital": 1.0
   },
   "300251": {
    "chain": 2.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 1.0
   },
   "601158": {
    "chain": 2.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 1.0
   },
   "601512": {
    "chain": 2.5,
-   "delivery": 5.0,
+   "surge": 5.0,
    "capital": 1.0
   },
   "601808": {
    "chain": 2.5,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 1.0
   },
   "603099": {
    "chain": 2.5,
-   "delivery": 3.5,
+   "surge": 3.5,
    "capital": 1.0
   },
   "605099": {
    "chain": 2.5,
-   "delivery": 6.5,
+   "surge": 6.5,
    "capital": 1.0
   },
   "605499": {
    "chain": 2.5,
-   "delivery": 8.5,
+   "surge": 8.5,
    "capital": 1.0
   },
   "603699": {
    "chain": 2.5,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 1.0
   },
   "600662": {
    "chain": 2.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 0.8
   },
   "603816": {
    "chain": 2.4,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 0.8
   },
   "600039": {
    "chain": 2.5,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 0.5
   },
   "601866": {
    "chain": 2.2,
-   "delivery": 4.5,
+   "surge": 4.5,
    "capital": 0.8
   },
   "601872": {
    "chain": 2.2,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 0.8
   },
   "605198": {
    "chain": 2.0,
-   "delivery": 4.0,
+   "surge": 4.0,
    "capital": 1.0
   },
   "002466": {
    "chain": 2.0,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 0.8
   },
   "001221": {
    "chain": 2.0,
-   "delivery": 5.5,
+   "surge": 5.5,
    "capital": 0.5
   },
   "003036": {
    "chain": 1.5,
-   "delivery": 2.5,
+   "surge": 2.5,
    "capital": 0.5
   },
   "600545": {
    "chain": 1.5,
-   "delivery": 0.5,
+   "surge": 0.5,
    "capital": 0.5
   },
   "603226": {
    "chain": 0.5,
-   "delivery": 0.5,
+   "surge": 0.5,
    "capital": 0.5
   },
   "300236": {
    "chain": 0,
-   "delivery": 0,
+   "surge": 0,
    "capital": 0
   },
   "688233": {
    "chain": 0,
-   "delivery": 0,
+   "surge": 0,
    "capital": 0
   }
  },

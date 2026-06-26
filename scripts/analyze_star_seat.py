@@ -6,7 +6,7 @@
   - 但新晋股跑赢 TOP10 中位数的命中率 18.7% vs 全池 14.6% vs 同低v3控制组 6.5%,
     量价异动带来真增量 (+12.2pp vs 控制组)。
   - 每期最强新晋股 20/20 期碾压 TOP10 末位, 平均 +127pp。
-  - 新晋股内部 ``chain+capital-delivery`` 与后续涨幅 ρ=+0.494 (20/20 正)。
+  - 新晋股内部 ``chain+capital-surge`` 与后续涨幅 ρ=+0.494 (20/20 正)。
 
 本脚本验证假设: 既然排序推不动、但最强新晋股确定性碾压 TOP10 末位,
 正确做法不是改 _anchor_score, 而是【产出后保留席位】:
@@ -16,8 +16,8 @@
 机制维度:
   - K (预留席位数): 1, 2, 3
   - star 内部排序指标 (从无前视偏差的静态值算):
-      * chain+capital-delivery  (新晋股内最强 ρ=+0.49)
-      * chain-delivery          (ρ=+0.47)
+      * chain+capital-surge  (新晋股内最强 ρ=+0.49)
+      * chain-surge          (ρ=+0.47)
       * anchor (chain+cap×2-deliv×0.5)  (全池基线锚, 对照)
       * r20                     (纯量价, 看是否"最强异动"就够)
       * chain                   (单因子最强)
@@ -49,12 +49,12 @@ from scripts.analyze_rising_star_boost import (
 # ══════════════════════════════════════════════════════════
 
 def anchor_base(r: dict) -> float:
-    return r["chain"] + r["capital"] * 2 - r["delivery"] * 0.5
+    return r["chain"] + r["capital"] * 2 - r["surge"] * 0.5
 
 
 STAR_METRICS: Dict[str, Callable[[dict], float]] = {
-    "chain+capital-delivery": lambda r: r["chain"] + r["capital"] - r["delivery"],
-    "chain-delivery": lambda r: r["chain"] - r["delivery"],
+    "chain+capital-surge": lambda r: r["chain"] + r["capital"] - r["surge"],
+    "chain-surge": lambda r: r["chain"] - r["surge"],
     "anchor(对照)": lambda r: anchor_base(r),
     "r20(量价对照)": lambda r: r["r20"],
     "chain": lambda r: r["chain"],

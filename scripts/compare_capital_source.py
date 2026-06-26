@@ -3,12 +3,12 @@
 
 V3 cache 同时存了:
   - capital: G模式量化重算 (base+D2×2+pf×2, 无封顶, 每日更新)
-  - sector_score_model: LLM原始 sector_score (chain+delivery+LLM_capital)
-  → LLM_capital = sector_score_model - chain - delivery (LLM打的0-5分)
+  - sector_score_model: LLM原始 sector_score (chain+surge+LLM_capital)
+  → LLM_capital = sector_score_model - chain - surge (LLM打的0-5分)
 
 对比两个锚的 Spearman:
-  锚A (G模式):  chain + capital_G×2 - delivery×0.5   ← 当前生产
-  锚B (LLM直出): chain + capital_L×2 - delivery×0.5  ← 用户提议
+  锚A (G模式):  chain + capital_G×2 + surge×SURGE_WEIGHT   ← 当前生产
+  锚B (LLM直出): chain + capital_L×2 + surge×SURGE_WEIGHT  ← 用户提议
 
 用法: python3 scripts/compare_capital_source.py
 """
@@ -60,8 +60,8 @@ def run():
     print(f"{'='*80}")
 
     factors = {
-        "锚A: G模式cap×2-del×0.5 (生产)": lambda v: v.get("chain",0) + v.get("capital",0)*2 - v.get("delivery",0)*0.5,
-        "锚B: LLM cap×2-del×0.5":        lambda v: v.get("chain",0) + llm_cap(v)*2 - v.get("delivery",0)*0.5,
+        "锚A: G模式cap×2-del×0.5 (生产)": lambda v: v.get("chain",0) + v.get("capital",0)*2 - v.get("surge",0)*0.5,
+        "锚B: LLM cap×2-del×0.5":        lambda v: v.get("chain",0) + llm_cap(v)*2 - v.get("surge",0)*0.5,
         "G模式 sector_score (chain+del+Gcap)": lambda v: v.get("sector_score",0),
         "LLM sector_score_model (chain+del+LLMcap)": lambda v: v.get("sector_score_model",0),
         "纯 chain (无capital)":           lambda v: v.get("chain",0),
@@ -108,7 +108,7 @@ def llm_cap(v):
     """从 sector_score_model 反推 LLM 原始 capital"""
     ssm = v.get("sector_score_model")
     if not isinstance(ssm, (int, float)): return v.get("capital", 0)
-    return round(ssm - v.get("chain", 0) - v.get("delivery", 0), 1)
+    return round(ssm - v.get("chain", 0) - v.get("surge", 0), 1)
 
 
 if __name__ == "__main__":

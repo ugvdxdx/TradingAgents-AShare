@@ -126,7 +126,7 @@ def _render_report(state) -> str:
 
     lines.append("\n" + "═" * 70)
     lines.append(f"  📈 量化选股榜 — {date}")
-    lines.append(f"  排序锚: chain+capital×2-delivery×0.5 | "
+    lines.append(f"  排序锚: chain+capital×2+surge×SURGE_WEIGHT | "
                  f"候选 {len(cands)} 只 → TOP{len(ranking)}")
     lines.append("═" * 70)
 

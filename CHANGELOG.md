@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **V3 第三子维度 delivery→surge 爆发分 (2026-06-26)**: delivery(业绩兑现) 与 fundamentals 的 growth_score 高度共线, 预测力稀释至 +0.10; experiment 证实其全池 Spearman=+0.082 正向, 原 −0.5 负权重是基于新晋股子池 −0.33 的错误外推。替换为 **surge 爆发分**(30天超额收益概率=成长性加速拐点×催化近度, 正交于 chain/capital 的二阶导 alpha, 4档: 加速主升8-10/温和加速5.5-7.9/平稳钝化3-5.4/失速0-2.9)。锚公式 `chain+capital×2-delivery×0.5` → `chain+capital×2+surge×SURGE_WEIGHT`(SURGE_WEIGHT=+1.0, 待实盘积累后用 experiment_surge_weight.py 回测固化)。字段 delivery→surge 全量重命名(字段/变量/TTL key `surge_scored_date`/cache 574只/snapshots/21个scripts/文档); judges.py 三处复制公式统一调用 `data_io.anchor_score` 消除技术债; delivery 7条交叉验证规则逐条裁决(继承客户实证/财报窗口/需求性质现金流, 改造利润率红线→杠杆方向/模板句→催化空话, 丢弃增速匹配/ROE校验)。cache `surge_scored_date` 已清空, 下次维护全量重评爆发分。详见 CLAUDE.md「surge 爆发分重设计」。
+
 ### Fixed
 - **选股结果非确定性 (PYTHONHASHSEED)**：`normalize.py:get_sector_keyword_index()` 原用 `set()` 合并板块名导致 key 顺序随进程随机，industry 在多板块命中数相同时 classify 结果不稳 → capital 随进程波动、排名翻转。修复：`sorted(set(...))` 固定顺序 + classify 平局取命中关键词最长的板块。同一数据两次跑选股结果不一致问题根治。
 - **新晋股/研报股算分逻辑统一为普通股**：`_load_rising_stars` / `_load_research_hot_stocks` 原各自构造完整 stock dict（含 V3=0 时的归因模板假数据 chain_position/biggest_bull 等），算分逻辑与普通股分叉。重构为只返回 code + 归因摘要（`_attribution_brief`），入池后由 `load_top_n` 统一调 `_build_stock(code, v3_entry)` 构造，chain/delivery/capital/essence 全部来自 V3 cache，与普通股完全一致。归因信息仅追加到 brief 供展示。同时移除行业动量调整对新晋股/研报股的特殊跳过逻辑（v3=0 自然不受影响）。无 V3 评分的保送股（chain/capital/delivery=0）锚分=0 沉底，不再靠假数据参与排序。

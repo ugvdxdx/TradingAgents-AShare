@@ -33,8 +33,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates,
 )
 
 HISTORY_PATH = os.path.join(paths.CACHES_DIR, "capital_history.json")
@@ -79,53 +78,19 @@ def price_factor_at(code: str, cutoff: str) -> float:
 # 单个 cutoff 的 capital 全量重建
 # ══════════════════════════════════════════════════════════
 
-def build_capital_at(cutoff: str, v3: dict, kw_index: dict,
-                     override_sorted: list) -> Dict[str, float]:
-    """重建 cutoff 当天全池的 capital。
+def build_capital_at(cutoff: str) -> Dict[str, float]:
+    """重建 cutoff 当天全池的 capital (G 模式: base+d2×2+pf×2 无封顶)。
 
-    返回 {code: capital}, 仅含有 fundamentals 的股 (与生产 compute_capital_updates 一致)。
+    调用 v3_full_score.compute_capital_updates(cutoff_date=cutoff) 拿 G 模式 cache,
+    提取 {code: capital}。与生产选股流程同源 (无前视: pf/d2 按 cutoff 截断 K线)。
     """
-    from tradingagents.research.consumer import get_sector_momentum
-
-    # cutoff 化的板块动量
-    try:
-        momentum = get_sector_momentum(cutoff_date=cutoff, days=14)
-    except Exception:
+    cap_cache = compute_capital_updates(cutoff_date=cutoff)
+    if not cap_cache:
         return {}
-    if not momentum.get("hot_sectors"):
-        return {}
-
-    def classify(industry):
-        # 平局裁决: 命中数相同时取命中关键词最长的板块 (与 v3_full_score._classify_sector 一致)
-        if not industry:
-            return ""
-        best, best_hit, best_kw_len = "", 0, 0
-        for sec, kws in kw_index.items():
-            matched = [k for k in kws if k in industry]
-            h = len(matched)
-            if h <= 0:
-                continue
-            max_kw_len = max(len(k) for k in matched)
-            if h > best_hit or (h == best_hit and max_kw_len > best_kw_len):
-                best_hit, best_kw_len, best = h, max_kw_len, sec
-        return best
-
-    result = {}
-    for code, entry in v3.items():
-        if not isinstance(entry, dict) or "chain" not in entry:
-            continue
-        industry = _get_industry(code)
-        sector = classify(industry)
-        if not sector:
-            continue
-        base_capital = _compute_capital_from_momentum(sector, momentum)
-        for keyword, cap_val in override_sorted:
-            if keyword in industry:
-                base_capital = cap_val
-                break
-        pf = price_factor_at(code, cutoff)
-        result[code] = round(max(0, min(5.0, base_capital * pf)), 1)
-    return result
+    cap_dict = cap_cache[0]
+    return {code: entry.get("capital", 0)
+            for code, entry in cap_dict.items()
+            if isinstance(entry, dict) and "capital" in entry}
 
 
 # ══════════════════════════════════════════════════════════
@@ -174,16 +139,11 @@ def main():
         print("  ✓ 全部已存在, 无需计算")
         return
 
-    # 预加载共享资源
-    from tradingagents.research.normalize import get_sector_keyword_index
-    kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
-
     print(f"  {'cutoff':>12} {'板块数':>6} {'个股数':>6} {'hot板块示例':>30}")
     print("  " + "-" * 60)
     t0 = time.time()
     for i, cutoff in enumerate(todo, 1):
-        caps = build_capital_at(cutoff, v3, kw_index, override_sorted)
+        caps = build_capital_at(cutoff)
         history[cutoff] = caps
         # 进度
         hot = ""

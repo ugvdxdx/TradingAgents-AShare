@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """新晋股 chain-boost 可行性分析 (只分析, 不改生产代码)。
 
-核心问题: 在量化锚 ``chain + capital×2 - delivery×0.5`` 上, 对新晋股加一个
+核心问题: 在量化锚 ``chain + capital×2 + surge×SURGE_WEIGHT`` 上, 对新晋股加一个
 chain-boost (或对照的 anchor/capital boost), 能不能提升 21 期 Spearman 且
 不破坏 TOP10 实盘质量?
 
@@ -140,7 +140,7 @@ def get_all_cutoffs(step: int = 2) -> List[str]:
 # ══════════════════════════════════════════════════════════
 
 def build_periods(cutoffs: List[str], hold_days: int = 30) -> Dict[str, List[dict]]:
-    """对每个 cutoff, 构建一行 = {code, ret, v3, chain, capital, delivery, r20, is_star}。
+    """对每个 cutoff, 构建一行 = {code, ret, v3, chain, capital, surge, r20, is_star}。
 
     K 线按 cutoff 截断 (无前视); r20 / ret 都基于截断后的位置算。
     """
@@ -189,7 +189,7 @@ def build_periods(cutoffs: List[str], hold_days: int = 30) -> Dict[str, List[dic
                 "code": code, "ret": ret, "r20": r20,
                 "v3": sector_score,
                 "chain": v.get("chain", 0),
-                "delivery": v.get("delivery", 0),
+                "surge": v.get("surge", 0),
                 "capital": v.get("capital", 0),
                 "is_star": (sector_score < STAR_V3_MAX) and (r20 > STAR_R20_MIN),
             })
@@ -228,7 +228,7 @@ def diagnose(periods: Dict[str, List[dict]]) -> dict:
         # star 群体内部 anchor vs ret 的 Spearman (看 flag 股内部排序是否有效)
         star_rho = None
         if len(stars) >= 5:
-            anchors = [r["chain"] + r["capital"] * 2 - r["delivery"] * 0.5 for r in stars]
+            anchors = [r["chain"] + r["capital"] * 2 - r["surge"] * 0.5 for r in stars]
             star_rho = spearman(anchors, [r["ret"] for r in stars])
 
         rec = {
@@ -287,7 +287,7 @@ def diagnose(periods: Dict[str, List[dict]]) -> dict:
 # ══════════════════════════════════════════════════════════
 
 def _anchor_base(r: dict) -> float:
-    return r["chain"] + r["capital"] * 2 - r["delivery"] * 0.5
+    return r["chain"] + r["capital"] * 2 - r["surge"] * 0.5
 
 
 def make_chain_boost(B: float, scaled: bool = False) -> Callable[[dict], float]:
@@ -296,7 +296,7 @@ def make_chain_boost(B: float, scaled: bool = False) -> Callable[[dict], float]:
         if not r["is_star"]:
             return _anchor_base(r)
         bonus = B * min(r["r20"] / STAR_R20_MIN, 3.0) if scaled else B
-        return (r["chain"] + bonus) + r["capital"] * 2 - r["delivery"] * 0.5
+        return (r["chain"] + bonus) + r["capital"] * 2 - r["surge"] * 0.5
     return fn
 
 
@@ -311,7 +311,7 @@ def make_capital_boost(B: float) -> Callable[[dict], float]:
     """capital_boost (对照): star 股 capital += B。"""
     def fn(r: dict) -> float:
         cap = r["capital"] + (B if r["is_star"] else 0.0)
-        return r["chain"] + cap * 2 - r["delivery"] * 0.5
+        return r["chain"] + cap * 2 - r["surge"] * 0.5
     return fn
 
 
@@ -555,7 +555,7 @@ def conclude(sp_ranked: List[Tuple[str, dict]], top10_agg: dict) -> dict:
             print(f"     最接近的变体 {n}: Spearman Δ{d:+.4f} (需 ≥ +{MEANINGFUL_RHO_GAIN}) — 实为噪声/平局。")
         print(f"     根因: 新晋股虽整体有超额(+13.8%正常期), 但 anchor 排序对全池 530 只已充分捕捉;")
         print(f"           boost 微调系数只会扰动排名, 不会稳定改善 TOP10 (TOP10 实盘涨幅反而下降)。")
-        print(f"     建议: 维持基线 chain+capital×2-delivery×0.5。新晋股的价值在'进入候选池', 不在'加分'。")
+        print(f"     建议: 维持基线 chain+capital×2+surge×SURGE_WEIGHT。新晋股的价值在'进入候选池', 不在'加分'。")
         rec["recommend"] = None
     return rec
 

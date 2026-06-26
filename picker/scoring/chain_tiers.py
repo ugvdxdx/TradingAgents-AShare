@@ -241,6 +241,69 @@ def save_chain_tier_map(tier_map: Dict[str, Any], generated_by: str = "", archiv
 _TIER_SKELETON_RANGES = ["8.5-10.0", "7.0-9.0", "5.5-7.5", "3.5-5.5", "2.0-4.0", "0.0-2.5"]
 
 
+def _compute_sector_price_momentum(days=20, cutoff_date=""):
+    """板块量价动量: 各板块近 N 日 r20/r5 涨幅中位数 (price-confirmed 热度)。
+
+    供 tier_map 档位更新用 — 弥补研报 bullish count 滞后、爆发异动(r5>15%&r20>10%)
+    漏判"温和持续上涨"的缺陷。复用 v3 _classify_sector 归类 + _get_industry 取行业,
+    遍历 kline_cache 算个股 r20/r5, 按板块聚中位数。遍历量与 v3._build_d2_sector_median_cache
+    (G 模式每日跑) 同量级, 不缓存 (tier_map 周级调用一次)。
+
+    Args:
+        days: r20 窗口 (r5 固定 5 日)。默认 20。
+        cutoff_date: 回测截止日, 非空时截断 K线 (无前视)。tier_map 实盘更新留空。
+    Returns:
+        [{sector, r20_median, r5_median, n_stocks}, ...] 按 r20_median 降序; 空数据返回 []。
+    """
+    import pickle as _pk
+    import glob as _glob
+    import statistics as _st
+    try:
+        from picker.paths import KLINE_CACHE_DIR
+        from picker.scoring.v3_full_score import _classify_sector, _get_industry
+    except Exception:
+        return []
+
+    min_bars = days + 1
+    sector_r20: Dict[str, list] = {}
+    sector_r5: Dict[str, list] = {}
+    for suffix_pat in ("_SZ.pkl", "_SH.pkl"):
+        for p in _glob.glob(os.path.join(KLINE_CACHE_DIR, f"*{suffix_pat}")):
+            try:
+                code = os.path.basename(p).replace(suffix_pat, "")
+                sector = _classify_sector(_get_industry(code))
+                if not sector:
+                    continue
+                df = _pk.load(open(p, "rb"))
+                if df is None or len(df) < min_bars:
+                    continue
+                df = df.sort_values("trade_date").reset_index(drop=True)
+                if cutoff_date:
+                    df = df[df["trade_date"] <= cutoff_date]
+                    if len(df) < min_bars:
+                        continue
+                close = df["close"]
+                r20 = (close.iloc[-1] / close.iloc[-1 - days] - 1) * 100
+                r5 = (close.iloc[-1] / close.iloc[-6] - 1) * 100 if len(close) >= 6 else 0.0
+                sector_r20.setdefault(sector, []).append(r20)
+                sector_r5.setdefault(sector, []).append(r5)
+            except Exception:
+                continue
+
+    out = []
+    for sec, v20 in sector_r20.items():
+        if len(v20) < 3:  # 样本太少不可靠
+            continue
+        out.append({
+            "sector": sec,
+            "r20_median": round(_st.median(v20), 1),
+            "r5_median": round(_st.median(sector_r5.get(sec, [0])), 1),
+            "n_stocks": len(v20),
+        })
+    out.sort(key=lambda x: -x["r20_median"])
+    return out
+
+
 def _gather_research_signals(days=14):
     """从 research.db + 异动分析 + 世界知识 汇总最新主线信号, 供 LLM 调整 tier_map。
 
@@ -259,7 +322,8 @@ def _gather_research_signals(days=14):
     out = {"hot_sectors": [], "cold_sectors": [], "emerging_sectors": [],
            "top_viewpoints": [], "world_knowledge_theme": "",
            "price_confirmed_hot": [], "price_confirmed_cold": [],
-           "gap_themes": []}
+           "gap_themes": [],
+           "sector_price_momentum_hot": [], "sector_price_momentum_cold": []}
 
     # 研报板块动量 (复用 consumer 的聚合)
     try:
@@ -332,6 +396,22 @@ def _gather_research_signals(days=14):
     except Exception:
         pass
 
+    # 板块量价动量 (price-confirmed 热度: 各板块近20日实际涨幅中位数)
+    # 弥补研报 bullish count 滞后 + 爆发异动漏判"温和持续上涨"的缺陷
+    try:
+        spm = _compute_sector_price_momentum(days=20)
+        if spm:
+            out["sector_price_momentum_hot"] = [
+                f"{s['sector']} r20={s['r20_median']}% r5={s['r5_median']}% n={s['n_stocks']}"
+                for s in spm[:8] if s["r20_median"] > 5
+            ]
+            out["sector_price_momentum_cold"] = [
+                f"{s['sector']} r20={s['r20_median']}% r5={s['r5_median']}% n={s['n_stocks']}"
+                for s in spm[-5:] if s["r20_median"] < 0
+            ]
+    except Exception:
+        pass
+
     # 世界知识主线 (读首段/标题行)
     try:
         if os.path.exists(WORLD_KNOWLEDGE_MD):
@@ -393,6 +473,12 @@ def build_candidate_tier_map(days=14):
 实际下跌股 + 原因 (这些主题价格走弱, 可能降温):
 {chr(10).join('- ' + v for v in signals['price_confirmed_cold']) if signals['price_confirmed_cold'] else '(暂无)'}
 
+## 📊 板块量价动量 (price-confirmed — 各板块近20日实际涨幅中位数, 比研报count更硬的热度验证)
+实际涨幅领先板块 (r20中位>5%, 资金持续涌入 → 倾向上移档位):
+{chr(10).join('- ' + v for v in signals['sector_price_momentum_hot']) if signals['sector_price_momentum_hot'] else '(暂无)'}
+实际下跌板块 (r20中位<0%, 资金撤退/见顶 → 倾向下移档位):
+{chr(10).join('- ' + v for v in signals['sector_price_momentum_cold']) if signals['sector_price_momentum_cold'] else '(暂无)'}
+
 ## 🔍 缺口发现信号 (热门但池未覆盖的主题 — 新兴赛道, 应加入tier_map对应热度档)
 {', '.join(signals['gap_themes']) if signals['gap_themes'] else '(暂无缺口数据)'}
 
@@ -403,6 +489,8 @@ def build_candidate_tier_map(days=14):
 1. 6档 ranges/labels 不变 (热度带, 档间重叠是有意的)
 2. 赛道按【当前热度】归入对应带: 热主线→8.5-10/7-9带; 新升温主题(如金刚石散热/PCIe Retimer)→5.5-7.5温热带(够热就别压低); 中性→3.5-5.5; 退潮→0-2.5
 3. 热度变化才移动: 赛道升温(冷→温/温→热)或降温才调档, 给出热度依据
+3.5. **量价验证(板块r20中位)**: 板块近20日实际涨幅中位 >+15% → 倾向上移一档; <0% → 下移。这是资金真实选择的硬信号
+3.6. **冲突仲裁(价格>研报count)**: 研报bullish密集但板块r20为负=资金撤退/见顶风险→优先信价格,下移到1-2档; 研报未提但板块r20显著正=资金先行研报滞后→可按价格归中高档
 4. theme 一句话当前主线; theme_strength = 绝对主线(单一主线碾压)/主线(主导有副线)/多线均衡(无单一主线)
 5. sectors 用具体细分名 (如"1.6T光模块"非"光通信"); criteria 简述热度+龙头定位依据
 

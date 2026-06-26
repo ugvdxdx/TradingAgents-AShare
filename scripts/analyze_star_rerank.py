@@ -4,16 +4,16 @@
 上一轮 (analyze_rising_star_boost) 发现:
   - 新晋股虽有超额 (+13.8% 正常期), 但被锚排序系统性压出 TOP10 (出现率 0.5%)。
   - 无差别加 chain-boost 无效 (扰动全池排序, TOP10 涨幅反降)。
-  - 但在新晋股【池内部】, chain+capital-delivery 与后续 30 日涨幅 Spearman=+0.494
-    (20/20 期正相关), 远超全池锚 chain+capital×2-delivery×0.5 的 +0.356。
+  - 但在新晋股【池内部】, chain+capital-surge 与后续 30 日涨幅 Spearman=+0.494
+    (20/20 期正相关), 远超全池锚 chain+capital×2+surge×SURGE_WEIGHT 的 +0.356。
 
-本脚本验证核心假设: 既然新晋股内部的"正确排序信号"和全池不同 (delivery 是反向),
+本脚本验证核心假设: 既然新晋股内部的"正确排序信号"和全池不同 (surge 是反向),
 能否对【新晋股子集】用专属锚重算, 让真正会涨的 star 进 TOP10, 同时不破坏全池排序?
 
 机制维度 (3 种):
-  - rerank:        star 股用 ``chain+capital-delivery`` 重算 (非 star 用基线锚)
-  - delivery_pen:  star 股 delivery 权重加大 (基线 -0.5 → -1.0/-1.5/-2.0), 其余不变
-  - rerank_strict: star 股用 ``chain-delivery`` (最强单组合) 重算
+  - rerank:        star 股用 ``chain+capital-surge`` 重算 (非 star 用基线锚)
+  - surge_pen:  star 股 surge 权重加大 (基线 -0.5 → -1.0/-1.5/-2.0), 其余不变
+  - rerank_strict: star 股用 ``chain-surge`` (最强单组合) 重算
 
 评估 (三重门槛, 沿用上一轮严格标准):
   1. 全池 Spearman 不显著低于基线 (Δ ≥ -0.005, 防排序整体劣化)
@@ -42,8 +42,8 @@ from scripts.analyze_rising_star_boost import (
 # ══════════════════════════════════════════════════════════
 
 def anchor_base(r: dict) -> float:
-    """基线锚: chain + capital×2 - delivery×0.5。"""
-    return r["chain"] + r["capital"] * 2 - r["delivery"] * 0.5
+    """基线锚: chain + capital×2 + surge×SURGE_WEIGHT。"""
+    return r["chain"] + r["capital"] * 2 - r["surge"] * 0.5
 
 
 def make_rerank(star_anchor: Callable[[dict], float], label: str) -> Callable[[dict], float]:
@@ -56,16 +56,16 @@ def make_rerank(star_anchor: Callable[[dict], float], label: str) -> Callable[[d
 
 # star 专属锚候选
 STAR_ANCHORS = {
-    "chain+capital-delivery": lambda r: r["chain"] + r["capital"] - r["delivery"],
-    "chain-delivery": lambda r: r["chain"] - r["delivery"],
+    "chain+capital-surge": lambda r: r["chain"] + r["capital"] - r["surge"],
+    "chain-surge": lambda r: r["chain"] - r["surge"],
 }
 
 
-def make_delivery_pen(weight: float) -> Callable[[dict], float]:
-    """star 股 delivery 权重加大: chain+capital×2-delivery×weight, 非 star 基线。"""
+def make_surge_pen(weight: float) -> Callable[[dict], float]:
+    """star 股 surge 权重加大: chain+capital×2-surge×weight, 非 star 基线。"""
     def fn(r: dict) -> float:
         if r["is_star"]:
-            return r["chain"] + r["capital"] * 2 - r["delivery"] * weight
+            return r["chain"] + r["capital"] * 2 - r["surge"] * weight
         return anchor_base(r)
     return fn
 
@@ -75,9 +75,9 @@ def build_variants() -> List[Tuple[str, Callable[[dict], float]]]:
     # 方案1: star 重算 (两个 star 锚)
     for name, fn in STAR_ANCHORS.items():
         out.append((f"star重算[{name}]", make_rerank(fn, name)))
-    # 方案2: star delivery 加权惩罚
+    # 方案2: star surge 加权惩罚
     for w in (1.0, 1.5, 2.0):
-        out.append((f"star delivery×{w}", make_delivery_pen(w)))
+        out.append((f"star surge×{w}", make_surge_pen(w)))
     return out
 
 

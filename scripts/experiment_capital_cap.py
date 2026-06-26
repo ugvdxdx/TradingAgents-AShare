@@ -26,8 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates,
 )
 
 PF_HISTORY = os.path.join(paths.CACHES_DIR, "price_factor_history.json")
@@ -129,72 +128,41 @@ def classify(industry, kw_index):
 
 
 def main():
-    from tradingagents.research.normalize import get_sector_keyword_index
-    from tradingagents.research.consumer import get_sector_momentum
-
     pf_history = json.load(open(PF_HISTORY, encoding="utf-8"))
     cap_history = json.load(open(CAP_HISTORY, encoding="utf-8"))
     cutoffs = sorted(set(pf_history.keys()) & set(cap_history.keys()))
-
-    kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
-
-    # 预读 industry (静态)
-    industry_map = {code: _get_industry(code) for code in V3
-                    if isinstance(V3[code], dict) and "chain" in V3[code]}
-    sector_map = {code: classify(ind, kw_index) for code, ind in industry_map.items()}
 
     print("=" * 76)
     print("  封顶机制实验 (G 模式: base + d2×2 + pf×2)")
     print("=" * 76)
     print(f"  cutoff 数: {len(cutoffs)} | 待测封顶: {CAP_VALUES}")
-    print(f"  anchor = chain + capital×2 - delivery×0.5\n")
+    print(f"  anchor = chain + capital×2 + surge×SURGE_WEIGHT\n")
 
     results = {cap: {"rhos": [], "top10": [], "capped_ratios": []} for cap in CAP_VALUES}
 
     for ci, cutoff in enumerate(cutoffs, 1):
-        # G 模式的 base: cutoff 化板块动量
-        momentum = get_sector_momentum(cutoff_date=cutoff, days=14)
+        # G 模式 capital: 调 compute_capital_updates 取无封顶 capital (base+d2×2+pf×2)
+        # base 自然含板块动量, 不需要 sub_sector_override
+        result = compute_capital_updates(cutoff_date=cutoff)
+        if result is None:
+            continue
+        cap_cache = result[0]
+        momentum = result[2]
         if not momentum.get("hot_sectors"):
             continue
 
-        # 预算每个板块的 r20 中位数 (d2 用)
-        sector_r20s: Dict[str, list] = {}
-        code_r5r20: Dict[str, tuple] = {}
-        for code in industry_map:
-            rv = r5r20_at(code, cutoff)
-            if rv is None:
-                continue
-            code_r5r20[code] = rv
-            sec = sector_map.get(code)
-            if sec:
-                sector_r20s.setdefault(sec, []).append(rv[1])
-        sector_median = {sec: statistics.median(vals) for sec, vals in sector_r20s.items() if vals}
-
-        # 算每只股的 G 模式原始 capital (封顶前)
+        # 拿 G capital → 后续施加封顶变体 → anchor → Spearman
         stock_data = {}
-        for code in industry_map:
-            rv = code_r5r20.get(code)
-            if rv is None:
+        for code, v in cap_cache.items():
+            if not isinstance(v, dict) or "chain" not in v:
                 continue
-            v = V3[code]
             ret = real_returns(code, cutoff)
             if ret is None:
                 continue
-            r5, r20 = rv
-            pf = price_factor_g(r5, r20)
-            sec = sector_map.get(code, "")
-            base = _compute_capital_from_momentum(sec, momentum)
-            for keyword, cap_val in override_sorted:
-                if keyword in industry_map[code]:
-                    base = cap_val
-                    break
-            d2 = d2_factor(r20, sector_median.get(sec))
-            raw_capital = base + d2 * 2 + pf * 2  # 封顶前
             stock_data[code] = {
                 "ret": ret, "chain": v.get("chain", 0),
-                "delivery": v.get("delivery", 0),
-                "raw_capital": raw_capital,
+                "surge": v.get("surge", 0),
+                "raw_capital": v.get("capital", 0),
             }
         if len(stock_data) < 10:
             continue
@@ -208,7 +176,7 @@ def main():
                 c = sd["raw_capital"]
                 c = min(c, cap) if cap is not None else c
                 c = max(0.0, c)
-                anchors.append(sd["chain"] + c * 2 - sd["delivery"] * 0.5)
+                anchors.append(sd["chain"] + c * 2 - sd["surge"] * 0.5)
             rho = spearman(anchors, rets)
             results[cap]["rhos"].append(rho)
             order = sorted(range(len(anchors)), key=lambda i: -anchors[i])[:10]

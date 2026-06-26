@@ -309,7 +309,7 @@ def make_ranking_debate(llm: LLMHelper, max_rounds: int = 3, final_top_k: int = 
         n = len(finalists)
 
         print(f"\n{'='*60}")
-        print(f"📊 [阶段 2/4] 量化排名 ({n}只 → TOP{top_k}, 锚=chain+capital×2-delivery×0.5)")
+        print(f"📊 [阶段 2/4] 量化排名 ({n}只 → TOP{top_k}, 锚=chain+capital×2+surge×SURGE_WEIGHT)")
         print(f"{'='*60}")
 
         ledger = new_debate_ledger(1)

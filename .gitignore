@@ -239,7 +239,7 @@ archive/
 # picker 运行时数据: 缓存/白名单/参考文件 (.db 仍由下方规则单独处理)
 data/caches/*
 !data/caches/.gitkeep
-# 例外: 每日选股快照需进版本控制 (回测依赖历史 chain/delivery 快照)
+# 例外: 每日选股快照需进版本控制 (回测依赖历史 chain/surge 快照)
 !data/caches/v3_snapshots/
 data/caches/v3_snapshots/*
 !data/caches/v3_snapshots/*.json

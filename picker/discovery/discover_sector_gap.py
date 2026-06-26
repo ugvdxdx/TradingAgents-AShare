@@ -425,7 +425,7 @@ def discover(v3_threshold=8.0, days=20, max_themes=8, coverage_threshold=2,
         if sc >= v3_threshold:
             cache[code] = score
             admitted.append((s, score))
-            print(f"  ✓ {code} {name:<10} V3={sc} [{score['chain']}+{score['delivery']}+{score['capital']}] "
+            print(f"  ✓ {code} {name:<10} V3={sc} [{score['chain']}+{score['surge']}+{score['capital']}] "
                   f"({dt:.0f}s) 入池", flush=True)
         else:
             try: os.remove(os.path.join(FUNDAMENTALS_DIR, f"{code}.json"))

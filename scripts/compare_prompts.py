@@ -14,12 +14,12 @@
 
      python3 scripts/compare_prompts.py --sample 30         # 抽查30只详细对比
      python3 scripts/compare_prompts.py --essence-quality    # essence 质量专项检查
-     python3 scripts/compare_prompts.py --delivery-audit     # delivery 交叉验证审计
+     python3 scripts/compare_prompts.py --surge-audit     # surge 交叉验证审计
      python3 scripts/compare_prompts.py --chain-calibration  # chain 区分度检查
      python3 scripts/compare_prompts.py --all                # 全部检查
 
 产出:
-  - 终端彩色对比表 (chain/delivery/essence 变化明细)
+  - 终端彩色对比表 (chain/surge/essence 变化明细)
   - data/caches/prompt_compare_report.json (结构化对比数据, 供后续分析)
 """
 
@@ -112,17 +112,17 @@ def color_delta(new_val, old_val, high_good=True):
 
 
 # ════════════════════════════════════════════════
-# ① 核心对比: chain/delivery/essence 变化
+# ① 核心对比: chain/surge/essence 变化
 # ════════════════════════════════════════════════
 
 def compare_core(old: dict, new: dict):
-    """对比 chain/delivery/ranking 变化。"""
+    """对比 chain/surge/ranking 变化。"""
     common = set(old.keys()) & set(new.keys())
     only_old = set(old.keys()) - set(new.keys())
     only_new = set(new.keys()) - set(old.keys())
 
     chain_deltas = []
-    delivery_deltas = []
+    surge_deltas = []
     anchor_deltas = []
     rank_shifts = []  # (code, old_rank, new_rank, rank_delta)
     essence_changed = []
@@ -147,25 +147,25 @@ def compare_core(old: dict, new: dict):
 
         chain_old = o.get("chain")
         chain_new = n.get("chain")
-        delivery_old = o.get("delivery")
-        delivery_new = n.get("delivery")
+        surge_old = o.get("surge")
+        surge_new = n.get("surge")
 
         if chain_old is not None and chain_new is not None:
             d = round(chain_new - chain_old, 1)
             if d != 0:
                 chain_deltas.append(d)
 
-        if delivery_old is not None and delivery_new is not None:
-            d = round(delivery_new - delivery_old, 1)
+        if surge_old is not None and surge_new is not None:
+            d = round(surge_new - surge_old, 1)
             if d != 0:
-                delivery_deltas.append(d)
+                surge_deltas.append(d)
 
         # 锚分变化
         anchor_old = (
-            o.get("chain", 0) + o.get("capital", 0) * 2 - o.get("delivery", 0) * 0.5
+            o.get("chain", 0) + o.get("capital", 0) * 2 - o.get("surge", 0) * 0.5
         )
         anchor_new = (
-            n.get("chain", 0) + n.get("capital", 0) * 2 - n.get("delivery", 0) * 0.5
+            n.get("chain", 0) + n.get("capital", 0) * 2 - n.get("surge", 0) * 0.5
         )
         anchor_deltas.append(round(anchor_new - anchor_old, 1))
 
@@ -218,16 +218,16 @@ def compare_core(old: dict, new: dict):
     else:
         print(f"  chain 无变化 (可能新 prompt 尚未运行)")
 
-    print(f"\n{BOLD}── delivery 变化 ──{RESET}")
-    if delivery_deltas:
-        pos = [d for d in delivery_deltas if d > 0]
-        neg = [d for d in delivery_deltas if d < 0]
-        print(f"  变化的股数: {len(delivery_deltas)}/{len(common)} "
+    print(f"\n{BOLD}── surge 变化 ──{RESET}")
+    if surge_deltas:
+        pos = [d for d in surge_deltas if d > 0]
+        neg = [d for d in surge_deltas if d < 0]
+        print(f"  变化的股数: {len(surge_deltas)}/{len(common)} "
               f"({GREEN}↑{len(pos)}{RESET} / {RED}↓{len(neg)}{RESET})")
-        print(f"  平均变化: {sum(delivery_deltas)/len(delivery_deltas):+.2f}")
-        print(f"  标准差: {(sum(d**2 for d in delivery_deltas)/len(delivery_deltas))**0.5:.2f}")
+        print(f"  平均变化: {sum(surge_deltas)/len(surge_deltas):+.2f}")
+        print(f"  标准差: {(sum(d**2 for d in surge_deltas)/len(surge_deltas))**0.5:.2f}")
 
-    print(f"\n{BOLD}── 锚分 (chain+capital×2-delivery×0.5) 变化 ──{RESET}")
+    print(f"\n{BOLD}── 锚分 (chain+capital×2+surge×SURGE_WEIGHT) 变化 ──{RESET}")
     if anchor_deltas:
         print(f"  变化的股数: {sum(1 for d in anchor_deltas if d != 0)}/{len(common)}")
         print(f"  平均变化: {sum(anchor_deltas)/len(anchor_deltas):+.2f}")
@@ -251,7 +251,7 @@ def compare_core(old: dict, new: dict):
 
     return {
         "chain_deltas": chain_deltas,
-        "delivery_deltas": delivery_deltas,
+        "surge_deltas": surge_deltas,
         "anchor_deltas": anchor_deltas,
         "rank_shifts": [(c, r1, r2, s) for c, r1, r2, s in rank_shifts],
         "essence_changed_count": len(essence_changed),
@@ -385,11 +385,11 @@ def check_essence_quality(new: dict):
 
 
 # ════════════════════════════════════════════════
-# ③ delivery 交叉验证审计
+# ③ surge 交叉验证审计
 # ════════════════════════════════════════════════
 
-def audit_delivery(new: dict):
-    """检查新 prompt 是否对低净利(<5%)的股票降低了 delivery 分。
+def audit_surge(new: dict):
+    """检查新 prompt 是否对低净利(<5%)的股票降低了 surge 分。
 
     这是 PROMPT_V3E 新增的交叉验证规则:
       "净利率<5% → 说明公司是代工/组装模式，即使有大客户也不超过6.0分"
@@ -401,8 +401,8 @@ def audit_delivery(new: dict):
     old_data = load_old() if os.path.exists(OLD_CACHE_PATH) else {}
     common = set(new.keys()) & set(old_data.keys()) if old_data else set()
 
-    low_margin_audit = []  # 低净利股 delivery 变化
-    high_margin_audit = []  # 高净利股 delivery 变化 (对照组)
+    low_margin_audit = []  # 低净利股 surge 变化
+    high_margin_audit = []  # 高净利股 surge 变化 (对照组)
 
     for code in sorted(common):
         fin = load_financial_metrics(code)
@@ -412,22 +412,22 @@ def audit_delivery(new: dict):
 
         o = old_data.get(code, {})
         n = new.get(code, {})
-        old_del = o.get("delivery")
-        new_del = n.get("delivery")
+        old_del = o.get("surge")
+        new_del = n.get("surge")
         if old_del is None or new_del is None:
             continue
 
         delta = round(new_del - old_del, 1)
         name = load_name(code)
 
-        if nm < 5:  # 低净利 — 新prompt应该降delivery
+        if nm < 5:  # 低净利 — 新prompt应该降surge
             if delta != 0:
                 low_margin_audit.append({
                     "code": code, "name": name,
                     "net_margin": nm,
                     "old_del": old_del, "new_del": new_del, "delta": delta,
                 })
-        elif nm > 20:  # 高净利 — 对照组, delivery不应无故下降
+        elif nm > 20:  # 高净利 — 对照组, surge不应无故下降
             if delta < -0.5:
                 high_margin_audit.append({
                     "code": code, "name": name,
@@ -435,7 +435,7 @@ def audit_delivery(new: dict):
                     "old_del": old_del, "new_del": new_del, "delta": delta,
                 })
 
-    print(f"\n{BOLD}── 低净利股 (<5%) delivery 变化 ──{RESET}")
+    print(f"\n{BOLD}── 低净利股 (<5%) surge 变化 ──{RESET}")
     if low_margin_audit:
         # 统计被降/被升的比例
         down = [a for a in low_margin_audit if a["delta"] < 0]
@@ -443,41 +443,41 @@ def audit_delivery(new: dict):
         print(f"  变化的股数: {len(low_margin_audit)} "
               f"({GREEN}↓降{len(down)}{RESET} / {RED}↑升{len(up)}{RESET})")
         print(f"  平均变化: {sum(a['delta'] for a in low_margin_audit)/len(low_margin_audit):+.2f}")
-        print(f"  期望: 低净利股 delivery 应下降 (利润率红线规则)")
+        print(f"  期望: 低净利股 surge 应下降 (利润率红线规则)")
         if len(down) > len(up):
-            print(f"  {GREEN}✓ 低净利股 delivery 以降为主, 符合预期{RESET}")
+            print(f"  {GREEN}✓ 低净利股 surge 以降为主, 符合预期{RESET}")
         else:
-            print(f"  {RED}⚠ 低净利股 delivery 以升为主, 可能规则未生效{RESET}")
+            print(f"  {RED}⚠ 低净利股 surge 以升为主, 可能规则未生效{RESET}")
 
         # 展示 Top 变化
         for a in sorted(low_margin_audit, key=lambda x: x["delta"])[:10]:
             color = GREEN if a["delta"] < 0 else RED
             print(f"    {a['code']} {a['name']:<8} 净利{a['net_margin']:.1f}% "
-                  f"delivery {a['old_del']}→{color}{a['new_del']} ({a['delta']:+.1f}){RESET}")
+                  f"surge {a['old_del']}→{color}{a['new_del']} ({a['delta']:+.1f}){RESET}")
     else:
-        # 检查是否有低净利股但 delivery 没变
+        # 检查是否有低净利股但 surge 没变
         low_margin_total = 0
-        low_margin_high_del = 0  # 低净利但 delivery > 6
+        low_margin_high_del = 0  # 低净利但 surge > 6
         for code in sorted(common):
             fin = load_financial_metrics(code)
             nm = fin.get("net_margin_pct")
             if nm is not None and nm < 5:
                 low_margin_total += 1
-                if new[code].get("delivery", 0) > 6.0:
+                if new[code].get("surge", 0) > 6.0:
                     low_margin_high_del += 1
         print(f"  低净利股总数: {low_margin_total}")
-        print(f"  其中 delivery > 6.0 的: {low_margin_high_del}")
+        print(f"  其中 surge > 6.0 的: {low_margin_high_del}")
         if low_margin_high_del > 0:
-            print(f"  {RED}⚠ 仍有 {low_margin_high_del} 只低净利股 delivery > 6, 规则可能未生效{RESET}")
+            print(f"  {RED}⚠ 仍有 {low_margin_high_del} 只低净利股 surge > 6, 规则可能未生效{RESET}")
         else:
-            print(f"  {GREEN}✓ 所有低净利股 delivery ≤ 6{RESET}")
+            print(f"  {GREEN}✓ 所有低净利股 surge ≤ 6{RESET}")
 
-    print(f"\n{BOLD}── 高净利股 (>20%) delivery 异常下降 ──{RESET}")
+    print(f"\n{BOLD}── 高净利股 (>20%) surge 异常下降 ──{RESET}")
     if high_margin_audit:
-        print(f"  {len(high_margin_audit)} 只高净利股 delivery 下降 >0.5:")
+        print(f"  {len(high_margin_audit)} 只高净利股 surge 下降 >0.5:")
         for a in sorted(high_margin_audit, key=lambda x: x["delta"])[:10]:
             print(f"    {a['code']} {a['name']:<8} 净利{a['net_margin']:.1f}% "
-                  f"delivery {a['old_del']}→{RED}{a['new_del']} ({a['delta']:+.1f}){RESET}")
+                  f"surge {a['old_del']}→{RED}{a['new_del']} ({a['delta']:+.1f}){RESET}")
         print(f"  建议人工复核: 这些股是否被误降 (正误降 vs 误伤)")
     else:
         print(f"  {GREEN}✓ 无高净利股被异常降分{RESET}")
@@ -600,7 +600,7 @@ def check_chain_calibration(new: dict):
 # ════════════════════════════════════════════════
 
 def sample_detail(old: dict, new: dict, n: int = 30):
-    """随机抽样 N 只股, 逐只对比 chain/delivery/essence 详情。"""
+    """随机抽样 N 只股, 逐只对比 chain/surge/essence 详情。"""
     import random
 
     print(f"\n{BOLD}{'='*80}{RESET}")
@@ -616,17 +616,17 @@ def sample_detail(old: dict, new: dict, n: int = 30):
         n = new[code]
         name = load_name(code)
         anchor_old = (
-            o.get("chain", 0) + o.get("capital", 0) * 2 - o.get("delivery", 0) * 0.5
+            o.get("chain", 0) + o.get("capital", 0) * 2 - o.get("surge", 0) * 0.5
         )
         anchor_new = (
-            n.get("chain", 0) + n.get("capital", 0) * 2 - n.get("delivery", 0) * 0.5
+            n.get("chain", 0) + n.get("capital", 0) * 2 - n.get("surge", 0) * 0.5
         )
 
         print(f"\n  {BOLD}{code} {name}{RESET}")
         print(f"  chain:  {o.get('chain', '?'):.1f} → {n.get('chain', '?'):.1f} "
               f"{color_delta(n.get('chain',0), o.get('chain',0))}", end="  ")
-        print(f"delivery: {o.get('delivery', '?'):.1f} → {n.get('delivery', '?'):.1f} "
-              f"{color_delta(n.get('delivery',0), o.get('delivery',0))}", end="  ")
+        print(f"surge: {o.get('surge', '?'):.1f} → {n.get('surge', '?'):.1f} "
+              f"{color_delta(n.get('surge',0), o.get('surge',0))}", end="  ")
         print(f"锚: {anchor_old:.1f} → {anchor_new:.1f} "
               f"{color_delta(anchor_new, anchor_old)}")
 
@@ -669,9 +669,9 @@ def main():
     if do_all or "--essence-quality" in args:
         report["essence"] = check_essence_quality(new)
 
-    # ③ delivery 审计
-    if do_all or "--delivery-audit" in args:
-        report["delivery"] = audit_delivery(new)
+    # ③ surge 审计
+    if do_all or "--surge-audit" in args:
+        report["surge"] = audit_surge(new)
 
     # ④ chain 区分度
     if do_all or "--chain-calibration" in args:

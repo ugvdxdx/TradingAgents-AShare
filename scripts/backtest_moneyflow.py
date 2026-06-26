@@ -4,7 +4,7 @@
 设计原则 (修正旧 validate_anchor 的前视偏差):
   1. 所有信号精确截断到 cutoff (资金流 main_pct 用 cutoff 前 N 日累计; 价格因子用 cutoff 前 r20)
   2. 资金流用 main_pct (净流入占成交比, 跨股可比), 非原始 main_net (大股市值偏置)
-  3. chain/delivery 无历史快照 → 用当前分=前视, 单列"含基本面(前视上界)"不当主结论
+  3. chain/surge 无历史快照 → 用当前分=前视, 单列"含基本面(前视上界)"不当主结论
   4. 多指标: Spearman + TOP10收益 + 价差 + 胜率; + TOP5可持续性体检
 
 核心问题: 真实主力资金流 (main_pct) 预测30日收益, 是否优于价格涨幅代理 (r20)?
@@ -155,7 +155,7 @@ def main():
         print(f"  {fname:<40} {avg_sp:>+9.3f} {win*100:>5.0f}% {top10:>+8.1f}% {bot10:>+6.1f}% {top10-bot10:>+6.1f}")
 
     print(f"\n  池子平均前视收益: {np.mean([np.mean(r['top10']+r['bot10']) for r in results.values()]):+.1f}% (参考)")
-    print(f"\n  ⚠ 本回测只测【时变信号】(资金流/价格), 不含chain/delivery(无历史快照=前视)。")
+    print(f"\n  ⚠ 本回测只测【时变信号】(资金流/价格), 不含chain/surge(无历史快照=前视)。")
     print(f"     结论: 若真实资金流(main_pct)Spearman > cap_r20, 说明用真实资金流替代合成capital更优。")
 
 

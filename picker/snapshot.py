@@ -2,9 +2,9 @@
 
 快照由 picker_graph._save_daily_snapshot 在实盘选股后存档:
   data/caches/v3_snapshots/YYYY-MM-DD.json
-  {date, scores: {code: {chain, delivery, capital}}, ranking: [...]}
+  {date, scores: {code: {chain, surge, capital}}, ranking: [...]}
 
-回测时按 cutoff 取 ≤ cutoff 的最近快照, 消除 chain/delivery 前视偏差。
+回测时按 cutoff 取 ≤ cutoff 的最近快照, 消除 chain/surge 前视偏差。
 若某 cutoff 无快照 (历史未存档), 回退到当前 V3 cache (已知近似)。
 """
 import json
@@ -21,7 +21,7 @@ def get_snapshot_at(cutoff: str) -> Tuple[dict, str]:
     """取 ≤ cutoff 的最近快照 scores。
 
     Returns:
-        (scores, source): scores={code:{chain,delivery,capital}},
+        (scores, source): scores={code:{chain,surge,capital}},
                           source="snapshot:YYYY-MM-DD" 或 "v3_cache(无快照,回退)"
     """
     if cutoff in _SNAPSHOT_CACHE:
@@ -48,7 +48,7 @@ def get_snapshot_at(cutoff: str) -> Tuple[dict, str]:
     if scores is None:
         try:
             cache = json.load(open(V3_CACHE, encoding="utf-8"))
-            scores = {c: {"chain": v.get("chain", 0), "delivery": v.get("delivery", 0),
+            scores = {c: {"chain": v.get("chain", 0), "surge": v.get("surge", 0),
                           "capital": v.get("capital", 0)}
                       for c, v in cache.items() if isinstance(v, dict) and "chain" in v}
             source = "v3_cache(无快照,回退)"

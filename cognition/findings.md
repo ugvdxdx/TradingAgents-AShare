@@ -5,6 +5,8 @@
 
 ---
 
+> ⚠️ **2026-06-26 更新**: 本文档的 `delivery`(业绩兑现) 分析(全池 ρ=+0.10、新晋股内 −0.33、最优锚 `chain+capital×2-delivery×0.5` 等)均为**历史记录**。delivery 已替换为 **surge 爆发分**(30天超额收益概率=成长性加速拐点×催化近度), 锚公式改为 `chain+capital×2+surge×SURGE_WEIGHT`(+1.0, 待回测)。experiment 证实 delivery 全池 ρ=+0.082 正向, 原 −0.5 负权重是基于新晋股子池 −0.33 的错误外推(新晋股反向指标特性不适用全池)。下方 delivery 结论保留作历史参考。
+
 ## 一、量化锚公式
 
 ### ✅ 最优排序锚: `chain + capital×2 - delivery×0.5`

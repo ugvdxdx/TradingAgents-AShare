@@ -7,7 +7,7 @@
 规则 (每个 code 维护历史入选收益列表):
   - consecutive: 连续N次入选涨幅都<0 → 拉黑
   - cumulative: 累计跌幅>X% → 拉黑 (止损)
-  - highdl_loss: delivery≥7 且入选≥3次且均涨<0 → 拉黑 (针对高delivery毒瘤)
+  - highdl_loss: surge≥7 且入选≥3次且均涨<0 → 拉黑 (针对高surge毒瘤)
   - strict: 连续2次亏损 OR 累计跌10% → 拉黑 (最严)
 """
 import json
@@ -22,8 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from picker import paths
 from picker.scoring.v3_full_score import (
-    KLINE_CACHE_DIR, _compute_capital_from_momentum, _get_industry,
-    _load_sub_sector_override,
+    KLINE_CACHE_DIR, compute_capital_updates, _get_industry,
 )
 
 CAP_HISTORY = os.path.join(paths.CACHES_DIR, "capital_history.json")
@@ -90,7 +89,7 @@ def count_trading_days(d1, d2):
 
 
 # ── 黑名单规则定义 ──
-# 每个规则: fn(code, history_rets, delivery) -> bool (True=拉黑)
+# 每个规则: fn(code, history_rets, surge) -> bool (True=拉黑)
 # history_rets: 该股截至当前的所有历史入选30日涨幅(%)
 
 def rule_none(code, hist, dl):
@@ -120,11 +119,11 @@ def rule_cumul_loss5(code, hist, dl):
     return len(hist) >= 2 and (cum - 1) * 100 < -5
 
 def rule_highdl_loss(code, hist, dl):
-    """delivery≥7 且入选≥3次且均涨<0 → 拉黑 (高delivery毒瘤)"""
+    """surge≥7 且入选≥3次且均涨<0 → 拉黑 (高surge毒瘤)"""
     return dl >= 7.0 and len(hist) >= 3 and statistics.mean(hist) < 0
 
 def rule_strict(code, hist, dl):
-    """最严: 连续2次亏损 OR 累计跌10% OR (delivery≥7均涨<0)"""
+    """最严: 连续2次亏损 OR 累计跌10% OR (surge≥7均涨<0)"""
     return rule_consec2(code, hist, dl) or rule_cumul_loss10(code, hist, dl) or rule_highdl_loss(code, hist, dl)
 
 
@@ -147,7 +146,6 @@ def main():
     cutoffs = sorted(cap_hist.keys())
 
     kw_index = get_sector_keyword_index()
-    override_sorted = sorted(_load_sub_sector_override().items(), key=lambda x: -len(x[0]))
     industry_map = {code: _get_industry(code) for code in V3
                     if isinstance(V3[code], dict) and "chain" in V3[code]}
     sector_map = {code: classify(ind, kw_index) for code, ind in industry_map.items()}
@@ -157,43 +155,23 @@ def main():
     print("=" * 80)
     print(f"  cutoff: {len(cutoffs)} 期 | {len(RULES)} 种规则\n")
 
-    # 预算每个 cutoff 的基础锚分
+    # 预算每个 cutoff 的基础锚分 (G 模式 capital, cutoff 化无前视)
     base_anchors = {}
     for ci, cutoff in enumerate(cutoffs, 1):
         mom = get_sector_momentum(days=14)
         if not mom.get("hot_sectors"):
             continue
-        sr20: Dict[str, list] = {}
-        cr: Dict[str, tuple] = {}
-        for code in industry_map:
-            rv = r5r20_at(code, cutoff)
-            if rv is None:
-                continue
-            cr[code] = rv
-            s = sector_map.get(code)
-            if s:
-                sr20.setdefault(s, []).append(rv[1])
-        sm = {s: statistics.median(v) for s, v in sr20.items() if v}
+        cap_cache = compute_capital_updates(cutoff_date=cutoff)
+        cap_dict = cap_cache[0] if cap_cache else {}
+        if not cap_dict:
+            continue
         sd = {}
         for code in industry_map:
-            rv = cr.get(code)
-            if rv is None:
+            capital = cap_dict.get(code, {}).get("capital")
+            if capital is None:
                 continue
             v = V3[code]
-            r5, r20 = rv
-            pf = (1.3 if r20 > 20 and r5 > 5 else (0.9 if r20 > 20 and r5 < -5 else (1.1 if r20 > 20 else
-                  ((1.0 + r20 * 0.01) if r20 > 0 and r5 > 0 else (0.9 if r20 > 0 else
-                  (0.9 if r20 > -10 and r5 > 0 else (0.7 if r20 > -10 else 0.6)))))))
-            s = sector_map.get(code, "")
-            base = _compute_capital_from_momentum(s, mom)
-            for kw, cv in override_sorted:
-                if kw in industry_map[code]:
-                    base = cv
-                    break
-            d2 = 1.15 if sm.get(s) and r20 > sm[s] + 15 else (
-                 0.85 if sm.get(s) and r20 < sm[s] - 10 else 1.0)
-            capital = max(0, base + d2 * 2 + pf * 2)
-            sd[code] = v.get("chain", 0) + capital * 2 - v.get("delivery", 0) * 0.5
+            sd[code] = v.get("chain", 0) + capital * 2 - v.get("surge", 0) * 0.5
         base_anchors[cutoff] = sd
         if ci % 40 == 0:
             print(f"  ... 基础锚分 {ci}/{len(cutoffs)}")
@@ -222,7 +200,7 @@ def main():
             for code in base_anchors[cutoff]:
                 if code in blacklist:
                     continue
-                dl = V3.get(code, {}).get("delivery", 0)
+                dl = V3.get(code, {}).get("surge", 0)
                 if rule_fn(code, perf.get(code, []), dl):
                     blacklist.add(code)
                     bl_count += 1

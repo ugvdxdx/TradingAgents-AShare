@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """构建 price_factor 历史快照 (14 个变体 + 基线, 无前视, 供回测批量对比)。
 
-price_factor 是 capital 的个股量价乘子 (0.6~1.3):
-    capital = base_capital(板块动量) × price_factor(个股量价)
+price_factor 是 capital G 模式公式中的个股量价项 (0.6~1.3):
+    capital = base_capital(板块动量) + d2×2 + price_factor×2  (G 模式, 无封顶)
 
 当前生产只用了 r5/r20 (close 的 2 个点)。本脚本实现 14 个更丰富的变体,
 覆盖量价(量能/振幅/影线)、个股资金流(净流入/加速/占比)、资金流层结构(背离/主导)、
@@ -564,32 +564,71 @@ VARIANTS = {
     "D2_sector_relative": (f_D2_sector_relative, "行业相对强度"),
 }
 
-# build_capital_at 需要的共享资源 (懒加载, 避免每次 cutoff 重建)
-_KW_INDEX_FOR_BUILD = None
-_OVERRIDE_SORTED_FOR_BUILD = None
+# ══════════════════════════════════════════════════════════
+# G 模式纯板块动量 base_capital (剥离 pf/d2, 供 eval_price_factors 重建 capital)
+# ══════════════════════════════════════════════════════════
+#
+# eval_price_factors.py 把 capital 重建为 G 公式: base + d2×2 + pf_variant×2,
+# 故 _base_capital 必须是【纯板块动量分】(无 pf/d2, 无 override 拆分降温)。
+# 复用 compute_capital_updates 的同源 momentum + classify, 只取 base 分支。
+
+_BASE_CAP_CACHE: Dict[str, Dict[str, float]] = {}  # cutoff → {code: base}
 
 
-def _get_kw_index_for_build():
-    global _KW_INDEX_FOR_BUILD
-    if _KW_INDEX_FOR_BUILD is None:
-        try:
-            from tradingagents.research.normalize import get_sector_keyword_index
-            _KW_INDEX_FOR_BUILD = get_sector_keyword_index()
-        except Exception:
-            _KW_INDEX_FOR_BUILD = {}
-    return _KW_INDEX_FOR_BUILD
+def _build_base_capital_at(cutoff: str) -> Dict[str, float]:
+    """cutoff 当天全池的纯板块动量 base_capital (G 模式 base 分支, 无 pf/d2/override)。
 
+    与 compute_capital_updates 取同源 momentum + classify, 但只保留
+    _compute_capital_from_momentum 的 base 分 (剥离 pf/d2)。
+    base 不随 cutoff 重算 (研报无可靠历史版), 故 momentum 用当前快照。
+    """
+    if cutoff in _BASE_CAP_CACHE:
+        return _BASE_CAP_CACHE[cutoff]
+    from picker.scoring.v3_full_score import (
+        _get_industry, _compute_capital_from_momentum,
+    )
+    from tradingagents.research.normalize import get_sector_keyword_index
+    from tradingagents.research.consumer import get_sector_momentum
 
-def _get_override_sorted():
-    global _OVERRIDE_SORTED_FOR_BUILD
-    if _OVERRIDE_SORTED_FOR_BUILD is None:
-        try:
-            from picker.scoring.v3_full_score import _load_sub_sector_override
-            _OVERRIDE_SORTED_FOR_BUILD = sorted(
-                _load_sub_sector_override().items(), key=lambda x: -len(x[0]))
-        except Exception:
-            _OVERRIDE_SORTED_FOR_BUILD = []
-    return _OVERRIDE_SORTED_FOR_BUILD
+    try:
+        momentum = get_sector_momentum(days=14)
+    except Exception:
+        return {}
+    if not momentum.get("hot_sectors"):
+        return {}
+    try:
+        kw_index = get_sector_keyword_index()
+    except Exception:
+        return {}
+
+    def classify(industry: str) -> str:
+        # 平局裁决同 _classify_sector: 命中数相同时取命中关键词最长的板块,
+        # 保证跨进程确定性 (get_sector_keyword_index 已按板块名排序)。
+        if not industry:
+            return ""
+        best, best_hit, best_kw_len = "", 0, 0
+        for sec, kws in kw_index.items():
+            matched = [k for k in kws if k in industry]
+            h = len(matched)
+            if h <= 0:
+                continue
+            max_kw_len = max(len(k) for k in matched)
+            if h > best_hit or (h == best_hit and max_kw_len > best_kw_len):
+                best_hit, best_kw_len, best = h, max_kw_len, sec
+        return best
+
+    result = {}
+    for code, entry in V3.items():
+        if not isinstance(entry, dict) or "chain" not in entry:
+            continue
+        industry = _get_industry(code)
+        sector = classify(industry)
+        if not sector:
+            continue
+        base_capital = _compute_capital_from_momentum(sector, momentum)
+        result[code] = round(base_capital, 1)
+    _BASE_CAP_CACHE[cutoff] = result
+    return result
 
 
 # ══════════════════════════════════════════════════════════
@@ -647,12 +686,10 @@ def main():
         bf = load_board_flow_at(cutoff)
         # 预算 D2 的行业 r20 中位数缓存 (按 cutoff)
         _build_sector_r20_cache(cutoff)
-        # 同时算 base_capital (剥离 price_factor 的纯板块动量分), 供 eval 用
-        # 复用 build_capital_history 的逻辑: base_capital 不含 price_factor
-        from scripts.build_capital_history import build_capital_at
-        base_caps = build_capital_at(cutoff, V3, _get_kw_index_for_build(), _get_override_sorted())
+        # 纯板块动量 base_capital (剥离 pf/d2), eval_price_factors 用 base+d2×2+pf×2 重建 capital
+        base_caps = _build_base_capital_at(cutoff)
         per_variant: Dict[str, Dict[str, float]] = {v: {} for v in active_variants}
-        per_variant["_base_capital"] = base_caps  # 特殊 key, eval 用它 × pf_variant
+        per_variant["_base_capital"] = base_caps  # 特殊 key, eval 用它重建 G 模式 capital
         for code in codes:
             df = load_kline_cut(code, cutoff)
             mf = load_mf_cut(code, cutoff)

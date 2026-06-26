@@ -261,7 +261,7 @@ def main():
         path = ct.save_chain_tier_map(cand, generated_by="manual", archive_reason="manual-replace")
         print(f"\n✓ 已写入 {path}")
         print(f"✓ 当前生效: {cand['version']} | theme: {cand.get('theme')}")
-        print("  注: 受影响股票的 chain 将在 7天TTL 过期后自然重评;")
+        print("  注: 受影响股票的 chain 将在次日盘后全量重评时自然刷新 (TTL=1);")
         print("      如需立即生效, 手动跑 v3_full_score 全量重评。")
         return
 
