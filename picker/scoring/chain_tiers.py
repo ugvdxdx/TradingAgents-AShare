@@ -260,7 +260,7 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
     import statistics as _st
     try:
         from picker.paths import KLINE_CACHE_DIR
-        from picker.scoring.v3_full_score import _classify_sector, _get_industry
+        from picker.scoring.v3_full_score import _current_sector
     except Exception:
         return []
 
@@ -271,7 +271,7 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
         for p in _glob.glob(os.path.join(KLINE_CACHE_DIR, f"*{suffix_pat}")):
             try:
                 code = os.path.basename(p).replace(suffix_pat, "")
-                sector = _classify_sector(_get_industry(code))
+                sector = _current_sector(code)  # attribution 优先 (多主业股归当前驱动板块)
                 if not sector:
                     continue
                 df = _pk.load(open(p, "rb"))
@@ -292,7 +292,7 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
 
     out = []
     for sec, v20 in sector_r20.items():
-        if len(v20) < 3:  # 样本太少不可靠
+        if len(v20) < 5:  # 样本<5不可靠(小样本中位数方差大, 1-2只异常股会带偏)
             continue
         out.append({
             "sector": sec,
@@ -380,8 +380,9 @@ def _gather_research_signals(days=14):
                         out["price_confirmed_cold"].append(item)
                 except Exception:
                     pass
-            out["price_confirmed_hot"] = out["price_confirmed_hot"][:20]
-            out["price_confirmed_cold"] = out["price_confirmed_cold"][:10]
+            # 全量进 prompt, 不截断: 异动信号是赛道热度最硬的验证(价格已证实),
+            # 按 r20 强度价值不均, 截断会随机砍掉大涨股(原 [:20]/[:10] 按字典序取, 非按涨幅)。
+            # 全量约 76+26 条 / ~6000 字符, 对 128K 上下文窗口占比 <5%, 无需担心 prompt 过长。
     except Exception:
         pass
 
@@ -497,32 +498,39 @@ def build_candidate_tier_map(days=14):
 **第一行就以 `{{` 开始直接输出 JSON, 不要推理/前言** (GLM 推理会占满token致JSON截断)。
 输出完整 tier_map JSON: 最外层 theme/theme_strength/tiers, tiers 6个元素含 range/label/sectors/criteria。range 严格按顺序: {ranges}。"""
     # tier_map JSON 较大 + GLM 推理开销, 用 4096 防截断
-    raw = _llm(prompt, max_tokens=4096)
-    if not raw:
-        return None
-
-    # GLM 可能仍带推理前缀, 找最后一个完整 JSON 对象 (从首个 { 到末个 })
+    # 解析/骨架失败也重试 (GLM 偶发返回空/推理前缀/截断/擅改骨架, 串行重跑通常成功 — 与 v3._call 同范式)
     import re
-    # 去除可能的 ```json 代码块标记
-    raw2 = raw.strip()
-    if raw2.startswith("```"):
-        raw2 = raw2.split("```")[1] if "```" in raw2[3:] else raw2
-        if raw2.startswith("json"):
-            raw2 = raw2[4:]
-    m = re.search(r'\{.*\}', raw2, re.S)
-    if not m:
-        return None
-    try:
-        candidate = json.loads(m.group())
-    except json.JSONDecodeError:
-        return None
-
-    # 校验: 骨架一致 (6档可重叠热度带 + ranges 完全匹配)
-    cand_ranges = [t.get("range") for t in candidate.get("tiers", [])]
-    if cand_ranges != _TIER_SKELETON_RANGES:
-        # 骨架被破坏 (LLM 改了 ranges), 拒绝 — 只接受赛道重映射
-        return None
-    if not candidate.get("theme") or not candidate.get("tiers"):
+    candidate = None
+    last_raw = ""
+    for _attempt in range(3):
+        raw = _llm(prompt, max_tokens=4096)
+        if not raw:
+            continue
+        last_raw = raw
+        # 去除可能的 ```json 代码块标记 + 推理前缀, 找最后一个完整 JSON 对象
+        raw2 = raw.strip()
+        if raw2.startswith("```"):
+            raw2 = raw2.split("```")[1] if "```" in raw2[3:] else raw2
+            if raw2.startswith("json"):
+                raw2 = raw2[4:]
+        m = re.search(r'\{.*\}', raw2, re.S)
+        if not m:
+            continue
+        try:
+            cand = json.loads(m.group())
+        except json.JSONDecodeError:
+            continue
+        # 校验: 骨架一致 (6档可重叠热度带 + ranges 完全匹配) — LLM 擅改 ranges 则重试
+        cand_ranges = [t.get("range") for t in cand.get("tiers", [])]
+        if cand_ranges != _TIER_SKELETON_RANGES:
+            continue
+        if not cand.get("theme") or not cand.get("tiers"):
+            continue
+        candidate = cand
+        break
+    if not candidate:
+        if last_raw:
+            print(f"  [chain_tiers] 候选生成失败(重试3次), 最后一次返回前 120 字: {last_raw[:120]!r}")
         return None
     return candidate
 

@@ -34,7 +34,14 @@
       "rd_ratio_pct": 3.4,
       "rd_expense_yi": 5.51,
       "operating_cf_yi": 53.78,
-      "cf_to_profit": 2.01
+      "cf_to_profit": 2.01,
+      "pe_ttm": 59.0012,
+      "pb": 7.04,
+      "ps_ttm": 9.8285,
+      "turnover_rate": 1.6782,
+      "dv_ratio": 0.5197,
+      "total_mv_yi": 1653.8,
+      "netprofit_yoy": 2.0342
     },
     "health_rating": "健康",
     "benchmark_ref": "油气服务与装备制造行业",

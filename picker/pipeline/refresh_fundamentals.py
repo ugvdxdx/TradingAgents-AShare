@@ -183,13 +183,13 @@ REFRESH_SYSTEM_PROMPT = """你是资深A股研究员，负责为一只股票生�
 三类失效模式，命中即删除或重写：
 - 失效①（停在行业层无落点）：只写行业趋势不落到该公司承接环节。例："AIDC产业爆发带动科技信贷需求"——删掉公司名后对任何银行都成立，无传导第二跳。
 - 失效②（牵强附会，传导断裂）：趋势与该公司核心营收/利润弱相关，要靠"也许/可能/间接带动"才连得上，或对营收占比影响<5%。例：银行写AIDC、白酒写AI算力失血。
-- 失效③（混入市场交易因素，与成长性无关）：写的是资金面/估值/交易情绪（存量博弈、增量资金、资金挤出/资金失血、机构资金、戴维斯双杀、估值修复/估值过高、获利回吐、板块轮动、风格切换、交易拥挤等）——这些描述"股价怎么走"，与"营收利润怎么变"无关，一律归 geopolitical_assessment，严禁出现在本字段。
+- 失效③（混入市场交易因素，与成长性无关）：写的是资金面/估值/交易情绪（存量博弈、增量资金、资金挤出/资金失血、机构资金、戴维斯双杀、估值修复/估值过高、获利回吐、板块轮动、风格切换、交易拥挤等）——这些描述"股价怎么走"，与"营收利润怎么变"无关，严禁出现在 growth_drivers/headwinds（保持成长性纯净）。注意：这指"作为成长性论据"不合格，并非删除信息本身——交易面观察若来自异动归因，应保留到 summary 作市场背景（capital 已量化承担），不得静默丢弃。
 
 【趋势词本身不禁】算力、储能、存储周期、半导体国产化、创新药出海等趋势词，只要接出该公司具体业务传导链就是好条目（中际旭创"AI算力→800G/1.6T光模块订单持续高增"是合格范例）。禁的是"无落点的趋势陈述"和"牵强蹭概念"。
 【条数】每字段 3-5 条，宁缺毋滥，凑不满有针对性的条目就少写（3条允许），严禁用行业泛话或交易面套话凑满 5 条。
 
 【financial_health 职责边界（与 growth_assessment 分工）】
-financial_health 只描述【当前财务现状】：盈利能力(毛利率/净利率/ROE)、偿债(负债率)、现金流质量(经营现金流/CF净利比)、资产质量。严禁写未来成长性（成长潜力归 growth_assessment）、严禁写市场交易因素（归 geopolitical_assessment）。health_rating 是基于当前财务现状的综合判断（不含未来成长预期）；highlights/risks 各1条（非常必要时2条），简单明确、言之有物，点出该公司财务现状的核心优势/核心隐忧，含数据。"""
+financial_health 只描述【当前财务现状】：盈利能力(毛利率/净利率/ROE)、偿债(负债率)、现金流质量(经营现金流/CF净利比)、资产质量。严禁写未来成长性（成长潜力归 growth_assessment）、严禁写市场交易因素（直接删除，由 capital 量价信号承担）。health_rating 是基于当前财务现状的综合判断（不含未来成长预期）；highlights/risks 各1条（非常必要时2条），简单明确、言之有物，点出该公司财务现状的核心优势/核心隐忧，含数据。"""
 
 
 def _build_refresh_prompt(code: str, name: str, industry: str,
@@ -286,7 +286,7 @@ def _build_refresh_prompt(code: str, name: str, industry: str,
 {old_summary}
 {web_section}{fin_section}{research_section}{surge_section}
 ## 当前世界知识（2026年6月）
-（本段含两类信息，必须区别使用：①产业趋势段（AI算力/半导体/新能源/医药/出海等）是判断该公司成长性的【输入信号】，写入 growth_drivers/headwinds 时必须接出"趋势→该公司具体业务环节→营收利润成长"的传导链，不得原样抄录为泛行业文案；②"市场盘面与宏观环境"段（存量博弈/极致抽血/缩量/获利回吐/海外情绪扰动等）属交易层面观察，仅供 geopolitical_assessment，禁止作为 growth_drivers/headwinds 论据）
+（本段含两类信息，必须区别使用：①产业趋势段（AI算力/半导体/新能源/医药/出海等）是判断该公司成长性的【输入信号】，写入 growth_drivers/headwinds 时必须接出"趋势→该公司具体业务环节→营收利润成长"的传导链，不得原样抄录为泛行业文案；②"市场盘面与宏观环境"段须再细分——真正的宏观/地缘（海外流动性/美联储/关税/地缘冲突等）可入 geopolitical_assessment；纯A股交易层面（存量博弈/极致抽血/缩量/获利回吐/板块轮动等）由 capital 量价信号承担，不进 growth/geopolitical，但若来自异动归因须保留到 summary 作市场背景，不得删除。两者均禁止作为 growth_drivers/headwinds 论据）
 {wk_text}
 
 ## 输出格式
@@ -322,8 +322,8 @@ def _build_refresh_prompt(code: str, name: str, industry: str,
   }},
   "growth_assessment": {{
     "growth_score": 0.0,
-    "growth_drivers": ["3-5条【针对该公司未来营收/利润成长性】的驱动，宁缺毋滥（凑不满3条就少写，严禁套话凑满）。每条必须含完整传导链【行业趋势或公司动作 → 该公司具体业务环节（订单/产能/产能利用率/客户或客户结构/市占率/产品价格/毛利率/净利率/营收占比，七选一以上） → 对营收或利润成长的方向性影响】，含具体数据或产品线/客户名/产能节点；趋势词（算力/储能/存储/创新药等）可用，禁无落点的趋势陈述与牵强蹭概念；严禁市场交易类内容（存量博弈/资金挤出/戴维斯双杀/估值修复/板块轮动等，归geopolitical_assessment）。若注入了异动分析结论段(⚡)，其中符合针对性的近期驱动应充分写入本字段，不因条数限制删减"],
-    "headwinds": ["3-5条【针对该公司未来营收/利润成长性】的阻力，宁缺毋滥（严禁凑数套话）。每条必须是拖累未来营收/利润增长的具体因素（订单下滑/产能过剩/价格战/客户流失/份额被抢/成本上升侵蚀毛利/技术路线被替代/政策收紧/客户集中度上升），含具体数据或传导链；严禁市场交易类内容（存量博弈/增量资金/资金挤出/资金失血/机构资金/戴维斯双杀/估值修复/估值过高/获利回吐/板块轮动/风格切换/交易拥挤，归geopolitical_assessment）；判定法：若描述的是'股价怎么走'而非'营收利润怎么变'则不合格，删"]
+    "growth_drivers": ["3-5条【针对该公司未来营收/利润成长性】的驱动，宁缺毋滥（凑不满3条就少写，严禁套话凑满）。每条必须含完整传导链【行业趋势或公司动作 → 该公司具体业务环节（订单/产能/产能利用率/客户或客户结构/市占率/产品价格/毛利率/净利率/营收占比，七选一以上） → 对营收或利润成长的方向性影响】，含具体数据或产品线/客户名/产能节点；趋势词（算力/储能/存储/创新药等）可用，禁无落点的趋势陈述与牵强蹭概念；严禁市场交易类内容（存量博弈/资金挤出/戴维斯双杀/估值修复/板块轮动等）作为成长性论据——移出本字段（保留到 summary，由 capital 量化承担）。若注入了异动分析结论段(⚡)，其中符合针对性的近期驱动应充分写入本字段，不因条数限制删减"],
+    "headwinds": ["3-5条【针对该公司未来营收/利润成长性】的阻力，宁缺毋滥（严禁凑数套话）。每条必须是拖累未来营收/利润增长的具体因素（订单下滑/产能过剩/价格战/客户流失/份额被抢/成本上升侵蚀毛利/技术路线被替代/政策收紧/客户集中度上升），含具体数据或传导链；严禁市场交易类内容（存量博弈/增量资金/资金挤出/资金失血/机构资金/戴维斯双杀/估值修复/估值过高/获利回吐/板块轮动/风格切换/交易拥挤）作为成长性论据——移出本字段（保留到 summary，由 capital 量化承担）；判定法：若描述的是'股价怎么走'而非'营收利润怎么变'则不合格"]
   }},
   "geopolitical_assessment": {{
     "risks": ["0-2条地缘/政策/宏观风险（建议1条，宁缺毋滥，实在没有可不写、留空数组）。必须言之有物：每条含具体政策名/出口管制清单/补贴退坡数额/关税税率/行业数据；严禁'宏观不确定性''政策风险''中美博弈长期化''地缘局势紧张'等任何股票都适用的泛词套话（命中即删）。引用世界知识数据"],
@@ -340,9 +340,9 @@ def _build_refresh_prompt(code: str, name: str, industry: str,
 3. **不重复旧文件的错误**：旧文件的分类/断言如有误，请在本次修正
 4. **供应链断言防污染**：注意信源分级，送样/测试 ≠ 已锁定
 5. **宁缺毋滥**：无法确认的强断言宁可删除
-6. **growth_drivers/headwinds 针对性自检（写完每条当场执行，任一不过即删除或重写）**：①删名测试——删掉公司名后是否对任何同业都成立？若是则太泛，须细化到该公司独有的产品线/客户/产能/份额/订单，细化不出则删除（例：删"平安银行"后"AIDC带动科技信贷"对任何银行都成立=不合格；删"中际旭创"后"1.6T光模块量产交付"仅对头部光模块厂成立=合格）；②传导落点测试——是否点明趋势→该公司订单/产能/客户/份额/价格/利润率中的具体落点？只停在"XX产业爆发"无落点或牵强（银行写AIDC、白酒写AI算力失血）→删除；③成长性vs交易性测试——描述的是"营收利润怎么变"还是"股价怎么走"？含存量博弈/资金挤出/戴维斯双杀/估值修复/获利回吐/板块轮动等词→移入geopolitical_assessment
-7. **市场交易内容硬剥离**：资金面（存量博弈/增量资金/资金挤出/资金失血/机构资金/北向资金/主力资金）、估值与交易情绪（戴维斯双杀/估值修复/估值过高/获利回吐/板块轮动/风格切换/交易拥挤/筹码结构/风险偏好）一律不得进入 growth_drivers/headwinds，归 geopolitical_assessment——这些关乎该股票的市场表现，与该公司未来营收利润的成长性无关
-8. **异动回流必须保留**：若注入了"⚡近期异动分析结论"段，其中的近期异动驱动（经实时web search归因、已具体到事件）须充分反映到 growth_drivers/strengths，不因条数限制删减——这是当前市场对该股的真实认知
+6. **growth_drivers/headwinds 针对性自检（写完每条当场执行，任一不过即删除或重写）**：①删名测试——删掉公司名后是否对任何同业都成立？若是则太泛，须细化到该公司独有的产品线/客户/产能/份额/订单，细化不出则删除（例：删"平安银行"后"AIDC带动科技信贷"对任何银行都成立=不合格；删"中际旭创"后"1.6T光模块量产交付"仅对头部光模块厂成立=合格）；②传导落点测试——是否点明趋势→该公司订单/产能/客户/份额/价格/利润率中的具体落点？只停在"XX产业爆发"无落点或牵强（银行写AIDC、白酒写AI算力失血）→删除；③成长性vs交易性测试——描述的是"营收利润怎么变"还是"股价怎么走"？含存量博弈/资金挤出/戴维斯双杀/估值修复/获利回吐/板块轮动等词→移出本字段（保留到 summary 作市场背景，capital 已量化承担）
+7. **市场交易内容硬剥离（仅针对成长性字段）**：资金面（存量博弈/增量资金/资金挤出/资金失血/机构资金/北向资金/主力资金）、估值与交易情绪（戴维斯双杀/估值修复/估值过高/获利回吐/板块轮动/风格切换/交易拥挤/筹码结构/风险偏好）一律不得进入 growth_drivers/headwinds——这些关乎该股票的市场表现，由 capital 量价信号量化承担，与该公司未来营收利润的成长性无关；geopolitical_assessment 只留真正的地缘/政策/宏观。但【交易类信息本身不删除】：若来自异动归因，保留到 summary 作近期市场背景
+8. **异动回流必须保留（最高优先级，不得弱化）**：若注入了"⚡近期异动分析结论"段，该结论是花成本（实时web search+归因）得来的重要信号，必须真实落盘、不得静默删除或弱化：成长性催化类（个股事件/板块供需/政策催化）→充分写入 growth_drivers/strengths；下跌类（基本面恶化/特定风险）→headwinds；技术回调/估值杀跌等纯交易类→写入 summary 作近期市场异动背景（capital 已量化该价格行为）。均不因条数限制删减——这是当前市场对该股的真实认知
 9. **与v3评分端同向**：禁用"国产替代/一带一路/政策红利/行业景气度高/竞争加剧/宏观不确定性/估值偏高"等任何股票都适用的空话作为独立条目，必须附具体订单/产能/客户名/份额数据
 
 请直接输出 JSON，不要有其他文字。"""
@@ -539,6 +539,17 @@ def refresh_one(code: str, world_knowledge: str = "",
     except Exception as e:
         print(f"    Tushare: 拉取失败 ({type(e).__name__})")
 
+    # ── 3.5. Tushare 估值 (PE/PB/市值/换手, 供 surge price-in 锚定) ──
+    # 直接写入 key_metrics (post-LLM), 不进 fundamentals-gen prompt —— 避免估值泄漏进 growth 字段
+    valuation = None
+    try:
+        from picker.data.fundamentals_data import fetch_valuation
+        valuation = fetch_valuation(code)
+        if valuation:
+            print(f"    Tushare 估值: PE_TTM={valuation.get('pe_ttm')} PB={valuation.get('pb')} 市值{valuation.get('total_mv_yi')}亿")
+    except Exception as e:
+        print(f"    Tushare 估值: 拉取失败 ({type(e).__name__})")
+
     # ── 4. 研报提及 ──
     mentions = _get_stock_research_mentions(code, name)
     if mentions:
@@ -608,8 +619,14 @@ def refresh_one(code: str, world_knowledge: str = "",
     km = fh.setdefault('key_metrics', {})
     for k in ["revenue_yi", "net_profit_yi", "gross_margin_pct", "net_margin_pct",
                "roe_pct", "debt_ratio_pct", "rd_ratio_pct", "rd_expense_yi",
-               "operating_cf_yi", "cf_to_profit"]:
+               "operating_cf_yi", "cf_to_profit", "netprofit_yoy"]:
         km.setdefault(k, None)
+    # surge price-in 锚定估值字段 (Tushare daily_basic); 直接写入不经 LLM (估值水位仅供 surge 评分, 不进 growth 字段)
+    for k in ("pe_ttm", "pb", "ps_ttm", "total_mv_yi", "turnover_rate", "dv_ratio"):
+        km[k] = valuation.get(k) if valuation else None
+    # 净利同比 (供 surge PEG 估值消化判断): 从财报写入, 不经 LLM
+    if real_financials and real_financials.get("netprofit_yoy") is not None:
+        km["netprofit_yoy"] = real_financials["netprofit_yoy"]
 
     # 写入文件（覆盖）
     os.makedirs(paths.FUNDAMENTALS_DIR, exist_ok=True)
@@ -620,8 +637,15 @@ def refresh_one(code: str, world_knowledge: str = "",
     # ── 6. V3 重评 ──
     if do_v3_rescore:
         try:
-            _trigger_v3_rescore(code, new_data)
-            print(f"    ✓ V3 已重评")
+            status = _trigger_v3_rescore(code, new_data)
+            if status == "ok":
+                print(f"    ✓ V3 已重评")
+            elif status == "empty":
+                print(f"    ⚠ V3 未重评: LLM 返回空 (可能 429 限流/瞬时故障, 旧分保留)")
+            elif status == "parse_fail":
+                print(f"    ⚠ V3 未重评: 解析失败 (LLM 返回缺 chain/surge 字段或畸形, 旧分保留)")
+            else:
+                print(f"    ⚠ V3 未重评: {status}")
         except Exception as e:
             print(f"    ⚠ V3 重评失败: {e}")
 
@@ -629,18 +653,33 @@ def refresh_one(code: str, world_knowledge: str = "",
 
 
 def _trigger_v3_rescore(code: str, fund_data: dict):
-    """触发单只股票的 V3 评分更新（链式调用 v3_full_score）。"""
+    """触发单只股票的 V3 评分更新（链式调用 v3_full_score）。
+
+    返回状态字符串供调用方如实报告 (旧实现早返回时静默 None, 调用方无法区分成功/空转,
+    曾导致 LLM 空响应/解析失败时仍误打"✓ V3 已重评"):
+      "ok" 写入成功 / "empty" LLM 返回空 (常 429 限流耗尽重试/瞬时故障) /
+      "parse_fail" 有内容但缺 chain/surge 字段或畸形解析失败
+    """
     from picker.scoring import v3_full_score as v3
 
     prompt = v3.get_chain_prompt() + "\n" + json.dumps(fund_data, ensure_ascii=False, indent=2)
-    _ZHIPU_LIMITER.acquire()  # V3 重评也限速 (补全所有智谱调用点, 避免此点爆发连累全局)
-    content = v3._llm(prompt)
-    if not content:
-        return
-
-    result = v3._parse(content)
+    # 解析失败也重试 (与 v3._call 同: GLM 偶发返回畸形/截断响应, 串行重跑通常成功)
+    result = None
+    last_content = ""
+    for _attempt in range(3):
+        _ZHIPU_LIMITER.acquire()  # 每次重试都限速, 避免爆发连累全局
+        content = v3._llm(prompt)
+        if not content:
+            continue
+        last_content = content
+        result = v3._parse(content)
+        if result:
+            break
     if not result:
-        return
+        if last_content:
+            print(f"    [diag] V3 解析失败(重试3次), LLM 原始返回前 120 字: {last_content[:120]!r}")
+            return "parse_fail"
+        return "empty"
 
     # 写入 V3_CACHE（全局锁 + 原子写：写 .tmp 再 rename，防多线程并发损坏文件）
     with _V3_LOCK:
@@ -650,11 +689,18 @@ def _trigger_v3_rescore(code: str, fund_data: dict):
                 cache = json.load(open(v3.V3_CACHE))
             except Exception:
                 cache = {}
+        # 保留 quant capital: result 里的 capital 是 LLM 占位值(0-5), 整条覆盖会冲掉 update_capital 算好的 G模式 capital
+        preserved_cap = cache.get(code, {}).get("capital")
         cache[code] = result
+        if preserved_cap is not None:
+            cache[code]["capital"] = preserved_cap
+            cache[code]["sector_score"] = round(
+                result.get("chain", 0) + result.get("surge", 0) + preserved_cap, 1)
         tmp = v3.V3_CACHE + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(cache, f, ensure_ascii=False, indent=1)
         os.replace(tmp, v3.V3_CACHE)  # 原子替换
+    return "ok"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -706,7 +752,7 @@ def refresh_from_research(days: int = 3, dry_run: bool = False,
                           max_stocks: int = 0,
                           do_web_search: bool = True,
                           do_v3_rescore: bool = True,
-                          workers: int = 1) -> dict:
+                          workers: int = 5) -> dict:
     """对近期有研报提及的个股批量刷新 fundamentals。
 
     Args:
@@ -926,7 +972,7 @@ def main():
     parser.add_argument('--no-web', action='store_true', help='跳过网络搜索')
     parser.add_argument('--no-v3', action='store_true', help='不触发 V3 重评')
     parser.add_argument('--dry-run', action='store_true', help='只看不写')
-    parser.add_argument('--workers', '-w', type=int, default=1, help='并发线程数 (默认1串行, LLM为IO密集建议5)')
+    parser.add_argument('--workers', '-w', type=int, default=5, help='并发线程数 (默认5并行; LLM为IO密集, _ZHIPU_LIMITER 兜底防429)')
     args = parser.parse_args()
 
     if args.stock:

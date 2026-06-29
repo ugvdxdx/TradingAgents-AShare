@@ -33,7 +33,14 @@
       "rd_ratio_pct": 7.08,
       "rd_expense_yi": 2.13,
       "operating_cf_yi": 3.83,
-      "cf_to_profit": 0.54
+      "cf_to_profit": 0.54,
+      "pe_ttm": 19.1774,
+      "pb": 5.0429,
+      "ps_ttm": 4.8004,
+      "turnover_rate": 0.8216,
+      "dv_ratio": 2.5964,
+      "total_mv_yi": 149.5,
+      "netprofit_yoy": 21.5424
     },
     "health_rating": "健康",
     "benchmark_ref": "纺织服装设备及工业自动化行业",

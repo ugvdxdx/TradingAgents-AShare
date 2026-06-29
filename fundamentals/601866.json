@@ -32,7 +32,14 @@
       "rd_ratio_pct": 0.15,
       "rd_expense_yi": 0.39,
       "operating_cf_yi": 51.88,
-      "cf_to_profit": 3.22
+      "cf_to_profit": 3.22,
+      "pe_ttm": 19.4271,
+      "pb": 0.9626,
+      "ps_ttm": 1.1626,
+      "turnover_rate": 0.6644,
+      "dv_ratio": 1.8062,
+      "total_mv_yi": 299.6,
+      "netprofit_yoy": -4.5402
     },
     "health_rating": "一般",
     "benchmark_ref": "航运及物流重资产租赁行业",

@@ -33,7 +33,14 @@
       "rd_ratio_pct": 16.69,
       "rd_expense_yi": 8.42,
       "operating_cf_yi": 29.85,
-      "cf_to_profit": 1.7
+      "cf_to_profit": 1.7,
+      "pe_ttm": 20.9692,
+      "pb": 3.1964,
+      "ps_ttm": 7.8399,
+      "turnover_rate": 8.0718,
+      "dv_ratio": 1.0512,
+      "total_mv_yi": 521.5,
+      "netprofit_yoy": 23.1323
     },
     "health_rating": "健康",
     "benchmark_ref": "游戏行业平均毛利率约75%，平均净利率约15-20%",

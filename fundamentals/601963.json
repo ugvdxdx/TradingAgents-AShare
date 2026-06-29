@@ -34,7 +34,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 494.36,
-      "cf_to_profit": 8.74
+      "cf_to_profit": 8.74,
+      "pe_ttm": 6.4942,
+      "pb": 0.6466,
+      "ps_ttm": 2.4354,
+      "turnover_rate": 0.4538,
+      "dv_ratio": 3.6761,
+      "total_mv_yi": 378.2,
+      "netprofit_yoy": 10.4924
     },
     "health_rating": "健康",
     "benchmark_ref": "城商行行业平均（ROE约9-12%、净利率约30-38%、资产负债率约92-94%）；头部城商行标杆（宁波银行ROE约14%+、成都银行ROE约16%+）",

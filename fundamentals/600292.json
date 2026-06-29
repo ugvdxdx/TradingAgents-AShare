@@ -34,7 +34,13 @@
       "rd_ratio_pct": 1.09,
       "rd_expense_yi": 1.32,
       "operating_cf_yi": 49.05,
-      "cf_to_profit": 9.22
+      "cf_to_profit": 9.22,
+      "pe_ttm": 72.4623,
+      "pb": 3.2333,
+      "ps_ttm": 4.8684,
+      "turnover_rate": 3.9583,
+      "total_mv_yi": 564.2,
+      "netprofit_yoy": -34.0682
     },
     "health_rating": "一般",
     "benchmark_ref": "A股水电龙头（长江电力/华能水电）：毛利率60%+、净利率30%+、ROE 12%+、资产负债率55-60%",

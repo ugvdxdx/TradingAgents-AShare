@@ -33,7 +33,14 @@
       "rd_ratio_pct": 0.0,
       "rd_expense_yi": 0.0,
       "operating_cf_yi": 10.66,
-      "cf_to_profit": 0.27
+      "cf_to_profit": 0.27,
+      "pe_ttm": 13.8135,
+      "pb": 1.1229,
+      "ps_ttm": 5.3806,
+      "turnover_rate": 2.214,
+      "dv_ratio": 1.6825,
+      "total_mv_yi": 588.6,
+      "netprofit_yoy": 79.85
     },
     "health_rating": "一般",
     "benchmark_ref": "证券行业平均水平（净利率约30%，ROE约6-8%）",

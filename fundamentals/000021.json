@@ -34,7 +34,14 @@
       "rd_ratio_pct": 2.92,
       "rd_expense_yi": 4.6,
       "operating_cf_yi": 17.65,
-      "cf_to_profit": 1.55
+      "cf_to_profit": 1.55,
+      "pe_ttm": 70.2665,
+      "pb": 6.3056,
+      "ps_ttm": 5.2305,
+      "turnover_rate": 14.4389,
+      "dv_ratio": 0.352,
+      "total_mv_yi": 842.4,
+      "netprofit_yoy": 22.0707
     },
     "health_rating": "健康",
     "benchmark_ref": "半导体封测行业（长电科技/通富微电/华天科技）",

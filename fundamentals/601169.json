@@ -31,7 +31,14 @@
       "rd_ratio_pct": 0.0,
       "rd_expense_yi": 0.0,
       "operating_cf_yi": 3789.55,
-      "cf_to_profit": 18.87
+      "cf_to_profit": 18.87,
+      "pe_ttm": 5.092,
+      "pb": 0.3686,
+      "ps_ttm": 1.4813,
+      "turnover_rate": 0.5189,
+      "dv_ratio": 6.4777,
+      "total_mv_yi": 1044.5,
+      "netprofit_yoy": -23.726
     },
     "health_rating": "健康",
     "benchmark_ref": "城市商业银行平均水平",

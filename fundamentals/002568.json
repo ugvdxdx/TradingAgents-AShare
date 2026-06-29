@@ -33,7 +33,14 @@
       "rd_ratio_pct": 3.34,
       "rd_expense_yi": 0.98,
       "operating_cf_yi": 8.8,
-      "cf_to_profit": 1.38
+      "cf_to_profit": 1.38,
+      "pe_ttm": 24.3641,
+      "pb": 3.2505,
+      "ps_ttm": 5.4495,
+      "turnover_rate": 1.6421,
+      "dv_ratio": 1.9001,
+      "total_mv_yi": 163.8,
+      "netprofit_yoy": -11.3632
     },
     "health_rating": "健康",
     "benchmark_ref": "食品饮料行业平均",

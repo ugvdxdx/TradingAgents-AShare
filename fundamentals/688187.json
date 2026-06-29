@@ -33,7 +33,14 @@
       "rd_ratio_pct": 10.49,
       "rd_expense_yi": 30.11,
       "operating_cf_yi": 39.65,
-      "cf_to_profit": 0.97
+      "cf_to_profit": 0.97,
+      "pe_ttm": 19.5597,
+      "pb": 1.8631,
+      "ps_ttm": 2.7458,
+      "turnover_rate": 2.4137,
+      "dv_ratio": 2.4149,
+      "total_mv_yi": 803.6,
+      "netprofit_yoy": 10.64
     },
     "health_rating": "健康",
     "benchmark_ref": "轨交装备及半导体行业",

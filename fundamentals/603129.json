@@ -32,7 +32,14 @@
       "rd_ratio_pct": 6.18,
       "rd_expense_yi": 12.2,
       "operating_cf_yi": 39.66,
-      "cf_to_profit": 2.37
+      "cf_to_profit": 2.37,
+      "pe_ttm": 22.2534,
+      "pb": 4.6788,
+      "ps_ttm": 1.7958,
+      "turnover_rate": 1.3898,
+      "dv_ratio": 1.5686,
+      "total_mv_yi": 374.5,
+      "netprofit_yoy": 13.8344
     },
     "health_rating": "健康",
     "benchmark_ref": "汽车零部件及摩托车制造行业",

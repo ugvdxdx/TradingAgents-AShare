@@ -33,7 +33,13 @@
       "rd_ratio_pct": 16.83,
       "rd_expense_yi": 3.85,
       "operating_cf_yi": -8.78,
-      "cf_to_profit": 1.83
+      "cf_to_profit": 1.83,
+      "pe_ttm": 22110.4777,
+      "pb": 357.8593,
+      "ps_ttm": 86.941,
+      "turnover_rate": 21.6496,
+      "total_mv_yi": 2870.3,
+      "netprofit_yoy": -151.9643
     },
     "health_rating": "较差",
     "benchmark_ref": "半导体存储模组行业（通常毛利率20%-30%以上）",

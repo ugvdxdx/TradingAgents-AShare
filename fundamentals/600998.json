@@ -33,7 +33,14 @@
       "rd_ratio_pct": 0.08,
       "rd_expense_yi": 1.29,
       "operating_cf_yi": 34.41,
-      "cf_to_profit": 1.53
+      "cf_to_profit": 1.53,
+      "pe_ttm": 11.5432,
+      "pb": 0.8468,
+      "ps_ttm": 0.1419,
+      "turnover_rate": 0.5719,
+      "dv_ratio": 4.2809,
+      "total_mv_yi": 233.0,
+      "netprofit_yoy": -10.0713
     },
     "health_rating": "一般",
     "benchmark_ref": "医药流通行业（毛利率普遍在8%-12%之间，资产负债率约65%）",

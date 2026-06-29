@@ -33,7 +33,14 @@
       "rd_ratio_pct": 2.69,
       "rd_expense_yi": 0.51,
       "operating_cf_yi": 3.67,
-      "cf_to_profit": 0.85
+      "cf_to_profit": 0.85,
+      "pe_ttm": 26.5,
+      "pb": 2.3166,
+      "ps_ttm": 6.3495,
+      "turnover_rate": 4.7878,
+      "dv_ratio": 4.4158,
+      "total_mv_yi": 135.9,
+      "netprofit_yoy": -34.5555
     },
     "health_rating": "健康",
     "benchmark_ref": "贝泰妮/巨子生物",

@@ -32,7 +32,13 @@
       "rd_ratio_pct": 6.6,
       "rd_expense_yi": 2.17,
       "operating_cf_yi": 1.32,
-      "cf_to_profit": 0.4
+      "cf_to_profit": 0.4,
+      "pe_ttm": 327.4158,
+      "pb": 22.4408,
+      "ps_ttm": 34.9685,
+      "turnover_rate": 23.6262,
+      "total_mv_yi": 1225.4,
+      "netprofit_yoy": -3.015
     },
     "health_rating": "一般",
     "benchmark_ref": "国防军工/特种电源行业",

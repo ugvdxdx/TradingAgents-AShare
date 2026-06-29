@@ -32,7 +32,14 @@
       "rd_ratio_pct": 0.49,
       "rd_expense_yi": 17.15,
       "operating_cf_yi": 754.3,
-      "cf_to_profit": 1.46
+      "cf_to_profit": 1.46,
+      "pe_ttm": 10.8191,
+      "pb": 3.3832,
+      "ps_ttm": 1.8105,
+      "turnover_rate": 1.7126,
+      "dv_ratio": 1.9873,
+      "total_mv_yi": 6674.3,
+      "netprofit_yoy": 61.5487
     },
     "health_rating": "健康",
     "benchmark_ref": "有色金属矿采选业",

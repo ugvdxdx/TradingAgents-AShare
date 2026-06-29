@@ -34,7 +34,14 @@
       "rd_ratio_pct": 4.1,
       "rd_expense_yi": 44.03,
       "operating_cf_yi": 146.36,
-      "cf_to_profit": 2.47
+      "cf_to_profit": 2.47,
+      "pe_ttm": 10.7921,
+      "pb": 1.4653,
+      "ps_ttm": 0.6107,
+      "turnover_rate": 0.2403,
+      "dv_ratio": 5.4611,
+      "total_mv_yi": 653.6,
+      "netprofit_yoy": 15.6672
     },
     "health_rating": "健康",
     "benchmark_ref": "钢铁/特种钢行业基准：毛利率约15-25%，净利率约3-8%，ROE约8-15%",

@@ -34,7 +34,13 @@
       "rd_ratio_pct": 8.56,
       "rd_expense_yi": 4.19,
       "operating_cf_yi": 5.07,
-      "cf_to_profit": 11.27
+      "cf_to_profit": 11.27,
+      "pe_ttm": 257.7497,
+      "pb": 10.3631,
+      "ps_ttm": 6.9034,
+      "turnover_rate": 12.3651,
+      "total_mv_yi": 335.5,
+      "netprofit_yoy": 105.5491
     },
     "health_rating": "较差",
     "benchmark_ref": "工业机器人本体及自动化装备行业（发那科/ABB/汇川技术等）",

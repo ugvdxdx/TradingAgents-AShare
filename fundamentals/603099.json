@@ -34,7 +34,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 1.73,
-      "cf_to_profit": 1.34
+      "cf_to_profit": 1.34,
+      "pe_ttm": 71.8712,
+      "pb": 6.3491,
+      "ps_ttm": 11.7284,
+      "turnover_rate": 1.5586,
+      "dv_ratio": 0.2273,
+      "total_mv_yi": 95.6,
+      "netprofit_yoy": -10.3327
     },
     "health_rating": "健康",
     "benchmark_ref": "自然景区上市公司（黄山旅游、峨眉山A、张家界等）",

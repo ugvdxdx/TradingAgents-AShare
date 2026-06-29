@@ -32,7 +32,14 @@
       "rd_ratio_pct": 5.15,
       "rd_expense_yi": 0.95,
       "operating_cf_yi": 0.95,
-      "cf_to_profit": 1.44
+      "cf_to_profit": 1.44,
+      "pe_ttm": 74.0691,
+      "pb": 2.1929,
+      "ps_ttm": 2.5882,
+      "turnover_rate": 12.7342,
+      "dv_ratio": 0.2744,
+      "total_mv_yi": 50.0,
+      "netprofit_yoy": 108.7922
     },
     "health_rating": "一般",
     "benchmark_ref": "LED封装及显示器件行业基准",

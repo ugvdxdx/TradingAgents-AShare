@@ -32,7 +32,14 @@
       "rd_ratio_pct": 4.02,
       "rd_expense_yi": 6.44,
       "operating_cf_yi": 47.44,
-      "cf_to_profit": 1.17
+      "cf_to_profit": 1.17,
+      "pe_ttm": 16.6543,
+      "pb": 3.883,
+      "ps_ttm": 4.2799,
+      "turnover_rate": 0.3498,
+      "dv_ratio": 4.4827,
+      "total_mv_yi": 691.8,
+      "netprofit_yoy": -4.7182
     },
     "health_rating": "健康",
     "benchmark_ref": "家用电器行业整体",

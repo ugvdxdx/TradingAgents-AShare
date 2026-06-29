@@ -34,7 +34,14 @@
       "rd_ratio_pct": 6.54,
       "rd_expense_yi": 5.19,
       "operating_cf_yi": 7.98,
-      "cf_to_profit": 2.19
+      "cf_to_profit": 2.19,
+      "pe_ttm": 69.9896,
+      "pb": 4.5384,
+      "ps_ttm": 3.1225,
+      "turnover_rate": 5.734,
+      "dv_ratio": 0.7869,
+      "total_mv_yi": 267.0,
+      "netprofit_yoy": -2.0195
     },
     "health_rating": "一般",
     "benchmark_ref": "半导体材料/先进金属材料行业（江丰电子毛利率约30%、有研新森毛利率约4%-6%但营收体量大）",

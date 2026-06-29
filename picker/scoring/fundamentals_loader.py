@@ -78,6 +78,14 @@ def _build_stock_json(code: str) -> Optional[str]:
             "debt_ratio_pct": metrics.get("debt_ratio_pct"),
             "operating_cf_yi": ocf,
             "cf_to_profit": c2p,
+            "netprofit_yoy": metrics.get("netprofit_yoy"),  # 净利同比% (surge PEG 用)
+            # surge price-in 锚定: 估值水位 (Tushare daily_basic, 经 key_metrics 带出)
+            "pe_ttm": metrics.get("pe_ttm"),
+            "pb": metrics.get("pb"),
+            "ps_ttm": metrics.get("ps_ttm"),
+            "total_mv_yi": metrics.get("total_mv_yi"),
+            "turnover_rate": metrics.get("turnover_rate"),
+            "dv_ratio": metrics.get("dv_ratio"),
             "health": fin.get("health_rating", ""),
             "benchmark_ref": fin.get("benchmark_ref", ""),
             "highlights": fin.get("highlights", [])[:2],

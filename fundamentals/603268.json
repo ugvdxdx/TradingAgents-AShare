@@ -34,7 +34,13 @@
       "rd_ratio_pct": 0.77,
       "rd_expense_yi": 1.66,
       "operating_cf_yi": -14.58,
-      "cf_to_profit": -0.55
+      "cf_to_profit": -0.55,
+      "pe_ttm": 39.9598,
+      "pb": 13.2397,
+      "ps_ttm": 5.0668,
+      "turnover_rate": 2.5605,
+      "total_mv_yi": 1396.2,
+      "netprofit_yoy": 1083.0538
     },
     "health_rating": "一般",
     "benchmark_ref": "中国船舶（资产负债率约50%、ROE约15%）、中国重工等同业央企龙头",

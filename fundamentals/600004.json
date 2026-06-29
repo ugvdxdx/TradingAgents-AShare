@@ -32,7 +32,14 @@
       "operating_cf_yi": 30.75,
       "rd_ratio_pct": 1.29,
       "rd_expense_yi": 1.02,
-      "cf_to_profit": 2.09
+      "cf_to_profit": 2.09,
+      "pe_ttm": 14.3845,
+      "pb": 0.9101,
+      "ps_ttm": 2.3769,
+      "turnover_rate": 0.4581,
+      "dv_ratio": 1.9275,
+      "total_mv_yi": 192.8,
+      "netprofit_yoy": 58.5951
     },
     "health_rating": "健康",
     "benchmark_ref": "交通运输/机场枢纽行业",

@@ -33,7 +33,13 @@
       "rd_ratio_pct": 21.53,
       "rd_expense_yi": 2.03,
       "operating_cf_yi": 0.83,
-      "cf_to_profit": 0.65
+      "cf_to_profit": 0.65,
+      "pe_ttm": 366.2042,
+      "pb": 16.46,
+      "ps_ttm": 51.7419,
+      "turnover_rate": 4.8709,
+      "total_mv_yi": 492.9,
+      "netprofit_yoy": 303.332
     },
     "health_rating": "一般",
     "benchmark_ref": "机器视觉及传感器行业",

@@ -32,7 +32,14 @@
       "rd_ratio_pct": 3.79,
       "rd_expense_yi": 13.11,
       "operating_cf_yi": 74.29,
-      "cf_to_profit": 1.57
+      "cf_to_profit": 1.57,
+      "pe_ttm": 11.3652,
+      "pb": 0.9218,
+      "ps_ttm": 1.3533,
+      "turnover_rate": 1.8519,
+      "dv_ratio": 9.5298,
+      "total_mv_yi": 469.7,
+      "netprofit_yoy": -1.9554
     },
     "health_rating": "健康",
     "benchmark_ref": "铝冶炼及压延加工行业",

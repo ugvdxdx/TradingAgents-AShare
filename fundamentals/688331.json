@@ -33,7 +33,13 @@
       "rd_ratio_pct": 37.49,
       "rd_expense_yi": 12.19,
       "operating_cf_yi": 0.53,
-      "cf_to_profit": 0.07
+      "cf_to_profit": 0.07,
+      "pe_ttm": 49.3732,
+      "pb": 16.2354,
+      "ps_ttm": 18.8627,
+      "turnover_rate": 5.2799,
+      "total_mv_yi": 637.8,
+      "netprofit_yoy": 148.3294
     },
     "health_rating": "一般",
     "benchmark_ref": "创新生物制药行业基准",

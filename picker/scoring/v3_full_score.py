@@ -93,26 +93,30 @@ PROMPT_V3E = """你是A股量化研究员，对股票赛道动量评分并提炼
 
 ### surge 爆发分 (0.0-10.0) — 30天内股价超额收益概率预估
 
-**爆发分 ≠ growth_score。** growth_score = 公司业务1-3年能否高速成长（中长期潜力，不看股价）；**爆发分 = 这种成长性能否在未来30天内兑现为超额收益（变现概率+时机）**。判别核心=成长动能是否处于【加速拐点】×【催化是否落在30天内可验证】。成长性高但已稳定/已price-in→低分；成长性中等但刚加速+有近端硬催化→高分。先读 growth_drivers/what_they_do（含⚡异动回流段）里的【加速/拐点/订单/产能/价格/份额/预告】信号，据此同时产出 surge 与 essence.core_catalyst（两者必须同源同向）。
+**爆发分 ≠ growth_score。** growth_score = 公司业务1-3年能否高速成长（中长期潜力，不看股价）；**爆发分 = 这种成长性能否在未来30天内兑现为超额收益（变现概率+时机）**。判别核心=成长动能是否处于【加速拐点】×【催化是否落在30天内可验证】。成长性高但已稳定/已price-in→低分；成长性中等但刚加速+有近端硬催化→高分。先读 growth_drivers/what_they_do（含⚡异动回流段）里的【加速/拐点/订单/产能/价格/份额/预告】信号，据此同时产出 surge 与 essence.core_catalyst（两者必须同源同向）。**price-in 锚定（必读）**：评分前先读注入的【surge 锚定数据】(多窗口涨幅+动量状态) 与估值段(板块相对分位+PEG)——这是判断"利好涨幅已释放多少/后续还剩多少"的硬数据依据；据此权衡"已涨幅(price-in压力) vs 当前加速度(动量支撑) vs 估值(板块分位+PEG, 非绝对PE/PB)"，涨幅本身不机械扣分。
 
-**档位规则（4档，核心维度=加速度证据×催化近度）**：
+**surge档位规则（4档，核心维度=加速度证据×催化近度）**：
 - **8.0-10.0 加速主升档**：growth_drivers含明确【加速拐点】（环比提速/渗透率破临界/订单逐季加速/稼动率快速爬坡/价格拐头向上/产能30天内投产节点）+ 催化在30天内可验证（near：财报预增公告日期/订单交付节点/招标中标公示/投产点火/政策细则/新品发布，须含具体日期或窗口如"7月15日""Q2财报季"）+ 财务交叉印证（营收增速环比上行或毛利率改善）+ 尚未被充分price-in。可给满分。
 - **5.5-7.9 温和加速档**：成长性扎实+环比改善趋势确立，但加速不够剧烈 或 催化在1季内（mid）或 催化已有部分被预期。
-- **3.0-5.4 平稳/钝化档**：成长性良好但动能平稳（无加速迹象，维持既定增速）或 催化遥远（far）或 已被充分price-in（市场长期共识1年以上+股价已大涨）。最常见档位。
+- **3.0-5.4 平稳/钝化档**：成长性良好但动能平稳（无加速迹象，维持既定增速）或 催化遥远（far）或 锚定数据显示已充分price-in（60日/90日/自低点涨幅均显著 且 momentum_state∈{decelerating,top_reversal}，同时 PE/PB 处板块80分位+ 且 PEG>2 成长消化不掉）。最常见档位。
 - **0.0-2.9 失速/虚假加速档**：成长性向下（环比恶化/订单延迟/产能过剩/价格战）或 drivers全是模板空话无落点（删掉公司名对任何同业都成立）或"加速"仅存在于叙事但财务反向。
 
 **交叉验证规则（给分前逐一核对）**：
-1. **加速度>绝对水平（灵魂）**：无任何环比/拐点/订单加速证据 → 即便growth_score=9也上限7.9。drivers里有无"环比/Q3/下半年/本月/即将/加速/突破/爬坡/导入/拐头"等时间方向性词？无→视为平稳进平稳档。
+1. **加速度>绝对水平（灵魂）**：无基本面加速证据 → 即便growth_score=9也上限7.9。**判断"是否在加速"看 drivers + essence.core_catalyst 的实质内容（有无具体数字/环比/订单量/产能投产节点的加速表述），不要做词面 substring 匹配**——词面有无"环比/加速"等词不决定档位，看的是有没有可核验的加速事实："受益于AI需求增长/景气延续"=泛涨≠加速证据（→平稳档）；"Q2订单环比+40%"/"产能爬坡至90%"/"6月量产"/"渗透率从15%升至30%"=加速（可上8+）。配合 essence.catalyst_horizon=near 加权（近端催化本身是加速变现的硬证据）。
 2. **催化日期硬要求**：高分档（≥5.5）每条催化必须含具体时间节点（日期或窗口）。只有"有望/预计/持续推进/逐步放量"等无锚点词 → 上限4.5。essence.catalyst_horizon=far 且drivers无30天可验证事件 → 上限5.4。
 3. **传导落点检测**：drivers停在"AI算力景气/国产替代大趋势/政策红利"无具体落点（无订单/产能/客户名/份额/价格/稼动率）→ 不构成加速证据，无落点者不超过3分。
 4. **客户实证**：声称大客户但无具体产品名(如"800G光模块")+份额/订单金额 → 扣1分（送样测试≠已锁定）。虚假客户=催化不存在=变现概率归零。
 5. **财报窗口加权（A股最强短期催化）**：窗口期（1月年报预告/4月一季报/7月中报/10月三季报）有明确预告且超预期→大幅加分（核心得分点）；业绩存疑/无预告→从严；非窗口看订单/产能/政策催化。
 6. **需求性质×现金流**：cf_to_profit<0时——若产品属结构性持续景气（世界知识列为主线/景气赛道关键输入+短缺延续多年：HBM/AI光模块/CoWoS/战略金属/存储主控/国产GPU核心环节）→现金流差=扩产备货待涨，不扣分甚至加权；若属投机/泛周期/非主线边缘品→现金流差=赌方向囤货，扣分（减值隐患）。
-7. **price-in软判断（档内修正，非独立维度）**：催化已是市场长期共识（如"AI算力长期景气"反复报道1年以上）+股价已连续大涨 → 边际增量收窄，档内取下沿。但主升浪初期资金介入本身就是预期差修复信号，不因股价涨就机械扣分（防误杀右侧主升浪股）；新出现、近期才被认知的拐点给档内上沿。
+7. **price-in 锚定判断（档内修正，用【surge 锚定数据】含估值板块分位+PEG 权衡，非机械硬规则）**：
+   - 三类权衡公式：已涨幅（price-in压力：60日/90日/自低点涨幅越大越压制）× 当前加速度（动量支撑：momentum_state=accelerating 或 r5 仍强则抵消压力）× 估值（看**板块分位+PEG**，非绝对PE/PB：PE板块低分位=便宜即使绝对值高、PEG<1=成长能消化不算贵、PEG>2=偏贵）。
+   - **关键反例（防误杀高增周期股）**：PE绝对值看似高（如52）但板块0分位（最便宜）且 PEG<1（成长能消化）→ 不算贵，不得据此压分；叠加 momentum_state=accelerating + 30天内有硬催化 → 仍可给档内上沿甚至上一档（"涨多"不等于"涨完"，超级周期股右侧加速能持续）。
+   - **真该压 price-in 的**：涨幅大 + momentum_state∈{decelerating,top_reversal} + 估值已贵（PE/PB 板块80分位+ 且 PEG>2）+ 催化遥远（far）→ 档内下沿。
+   - 不机械扣分原则不变：主升浪初期资金介入是预期差修复信号；近期才被认知的拐点（自低点涨幅小但加速明确）给档内上沿。
 
 **杠杆方向修正**：低净利率(<5%)不设硬上限。净利率持续下行/营收增但利润不增（量增价跌伪成长）→ 扣1.5；利润率处拐点（毛利率高位+净利率从负转正/低回升的扭亏故事）→ 不扣分甚至加权（30天弹性最大品种之一）。
 
-**防共线自检（给分前强制）**：若爆发分与 growth_score 差值<1.0（如growth8.5→爆发8.0）→ 必须重新审视是否只复制了成长性判断而忽略时机。反例A：growth=8.5+30天内有中报预增→爆发8.5；growth=8.5+空窗期无近端催化→爆发3.0（同成长性差5.5）。反例B：growth=9.5远期AI算力龙头但30天纯空窗→爆发3.5；growth=6.5传统主业但30天内产能投产+订单公示双催化→爆发6.0。
+**防共线自检（给分前强制）**：若爆发分与 growth_score 差值<1.0（如growth8.5→爆发8.0）→ 必须重新审视是否只复制了成长性判断而忽略时机。反例A：growth=8.5+30天内有中报预增→爆发8.5；growth=8.5+空窗期无近端催化→爆发3.0（同成长性差5.5）。反例B：growth=9.5远期AI算力龙头但30天纯空窗→爆发3.5；growth=6.5传统主业但30天内产能投产+订单公示双催化→爆发6.0。**price-in 维度追加自检**：若 surge≥7.0 但锚定数据显示 momentum_state∈{decelerating,top_reversal} 且 60日涨幅>50% → 必须重新审视是否高估了剩余涨幅（典型：已大涨+动量衰减+催化空窗的伪主升浪）；反之涨幅巨大但 momentum_state=accelerating 的高分须有近端硬催化支撑，否则视为资金惯性而非基本面加速。
 
 ### capital 资金关注度 (0.0-5.0)
 此字段由量化系统计算（板块动量+量价因子），你只需判断LLM视角的板块热度，供交叉参考。量化capital会覆盖此值。
@@ -266,6 +270,189 @@ def _parse(content):
     }
 
 
+_SECTOR_VAL_CACHE = None       # {sector: {"pes":[sorted], "pbs":[sorted]}}
+_SECTOR_VAL_CODE2SEC = {}      # {code: sector} (用 stock_basic 行业归类, 与快照同源)
+_SECTOR_VAL_DATE = ""
+
+
+def _current_sector(code, industry=None):
+    """个股【当前驱动板块】: 优先用异动归因 sector_tag, 回退 _classify_sector(industry)。
+
+    解决多主业股被 industry 字段带偏: 中天科技 industry="通信/电力设备(海缆/电缆/储能)"
+    → _classify_sector 命中"电力/电网"(错), 但其异动归因 sector_tag="MPO光纤/海缆"(当前真实驱动)
+    → "光通信/AI算力"(对)。归因只对异动股(r20>25%)有, 非异动股回退 industry —— 不异动的股
+    也用不上"当前驱动", industry 即可。空壳归因(summary空)视为无效, 回退。
+    """
+    try:
+        from picker.discovery.attribution import get_attribution_for_code
+        attr = get_attribution_for_code(code)
+        # 有效归因: summary 非空(防空壳) + 非"概念炒作"(炒作类 sector_tag 不可靠, 会把股错路由到概念板块)
+        if attr and attr.get("summary") and attr.get("reason_type") != "概念炒作":
+            sec = _classify_sector(attr.get("sector_tag", ""))
+            if sec:
+                return sec
+    except Exception:
+        pass
+    return _classify_sector(industry if industry is not None else _get_industry(code))
+
+
+def _load_sector_valuation(force=False):
+    """每日一次: fundamentals 池(rich industry 精细归类) + 市场快照 PE/PB → 按板块分组排序。
+
+    用 fundamentals 的 rich industry 归类 (stock_basic 粗类如"半导体"无法精细分),
+    PE/PB 从全市场 daily_basic 快照按 ts_code 查。peer 集 = fundamentals 热股池(同板块热门股)。
+    进程级缓存(当日复用)。拉取失败返回旧缓存(若有)。返回 by_sector dict 或 None。
+    """
+    global _SECTOR_VAL_CACHE, _SECTOR_VAL_CODE2SEC, _SECTOR_VAL_DATE
+    today = datetime.now().strftime("%Y-%m-%d")
+    if _SECTOR_VAL_CACHE is not None and _SECTOR_VAL_DATE == today and not force:
+        return _SECTOR_VAL_CACHE
+    from picker.data.fundamentals_data import fetch_market_valuation_snapshot, _code_to_ts_code
+    import glob
+    snap = fetch_market_valuation_snapshot()
+    if not snap:
+        return _SECTOR_VAL_CACHE
+    by_sec, code2sec = {}, {}
+    for fp in glob.glob(os.path.join(FUNDAMENTALS_DIR, "*.json")):
+        code = os.path.basename(fp).replace(".json", "")
+        try:
+            d = json.load(open(fp, encoding="utf-8"))
+        except Exception:
+            continue
+        ind = (d.get("business_overview", {}) or {}).get("industry", "") or ""
+        sec = _current_sector(code, ind)  # attribution 优先: 多主业股归当前驱动板块(中天科技→光通信非电力)
+        if not sec:
+            continue
+        sv = snap.get(_code_to_ts_code(code))
+        if not sv:
+            continue
+        code2sec[code] = sec
+        bucket = by_sec.setdefault(sec, {"pes": [], "pbs": []})
+        pe, pb = sv.get("pe_ttm"), sv.get("pb")
+        if pe and pe > 0:
+            bucket["pes"].append(pe)
+        if pb and pb > 0:
+            bucket["pbs"].append(pb)
+    for sec in by_sec:
+        by_sec[sec]["pes"].sort()
+        by_sec[sec]["pbs"].sort()
+    _SECTOR_VAL_CACHE, _SECTOR_VAL_CODE2SEC, _SECTOR_VAL_DATE = by_sec, code2sec, today
+    return by_sec
+
+
+def _sector_percentile(code, pe, pb):
+    """板块相对估值分位。用快照里该股自身的 stock_basic 行业归类(与 peer 同源, 保证一致)。
+
+    返回 {sector, pe_pct, pb_pct, pe_median, pb_median, pe_n} 或 None(无快照/股不在快照)。
+    分位=板块内比它低的占比 (0=板块最低/最便宜, 50=中位, 100=最高/最贵)。
+    """
+    by_sec = _load_sector_valuation()
+    if not by_sec:
+        return None
+    sector = _SECTOR_VAL_CODE2SEC.get(str(code))
+    if not sector or sector not in by_sec:
+        return None
+    sv = by_sec[sector]
+    import bisect
+    import statistics as st
+    def _pct(lst, val):
+        return round(bisect.bisect_left(lst, val) / len(lst) * 100) if (val is not None and lst) else None
+    return {
+        "sector": sector,
+        "pe_pct": _pct(sv.get("pes", []), pe),
+        "pb_pct": _pct(sv.get("pbs", []), pb),
+        "pe_median": round(st.median(sv["pes"]), 1) if sv.get("pes") else None,
+        "pb_median": round(st.median(sv["pbs"]), 1) if sv.get("pbs") else None,
+        "pe_n": len(sv.get("pes", [])),
+    }
+
+
+def _compute_valuation_signals(code):
+    """surge 估值锚定: PE/PB 的板块相对分位 + PEG(增长消化)。读 fundamentals key_metrics。
+
+    返回 {pe_ttm, pb, netprofit_yoy, peg, sector, pe_pct, pb_pct, pe_median, pb_median} 或 None。
+    PEG=PE/净利同比: <1 便宜(成長能消化), >2 偏贵; 负增长/亏损时不计算。
+    """
+    fund_path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
+    if not os.path.exists(fund_path):
+        return None
+    try:
+        d = json.load(open(fund_path, encoding="utf-8"))
+    except Exception:
+        return None
+    km = (d.get("financial_health") or {}).get("key_metrics") or {}
+    pe, pb, g = km.get("pe_ttm"), km.get("pb"), km.get("netprofit_yoy")
+    ps = km.get("ps_ttm")
+    high_pe = pe is not None and pe > 200  # PE>200=当前微利/亏损边缘, PEG 会失真(分母极小, 任何增速都给巨大PEG)
+    peg = round(pe / g, 2) if (pe and g and g > 0 and not high_pe) else None
+    sp = _sector_percentile(code, pe, pb) or {}
+    if not any([pe, pb, peg, sp]):
+        return None
+    return {
+        "pe_ttm": pe, "pb": pb, "ps_ttm": ps, "netprofit_yoy": g, "peg": peg, "high_pe": high_pe,
+        "sector": sp.get("sector"), "pe_pct": sp.get("pe_pct"), "pb_pct": sp.get("pb_pct"),
+        "pe_median": sp.get("pe_median"), "pb_median": sp.get("pb_median"),
+    }
+
+
+def _render_surge_signals_block(sig, val_sig=None):
+    """把 surge 锚定数据渲染为 LLM 一眼可读段: 价格水位+动量 (sig) + 估值板块分位+PEG (val_sig)。
+
+    估值用板块相对分位+PEG (非绝对 PE/PB), 让 price-in 判断不误伤高增周期股
+    (德明利 PE52 看似贵, 实为板块0分位最便宜+PEG0.55)。sig/val_sig 为 None 时对应部分省略。
+    """
+    if not sig and not val_sig:
+        return ""
+    lines = []
+    if sig:
+        r = sig.get("returns", {})
+        state_zh = {
+            "accelerating": "加速主升(短期仍强)",
+            "strong_steady": "强势整理(大涨但短期犹豫)",
+            "top_reversal": "见顶回落警示(大涨后急跌)",
+            "healthy_uptrend": "健康上行",
+            "decelerating": "动量衰减",
+            "bottoming": "筑底企稳",
+            "weak": "持续走弱",
+            "trend_broken": "趋势已破",
+        }.get(sig.get("momentum_state"), sig.get("momentum_state", ""))
+
+        def _fmt(v):
+            return f"{v:+.0f}%" if isinstance(v, (int, float)) else "N/A"
+
+        fl = r.get("from_low")
+        fl_str = (f"自{r.get('low_date', '?')}低点 {_fmt(fl)}" if fl is not None else "自低点 N/A")
+        lines.append(f"【surge 锚定数据 (截至 {sig.get('trade_date', '?')}, K线实测 非叙事)】")
+        lines.append(f"价格水位: 近5日 {_fmt(r.get('r5'))} / 20日 {_fmt(r.get('r20'))} / "
+                     f"60日 {_fmt(r.get('r60'))} / 90日 {_fmt(r.get('r90'))} / {fl_str} | "
+                     f"最新收盘 {sig.get('latest_close')}")
+        lines.append(f"动量状态: {state_zh} (涨幅不机械扣分, 权衡'已涨幅price-in压力 vs 加速度动量支撑')")
+    if val_sig:
+        lines.append("【估值水位 (板块相对分位 + 增长消化PEG, 非绝对PE/PB)】")
+        sect = val_sig.get("sector") or "未归类"
+        pe, pb = val_sig.get("pe_ttm"), val_sig.get("pb")
+        pe_pct, pb_pct = val_sig.get("pe_pct"), val_sig.get("pb_pct")
+        pe_m, pb_m = val_sig.get("pe_median"), val_sig.get("pb_median")
+
+        def _tag(pct):
+            return "板块最便宜" if pct is not None and pct <= 10 else ("板块偏贵" if pct is not None and pct >= 80 else "")
+        pe_line = f"PE {pe}" + (f" → 板块{pe_pct:.0f}分位(中位{pe_m}, {_tag(pe_pct)})" if pe_pct is not None else "")
+        pb_line = f"PB {pb}" + (f" → 板块{pb_pct:.0f}分位(中位{pb_m}, {_tag(pb_pct)})" if pb_pct is not None else "")
+        lines.append(f"{sect}: {pe_line} | {pb_line}")
+        peg, g = val_sig.get("peg"), val_sig.get("netprofit_yoy")
+        if val_sig.get("high_pe"):
+            ps = val_sig.get("ps_ttm")
+            ps_str = f"PS={ps}、" if ps else ""
+            lines.append(f"PE {pe} 极高(当前微利/亏损边缘, 远期产能/订单定价为主) → PEG不适用, 看{ps_str}营收增速/在手订单而非PE")
+        elif peg is not None and g is not None:
+            tag = "便宜(成长能消化估值)" if peg < 1 else ("偏贵(增速消化不掉)" if peg > 2 else "中性")
+            lines.append(f"PEG={peg} (PE / 净利增速{g:.0f}%) → {tag}")
+        elif g is not None and g <= 0:
+            lines.append(f"净利同比 {g:.0f}% (负增长, PEG 不适用, 盈利承压)")
+        lines.append("判估值贵否须看板块分位+PEG, 勿用绝对PE/PB (高增周期股PE天生高, 如PE52可能实为板块最便宜)。")
+    return "\n\n" + "\n".join(lines) + "\n"
+
+
 def _call(code):
     sj = fs._build_stock_json(code)
     if not sj:
@@ -278,8 +465,12 @@ def _call(code):
     if wk_slim:
         wk_date_line = f" ({_WORLD_KNOWLEDGE_DATE})" if _WORLD_KNOWLEDGE_DATE else ""
         wk_section = f"\n\n【当前市场宏观背景 (来自世界知识{wk_date_line})】\n{wk_slim}\n请将以上宏观背景纳入 chain 产业链位置和 surge 爆发分(30天超额收益概率)的判断, 尤其注意催化时间节点(中报窗口/订单交付节点)对30天变现概率的影响, 以及需求性质(结构性景气vs投机周期)对现金流红线的解读。"
-    # chain 信号四源: chain_tier_map (get_chain_prompt) + 世界知识 + fundamentals JSON (含已回流的异动信息)
-    prompt = get_chain_prompt() + wk_section + sj[:8000]
+    # surge price-in 锚定数据: 价格/动量 (K线) + 估值板块分位/PEG (Tushare)
+    surge_sig = _compute_surge_signals(code)
+    val_sig = _compute_valuation_signals(code)
+    surge_block = _render_surge_signals_block(surge_sig, val_sig)
+    # chain 信号: chain_tier_map + 世界知识 + fundamentals JSON(含异动回流) + surge 锚定段
+    prompt = get_chain_prompt() + wk_section + sj[:8000] + surge_block
     # 解析失败也重试 (并发下 GLM 偶发返回畸形/截断响应, 非空但解析失败;
     # _llm 只在异常/空内容时重试, 这里对"有内容但解析失败"再给最多3次机会)。
     # 实测: 并发下 ~20% 偶发解析失败, 串行重跑同股可成功 → 解析重试能收敛。
@@ -333,6 +524,32 @@ def needs_run(entry):
 # capital 动态更新 (每次跑 V3 前调用, 用研报板块热度重算)
 # ══════════════════════════════════════════════════════════
 
+def _load_kline_df(code, cutoff_date=""):
+    """加载个股 K线 DataFrame, cutoff 截断, 按 trade_date 升序。
+
+    _compute_price_factor / _compute_d2_factor / _compute_surge_signals 共用,
+    消除重复读 pkl + 截断逻辑。返回 df 或 None(无缓存/过短/截断后过短/异常)。
+    """
+    try:
+        import pickle as _pk
+        for suffix in ["_SH.pkl", "_SZ.pkl"]:
+            path = os.path.join(KLINE_CACHE_DIR, f"{code}{suffix}")
+            if os.path.exists(path):
+                with open(path, "rb") as f:
+                    df = _pk.load(f)
+                if df is None or len(df) < 21:
+                    return None
+                df = df.sort_values("trade_date").reset_index(drop=True)
+                if cutoff_date:
+                    df = df[df["trade_date"] <= cutoff_date]
+                    if len(df) < 21:
+                        return None
+                return df
+        return None
+    except Exception:
+        return None
+
+
 def _compute_price_factor(code, cutoff_date=""):
     """个股量价趋势因子 (短周期r5 + 长周期r20 双窗口判断)。
 
@@ -352,47 +569,109 @@ def _compute_price_factor(code, cutoff_date=""):
     Args:
         cutoff_date: 回测截止日。非空时截断 K线到该日再算 r5/r20 (无前视)。
     """
+    # K线加载+cutoff 截断下沉 _load_kline_df (与 d2/surge 共用); 返回 None=用默认 1.0
+    df = _load_kline_df(code, cutoff_date)
+    if df is None:
+        return 1.0
     try:
-        import pickle as _pk
-        for suffix in ["_SH.pkl", "_SZ.pkl"]:
-            path = os.path.join(KLINE_CACHE_DIR, f"{code}{suffix}")
-            if os.path.exists(path):
-                with open(path, "rb") as f:
-                    df = _pk.load(f)
-                if df is None or len(df) < 21:
-                    return 1.0
-                df = df.sort_values("trade_date").reset_index(drop=True)
-                if cutoff_date:
-                    df = df[df["trade_date"] <= cutoff_date]
-                    if len(df) < 21:
-                        return 1.0
-                close = df["close"]
-                r20 = (close.iloc[-1] / close.iloc[-21] - 1) * 100
-                r5 = (close.iloc[-1] / close.iloc[-6] - 1) * 100 if len(close) >= 6 else 0
+        close = df["close"]
+        r20 = (close.iloc[-1] / close.iloc[-21] - 1) * 100
+        r5 = (close.iloc[-1] / close.iloc[-6] - 1) * 100 if len(close) >= 6 else 0
 
-                # 双窗口组合判断
-                if r20 > 20:
-                    if r5 > 5:
-                        return 1.3   # 持续主升浪
-                    elif r5 < -5:
-                        return 0.9   # 见顶回落 (关键改进: 不再盲目给1.3)
-                    else:
-                        return 1.1   # 强势但短期犹豫
-                elif r20 > 0:
-                    if r5 > 0:
-                        return 1.0 + r20 * 0.01  # 健康上涨 1.0~1.2
-                    else:
-                        return 0.9   # 动量衰减
-                elif r20 > -10:
-                    if r5 > 0:
-                        return 0.9   # 回调中企稳
-                    else:
-                        return 0.7   # 持续走弱
-                else:
-                    return 0.6       # 趋势已破
+        # 双窗口组合判断
+        if r20 > 20:
+            if r5 > 5:
+                return 1.3   # 持续主升浪
+            elif r5 < -5:
+                return 0.9   # 见顶回落 (关键改进: 不再盲目给1.3)
+            else:
+                return 1.1   # 强势但短期犹豫
+        elif r20 > 0:
+            if r5 > 0:
+                return 1.0 + r20 * 0.01  # 健康上涨 1.0~1.2
+            else:
+                return 0.9   # 动量衰减
+        elif r20 > -10:
+            if r5 > 0:
+                return 0.9   # 回调中企稳
+            else:
+                return 0.7   # 持续走弱
+        else:
+            return 0.6       # 趋势已破
         return 1.0
     except Exception:
         return 1.0
+
+
+def _compute_surge_signals(code, cutoff_date=""):
+    """surge 评分的 price-in / 剩余涨幅锚定数据 (三类信号: 涨幅幅度 + 动量状态之源)。
+
+    与 _compute_price_factor 同源 (共用 _load_kline_df + cutoff 截断), 但返回结构化
+    多字段供 surge LLM 推理; 不影响 capital (capital 仍用 _compute_price_factor 的 float)。
+    cutoff_date 非空时截断 K线到该日 (回测无前视, 与 _compute_price_factor 同范式)。
+
+    返回:
+      {"returns": {"r5","r20","r60","r90","from_low","low_date"},
+       "momentum_state": accelerating|strong_steady|top_reversal|healthy_uptrend|
+                         decelerating|bottoming|weak|trend_broken,
+       "latest_close": float, "trade_date": str}  或 None (数据不足)。
+
+    自低点用「近12个月最低」(≈250交易日), 非全局最低 —— 全局最低对老股失真,
+    与 surge 30 天前瞻尺度不匹配; 近12月能反映本轮主升浪起点且对近期走势敏感。
+    """
+    df = _load_kline_df(code, cutoff_date)
+    if df is None:
+        return None
+    try:
+        close = df["close"]
+        n = len(close)
+        latest = float(close.iloc[-1])
+        trade_date = str(df["trade_date"].iloc[-1])
+
+        def _ret(days):
+            # close[-1]/close[-(days+1)] - 1, 转百分比; 窗口不足返回 None
+            if n >= days + 1:
+                return round((latest / float(close.iloc[-(days + 1)]) - 1) * 100, 1)
+            return None
+
+        r5 = _ret(5)
+        r20 = _ret(20)
+        r60 = _ret(60)
+        r90 = _ret(90)
+
+        # 自低点: 近 12 个月 (≈250 交易日) 最低
+        window = df.tail(250)
+        low_pos = int(window["close"].values.argmin())
+        low_close = float(window["close"].iloc[low_pos])
+        low_date = str(window["trade_date"].iloc[low_pos])
+        from_low = round((latest / low_close - 1) * 100, 0) if low_close > 0 else None
+
+        # momentum_state: 与 _compute_price_factor 双窗口表同构, 但输出语义标签 (LLM 直接读懂)
+        r20v = r20 if r20 is not None else 0
+        r5v = r5 if r5 is not None else 0
+        if r20v > 20:
+            if r5v > 5:
+                state = "accelerating"      # 持续主升浪 + 短期仍强 (001309 当前态)
+            elif r5v < -5:
+                state = "top_reversal"      # 大涨后急跌 (见顶回落风险)
+            else:
+                state = "strong_steady"     # 大涨但短期犹豫
+        elif r20v > 0:
+            state = "healthy_uptrend" if r5v > 0 else "decelerating"
+        elif r20v > -10:
+            state = "bottoming" if r5v > 0 else "weak"
+        else:
+            state = "trend_broken"
+
+        return {
+            "returns": {"r5": r5, "r20": r20, "r60": r60, "r90": r90,
+                        "from_low": from_low, "low_date": low_date},
+            "momentum_state": state,
+            "latest_close": latest,
+            "trade_date": trade_date,
+        }
+    except Exception:
+        return None
 
 
 # D2 因子缓存 (G 模式用: 每次更新 capital 时预算一次, 避免逐股重复算行业中位)
@@ -425,7 +704,7 @@ def _compute_d2_factor(code: str, cutoff_date="") -> float:
                     close = df["close"]
                     r20 = (close.iloc[-1] / close.iloc[-21] - 1) * 100
                     industry = _get_industry(code)
-                    sector = _classify_sector(industry)
+                    sector = _current_sector(code, industry)  # attribution 优先 (多主业股归当前驱动板块)
                     sector_median = _D2_SECTOR_MEDIAN_CACHE.get(sector)
                     if sector_median is None:
                         return 1.0
@@ -481,7 +760,7 @@ def _build_d2_sector_median_cache(cutoff_date=""):
         for p in _glob.glob(os.path.join(KLINE_CACHE_DIR, f"*{suffix_pat}")):
             code = os.path.basename(p).replace(suffix_pat, "")
             industry = _get_industry(code)
-            sector = _classify_sector(industry)
+            sector = _current_sector(code, industry)  # attribution 优先 (与 D2/capital/valuation 一致)
             if not sector:
                 continue
             try:
@@ -593,28 +872,6 @@ def compute_capital_updates(cutoff_date=""):
     if not momentum.get("hot_sectors"):
         return None
 
-    try:
-        from tradingagents.research.normalize import get_sector_keyword_index
-        kw_index = get_sector_keyword_index()
-    except Exception:
-        return None
-
-    def classify(industry):
-        # 平局裁决同 _classify_sector: 命中数相同时取命中关键词最长的板块,
-        # 保证跨进程确定性 (get_sector_keyword_index 已按板块名排序)。
-        if not industry:
-            return ""
-        best, best_hit, best_kw_len = "", 0, 0
-        for sec, kws in kw_index.items():
-            matched = [k for k in kws if k in industry]
-            h = len(matched)
-            if h <= 0:
-                continue
-            max_kw_len = max(len(k) for k in matched)
-            if h > best_hit or (h == best_hit and max_kw_len > best_kw_len):
-                best_hit, best_kw_len, best = h, max_kw_len, sec
-        return best
-
     # 预算行业 r20 中位数缓存 (供 _compute_d2_factor 用, G 模式必需)
     _build_d2_sector_median_cache(cutoff_date=cutoff_date)
 
@@ -623,7 +880,7 @@ def compute_capital_updates(cutoff_date=""):
         if not isinstance(entry, dict) or "chain" not in entry:
             continue
         industry = _get_industry(code)
-        sector = classify(industry)
+        sector = _current_sector(code, industry)  # attribution 优先 (多主业股归当前驱动板块, 与 D2/valuation 一致)
         if not sector:
             continue
 
@@ -667,7 +924,7 @@ def update_capital(persist=True, cutoff_date=""):
         json.dump(cache, open(V3_CACHE, "w"), ensure_ascii=False, indent=1)
 
     hot_names = [s["sector"] for s in momentum.get("hot_sectors", [])[:5]]
-    print(f"  [capital] 模式{mode} | 更新 {updated} 只 | 热门: {hot_names}"
+    print(f"  [capital] G模式(base+d2×2+pf×2 无封顶) | 更新 {updated} 只 | 热门: {hot_names}"
           f"{' (已落盘)' if persist else ' (仅内存)'}")
     return cache
 
@@ -717,7 +974,15 @@ def main():
                     fail[0] += 1
                     print(f"[{n}/{len(todo)}] {code} 失败/解析失败 ({dt:.0f}s)", flush=True)
                     continue
+                # 保留 Step0 的 quant capital: r 里的 capital 是 LLM 占位值(0-5, prompt 告知会被量化覆盖),
+                # 整条覆盖会冲掉 Step0 算好的 G模式 quant capital(实测 688012 被覆盖 9.6→3.8)。
+                preserved_cap = cache.get(code, {}).get("capital")
                 cache[code] = r
+                if preserved_cap is not None:
+                    cache[code]["capital"] = preserved_cap
+                    # sector_score 重算 (_parse 用占位 capital 算的, 须用 quant 重算)
+                    cache[code]["sector_score"] = round(
+                        r.get("chain", 0) + r.get("surge", 0) + preserved_cap, 1)
                 json.dump(cache, open(V3_CACHE, "w"), ensure_ascii=False, indent=1)
                 if "sector_score" not in r:
                     print(f"[{n}/{len(todo)}] {code} 无fundamentals", flush=True)

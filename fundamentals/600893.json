@@ -32,7 +32,14 @@
       "rd_ratio_pct": 1.67,
       "rd_expense_yi": 7.73,
       "operating_cf_yi": -44.18,
-      "cf_to_profit": -6.97
+      "cf_to_profit": -6.97,
+      "pe_ttm": 158.0189,
+      "pb": 2.4733,
+      "ps_ttm": 2.1051,
+      "turnover_rate": 1.7348,
+      "dv_ratio": 0.26,
+      "total_mv_yi": 994.5,
+      "netprofit_yoy": -26.2659
     },
     "health_rating": "较差",
     "benchmark_ref": "军工整机/航空装备制造行业基准",

@@ -32,7 +32,14 @@
       "rd_ratio_pct": 2.19,
       "rd_expense_yi": 0.37,
       "operating_cf_yi": 7.63,
-      "cf_to_profit": 0.16
+      "cf_to_profit": 0.16,
+      "pe_ttm": 14.4235,
+      "pb": 1.4703,
+      "ps_ttm": 41.7648,
+      "turnover_rate": 0.475,
+      "dv_ratio": 2.8592,
+      "total_mv_yi": 682.0,
+      "netprofit_yoy": 5.4667
     },
     "health_rating": "健康",
     "benchmark_ref": "水力发电行业（典型如长江电力、华能水电）",

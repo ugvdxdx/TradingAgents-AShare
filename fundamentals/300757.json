@@ -32,7 +32,13 @@
       "rd_ratio_pct": 11.19,
       "rd_expense_yi": 1.06,
       "operating_cf_yi": 2.08,
-      "cf_to_profit": -3.15
+      "cf_to_profit": -3.15,
+      "pb": 60.6138,
+      "ps_ttm": 96.9052,
+      "turnover_rate": 5.2157,
+      "dv_ratio": 0.0077,
+      "total_mv_yi": 985.4,
+      "netprofit_yoy": -203.9992
     },
     "health_rating": "较差",
     "benchmark_ref": "光伏及半导体设备行业",

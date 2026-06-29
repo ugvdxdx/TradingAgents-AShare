@@ -34,7 +34,14 @@
       "rd_expense_yi": 4.15,
       "rd_ratio_pct": 5.99,
       "operating_cf_yi": 13.47,
-      "cf_to_profit": 1.15
+      "cf_to_profit": 1.15,
+      "pe_ttm": 41.583,
+      "pb": 4.8866,
+      "ps_ttm": 6.9524,
+      "turnover_rate": 6.9548,
+      "dv_ratio": 0.8282,
+      "total_mv_yi": 498.3,
+      "netprofit_yoy": 13.844
     },
     "health_rating": "健康",
     "benchmark_ref": "光学元器件行业（可比公司：舜宇光学、歌尔股份、蓝特光学等）",

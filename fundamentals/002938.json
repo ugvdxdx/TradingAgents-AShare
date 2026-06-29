@@ -34,7 +34,14 @@
       "rd_ratio_pct": 6.28,
       "rd_expense_yi": 24.59,
       "operating_cf_yi": 72.86,
-      "cf_to_profit": 1.95
+      "cf_to_profit": 1.95,
+      "pe_ttm": 69.2809,
+      "pb": 7.4228,
+      "ps_ttm": 6.5871,
+      "turnover_rate": 2.1123,
+      "dv_ratio": 0.9013,
+      "total_mv_yi": 2572.0,
+      "netprofit_yoy": 3.2453
     },
     "health_rating": "健康",
     "benchmark_ref": "A股PCB同行（沪电/深南/胜宏）：毛利率均值约25-35%，ROE约12-15%",

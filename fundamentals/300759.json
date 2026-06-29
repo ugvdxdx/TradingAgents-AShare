@@ -33,7 +33,14 @@
       "rd_ratio_pct": 4.09,
       "rd_expense_yi": 5.76,
       "operating_cf_yi": 32.21,
-      "cf_to_profit": 1.94
+      "cf_to_profit": 1.94,
+      "pe_ttm": 28.5516,
+      "pb": 2.9381,
+      "ps_ttm": 3.3179,
+      "turnover_rate": 5.4107,
+      "dv_ratio": 0.7595,
+      "total_mv_yi": 483.6,
+      "netprofit_yoy": -7.2184
     },
     "health_rating": "健康",
     "benchmark_ref": "CRO/CDMO行业头部基准（如药明康德、凯莱英）",

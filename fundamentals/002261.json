@@ -34,7 +34,13 @@
       "rd_ratio_pct": 4.65,
       "rd_expense_yi": 1.47,
       "operating_cf_yi": 7.78,
-      "cf_to_profit": 12.16
+      "cf_to_profit": 12.16,
+      "pe_ttm": 566.1013,
+      "pb": 13.0112,
+      "ps_ttm": 10.7846,
+      "turnover_rate": 5.0803,
+      "total_mv_yi": 338.8,
+      "netprofit_yoy": 163.4266
     },
     "health_rating": "一般",
     "benchmark_ref": "AI服务器行业头部（浪潮信息/中科曙光）毛利率约10-15%，净利率约1-3%；拓维毛利率16.33%略高于纯硬件厂商但净利率1.30%处于行业中低位",

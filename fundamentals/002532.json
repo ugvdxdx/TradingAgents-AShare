@@ -34,7 +34,14 @@
       "rd_ratio_pct": 0.86,
       "rd_expense_yi": 2.55,
       "operating_cf_yi": 80.53,
-      "cf_to_profit": 1.67
+      "cf_to_profit": 1.67,
+      "pe_ttm": 8.5784,
+      "pb": 1.6374,
+      "ps_ttm": 1.7083,
+      "turnover_rate": 2.2723,
+      "dv_ratio": 3.5881,
+      "total_mv_yi": 512.9,
+      "netprofit_yoy": 8.1348
     },
     "health_rating": "健康",
     "benchmark_ref": "A股电解铝行业平均毛利率约15-18%、ROE约10-12%、负债率约50-55%",

@@ -34,7 +34,13 @@
       "rd_ratio_pct": 3.81,
       "rd_expense_yi": 0.41,
       "operating_cf_yi": 4.2,
-      "cf_to_profit": 1.0
+      "cf_to_profit": 1.0,
+      "pe_ttm": 88.5151,
+      "pb": 32.1027,
+      "ps_ttm": 34.1546,
+      "turnover_rate": 10.2772,
+      "total_mv_yi": 415.1,
+      "netprofit_yoy": 26.727
     },
     "health_rating": "健康",
     "benchmark_ref": "电气设备行业（麦格米特/汇川技术/欧陆通等，行业平均毛利率约25%-35%）",

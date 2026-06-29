@@ -34,7 +34,8 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": null,
-      "cf_to_profit": null
+      "cf_to_profit": null,
+      "netprofit_yoy": 6.1371
     },
     "health_rating": "较差",
     "benchmark_ref": "A股创新药/基因治疗板块（如君实生物、百奥泰等尚未盈利Biotech）平均净利率约-30%~-80%、负债率20%-40%",

@@ -34,7 +34,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 3158.58,
-      "cf_to_profit": 7.41
+      "cf_to_profit": 7.41,
+      "pe_ttm": 4.6104,
+      "pb": 0.4278,
+      "ps_ttm": 1.4925,
+      "turnover_rate": 0.6372,
+      "dv_ratio": 5.8457,
+      "total_mv_yi": 1985.2,
+      "netprofit_yoy": -4.2127
     },
     "health_rating": "一般",
     "benchmark_ref": "股份制商业银行（行业平均ROE约10%-11%，招商银行约15%）",

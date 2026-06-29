@@ -31,7 +31,12 @@
       "operating_cf_yi": -0.9,
       "rd_ratio_pct": 16.06,
       "rd_expense_yi": 0.8,
-      "cf_to_profit": 0.9
+      "cf_to_profit": 0.9,
+      "pb": 5.3315,
+      "ps_ttm": 12.3279,
+      "turnover_rate": 9.8091,
+      "total_mv_yi": 76.4,
+      "netprofit_yoy": 4.7837
     },
     "health_rating": "较差",
     "benchmark_ref": "军工电子及半导体材料行业基准",

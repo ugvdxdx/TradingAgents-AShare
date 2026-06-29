@@ -33,7 +33,14 @@
       "rd_ratio_pct": 5.8,
       "rd_expense_yi": 8.83,
       "operating_cf_yi": 19.01,
-      "cf_to_profit": 1.08
+      "cf_to_profit": 1.08,
+      "pe_ttm": 27.3259,
+      "pb": 3.6734,
+      "ps_ttm": 3.0747,
+      "turnover_rate": 2.7897,
+      "dv_ratio": 1.0892,
+      "total_mv_yi": 502.2,
+      "netprofit_yoy": 19.8693
     },
     "health_rating": "健康",
     "benchmark_ref": "锂电池结构件行业",

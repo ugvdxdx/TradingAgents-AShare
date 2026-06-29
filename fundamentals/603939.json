@@ -33,7 +33,14 @@
       "rd_ratio_pct": 0.11,
       "rd_expense_yi": 0.28,
       "operating_cf_yi": 33.58,
-      "cf_to_profit": 2.0
+      "cf_to_profit": 2.0,
+      "pe_ttm": 12.7514,
+      "pb": 1.8503,
+      "ps_ttm": 0.8993,
+      "turnover_rate": 0.5564,
+      "dv_ratio": 3.8505,
+      "total_mv_yi": 220.4,
+      "netprofit_yoy": 9.8068
     },
     "health_rating": "健康",
     "benchmark_ref": "医药零售行业（毛利率均值约35%、ROE均值约12%）",

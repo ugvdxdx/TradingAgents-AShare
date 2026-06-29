@@ -33,7 +33,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 6586.32,
-      "cf_to_profit": 4.89
+      "cf_to_profit": 4.89,
+      "pe_ttm": 6.4407,
+      "pb": 0.8398,
+      "ps_ttm": 0.8254,
+      "turnover_rate": 1.3381,
+      "dv_ratio": 5.4415,
+      "total_mv_yi": 8552.2,
+      "netprofit_yoy": 6.4538
     },
     "health_rating": "健康",
     "benchmark_ref": "中国保险业及综合金融行业均值",

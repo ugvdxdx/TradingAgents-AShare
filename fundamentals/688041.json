@@ -34,7 +34,14 @@
       "rd_ratio_pct": 28.83,
       "rd_expense_yi": 41.45,
       "operating_cf_yi": 20.97,
-      "cf_to_profit": 0.82
+      "cf_to_profit": 0.82,
+      "pe_ttm": 294.071,
+      "pb": 34.1172,
+      "ps_ttm": 50.0717,
+      "turnover_rate": 1.7111,
+      "dv_ratio": 0.0492,
+      "total_mv_yi": 8016.6,
+      "netprofit_yoy": 31.792
     },
     "health_rating": "健康",
     "benchmark_ref": "A股半导体设计/算力芯片板块",

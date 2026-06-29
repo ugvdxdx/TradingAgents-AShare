@@ -33,7 +33,13 @@
       "rd_ratio_pct": 8.2,
       "rd_expense_yi": 55.19,
       "operating_cf_yi": 200.81,
-      "cf_to_profit": 3.98
+      "cf_to_profit": 3.98,
+      "pe_ttm": 252.397,
+      "pb": 8.5009,
+      "ps_ttm": 18.5533,
+      "turnover_rate": 5.382,
+      "total_mv_yi": 12734.9,
+      "netprofit_yoy": 36.2852
     },
     "health_rating": "健康",
     "benchmark_ref": "全球头部晶圆代工厂（台积电、联电）",

@@ -34,7 +34,14 @@
       "rd_ratio_pct": 1.31,
       "rd_expense_yi": 1.75,
       "operating_cf_yi": 65.11,
-      "cf_to_profit": 1.41
+      "cf_to_profit": 1.41,
+      "pe_ttm": 13.9423,
+      "pb": 0.9209,
+      "ps_ttm": 4.5736,
+      "turnover_rate": 0.219,
+      "dv_ratio": 4.3939,
+      "total_mv_yi": 645.5,
+      "netprofit_yoy": -13.379
     },
     "health_rating": "健康",
     "benchmark_ref": "A股公路类上市公司平均水平（ROE约8-10%、资产负债率约50-55%、经营现金流/净利润约1.2-1.4倍）",

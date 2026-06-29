@@ -32,7 +32,14 @@
       "rd_ratio_pct": 2.08,
       "rd_expense_yi": 1.3,
       "operating_cf_yi": 32.22,
-      "cf_to_profit": 1.46
+      "cf_to_profit": 1.46,
+      "pe_ttm": 16.6021,
+      "pb": 2.0987,
+      "ps_ttm": 5.6598,
+      "turnover_rate": 0.3382,
+      "dv_ratio": 2.5286,
+      "total_mv_yi": 321.6,
+      "netprofit_yoy": -18.1364
     },
     "health_rating": "健康",
     "benchmark_ref": "环保工程及服务行业均值（净利率约15%，资产负债率约60%）",

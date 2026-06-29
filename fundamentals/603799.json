@@ -32,7 +32,14 @@
       "rd_ratio_pct": 2.08,
       "rd_expense_yi": 16.82,
       "operating_cf_yi": 40.12,
-      "cf_to_profit": 0.66
+      "cf_to_profit": 0.66,
+      "pe_ttm": 12.0654,
+      "pb": 1.757,
+      "ps_ttm": 0.9974,
+      "turnover_rate": 3.6826,
+      "dv_ratio": 0.9459,
+      "total_mv_yi": 887.5,
+      "netprofit_yoy": 47.067
     },
     "health_rating": "一般",
     "benchmark_ref": "电池材料及小金属冶炼行业",

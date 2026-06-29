@@ -32,7 +32,14 @@
       "rd_ratio_pct": 11.8,
       "rd_expense_yi": 7.7,
       "operating_cf_yi": null,
-      "cf_to_profit": null
+      "cf_to_profit": null,
+      "pe_ttm": 143.0436,
+      "pb": 32.4539,
+      "ps_ttm": 33.9747,
+      "turnover_rate": 2.8386,
+      "dv_ratio": 0.032,
+      "total_mv_yi": 2352.0,
+      "netprofit_yoy": 34.6651
     },
     "health_rating": "一般",
     "benchmark_ref": "全球半导体设备龙头（如AMAT、泛林）毛利率通常在45%-50%，净利率在20%以上，拓荆科技目前盈利能力与全球龙头仍有差距。",

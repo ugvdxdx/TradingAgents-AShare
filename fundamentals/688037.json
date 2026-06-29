@@ -33,7 +33,14 @@
       "rd_ratio_pct": 13.06,
       "rd_expense_yi": 2.55,
       "operating_cf_yi": 1.03,
-      "cf_to_profit": 1.43
+      "cf_to_profit": 1.43,
+      "pe_ttm": 1014.2232,
+      "pb": 25.5479,
+      "ps_ttm": 35.7117,
+      "turnover_rate": 5.306,
+      "dv_ratio": 0.0309,
+      "total_mv_yi": 715.6,
+      "netprofit_yoy": -64.6445
     },
     "health_rating": "一般",
     "benchmark_ref": "半导体设备行业（以北方华创、盛美上海为基准）",

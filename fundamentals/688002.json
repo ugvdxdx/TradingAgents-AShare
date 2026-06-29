@@ -33,7 +33,14 @@
       "rd_ratio_pct": 18.3,
       "rd_expense_yi": 11.53,
       "operating_cf_yi": 18.56,
-      "cf_to_profit": 1.65
+      "cf_to_profit": 1.65,
+      "pe_ttm": 46.1972,
+      "pb": 9.462,
+      "ps_ttm": 9.4671,
+      "turnover_rate": 2.2489,
+      "dv_ratio": 0.107,
+      "total_mv_yi": 673.3,
+      "netprofit_yoy": 97.6631
     },
     "health_rating": "健康",
     "benchmark_ref": "军工电子及红外成像行业基准",

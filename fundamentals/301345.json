@@ -32,7 +32,14 @@
       "rd_ratio_pct": 3.13,
       "rd_expense_yi": 1.23,
       "operating_cf_yi": 7.54,
-      "cf_to_profit": 0.92
+      "cf_to_profit": 0.92,
+      "pe_ttm": 27.4098,
+      "pb": 6.5749,
+      "ps_ttm": 5.6968,
+      "turnover_rate": 6.1857,
+      "dv_ratio": 1.5329,
+      "total_mv_yi": 248.4,
+      "netprofit_yoy": 89.2863
     },
     "health_rating": "健康",
     "benchmark_ref": "休闲运动装备及两轮车行业",

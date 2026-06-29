@@ -12,7 +12,7 @@
 消除对大涨股的双重 web search, 节省 GLM Coding Plan 搜索额度。
 
 依赖 (单向, 无循环):
-  - picker.common.llm_client._llm_quick  : LLM 归因
+  - picker.common.llm_client._llm        : LLM 归因 (带429重试, 非不重试的_llm_quick)
   - picker.common.web_search._web_search : 联网搜索
   - picker.paths                         : UNIFIED_ATTR_CACHE / RESEARCH_DB / KLINE_CACHE_DIR
 
@@ -35,13 +35,14 @@ import sqlite3
 from datetime import datetime
 
 from picker import paths
-from picker.common.llm_client import _llm_quick
+from picker.common.llm_client import _llm
 from picker.common.web_search import _web_search
 
 # ── 缓存与 TTL ──
 ATTR_CACHE_PATH = paths.UNIFIED_ATTR_CACHE          # = mispriced_attribution_cache.json
 ATTR_TTL_DAYS = 14                                   # 统一 TTL (世界知识/保送需较长窗口; 比 surge 7d 更省搜索)
 SECTOR_WIDE_TYPES = ("板块供需", "政策催化")          # 板块行情类 (驱动板块扩散); 下跌类不归此
+TRADING_REASON_TYPES = ("技术回调", "估值杀跌")        # 纯交易/估值类异动 ("股价怎么走", 非营收利润怎么变); 由 capital 量价信号承担, 不进 fundamentals 成长字段
 
 # ── 异动判定阈值 (从 v3_full_score 下沉; r5>15% 的新晋股由 scan 调薄封装覆盖) ──
 SURGE_UP_THRESHOLD = 25.0      # 大涨异动 (r20 >= 此值)
@@ -51,17 +52,18 @@ SURGE_R5_CONFIRM = 5.0         # |r5| > 此值确认非单日脉冲
 KLINE_CACHE_DIR = paths.KLINE_CACHE_DIR
 
 
-ATTR_PROMPT_UNIFIED = """你是A股研究员。请判断这只股票近期{direction}的真实原因, 并归类。
+ATTR_PROMPT_UNIFIED = """判断这只股票近期{direction}的真实原因并归类。直接输出三行结果, 第一行就是答案, 禁止输出任何分析、推理、解释、开场白。
 
 股票: {name}({code}) 行业: {industry}
-近20日涨幅: {r20}% (近5日{r5}%) 方向: {direction}
+近20日{r20}% 近5日{r5}% 方向{direction}
 
 {context}
 
-请严格按以下格式输出 (用|分隔, 不要换行):
-REASON_TYPE|{reason_options}
-SECTOR_TAG|最相关的1-2个细分赛道关键词(如:六氟化钨/MLCC粉体/TLVR电感/空芯光纤, 不要用大类如"化工"; 若无明显赛道填"无")
-SUMMARY|30字内一句话原因"""
+REASON_TYPE 只能是这几个词之一(选最匹配的, 输出该词本身): {reason_options}
+立刻输出且只输出下面三行, 每行 字段|值:
+REASON_TYPE|这里写你选的词
+SECTOR_TAG|这里写1-2个细分赛道关键词如六氟化钨或MLCC粉体或空芯光纤, 不要用大类如化工, 无则写无
+SUMMARY|这里写30字内一句话真实原因"""
 
 _UP_OPTIONS = "板块供需 或 个股事件 或 政策催化 或 概念炒作 或 未知"
 _DOWN_OPTIONS = "基本面恶化 或 技术回调 或 特定风险 或 估值杀跌 或 未知"
@@ -310,7 +312,9 @@ def attribute_stock_unified(code, name, r5, r20, industry, direction,
         r20=f"{r20:+.0f}", r5=f"{r5:+.0f}", context=context,
         reason_options=(_UP_OPTIONS if direction == "上涨" else _DOWN_OPTIONS),
     )
-    parsed = _parse_attribution(_llm_quick(prompt))
+    # 用带 429 重试的 _llm (非 _llm_quick): GLM-5.2 是推理模型, 归因需 ~1500 token
+    # 且并发扫池易触发限流, _llm_quick 不重试会静默返回空 → 空壳归因
+    parsed = _parse_attribution(_llm(prompt, max_tokens=1500))
     parsed["direction"] = direction
     parsed["r20"] = r20
     parsed["r5"] = r5
@@ -422,7 +426,9 @@ def build_attribution_section(attr):
     """渲染归因结论为 fundamentals 生成 prompt 的注入段。
 
     替代 v3.build_surge_fundamentals_section。用结构化字段(summary/sector_tag/reason_type)
-    指示 LLM 写入 fundamentals 的 what_they_do/growth_drivers/strengths。
+    按 reason_type 分流, 但【任何类型都必须在 fundamentals 中真实体现, 严禁静默删除】:
+      - 成长性催化(个股事件/板块供需/政策催化/基本面恶化/特定风险) → growth_drivers(涨)/headwinds(跌)
+      - 纯交易/估值类(技术回调/估值杀跌) → summary 作近期市场异动背景(capital已量化, 不污染成长性字段)
     """
     if not attr:
         return ""
@@ -438,9 +444,27 @@ def build_attribution_section(attr):
     if sector_tag:
         parts.append(f"细分赛道: {sector_tag}")
     parts.append(f"核心驱动: {summary}")
+    head = "\n## ⚡ 近期异动分析结论（实时web search归因）\n" + ", ".join(parts) + "。\n"
+
+    # 纯交易/估值类异动: "股价怎么走" 非 "营收利润怎么变", 不进成长性字段(避免污染);
+    # 但归因结论是重要信息, 必须写入 summary 作近期市场异动背景, 严禁删除
+    if reason_type in TRADING_REASON_TYPES:
+        return (
+            head
+            + "**重要（必须体现，不得删除）**: 此异动属交易/估值层面（技术回调/估值杀跌），描述的是'股价怎么走'而非'营收利润怎么变'，"
+            "已被 capital（量价一阶信号）量化覆盖，故不写入 growth_drivers/headwinds/geopolitical_assessment 以免污染；"
+            "但该归因是当前市场对该股的重要认知，必须在【summary 总览】用一句话体现近期异动及其原因。"
+        )
+
+    # 成长性催化类: 写入成长性字段 (上涨→growth_drivers/strengths; 下跌→headwinds)
+    if direction == "下跌":
+        target = "headwinds（作为基本面恶化/特定风险类阻力）"
+    else:
+        target = "growth_drivers、strengths、what_they_do"
     return (
-        "\n## ⚡ 近期异动分析结论（实时web search归因）\n"
-        f"{', '.join(parts)}。\n"
-        "**重要**: 请在 what_they_do、growth_drivers、strengths 中【充分反映】上述驱动信息。\n"
+        head
+        + f"**重要（必须体现，不得删减）**: 此异动是公司/赛道层面的成长性催化，请在 {target} 中【充分反映】上述驱动，不因条数限制删减。"
         "这是当前市场对该股的真实认知，即使旧文件或行业标签未充分体现，也必须写入。"
+        "（裁决: 若驱动仅为纯政策而无公司级落点，按既有删名测试/传导落点测试——纯政策可入 "
+        "geopolitical_assessment，有公司订单/产能/客户落点则入 growth_drivers。）"
     )

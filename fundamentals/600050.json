@@ -34,7 +34,14 @@
       "rd_ratio_pct": 2.29,
       "rd_expense_yi": 89.84,
       "operating_cf_yi": 914.11,
-      "cf_to_profit": 10.02
+      "cf_to_profit": 10.02,
+      "pe_ttm": 14.6248,
+      "pb": 0.7418,
+      "ps_ttm": 0.3233,
+      "turnover_rate": 0.3877,
+      "dv_ratio": 4.279,
+      "total_mv_yi": 1266.2,
+      "netprofit_yoy": 1.0716
     },
     "health_rating": "健康",
     "benchmark_ref": "通信运营行业（三大运营商平均净利率约8-12%，中国移动净利率超10%）",

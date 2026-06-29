@@ -32,7 +32,14 @@
       "operating_cf_yi": 1.52,
       "rd_ratio_pct": 9.45,
       "rd_expense_yi": 0.54,
-      "cf_to_profit": 1.23
+      "cf_to_profit": 1.23,
+      "pe_ttm": 495.2968,
+      "pb": 18.9791,
+      "ps_ttm": 110.5266,
+      "turnover_rate": 6.6168,
+      "dv_ratio": 0.027,
+      "total_mv_yi": 677.3,
+      "netprofit_yoy": 121.4189
     },
     "health_rating": "一般",
     "benchmark_ref": "工控与机器人零部件行业",

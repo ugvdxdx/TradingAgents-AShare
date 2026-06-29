@@ -33,7 +33,14 @@
       "rd_ratio_pct": 1.73,
       "rd_expense_yi": 0.39,
       "operating_cf_yi": 15.46,
-      "cf_to_profit": 1.89
+      "cf_to_profit": 1.89,
+      "pe_ttm": 19.3438,
+      "pb": 1.9288,
+      "ps_ttm": 6.7745,
+      "turnover_rate": 1.0504,
+      "dv_ratio": 3.4755,
+      "total_mv_yi": 150.9,
+      "netprofit_yoy": -22.0343
     },
     "health_rating": "健康",
     "benchmark_ref": "旅游及休闲行业",

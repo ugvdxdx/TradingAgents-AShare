@@ -32,7 +32,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 5606.51,
-      "cf_to_profit": 16.25
+      "cf_to_profit": 16.25,
+      "pe_ttm": 5.7648,
+      "pb": 0.7703,
+      "ps_ttm": 2.2659,
+      "turnover_rate": 0.624,
+      "dv_ratio": 4.6945,
+      "total_mv_yi": 2035.2,
+      "netprofit_yoy": 8.3465
     },
     "health_rating": "健康",
     "benchmark_ref": "城商行均值",

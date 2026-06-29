@@ -32,7 +32,14 @@
       "rd_expense_yi": null,
       "rd_ratio_pct": null,
       "operating_cf_yi": -10.38,
-      "cf_to_profit": -0.86
+      "cf_to_profit": -0.86,
+      "pe_ttm": 28.6255,
+      "pb": 1.2468,
+      "ps_ttm": 13.7946,
+      "turnover_rate": 0.6131,
+      "dv_ratio": 2.263,
+      "total_mv_yi": 318.9,
+      "netprofit_yoy": 58.84
     },
     "health_rating": "一般",
     "benchmark_ref": "证券行业平均水平",

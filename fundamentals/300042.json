@@ -33,7 +33,13 @@
       "rd_ratio_pct": 3.77,
       "rd_expense_yi": 0.47,
       "operating_cf_yi": -2.92,
-      "cf_to_profit": -10.81
+      "cf_to_profit": -10.81,
+      "pe_ttm": 115.025,
+      "pb": 12.3358,
+      "ps_ttm": 9.3858,
+      "turnover_rate": 13.3486,
+      "total_mv_yi": 140.0,
+      "netprofit_yoy": 127.3531
     },
     "health_rating": "较差",
     "benchmark_ref": "消费存储及算力硬件行业基准",

@@ -34,7 +34,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 2102.08,
-      "cf_to_profit": 9.64
+      "cf_to_profit": 9.64,
+      "pe_ttm": 5.6776,
+      "pb": 0.6729,
+      "ps_ttm": 2.2032,
+      "turnover_rate": 0.4611,
+      "dv_ratio": 4.8418,
+      "total_mv_yi": 1266.0,
+      "netprofit_yoy": 8.0804
     },
     "health_rating": "健康",
     "benchmark_ref": "A股上市城商行平均水平（ROE约10-11%、净利率约35-40%、不良率约1.0-1.2%）",

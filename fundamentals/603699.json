@@ -34,7 +34,14 @@
       "rd_ratio_pct": 2.56,
       "rd_expense_yi": 1.99,
       "operating_cf_yi": 21.93,
-      "cf_to_profit": 1.37
+      "cf_to_profit": 1.37,
+      "pe_ttm": 22.8201,
+      "pb": 7.6811,
+      "ps_ttm": 4.787,
+      "turnover_rate": 0.5151,
+      "dv_ratio": 3.4517,
+      "total_mv_yi": 384.2,
+      "netprofit_yoy": 38.5371
     },
     "health_rating": "健康",
     "benchmark_ref": "工业机械（阀门）行业，利润率与现金流表现显著优于国内同业",

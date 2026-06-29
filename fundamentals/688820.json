@@ -34,7 +34,13 @@
       "rd_ratio_pct": 11.67,
       "rd_expense_yi": 7.61,
       "operating_cf_yi": 41.51,
-      "cf_to_profit": 4.5
+      "cf_to_profit": 4.5,
+      "pe_ttm": 359.5782,
+      "pb": 24.5046,
+      "ps_ttm": 52.7478,
+      "turnover_rate": 17.2476,
+      "total_mv_yi": 3543.9,
+      "netprofit_yoy": 330.8393
     },
     "health_rating": "健康",
     "benchmark_ref": "国内封测行业均值（毛利率25-30%，净利率8-12%）；国际龙头日月光（毛利率35-40%）",

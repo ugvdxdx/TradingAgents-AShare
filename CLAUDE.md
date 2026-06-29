@@ -379,6 +379,7 @@ load_top_n 的 n 参数仅供测试脚本(scripts/test_deep_rank.py)做召回实
 异动黑名单 CLI: scan_mispriced.py --blacklist CODE / --blacklist-type 概念炒作 / --list-blacklist
 归因支持回测模式: cutoff_date 非空时跳过网络搜索(前视偏差), 用研报+LLM现场判断
 归因空壳防空壳锁死: attribute_stock_unified缓存命中(内层) + precompute跳过(外层) 两层均检查summary, 空壳(summary空)不视为有效、必重新归因 (2026-06-25修复: 原仅查age+direction致首次失败的空壳永久锁死, 单测use_cache=False绕过缓存掩盖了此bug)
+归因 prompt 防推理模型复述 (2026-06-26修复): ATTR_PROMPT_UNIFIED 原把 REASON_TYPE 选项塞进模板行(REASON_TYPE|板块供需 或 个股事件 或...), GLM-5.2 推理模型常当示例原样复述 → 归因失败/低质量(17空壳+4复述)。改为选项进说明、模板行用"这里写..."纯文字占位 + "第一行就是答案,禁止分析" 强约束; 归因调用从 _llm_quick(不重试, max_tokens=300 推理不够) 换 _llm(带429重试, max_tokens=1500)。修复后 159/159 全有效。
 下跌异动股不触发 fundamentals 刷新 (2026-06-26): refresh_from_research 合并异动股时跳过 direction=='下跌', 刷新列表只含研报提及 ∪ 上涨异动。下跌股用途是感知行业动向——喂给 chain_tiers 的 price_confirmed_cold 发现板块风险(见 chain_tiers._gather_research_signals, 与 fundamentals 刷新独立)。但下跌归因结论仍作为个股信息保留: 若某下跌股因研报提及/上涨异动触发而进入刷新, 其下跌结论在 refresh_one 内仍注入 headwinds。
 ```
 

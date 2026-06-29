@@ -33,7 +33,14 @@
       "rd_ratio_pct": 2.98,
       "rd_expense_yi": 155.94,
       "operating_cf_yi": 1245.19,
-      "cf_to_profit": 3.75
+      "cf_to_profit": 3.75,
+      "pe_ttm": 15.3713,
+      "pb": 1.0395,
+      "ps_ttm": 0.9347,
+      "turnover_rate": 0.1789,
+      "dv_ratio": 5.1485,
+      "total_mv_yi": 4868.2,
+      "netprofit_yoy": 0.523
     },
     "health_rating": "健康",
     "benchmark_ref": "电信运营行业",

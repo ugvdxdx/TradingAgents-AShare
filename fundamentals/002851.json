@@ -34,7 +34,14 @@
       "rd_ratio_pct": 11.94,
       "rd_expense_yi": 11.22,
       "operating_cf_yi": -1.39,
-      "cf_to_profit": -0.95
+      "cf_to_profit": -0.95,
+      "pe_ttm": 610.5604,
+      "pb": 10.4262,
+      "ps_ttm": 9.4719,
+      "turnover_rate": 11.6867,
+      "dv_ratio": 0.0293,
+      "total_mv_yi": 935.3,
+      "netprofit_yoy": -66.5799
     },
     "health_rating": "较差",
     "benchmark_ref": "电源管理行业标杆台达电子净利率约8-10%、ROE约15-20%；A股可比公司汇川技术净利率约12-15%、ROE约18-22%。麦格米特各核心财务指标均显著低于行业标杆",

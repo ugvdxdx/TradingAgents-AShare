@@ -34,7 +34,14 @@
       "rd_ratio_pct": 3.91,
       "rd_expense_yi": 4.64,
       "operating_cf_yi": 16.18,
-      "cf_to_profit": 1.46
+      "cf_to_profit": 1.46,
+      "pe_ttm": 15.9715,
+      "pb": 1.6673,
+      "ps_ttm": 1.5233,
+      "turnover_rate": 1.014,
+      "dv_ratio": 1.9009,
+      "total_mv_yi": 187.1,
+      "netprofit_yoy": 33.9458
     },
     "health_rating": "健康",
     "benchmark_ref": "环保设备行业平均毛利率约22-25%、净利率约6-8%、资产负债率约50%；公司毛利率与行业均值持平，净利率和现金流质量优于同业，但负债率偏高。",

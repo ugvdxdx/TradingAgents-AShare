@@ -33,7 +33,14 @@
       "rd_ratio_pct": 8.63,
       "rd_expense_yi": 7.07,
       "operating_cf_yi": 12.25,
-      "cf_to_profit": 1.48
+      "cf_to_profit": 1.48,
+      "pe_ttm": 63.259,
+      "pb": 10.4993,
+      "ps_ttm": 6.369,
+      "turnover_rate": 5.1657,
+      "dv_ratio": 1.1052,
+      "total_mv_yi": 542.9,
+      "netprofit_yoy": 15.8447
     },
     "health_rating": "健康",
     "benchmark_ref": "电网二次设备行业（国电南瑞/许继电气/思源电气），行业平均毛利率约25%-30%，平均ROE约12%-15%",

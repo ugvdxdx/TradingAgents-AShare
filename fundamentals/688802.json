@@ -34,7 +34,12 @@
       "rd_ratio_pct": 62.49,
       "rd_expense_yi": 10.27,
       "operating_cf_yi": -12.6,
-      "cf_to_profit": 1.6
+      "cf_to_profit": 1.6,
+      "pb": 22.3104,
+      "ps_ttm": 154.9826,
+      "turnover_rate": 8.7737,
+      "total_mv_yi": 2922.3,
+      "netprofit_yoy": 43.9664
     },
     "health_rating": "较差",
     "benchmark_ref": "半导体设计行业（盈利公司毛利率中位数40-50%、研发投入占比15-25%、资产负债率20-35%）",

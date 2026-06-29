@@ -34,7 +34,14 @@
       "rd_ratio_pct": 3.06,
       "rd_expense_yi": 1.01,
       "operating_cf_yi": 7.37,
-      "cf_to_profit": 1.1
+      "cf_to_profit": 1.1,
+      "pe_ttm": 17.8407,
+      "pb": 3.81,
+      "ps_ttm": 3.7253,
+      "turnover_rate": 0.4025,
+      "dv_ratio": 2.0224,
+      "total_mv_yi": 127.1,
+      "netprofit_yoy": 30.5966
     },
     "health_rating": "健康",
     "benchmark_ref": "文教休闲用品行业均值",

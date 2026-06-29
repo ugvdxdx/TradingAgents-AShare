@@ -22,7 +22,21 @@
       "Bash(python3 -c \"import ast; ast.parse\\(open\\('scripts/build_price_factor_history.py'\\).read\\(\\)\\); print\\('AST parse OK'\\)\")",
       "Bash(python3 -m py_compile scripts/build_price_factor_history.py)",
       "Bash(echo \"grep exit=$?\")",
-      "Bash(python3 -c \"import picker.paths, picker.scoring.v3_full_score, picker.scoring.chain_tiers, picker.discovery.scan_mispriced, picker.pipeline.run_daily_maintenance, tradingagents.agents.picker.analysts; print\\('✓ 全部生产模块 import OK'\\)\")"
+      "Bash(python3 -c \"import picker.paths, picker.scoring.v3_full_score, picker.scoring.chain_tiers, picker.discovery.scan_mispriced, picker.pipeline.run_daily_maintenance, tradingagents.agents.picker.analysts; print\\('✓ 全部生产模块 import OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('picker/pipeline/refresh_fundamentals.py',encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('picker/scoring/v3_full_score.py',encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('picker/pipeline/backfill_valuation.py',encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('picker/scoring/v3_full_score.py',encoding='utf-8'\\).read\\(\\)\\); ast.parse\\(open\\('picker/scoring/chain_tiers.py',encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK both'\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('data/reference/chain_tier_map.json'\\)\\); print\\('keys:', list\\(d.keys\\(\\)\\)[:8]\\); print\\('updated:', d.get\\('updated'\\) or d.get\\('updated_date'\\) or d.get\\('time'\\) or d.get\\('_updated'\\) or '\\(无时间字段\\)'\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('data/reference/chain_tier_map.json'\\)\\); print\\('generated_at:', d.get\\('generated_at'\\)\\); print\\('generated_by:', d.get\\('generated_by'\\)\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('picker/scoring/chain_tiers.py',encoding='utf-8'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "Skill(fewer-permission-prompts)",
+      "Skill(fewer-permission-prompts:*)",
+      "Bash(chmod +x /tmp/run_batch.sh)",
+      "Bash(bash /tmp/run_batch.sh)",
+      "Bash(awk '{print $11, $12, $13, $14}')",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('picker/pipeline/refresh_fundamentals.py',encoding='utf-8'\\).read\\(\\)\\); print\\('refresh_fundamentals.py syntax OK'\\)\")"
     ]
   }
 }

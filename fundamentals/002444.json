@@ -34,7 +34,14 @@
       "rd_ratio_pct": 2.75,
       "rd_expense_yi": 4.03,
       "operating_cf_yi": 23.1,
-      "cf_to_profit": 0.92
+      "cf_to_profit": 0.92,
+      "pe_ttm": 14.4582,
+      "pb": 1.9388,
+      "ps_ttm": 2.5081,
+      "turnover_rate": 1.9115,
+      "dv_ratio": 0.8054,
+      "total_mv_yi": 370.8,
+      "netprofit_yoy": 8.9465
     },
     "health_rating": "健康",
     "benchmark_ref": "轻工制造/手工具行业（同业毛利率普遍20-28%、净利率8-12%、负债率30-45%）",

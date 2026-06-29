@@ -34,7 +34,13 @@
       "rd_ratio_pct": 1.42,
       "rd_expense_yi": 9.42,
       "operating_cf_yi": 25.71,
-      "cf_to_profit": 6.87
+      "cf_to_profit": 6.87,
+      "pb": 1.9458,
+      "ps_ttm": 1.563,
+      "turnover_rate": 2.4124,
+      "dv_ratio": 0.0902,
+      "total_mv_yi": 1004.0,
+      "netprofit_yoy": 41.1872
     },
     "health_rating": "一般",
     "benchmark_ref": "普钢行业（宝钢股份毛利率约15%+、净利率3%+为一流标杆；行业平均净利率约1-2%）",

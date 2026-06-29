@@ -32,7 +32,13 @@
       "rd_ratio_pct": 3.78,
       "rd_expense_yi": 2.95,
       "operating_cf_yi": -13.7,
-      "cf_to_profit": 1.7
+      "cf_to_profit": 1.7,
+      "pb": 1.5211,
+      "ps_ttm": 1.03,
+      "turnover_rate": 2.3543,
+      "dv_ratio": 0.4326,
+      "total_mv_yi": 81.6,
+      "netprofit_yoy": -820.7615
     },
     "health_rating": "较差",
     "benchmark_ref": "军工新材料/特殊钢行业",

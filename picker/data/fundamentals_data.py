@@ -85,6 +85,121 @@ def _safe_float(val, default=None) -> Optional[float]:
         return default
 
 
+def _tushare_query(fn, label, max_retries=2, **kwargs):
+    """Tushare pro_api 查询 + SIGALRM 硬超时(主线程) + 重试。
+
+    fetch_real_financials / fetch_valuation 共用, 消除重复的超时/重试逻辑。
+    fn 通常是 pro.fina_indicator / pro.income / pro.daily_basic 等; label 仅供日志(通常=ts_code)。
+    主线程→SIGALRM 20s 硬超时; 子线程→不设超时依赖 requests 自身 30s timeout。
+    返回 df 或 None(超时耗尽重试/异常)。
+    """
+    import signal as _signal
+    import threading as _threading
+    import time as _time
+
+    class _TushareTimeout(Exception):
+        pass
+
+    _can_signal = (hasattr(_signal, "SIGALRM")
+                   and _threading.current_thread() is _threading.main_thread())
+    # Tushare pro_api 方法是 functools.partial 包装, 无 __name__, 兜底取底层函数名
+    fn_name = (getattr(fn, "__name__", None)
+               or getattr(getattr(fn, "func", None), "__name__", "tushare_api"))
+    for attempt in range(max_retries + 1):
+        try:
+            if _can_signal:
+                old_handler = _signal.signal(
+                    _signal.SIGALRM,
+                    lambda *_: (_ for _ in ()).throw(_TushareTimeout()))
+                _signal.alarm(20)
+            try:
+                df = fn(**kwargs)
+            finally:
+                if _can_signal:
+                    _signal.alarm(0)
+                    _signal.signal(_signal.SIGALRM, old_handler)
+            return df
+        except _TushareTimeout:
+            logger.warning(f"Tushare {fn_name}({label}) 超时(20s), attempt {attempt+1}/{max_retries+1}")
+            if attempt < max_retries:
+                _time.sleep(1.5 * (attempt + 1))
+            else:
+                return None
+        except Exception as e:
+            if _can_signal:
+                _signal.alarm(0)
+            if attempt < max_retries:
+                _time.sleep(1.5 * (attempt + 1))
+            else:
+                logger.warning(f"Tushare {fn_name}({label}) 失败: {type(e).__name__}: {e}")
+                return None
+
+
+def fetch_valuation(code, trade_date=""):
+    """拉取 Tushare daily_basic 估值快照 (PE_TTM/PB/总市值/换手率/股息率)。
+
+    供 surge price-in 锚定: 写入 financial_health.key_metrics, 经 fundamentals_loader
+    自动进 surge prompt。NaN(如亏损股 PE)→None, 调用方缺值时回退。
+    trade_date=""=最新交易日快照; "YYYYMMDD"=历史时点(回测用, 当前实现回测也用最新快照近似)。
+
+    Returns:
+      {"pe_ttm","pb","ps_ttm","total_mv_yi"(亿元),"turnover_rate","dv_ratio","_vd_date"} 或 None。
+    """
+    pro = _get_pro_api()
+    if pro is None:
+        return None
+    ts_code = _code_to_ts_code(code)
+    kwargs = {"ts_code": ts_code,
+              "fields": "trade_date,pe_ttm,pb,ps_ttm,total_mv,turnover_rate,dv_ratio"}
+    if trade_date:
+        kwargs["trade_date"] = trade_date  # 单日历史快照
+    df = _tushare_query(pro.daily_basic, ts_code, 2, **kwargs)
+    if df is None or len(df) == 0:
+        return None
+    row = df.iloc[0]  # trade_date 给定时单行; 不给时 daily_basic 按日期倒序, iloc[0]=最新
+    total_mv = _safe_float(row.get("total_mv"))
+    return {
+        "pe_ttm": _safe_float(row.get("pe_ttm")),
+        "pb": _safe_float(row.get("pb")),
+        "ps_ttm": _safe_float(row.get("ps_ttm")),
+        "total_mv_yi": round(total_mv / 1e4, 1) if total_mv is not None else None,  # 万→亿
+        "turnover_rate": _safe_float(row.get("turnover_rate")),
+        "dv_ratio": _safe_float(row.get("dv_ratio")),
+        "_vd_date": str(row.get("trade_date", "")),
+    }
+
+
+def fetch_market_valuation_snapshot(trade_date=""):
+    """全市场估值快照: {ts_code: {pe_ttm, pb}}。
+
+    供 surge 板块相对估值分位: 1 次 daily_basic(全市场某日)。板块归类用 fundamentals 池的
+    rich industry (stock_basic 的粗类如"半导体"无法精细归类), PE/PB 从本快照按 ts_code 查。
+    trade_date=""=自动找最近有数据的交易日(从今天回退); "YYYYMMDD"=指定日。返回 None=拉取失败。
+    """
+    pro = _get_pro_api()
+    if pro is None:
+        return None
+    db = None
+    if trade_date:
+        db = _tushare_query(pro.daily_basic, "ALL", 1, trade_date=trade_date)
+    else:
+        from datetime import datetime, timedelta
+        for back in range(0, 8):
+            d = (datetime.now() - timedelta(days=back)).strftime("%Y%m%d")
+            db = _tushare_query(pro.daily_basic, "ALL", 1, trade_date=d)
+            if db is not None and len(db) > 0:
+                break
+    if db is None or len(db) == 0:
+        return None
+    snap = {}
+    for _, row in db.iterrows():
+        ts = row.get("ts_code")
+        if not ts:
+            continue
+        snap[ts] = {"pe_ttm": _safe_float(row.get("pe_ttm")), "pb": _safe_float(row.get("pb"))}
+    return snap
+
+
 def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
     """调 Tushare 取最近年报财报, 返回 financial_health.key_metrics 格式 dict。
 
@@ -112,42 +227,9 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
     # 不抛异常), 导致子线程里仍调用 signal() → ValueError: signal only works in main thread,
     # 使并行刷新 (--workers>1) 的 Tushare 财报全部失败。改用 threading.main_thread() 精确判断:
     # 主线程→SIGALRM 硬超时; 子线程→不设超时, 依赖 requests 自身的 30s timeout (足够安全)。
-    import signal as _signal
-    import threading as _threading
-    class _TushareTimeout(Exception): pass
-    _can_signal = (hasattr(_signal, "SIGALRM")
-                   and _threading.current_thread() is _threading.main_thread())
-
-    def _query_with_retry(fn, *args, **kwargs):
-        # Tushare pro_api 的方法是 functools.partial 包装, 无 __name__, 兜底取底层函数名
-        fn_name = getattr(fn, "__name__", None) or getattr(getattr(fn, "func", None), "__name__", "tushare_api")
-        for attempt in range(max_retries + 1):
-            try:
-                if _can_signal:
-                    old_handler = _signal.signal(_signal.SIGALRM,
-                                                 lambda *_: (_ for _ in ()).throw(_TushareTimeout()))
-                    _signal.alarm(20)  # 单次查询 20s 硬超时
-                try:
-                    df = fn(*args, **kwargs)
-                finally:
-                    if _can_signal:
-                        _signal.alarm(0)
-                        _signal.signal(_signal.SIGALRM, old_handler)
-                return df
-            except _TushareTimeout:
-                logger.warning(f"Tushare {fn_name}({ts_code}) 超时(20s), attempt {attempt+1}/{max_retries+1}")
-                if attempt < max_retries:
-                    time.sleep(1.5 * (attempt + 1))
-                else:
-                    return None
-            except Exception as e:
-                if _can_signal:
-                    _signal.alarm(0)
-                if attempt < max_retries:
-                    time.sleep(1.5 * (attempt + 1))
-                else:
-                    logger.warning(f"Tushare {fn_name}({ts_code}) 失败: {type(e).__name__}: {e}")
-                    return None
+    # Tushare 查询 + SIGALRM 超时 + 重试下沉模块级 _tushare_query (与 fetch_valuation 共用)
+    def _query_with_retry(fn, **kwargs):
+        return _tushare_query(fn, ts_code, max_retries, **kwargs)
 
     try:
         # 1. 财务指标 (毛利率/净利率/ROE/负债率/EPS)
@@ -181,6 +263,7 @@ def fetch_real_financials(code: str, max_retries: int = 2) -> Optional[dict]:
             "debt_ratio_pct": _safe_float(fina_row.get("debt_to_assets")),
             "operating_cf_yi": None,
             "eps": _safe_float(fina_row.get("eps")),
+            "netprofit_yoy": _safe_float(fina_row.get("netprofit_yoy")),  # 净利同比% (供 surge PEG 估值消化判断)
             "rd_expense_yi": None,
             "rd_ratio_pct": None,
             "cf_to_profit": None,

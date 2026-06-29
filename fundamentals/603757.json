@@ -34,7 +34,14 @@
       "rd_ratio_pct": 6.01,
       "rd_expense_yi": 1.16,
       "operating_cf_yi": 1.96,
-      "cf_to_profit": 1.35
+      "cf_to_profit": 1.35,
+      "pe_ttm": 118.3802,
+      "pb": 6.5244,
+      "ps_ttm": 7.2424,
+      "turnover_rate": 11.2562,
+      "dv_ratio": 0.9117,
+      "total_mv_yi": 138.5,
+      "netprofit_yoy": -43.3155
     },
     "health_rating": "健康",
     "benchmark_ref": "通用设备制造业（毛利率约30%、净利率约8-10%、资产负债率约40%）",

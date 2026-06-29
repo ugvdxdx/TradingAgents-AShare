@@ -32,7 +32,14 @@
       "rd_ratio_pct": 5.39,
       "rd_expense_yi": 24.3,
       "operating_cf_yi": 36.24,
-      "cf_to_profit": 1.52
+      "cf_to_profit": 1.52,
+      "pe_ttm": 21.1684,
+      "pb": 1.6856,
+      "ps_ttm": 1.0219,
+      "turnover_rate": 2.2325,
+      "dv_ratio": 0.3673,
+      "total_mv_yi": 487.7,
+      "netprofit_yoy": 97.4885
     },
     "health_rating": "一般",
     "benchmark_ref": "宁德时代（毛利率约24-27%，资产负债率约60%）",

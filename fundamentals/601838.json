@@ -33,7 +33,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 748.6,
-      "cf_to_profit": 5.64
+      "cf_to_profit": 5.64,
+      "pe_ttm": 5.6688,
+      "pb": 0.8275,
+      "ps_ttm": 3.174,
+      "turnover_rate": 0.4707,
+      "dv_ratio": 4.961,
+      "total_mv_yi": 761.2,
+      "netprofit_yoy": 3.3061
     },
     "health_rating": "健康",
     "benchmark_ref": "银行业均值（净利率约30%，ROE约10%）",

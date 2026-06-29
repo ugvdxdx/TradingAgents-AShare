@@ -34,7 +34,14 @@
       "rd_ratio_pct": 37.7,
       "rd_expense_yi": 21.8,
       "operating_cf_yi": 10.67,
-      "cf_to_profit": 0.87
+      "cf_to_profit": 0.87,
+      "pe_ttm": 29.6506,
+      "pb": 3.9799,
+      "ps_ttm": 7.0096,
+      "turnover_rate": 2.1591,
+      "dv_ratio": 0.4759,
+      "total_mv_yi": 396.9,
+      "netprofit_yoy": 18.0126
     },
     "health_rating": "健康",
     "benchmark_ref": "金融IT行业",

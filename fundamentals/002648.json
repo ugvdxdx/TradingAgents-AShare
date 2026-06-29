@@ -32,7 +32,14 @@
       "rd_ratio_pct": 3.59,
       "rd_expense_yi": 16.56,
       "operating_cf_yi": 96.07,
-      "cf_to_profit": 1.81
+      "cf_to_profit": 1.81,
+      "pe_ttm": 14.2985,
+      "pb": 2.3631,
+      "ps_ttm": 1.805,
+      "turnover_rate": 4.3958,
+      "dv_ratio": 2.0032,
+      "total_mv_yi": 837.8,
+      "netprofit_yoy": -12.5357
     },
     "health_rating": "健康",
     "benchmark_ref": "化工原料行业平均",

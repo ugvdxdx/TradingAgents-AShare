@@ -34,7 +34,14 @@
       "rd_ratio_pct": 0.83,
       "rd_expense_yi": 5.02,
       "operating_cf_yi": 24.1,
-      "cf_to_profit": 3.0
+      "cf_to_profit": 3.0,
+      "pe_ttm": 33.0398,
+      "pb": 1.7076,
+      "ps_ttm": 0.5345,
+      "turnover_rate": 6.9603,
+      "dv_ratio": 0.9534,
+      "total_mv_yi": 341.1,
+      "netprofit_yoy": -25.8915
     },
     "health_rating": "一般",
     "benchmark_ref": "有色金属矿采选业平均毛利率20%-30%、净利率8%-15%",

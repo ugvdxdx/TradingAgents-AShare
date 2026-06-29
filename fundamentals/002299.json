@@ -33,7 +33,14 @@
       "rd_ratio_pct": 0.66,
       "rd_expense_yi": 1.32,
       "operating_cf_yi": 40.32,
-      "cf_to_profit": 2.92
+      "cf_to_profit": 2.92,
+      "pe_ttm": 12.6452,
+      "pb": 1.6372,
+      "ps_ttm": 0.8884,
+      "turnover_rate": 1.0071,
+      "dv_ratio": 4.6059,
+      "total_mv_yi": 187.8,
+      "netprofit_yoy": 90.5454
     },
     "health_rating": "健康",
     "benchmark_ref": "农林牧渔行业（禽畜养殖）",

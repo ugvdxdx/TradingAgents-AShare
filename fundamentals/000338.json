@@ -34,7 +34,14 @@
       "rd_ratio_pct": 3.57,
       "rd_expense_yi": 82.84,
       "operating_cf_yi": 286.82,
-      "cf_to_profit": 2.62
+      "cf_to_profit": 2.62,
+      "pe_ttm": 21.4151,
+      "pb": 2.5387,
+      "ps_ttm": 1.0219,
+      "turnover_rate": 2.4456,
+      "dv_ratio": 2.5308,
+      "total_mv_yi": 2421.1,
+      "netprofit_yoy": -4.146
     },
     "health_rating": "健康",
     "benchmark_ref": "重卡行业平均（净利率约3-5%，ROE约8-10%）；对标康明斯（净利率约8-10%，资产负债率约50%）",

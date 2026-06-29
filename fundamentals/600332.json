@@ -34,7 +34,14 @@
       "rd_ratio_pct": 0.85,
       "rd_expense_yi": 6.62,
       "operating_cf_yi": -2.32,
-      "cf_to_profit": -0.08
+      "cf_to_profit": -0.08,
+      "pe_ttm": 10.912,
+      "pb": 0.8125,
+      "ps_ttm": 0.4097,
+      "turnover_rate": 0.5777,
+      "dv_ratio": 4.0465,
+      "total_mv_yi": 321.4,
+      "netprofit_yoy": 5.2061
     },
     "health_rating": "一般",
     "benchmark_ref": "同仁堂（毛利率46%/净利率12%/ROE 12%）、云南白药（毛利率27%/净利率12%/ROE 10%+）",

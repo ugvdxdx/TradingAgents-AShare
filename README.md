@@ -2,6 +2,8 @@
 
 量化多 Agent 分析框架 — 使用 LangGraph 编排 14 个专业 Agent 对 A 股/美股/港股进行综合投研分析。内置「研报采集 → 基本面生成 → V3 评分 → 辩论选股」四步闭环选股流水线。
 
+> **文档导航**：`DEVLOG.md`(每日代码改动) · `CHANGELOG.md`(版本发布特性) · `cognition/findings.md`(实证结论) · `CLAUDE.md`(架构说明)
+
 ## 架构概览
 
 ```

@@ -34,7 +34,14 @@
       "rd_ratio_pct": 7.35,
       "rd_expense_yi": 4.46,
       "operating_cf_yi": 1.57,
-      "cf_to_profit": 0.3
+      "cf_to_profit": 0.3,
+      "pe_ttm": 218.0509,
+      "pb": 30.3956,
+      "ps_ttm": 16.6743,
+      "turnover_rate": 6.7294,
+      "dv_ratio": 0.1416,
+      "total_mv_yi": 1052.2,
+      "netprofit_yoy": 15.2984
     },
     "health_rating": "一般",
     "benchmark_ref": "精密温控行业（同飞股份/申菱环境等可比公司毛利率约25-30%，ROE约10-15%）",

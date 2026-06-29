@@ -34,7 +34,14 @@
       "rd_ratio_pct": 0.05,
       "rd_expense_yi": 0.28,
       "operating_cf_yi": 39.78,
-      "cf_to_profit": 10.64
+      "cf_to_profit": 10.64,
+      "pe_ttm": 29.8763,
+      "pb": 1.8784,
+      "ps_ttm": 0.1941,
+      "turnover_rate": 2.5005,
+      "dv_ratio": 5.5127,
+      "total_mv_yi": 112.4,
+      "netprofit_yoy": -35.6158
     },
     "health_rating": "健康",
     "benchmark_ref": "商业贸易/消费电子分销行业平均",

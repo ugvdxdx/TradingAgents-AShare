@@ -32,7 +32,14 @@
       "rd_ratio_pct": 2.88,
       "rd_expense_yi": 0.95,
       "operating_cf_yi": 9.38,
-      "cf_to_profit": 3.2
+      "cf_to_profit": 3.2,
+      "pe_ttm": 91.8347,
+      "pb": 21.8631,
+      "ps_ttm": 13.6307,
+      "turnover_rate": 11.1564,
+      "dv_ratio": 0.0685,
+      "total_mv_yi": 490.8,
+      "netprofit_yoy": 1088.594
     },
     "health_rating": "一般",
     "benchmark_ref": "PCB行业龙头（如深南电路、沪电股份）",

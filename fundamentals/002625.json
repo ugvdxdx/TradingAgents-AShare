@@ -34,7 +34,13 @@
       "rd_ratio_pct": 6.61,
       "rd_expense_yi": 1.35,
       "operating_cf_yi": 8.08,
-      "cf_to_profit": 1.18
+      "cf_to_profit": 1.18,
+      "pe_ttm": 90.7097,
+      "pb": 6.611,
+      "ps_ttm": 29.4382,
+      "turnover_rate": 1.9818,
+      "total_mv_yi": 646.4,
+      "netprofit_yoy": 5.3652
     },
     "health_rating": "健康",
     "benchmark_ref": "国防军工行业（中航高科、西部超导、钢研高纳等），行业平均毛利率30-40%、净利率12-18%、ROE 8-12%、负债率25-35%",

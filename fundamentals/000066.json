@@ -34,7 +34,13 @@
       "rd_ratio_pct": 0.0,
       "rd_expense_yi": 0.0,
       "operating_cf_yi": -3.26,
-      "cf_to_profit": 5.82
+      "cf_to_profit": 5.82,
+      "pe_ttm": 2969.3413,
+      "pb": 5.4796,
+      "ps_ttm": 3.7044,
+      "turnover_rate": 9.8507,
+      "total_mv_yi": 599.0,
+      "netprofit_yoy": 96.231
     },
     "health_rating": "较差",
     "benchmark_ref": "A股IT设备板块（对标浪潮信息、中科曙光、紫光股份等信创整机龙头）",

@@ -34,7 +34,14 @@
       "eps": 2.06,
       "rd_expense_yi": 12.68,
       "rd_ratio_pct": 4.01,
-      "cf_to_profit": 1.61
+      "cf_to_profit": 1.61,
+      "pe_ttm": 11.429,
+      "pb": 1.5865,
+      "ps_ttm": 1.1217,
+      "turnover_rate": 0.8052,
+      "dv_ratio": 3.1451,
+      "total_mv_yi": 368.8,
+      "netprofit_yoy": 1.577
     },
     "health_rating": "健康",
     "benchmark_ref": "中药/OTC行业：毛利率50-60%，净利率12-18%，ROE 12-16%",

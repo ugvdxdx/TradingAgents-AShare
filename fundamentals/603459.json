@@ -32,7 +32,13 @@
       "rd_ratio_pct": 3.99,
       "rd_expense_yi": 1.47,
       "operating_cf_yi": 8.39,
-      "cf_to_profit": 1.55
+      "cf_to_profit": 1.55,
+      "pe_ttm": 125.863,
+      "pb": 28.6387,
+      "ps_ttm": 18.1359,
+      "turnover_rate": 27.7921,
+      "total_mv_yi": 699.0,
+      "netprofit_yoy": 152.367
     },
     "health_rating": "健康",
     "benchmark_ref": "PCB行业龙头（深南电路、沪电股份等，行业平均毛利率约15%-20%）",

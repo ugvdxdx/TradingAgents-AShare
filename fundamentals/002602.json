@@ -34,7 +34,13 @@
       "rd_ratio_pct": 6.18,
       "rd_expense_yi": 23.4,
       "operating_cf_yi": 85.64,
-      "cf_to_profit": 1.53
+      "cf_to_profit": 1.53,
+      "pe_ttm": 16.0376,
+      "pb": 3.1198,
+      "ps_ttm": 2.4717,
+      "turnover_rate": 2.747,
+      "total_mv_yi": 1007.6,
+      "netprofit_yoy": 362.0161
     },
     "health_rating": "健康",
     "benchmark_ref": "A股游戏行业（毛利率普遍60-75%、ROE 10-18%）+ AIDC行业（重资产、净利率5-12%）",

@@ -34,7 +34,14 @@
       "rd_ratio_pct": 22.82,
       "rd_expense_yi": 14.03,
       "operating_cf_yi": 7.67,
-      "cf_to_profit": 0.53
+      "cf_to_profit": 0.53,
+      "pe_ttm": 43.1874,
+      "pb": 5.1243,
+      "ps_ttm": 10.78,
+      "turnover_rate": 5.647,
+      "dv_ratio": 0.2482,
+      "total_mv_yi": 713.5,
+      "netprofit_yoy": 21.8606
     },
     "health_rating": "一般",
     "benchmark_ref": "半导体IC设计行业平均毛利率约35%-45%，平均ROE约8%-12%",

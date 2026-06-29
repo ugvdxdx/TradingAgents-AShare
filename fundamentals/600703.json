@@ -34,7 +34,13 @@
       "rd_ratio_pct": 4.31,
       "rd_expense_yi": 7.73,
       "operating_cf_yi": 18.81,
-      "cf_to_profit": -5.33
+      "cf_to_profit": -5.33,
+      "pb": 3.1063,
+      "ps_ttm": 6.5529,
+      "turnover_rate": 10.8883,
+      "dv_ratio": 0.0868,
+      "total_mv_yi": 1084.1,
+      "netprofit_yoy": -239.6952
     },
     "health_rating": "较差",
     "benchmark_ref": "A股半导体行业平均毛利率约30%、ROE约8%；LED芯片同业（士兰微/兆驰股份）毛利率约18-20%",

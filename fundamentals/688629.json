@@ -34,7 +34,13 @@
       "rd_ratio_pct": 6.36,
       "rd_expense_yi": 1.61,
       "operating_cf_yi": -0.02,
-      "cf_to_profit": -0.01
+      "cf_to_profit": -0.01,
+      "pe_ttm": 157.0199,
+      "pb": 35.1873,
+      "ps_ttm": 24.6106,
+      "turnover_rate": 9.8028,
+      "total_mv_yi": 678.1,
+      "netprofit_yoy": 2120.0594
     },
     "health_rating": "一般",
     "benchmark_ref": "中航光电（营收200亿+，毛利率约35%，现金流稳健）",

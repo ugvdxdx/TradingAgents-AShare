@@ -33,7 +33,12 @@
       "rd_ratio_pct": 11.2,
       "rd_expense_yi": 0.85,
       "operating_cf_yi": 0.81,
-      "cf_to_profit": -0.61
+      "cf_to_profit": -0.61,
+      "pb": 60.6304,
+      "ps_ttm": 32.9868,
+      "turnover_rate": 16.2836,
+      "total_mv_yi": 254.5,
+      "netprofit_yoy": -2.9273
     },
     "health_rating": "较差",
     "benchmark_ref": "金融IT行业头部公司毛利率普遍在40%-55%区间，净利率5%-15%，资产负债率30%-45%；银之杰各项指标显著低于行业中位数",

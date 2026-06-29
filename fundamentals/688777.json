@@ -34,7 +34,14 @@
       "rd_ratio_pct": 11.79,
       "rd_expense_yi": 9.51,
       "operating_cf_yi": 3.77,
-      "cf_to_profit": 0.85
+      "cf_to_profit": 0.85,
+      "pe_ttm": 237.8149,
+      "pb": 9.3876,
+      "ps_ttm": 11.816,
+      "turnover_rate": 3.1231,
+      "dv_ratio": 0.5923,
+      "total_mv_yi": 941.9,
+      "netprofit_yoy": -60.4759
     },
     "health_rating": "一般",
     "benchmark_ref": "工业自动化行业（汇川/和利时等）：毛利率35-45%、净利率10-15%、ROE 10-15%、CF净利比>1.0",

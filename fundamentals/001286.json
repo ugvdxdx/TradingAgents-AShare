@@ -32,7 +32,14 @@
       "rd_ratio_pct": 0.12,
       "rd_expense_yi": 0.27,
       "operating_cf_yi": 89.91,
-      "cf_to_profit": 2.99
+      "cf_to_profit": 2.99,
+      "pe_ttm": 12.0328,
+      "pb": 1.3982,
+      "ps_ttm": 1.6332,
+      "turnover_rate": 1.2581,
+      "dv_ratio": 4.0,
+      "total_mv_yi": 384.4,
+      "netprofit_yoy": 0.0266
     },
     "health_rating": "健康",
     "benchmark_ref": "电力及公用事业行业",

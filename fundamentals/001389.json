@@ -33,7 +33,14 @@
       "rd_ratio_pct": 5.1,
       "rd_expense_yi": 2.8,
       "operating_cf_yi": 10.32,
-      "cf_to_profit": 1.02
+      "cf_to_profit": 1.02,
+      "pe_ttm": 89.3688,
+      "pb": 14.4797,
+      "ps_ttm": 16.6148,
+      "turnover_rate": 12.8697,
+      "dv_ratio": 0.2166,
+      "total_mv_yi": 1043.8,
+      "netprofit_yoy": 50.2423
     },
     "health_rating": "健康",
     "benchmark_ref": "PCB及元器件行业基准（行业平均毛利率约20%，净利率约8%）",

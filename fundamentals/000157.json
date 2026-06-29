@@ -32,7 +32,14 @@
       "rd_ratio_pct": 5.56,
       "rd_expense_yi": 28.95,
       "operating_cf_yi": 48.74,
-      "cf_to_profit": 1.0
+      "cf_to_profit": 1.0,
+      "pe_ttm": 14.5924,
+      "pb": 1.084,
+      "ps_ttm": 1.1941,
+      "turnover_rate": 1.0132,
+      "dv_ratio": 4.104,
+      "total_mv_yi": 632.2,
+      "netprofit_yoy": 38.0104
     },
     "health_rating": "健康",
     "benchmark_ref": "工程机械行业",

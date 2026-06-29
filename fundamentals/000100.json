@@ -33,7 +33,14 @@
       "rd_ratio_pct": 6.05,
       "rd_expense_yi": 111.45,
       "operating_cf_yi": null,
-      "cf_to_profit": null
+      "cf_to_profit": null,
+      "pe_ttm": 22.1957,
+      "pb": 1.7918,
+      "ps_ttm": 0.5992,
+      "turnover_rate": 12.7553,
+      "dv_ratio": 0.8798,
+      "total_mv_yi": 1123.2,
+      "netprofit_yoy": 188.7761
     },
     "health_rating": "一般",
     "benchmark_ref": "面板与光伏行业均值",

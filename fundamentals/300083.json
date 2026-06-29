@@ -32,7 +32,13 @@
       "rd_expense_yi": 1.58,
       "rd_ratio_pct": 2.97,
       "operating_cf_yi": 1.33,
-      "cf_to_profit": 0.93
+      "cf_to_profit": 0.93,
+      "pe_ttm": 180.9161,
+      "pb": 3.9909,
+      "ps_ttm": 3.8901,
+      "turnover_rate": 10.6038,
+      "total_mv_yi": 211.9,
+      "netprofit_yoy": -39.6291
     },
     "health_rating": "一般",
     "benchmark_ref": "通用设备/机床板块（海天精工、纽威数控）",
