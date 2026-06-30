@@ -139,7 +139,7 @@ def evaluate(pf_history: dict, cap_history: dict, cutoffs: List[str]) -> Dict[st
                 if pf is None:
                     continue
                 capital = max(0, sd["base_capital"] + sd["d2"] * 2 + pf * 2)
-                anchor = sd["chain"] + capital * 2 - sd["surge"] * 0.5
+                anchor = sd["chain"] + capital * 2 + sd["surge"]
                 anchors.append(anchor)
                 rets.append(sd["ret"])
             if len(anchors) < 10:

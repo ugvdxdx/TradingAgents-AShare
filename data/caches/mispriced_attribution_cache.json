@@ -1576,5 +1576,192 @@
   "r5": 20.0,
   "cached_date": "2026-06-27",
   "name": "聚石化学"
+ },
+ "600667": {
+  "reason_type": "板块供需",
+  "sector_tag": "存储芯片,先进封装",
+  "summary": "受美光财报超预期带动，半导体存储产业链景气度回升，资金做多。",
+  "is_sector_wide": true,
+  "direction": "上涨",
+  "r20": 97.2,
+  "r5": 28.5,
+  "cached_date": "2026-06-29",
+  "name": "太极实业"
+ },
+ "688530": {
+  "reason_type": "板块供需",
+  "sector_tag": "溅射靶材",
+  "summary": "算力带动稀有金属涨价，半导体靶材市场扩张且国产替代加速。",
+  "is_sector_wide": true,
+  "direction": "上涨",
+  "r20": 69.2,
+  "r5": 33.5,
+  "cached_date": "2026-06-29",
+  "name": "欧莱新材"
+ },
+ "688143": {
+  "reason_type": "板块供需",
+  "sector_tag": "特种光纤",
+  "summary": "AI智算中心爆发致特种光纤需求暴增及现货大幅涨价。",
+  "is_sector_wide": true,
+  "direction": "上涨",
+  "r20": 65.7,
+  "r5": 14.8,
+  "cached_date": "2026-06-29",
+  "name": "长盈通"
+ },
+ "603773": {
+  "reason_type": "概念炒作",
+  "sector_tag": "玻璃基板,TGV",
+  "summary": "玻璃基半导体封装概念及TGV技术产业化预期引发市场资金炒作。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 61.8,
+  "r5": 8.1,
+  "cached_date": "2026-06-29",
+  "name": "沃格光电"
+ },
+ "600552": {
+  "reason_type": "概念炒作",
+  "sector_tag": "UTG,玻璃基板",
+  "summary": "受折叠屏UTG放量、玻璃基板国产替代及产品涨价等多重概念共振驱动。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 55.2,
+  "r5": 26.9,
+  "cached_date": "2026-06-29",
+  "name": "凯盛科技"
+ },
+ "300706": {
+  "reason_type": "概念炒作",
+  "sector_tag": "溅射靶材",
+  "summary": "受存储芯片技术突破消息提振，叠加靶材国产替代加速预期上涨。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 52.2,
+  "r5": 52.3,
+  "cached_date": "2026-06-29",
+  "name": "阿石创"
+ },
+ "603989": {
+  "reason_type": "概念炒作",
+  "sector_tag": "铝电解电容器,超级电容",
+  "summary": "资金借电容提价及超级电容等新能源概念短期爆炒，公司澄清暂无相关收入。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 45.8,
+  "r5": 34.9,
+  "cached_date": "2026-06-29",
+  "name": "艾华集团"
+ },
+ "688012": {
+  "reason_type": "板块供需",
+  "sector_tag": "半导体设备,刻蚀设备",
+  "summary": "全球存储扩产提速带来实质性订单支撑，叠加收购杭州众硅。",
+  "is_sector_wide": true,
+  "direction": "上涨",
+  "r20": 35.9,
+  "r5": 14.7,
+  "cached_date": "2026-06-29",
+  "name": "中微公司"
+ },
+ "688166": {
+  "reason_type": "特定风险",
+  "sector_tag": "创新药,减重药",
+  "summary": "实控人涉嫌操纵证券市场被立案及取保候审，引发市场恐慌。",
+  "is_sector_wide": false,
+  "direction": "下跌",
+  "r20": -35.1,
+  "r5": -20.5,
+  "cached_date": "2026-06-29",
+  "name": "博瑞医药"
+ },
+ "688037": {
+  "reason_type": "概念炒作",
+  "sector_tag": "涂胶显影",
+  "summary": "加速替代日本东京电子等海外寡头，国产替代逻辑发酵受资金追捧。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 34.9,
+  "r5": 21.1,
+  "cached_date": "2026-06-29",
+  "name": "芯源微"
+ },
+ "688120": {
+  "reason_type": "个股事件",
+  "sector_tag": "CMP设备、半导体设备",
+  "summary": "拟定增募资不超37.95亿元，用于解决产能瓶颈问题。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 34.7,
+  "r5": 16.2,
+  "cached_date": "2026-06-29",
+  "name": "华海清科"
+ },
+ "003019": {
+  "reason_type": "特定风险",
+  "sector_tag": "智能交互显示、电子代工",
+  "summary": "发布定增说明书引发股权稀释担忧，叠加主力资金大幅流出。",
+  "is_sector_wide": false,
+  "direction": "下跌",
+  "r20": -31.5,
+  "r5": -9.5,
+  "cached_date": "2026-06-29",
+  "name": "宸展光电"
+ },
+ "688635": {
+  "reason_type": "技术回调",
+  "sector_tag": "特种光纤,光器件",
+  "summary": "短期获利盘出逃，主力资金大幅流出引发技术性回调。",
+  "is_sector_wide": false,
+  "direction": "下跌",
+  "r20": -31.1,
+  "r5": -15.6,
+  "cached_date": "2026-06-29",
+  "name": "长进光子"
+ },
+ "601066": {
+  "reason_type": "板块供需",
+  "sector_tag": "券商,证券",
+  "summary": "受益科创板跟投制度及板块补涨预期，券商板块集体崛起带动。",
+  "is_sector_wide": true,
+  "direction": "上涨",
+  "r20": 31.0,
+  "r5": 21.5,
+  "cached_date": "2026-06-29",
+  "name": "中信建投"
+ },
+ "002821": {
+  "reason_type": "未知",
+  "sector_tag": "",
+  "summary": "",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 30.8,
+  "r5": 24.2,
+  "cached_date": "2026-06-29",
+  "name": "凯莱英"
+ },
+ "300567": {
+  "reason_type": "个股事件",
+  "sector_tag": "前道量测",
+  "summary": "控股子公司签订1.35亿元明场缺陷检测设备日常经营性重大合同。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 30.8,
+  "r5": 28.6,
+  "cached_date": "2026-06-29",
+  "name": "精测电子"
+ },
+ "601636": {
+  "reason_type": "概念炒作",
+  "sector_tag": "玻璃基板",
+  "summary": "受康宁玻璃光互连组件及半导体玻璃基板国产替代预期利好驱动。",
+  "is_sector_wide": false,
+  "direction": "上涨",
+  "r20": 30.6,
+  "r5": 11.1,
+  "cached_date": "2026-06-29",
+  "name": "旗滨集团"
  }
 }

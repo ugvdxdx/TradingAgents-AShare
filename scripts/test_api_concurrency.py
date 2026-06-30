@@ -43,7 +43,7 @@ def _stats(lats, fails, W):
 
 def test_websearch(W):
     """W 并发下 web-search-pro: 成功=返回>100字符的有效结果"""
-    from picker.pipeline.refresh_fundamentals import _web_search
+    from picker.common.web_search import _web_search
     queries = [f"{STOCKS[i % len(STOCKS)]} 光模块 芯片 最新订单 2026" for i in range(W)]
     lats, fails = [], 0
 

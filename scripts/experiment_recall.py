@@ -194,7 +194,7 @@ def main():
             anchors = []
             rets = []
             for code, sd in pool:
-                anchor = sd["chain"] + sd["capital"] * 2 - sd["surge"] * 0.5
+                anchor = sd["chain"] + sd["capital"] * 2 + sd["surge"]
                 anchors.append(anchor)
                 rets.append(sd["ret"])
             if len(anchors) < 10:

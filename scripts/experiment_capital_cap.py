@@ -176,7 +176,7 @@ def main():
                 c = sd["raw_capital"]
                 c = min(c, cap) if cap is not None else c
                 c = max(0.0, c)
-                anchors.append(sd["chain"] + c * 2 - sd["surge"] * 0.5)
+                anchors.append(sd["chain"] + c * 2 + sd["surge"])
             rho = spearman(anchors, rets)
             results[cap]["rhos"].append(rho)
             order = sorted(range(len(anchors)), key=lambda i: -anchors[i])[:10]

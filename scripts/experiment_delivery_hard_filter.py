@@ -95,7 +95,7 @@ def main():
                 continue
             v = V3[code]
             capital = cap_entry["capital"]
-            anchor = v.get("chain", 0) + capital * 2 - v.get("surge", 0) * 0.5
+            anchor = v.get("chain", 0) + capital * 2 + v.get("surge", 0)
             stock_data[code] = {"anchor": anchor, "surge": v.get("surge", 0),
                                 "ret": r, "name": v.get("name", "")}
 

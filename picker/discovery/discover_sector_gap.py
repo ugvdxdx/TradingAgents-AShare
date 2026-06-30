@@ -205,7 +205,7 @@ def count_pool_coverage(theme, min_len=2):
 
 def web_search_stocks(theme, num_candidates=6):
     """web search "{theme} A股龙头" → LLM 抽取 [{code, name}]。"""
-    from picker.pipeline.refresh_fundamentals import _web_search
+    from picker.common.web_search import _web_search
     from picker.scoring.v3_full_score import _llm  # 带 429 退避
     try:
         raw = _web_search(f"{theme} A股 龙头股 上市公司 代码", num_results=5)

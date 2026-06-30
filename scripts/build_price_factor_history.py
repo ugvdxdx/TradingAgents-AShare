@@ -585,9 +585,8 @@ def _build_base_capital_at(cutoff: str) -> Dict[str, float]:
     if cutoff in _BASE_CAP_CACHE:
         return _BASE_CAP_CACHE[cutoff]
     from picker.scoring.v3_full_score import (
-        _get_industry, _compute_capital_from_momentum,
+        _get_industry, _compute_capital_from_momentum, _current_sector,
     )
-    from tradingagents.research.normalize import get_sector_keyword_index
     from tradingagents.research.consumer import get_sector_momentum
 
     try:
@@ -596,33 +595,13 @@ def _build_base_capital_at(cutoff: str) -> Dict[str, float]:
         return {}
     if not momentum.get("hot_sectors"):
         return {}
-    try:
-        kw_index = get_sector_keyword_index()
-    except Exception:
-        return {}
-
-    def classify(industry: str) -> str:
-        # 平局裁决同 _classify_sector: 命中数相同时取命中关键词最长的板块,
-        # 保证跨进程确定性 (get_sector_keyword_index 已按板块名排序)。
-        if not industry:
-            return ""
-        best, best_hit, best_kw_len = "", 0, 0
-        for sec, kws in kw_index.items():
-            matched = [k for k in kws if k in industry]
-            h = len(matched)
-            if h <= 0:
-                continue
-            max_kw_len = max(len(k) for k in matched)
-            if h > best_hit or (h == best_hit and max_kw_len > best_kw_len):
-                best_hit, best_kw_len, best = h, max_kw_len, sec
-        return best
 
     result = {}
     for code, entry in V3.items():
         if not isinstance(entry, dict) or "chain" not in entry:
             continue
         industry = _get_industry(code)
-        sector = classify(industry)
+        sector = _current_sector(code, industry)  # 归因优先(多主业股), 与生产 compute_capital_updates 同口径
         if not sector:
             continue
         base_capital = _compute_capital_from_momentum(sector, momentum)

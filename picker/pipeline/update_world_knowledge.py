@@ -503,6 +503,12 @@ def update_stocks(signals: dict, dry_run: bool = False) -> list:
             print(f"  ✗ {code} {name}: 输出解析失败")
             print(f"    末尾: {repr(result[-120:])}")
             continue
+        # 清洗: 过滤 LLM 指令残留/思考当数据 (如 "GROWTH: 结合...可以加入..."), 含未转义引号会破坏 world_knowledge.py 语法
+        _RESIDUE = ("GROWTH:", "可以加入", "STRENGTHS|", "WEAKNESSES|", "GROWTH|", "HEADWINDS|")
+        for _k in ("strengths", "weaknesses", "growth_drivers", "headwinds"):
+            if isinstance(new_fields.get(_k), list):
+                new_fields[_k] = [_it for _it in new_fields[_k]
+                                  if isinstance(_it, str) and not any(_w in _it for _w in _RESIDUE)]
 
         # 用字符串替换更新 (安全：定位 code 块内的字段)
         replaced = _replace_stock_fields(new_source, code, new_fields)

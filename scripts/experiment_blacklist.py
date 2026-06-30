@@ -171,7 +171,7 @@ def main():
             if capital is None:
                 continue
             v = V3[code]
-            sd[code] = v.get("chain", 0) + capital * 2 - v.get("surge", 0) * 0.5
+            sd[code] = v.get("chain", 0) + capital * 2 + v.get("surge", 0)
         base_anchors[cutoff] = sd
         if ci % 40 == 0:
             print(f"  ... 基础锚分 {ci}/{len(cutoffs)}")

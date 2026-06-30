@@ -274,6 +274,10 @@ _SECTOR_VAL_CACHE = None       # {sector: {"pes":[sorted], "pbs":[sorted]}}
 _SECTOR_VAL_CODE2SEC = {}      # {code: sector} (用 stock_basic 行业归类, 与快照同源)
 _SECTOR_VAL_DATE = ""
 
+# 业绩预告进程级缓存 (当日级失效, 避免每只股读盘; 磁盘源 forecast_fetcher.precompute_pool_forecast 每日刷新)
+_FORECAST_CACHE = None         # {code: [rec]}
+_FORECAST_DATE = ""
+
 
 def _current_sector(code, industry=None):
     """个股【当前驱动板块】: 优先用异动归因 sector_tag, 回退 _classify_sector(industry)。
@@ -296,6 +300,55 @@ def _current_sector(code, industry=None):
     return _classify_sector(industry if industry is not None else _get_industry(code))
 
 
+def _load_forecast_cache():
+    """读 FORECAST_CACHE (当日级进程缓存)。返回 {code: [rec]} 或 {}。
+
+    磁盘源由 forecast_fetcher.precompute_pool_forecast 每日维护刷新; 评分进程当日复用,
+    读失败时置空并标记当日, 避免反复重读 (容错: 无预告则 _compute_forecast_signals 返回 None)。
+    """
+    global _FORECAST_CACHE, _FORECAST_DATE
+    today = datetime.now().strftime("%Y-%m-%d")
+    if _FORECAST_CACHE is not None and _FORECAST_DATE == today:
+        return _FORECAST_CACHE
+    try:
+        from picker.paths import FORECAST_CACHE as _FC_PATH
+        if os.path.exists(_FC_PATH):
+            data = json.load(open(_FC_PATH, encoding="utf-8"))
+            _FORECAST_CACHE = data.get("forecasts", {}) or {}
+            _FORECAST_DATE = data.get("_updated", "")
+            return _FORECAST_CACHE
+    except Exception:
+        pass
+    _FORECAST_CACHE = {}
+    _FORECAST_DATE = today
+    return _FORECAST_CACHE
+
+
+def _compute_forecast_signals(code):
+    """读该股近期业绩预告 (FORECAST_CACHE) → surge 催化硬数据。返回 dict 或 None。
+
+    业绩预告带公告日期 + 预增幅度 + 预告类型, 直接满足 surge "催化日期硬要求"
+    (PROMPT_V3E 高分档催化必须含具体日期, LLM 原本只能从研报文本猜, 现在有真日历)。
+    """
+    cache = _load_forecast_cache()
+    recs = cache.get(code) or cache.get(str(code).zfill(6))
+    if not recs:
+        return None
+    rec = recs[0]  # 公告日期最近的一条 (fetch 时已跨报告期/多指标去重)
+    days_since = None
+    try:
+        days_since = (datetime.now() - datetime.strptime(rec.get("notice_date", "2000-01-01"), "%Y-%m-%d")).days
+    except Exception:
+        pass
+    return {
+        "type": rec.get("type", ""),
+        "change_pct": rec.get("change_pct"),
+        "notice_date": rec.get("notice_date", ""),
+        "summary": rec.get("summary", ""),
+        "days_since_notice": days_since,
+    }
+
+
 def _load_sector_valuation(force=False):
     """每日一次: fundamentals 池(rich industry 精细归类) + 市场快照 PE/PB → 按板块分组排序。
 
@@ -311,6 +364,7 @@ def _load_sector_valuation(force=False):
     import glob
     snap = fetch_market_valuation_snapshot()
     if not snap:
+        _SECTOR_VAL_DATE = today  # 失败也标记当日, 避免全池评分反复 fetch (同 _load_forecast_cache 容错)
         return _SECTOR_VAL_CACHE
     by_sec, code2sec = {}, {}
     for fp in glob.glob(os.path.join(FUNDAMENTALS_DIR, "*.json")):
@@ -395,13 +449,14 @@ def _compute_valuation_signals(code):
     }
 
 
-def _render_surge_signals_block(sig, val_sig=None):
-    """把 surge 锚定数据渲染为 LLM 一眼可读段: 价格水位+动量 (sig) + 估值板块分位+PEG (val_sig)。
+def _render_surge_signals_block(sig, val_sig=None, forecast_sig=None):
+    """把 surge 锚定数据渲染为 LLM 一眼可读段: 价格水位+动量 (sig) + 估值 (val_sig) + 业绩预告 (forecast_sig)。
 
     估值用板块相对分位+PEG (非绝对 PE/PB), 让 price-in 判断不误伤高增周期股
-    (德明利 PE52 看似贵, 实为板块0分位最便宜+PEG0.55)。sig/val_sig 为 None 时对应部分省略。
+    (德明利 PE52 看似贵, 实为板块0分位最便宜+PEG0.55)。业绩预告带公告日期+预增幅度,
+    直接满足 surge "催化日期硬要求"。任一为 None 时对应部分省略。
     """
-    if not sig and not val_sig:
+    if not sig and not val_sig and not forecast_sig:
         return ""
     lines = []
     if sig:
@@ -450,6 +505,16 @@ def _render_surge_signals_block(sig, val_sig=None):
         elif g is not None and g <= 0:
             lines.append(f"净利同比 {g:.0f}% (负增长, PEG 不适用, 盈利承压)")
         lines.append("判估值贵否须看板块分位+PEG, 勿用绝对PE/PB (高增周期股PE天生高, 如PE52可能实为板块最便宜)。")
+    if forecast_sig:
+        lines.append("【业绩预告 (硬催化, 含公告日期 — 直接满足'催化日期硬要求')】")
+        ftype = forecast_sig.get("type", "?")
+        chg = forecast_sig.get("change_pct")
+        chg_str = f"{chg:+.0f}%" if isinstance(chg, (int, float)) else "未披露幅度"
+        dsn = forecast_sig.get("days_since_notice")
+        dsn_str = f" ({dsn}天前公告)" if dsn is not None else ""
+        lines.append(f"预告类型: {ftype} | 业绩变动幅度: {chg_str} | 公告日期: {forecast_sig.get('notice_date', '?')}{dsn_str}")
+        lines.append(f"业绩变动: {forecast_sig.get('summary', '?')}")
+        lines.append("带日期的硬催化: 预增/扭亏+近期公告 → surge 加速主升档强证据; 预减/续亏/增亏 → 失速风险。")
     return "\n\n" + "\n".join(lines) + "\n"
 
 
@@ -468,7 +533,8 @@ def _call(code):
     # surge price-in 锚定数据: 价格/动量 (K线) + 估值板块分位/PEG (Tushare)
     surge_sig = _compute_surge_signals(code)
     val_sig = _compute_valuation_signals(code)
-    surge_block = _render_surge_signals_block(surge_sig, val_sig)
+    forecast_sig = _compute_forecast_signals(code)
+    surge_block = _render_surge_signals_block(surge_sig, val_sig, forecast_sig)
     # chain 信号: chain_tier_map + 世界知识 + fundamentals JSON(含异动回流) + surge 锚定段
     prompt = get_chain_prompt() + wk_section + sj[:8000] + surge_block
     # 解析失败也重试 (并发下 GLM 偶发返回畸形/截断响应, 非空但解析失败;
@@ -512,9 +578,9 @@ def needs_run(entry):
     chain_date = entry.get("chain_scored_date", "")
     surge_date = entry.get("surge_scored_date", "")
 
-    if not chain_date or chain_date < cutoff:
+    if not chain_date or chain_date <= cutoff:
         return True, "chain过期"
-    if not surge_date or surge_date < cutoff:
+    if not surge_date or surge_date <= cutoff:
         return True, "surge过期"
 
     return False, ""

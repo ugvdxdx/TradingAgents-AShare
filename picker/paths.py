@@ -90,6 +90,7 @@ NEED_GENERATE_PATH = _cache("need_generate.json")
 V3_SNAPSHOT_DIR = os.path.join(CACHES_DIR, "v3_snapshots")
 V3_FULL_BACKTEST_PATH = _cache("v3_full_backtest.json")
 BACKTEST_CORRELATION_PATH = _cache("backtest_correlation.json")
+FORECAST_CACHE = _cache("earnings_forecast_cache.json")  # 业绩预告缓存(每日刷新, surge催化源)
 
 # 旧名兼容: 部分模块用 LLM_CACHE_FILE 变量名
 LLM_CACHE_FILE = FUNDAMENTAL_LLM_SCORES_PATH

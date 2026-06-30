@@ -178,6 +178,21 @@ def step2d_movement_analysis():
     return result.get("searched", 0) > 0 or result.get("skipped", 0) > 0
 
 
+def step2e_fetch_forecast():
+    """Step 2.8: 业绩预告拉取 — akshare 拉近期预告写缓存, 供 v3 surge 催化判断。
+
+    业绩预告带公告日期+预增幅度, 是 surge 最强 30 天催化(满足"催化日期硬要求")。
+    必须在 step9 rescore 前跑 (评分时 _call 读缓存注入 surge_block)。
+    """
+    print('\n' + '=' * 60)
+    print('Step 2.8: 业绩预告拉取 (预填 forecast 缓存)')
+    print('=' * 60)
+
+    from picker.data.forecast_fetcher import precompute_pool_forecast
+    result = precompute_pool_forecast()
+    return result.get("n_records", 0) > 0
+
+
 def step2b_discover_gap(v3_threshold: float = 8.0):
     """Step 2.5: 板块缺口发现 — 研报热但池未覆盖的主题, web search 找股入池。
 
@@ -432,6 +447,7 @@ def main():
     parser.add_argument('--skip-discovery', action='store_true', help='跳过板块缺口发现 (step2.5)')
     parser.add_argument('--skip-movement', action='store_true', help='跳过异动分析 (step2.7)')
     parser.add_argument('--skip-chain-tiers', action='store_true', help='跳过 chain tier_map 更新 (step2.6)')
+    parser.add_argument('--skip-forecast', action='store_true', help='跳过业绩预告拉取 (step2.8)')
     parser.add_argument('--chain-tiers-mode', dest='chain_tiers_mode', default='auto',
                         choices=['manual', 'auto'],
                         help='chain tier 更新模式: manual=只输出diff不写 / auto=diff有变化即写入(归档可回滚, 默认)')
@@ -536,7 +552,15 @@ def main():
                 import traceback
                 traceback.print_exc()
                 results['2.6'] = False
-                results['2.5'] = False
+        # Step 2.8: 业绩预告拉取 (chain_tiers 后, step3/step9 评分前 — forecast 是 surge 催化输入)
+        if not args.skip_forecast and step in (0,):
+            try:
+                results['2.8'] = step2e_fetch_forecast()
+            except Exception as e:
+                print(f'\n✗ Step 2.8 异常: {type(e).__name__}: {e}')
+                import traceback
+                traceback.print_exc()
+                results['2.8'] = False
         _run(3, step3_refresh_fundamentals, date_from, args.dry_run, args.workers)
 
     # ── 收集数据采集子进程结果 (研报跑完后join) ──

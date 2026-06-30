@@ -47,7 +47,7 @@ from picker import paths
 
 
 # Web Search 下沉到 picker.common.web_search (re-export 保持向后兼容)
-from picker.common.web_search import _web_search, _ZHIPU_LIMITER  # noqa: F401
+from picker.common.web_search import _web_search, _ZHIPU_LIMITER, _is_rate_limited, _rate_limit_wait  # noqa: F401
 
 
 # ═══════════════════════════════════════════════════════════
@@ -640,12 +640,8 @@ def refresh_one(code: str, world_knowledge: str = "",
             status = _trigger_v3_rescore(code, new_data)
             if status == "ok":
                 print(f"    ✓ V3 已重评")
-            elif status == "empty":
-                print(f"    ⚠ V3 未重评: LLM 返回空 (可能 429 限流/瞬时故障, 旧分保留)")
-            elif status == "parse_fail":
-                print(f"    ⚠ V3 未重评: 解析失败 (LLM 返回缺 chain/surge 字段或畸形, 旧分保留)")
             else:
-                print(f"    ⚠ V3 未重评: {status}")
+                print(f"    ⚠ V3 未重评: _call 失败 (LLM 空/解析失败/重试耗尽, 旧分保留)")
         except Exception as e:
             print(f"    ⚠ V3 重评失败: {e}")
 
@@ -653,35 +649,25 @@ def refresh_one(code: str, world_knowledge: str = "",
 
 
 def _trigger_v3_rescore(code: str, fund_data: dict):
-    """触发单只股票的 V3 评分更新（链式调用 v3_full_score）。
+    """触发单只股票的 V3 评分更新 — 统一走 v3._call 链路 (与 step9 全量重评完全一致)。
 
-    返回状态字符串供调用方如实报告 (旧实现早返回时静默 None, 调用方无法区分成功/空转,
-    曾导致 LLM 空响应/解析失败时仍误打"✓ V3 已重评"):
-      "ok" 写入成功 / "empty" LLM 返回空 (常 429 限流耗尽重试/瞬时故障) /
-      "parse_fail" 有内容但缺 chain/surge 字段或畸形解析失败
+    _call 含完整 prompt: get_chain_prompt(新 tier_map 档位) + 世界知识 + surge_block
+    (业绩预告 forecast + 价格/动量/估值锚定) + fundamentals。统一链路确保 refresh 触发的
+    重评与全量 rescore 质量一致 (都带今天的优化: 新档位 + forecast + 锚定), 不再有简化版
+    surge 漏掉 forecast/锚定的 gap。fund_data 参数保留兼容 (refresh_one 传入), 实际 _call
+    内部 _build_stock_json(code) 读刚写入的 fundamentals JSON (refresh_one 第5步已写盘)。
+
+    Returns: "ok" 写入成功 / "fail" _call 失败(LLM 空/解析失败/重试耗尽, 旧分保留)。
     """
     from picker.scoring import v3_full_score as v3
 
-    prompt = v3.get_chain_prompt() + "\n" + json.dumps(fund_data, ensure_ascii=False, indent=2)
-    # 解析失败也重试 (与 v3._call 同: GLM 偶发返回畸形/截断响应, 串行重跑通常成功)
-    result = None
-    last_content = ""
-    for _attempt in range(3):
-        _ZHIPU_LIMITER.acquire()  # 每次重试都限速, 避免爆发连累全局
-        content = v3._llm(prompt)
-        if not content:
-            continue
-        last_content = content
-        result = v3._parse(content)
-        if result:
-            break
+    # 统一链路: 走 _call (与 step9 一致, _call 内部已重试3次)
+    _ZHIPU_LIMITER.acquire()  # 限进入频率 (v3._llm 不自带限速, 与旧版一致避免爆发)
+    _code, result, _elapsed = v3._call(code)
     if not result:
-        if last_content:
-            print(f"    [diag] V3 解析失败(重试3次), LLM 原始返回前 120 字: {last_content[:120]!r}")
-            return "parse_fail"
-        return "empty"
+        return "fail"  # _call 重试耗尽 (LLM 空/解析失败), 旧分保留
 
-    # 写入 V3_CACHE（全局锁 + 原子写：写 .tmp 再 rename，防多线程并发损坏文件）
+    # 写入 V3_CACHE (全局锁 + 原子写), 保留旧 capital (G 量化值, 不被 LLM 占位覆盖)
     with _V3_LOCK:
         cache = {}
         if os.path.exists(v3.V3_CACHE):

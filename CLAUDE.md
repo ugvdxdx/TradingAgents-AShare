@@ -11,12 +11,13 @@
 2. 阶段二（每日）：量化锚排序选股（`picker/pipeline/debate_picker_v5.py`）— LangGraph 4 节点纯量化基线：collect_data(全池采集) → quantum_rank(锚分排序取TOP5) → risk_review(可信度) → report_render(报告+🎯策略信号)。零 LLM 调用（回测证明 LLM 从头排序为负相关 -0.14，破坏量化信号）。三分析师+增量信息节点暂未接入，待优化。
 
 **核心机制**：
-- **chain 赛道热度×竞争力**（`picker/scoring/chain_tiers.py`）：chain=赛道热度(theme级)×个股竞争力，6档可重叠热度带(热主线→高档/退潮→低档)；档位映射外部化为 `chain_tier_map.json`，每日用最新研报动态更新(manual/auto)，注入评分 prompt
+- **chain 赛道热度×竞争力**（`picker/scoring/chain_tiers.py`）：chain=赛道热度(theme级)×个股竞争力，6档可重叠热度带(热主线→高档/退潮→低档)；档位映射外部化为 `chain_tier_map.json`，每日动态更新(manual/auto)；档位更新融合 **6类信号**(研报板块动量+异动归因+缺口发现+世界知识+**板块量价动量**`_compute_sector_price_momentum`+**板块主力资金流**`_fetch_sector_fund_flow`)，**价格硬信号(量价+资金流)优先于研报count**(冲突仲裁)，注入评分 prompt
 - **新晋股发现**（`picker/discovery/scan_mispriced.py`）：量价扫描 + 板块扩散 + 冷股激活 + 冷门清理(热→冷) + 异动黑名单(概念炒作/错归因, 默认冷却30天)。归因(网络搜索+LLM分类)统一到 `picker/discovery/attribution.py`
 - **统一异动归因**（`picker/discovery/attribution.py`，2026-06 重构）：合并原 scan ATTR 与 v3 surge 两套归因为一套 — 双向(涨/跌)+结构化(REASON_TYPE/SECTOR_TAG/SUMMARY)+统一 schema+单一缓存(`mispriced_attribution_cache.json`, TTL 14天)。公共 LLM/web search 工具下沉 `picker/common/`。异动经 fundamentals JSON 单一载体回流评分，v3 评分不再 inline 注入
 - **板块缺口发现**（`picker/discovery/discover_sector_gap.py`）：研报热但池未覆盖的主题 → 智谱web search找股 → refresh_one 生成基本面+V3评分入池
 - **池子边界管理**（四操作闭环）：Step 2.5 缺口补充(加热) / Step 6 冷股激活(冷→热) / Step 6.5 冷门清理(热→冷) / 异动黑名单(概念炒作错归因, 30天冷却, scan/precompute/refresh三处拦截, 见 `picker/discovery/movement_blacklist.py`)
 - **capital 动态更新**（`picker/scoring/v3_full_score.py:update_capital`）：每次选股前用研报板块动量 + 个股量价(双窗口)重算 capital，纯量化 0 次 LLM
+- **业绩预告(surge 催化源)**（`picker/data/forecast_fetcher.py` + v3 `_compute_forecast_signals`）：akshare 东财 `stock_yjyg_em` 拉近60天预告→`earnings_forecast_cache.json`(每日 step2.8 刷新)，v3._call 注入 surge_block(公告日期+预增幅度+预告类型)，直接满足 surge"催化日期硬要求"。**只在 V3 评分读**(surge_block)，不进 fundamentals 文本(异动走 fundamentals 回流改长期叙事，业绩预告走 surge_block 短期催化时机，分流)
 - **冷股池**（`cold_fundamentals/`）：无催化股票冬眠，新晋股逻辑可激活
 
 **归档**：旧版脚本（`run_debate_picker.py`, `run_stock_picker.py` 等）已移入 `archive/`。
@@ -155,7 +156,7 @@ docs/                   # 设计文档
 | 层级 | 触发方式 | 模块 | 操作 | 成本 |
 |---|---|---|---|---|
 | **L0 每日量化** | 每日自动 | `v3_full_score.py:update_capital()` | 纯量价+板块动量重算 capital | 秒级，0 LLM |
-| **L1 研报触发** | 研报有新提及 | `refresh_fundamentals.py:refresh_one()` | Web+Tushare+研报 → LLM 完整重写 JSON + V3 重评 | ~30s/只 |
+| **L1 研报触发** | 研报有新提及 | `refresh_fundamentals.py:refresh_one()` | Web+Tushare+研报 → LLM 完整重写 JSON + V3 重评(`_trigger_v3_rescore` 统一走 `v3._call`，与 step9 同链路含 surge_block forecast+锚定) | ~30s/只 |
 | **L2 每交易日盘后全量** | 每交易日盘后(step9) | `v3_full_score.py:main()` | 全部 537 只重评 chain/surge/essence | ~10-25min/天 |
 | **L3 冷启动** | 手动/新入池 | `refresh_fundamentals.py:refresh_one(name_hint=...)` | 无现有 JSON 时用 hint 兜底生成新 JSON | 按需 |
 
@@ -182,6 +183,9 @@ uv run python3 picker/pipeline/run_daily_maintenance.py --chain-tiers-mode auto
 
 # 跳过依赖 web search 的步骤(异动+缺口发现) —— coding plan 搜索额度耗尽时用
 uv run python3 picker/pipeline/run_daily_maintenance.py --skip-movement --skip-discovery
+
+# 跳过业绩预告拉取(step2.8, akshare) —— 东财接口不稳/无需时用
+uv run python3 picker/pipeline/run_daily_maintenance.py --skip-forecast
 ```
 
 ### 更新链路
@@ -193,7 +197,8 @@ run_daily_maintenance.py (统一编排器)
   │   Step 2: 知识提取 (LLM)      │   │   资金流 (fetch_money_flow_all)
   │   Step 2.7: 异动归因 (web)    │   │   (两者带新鲜度预检, 已最新则跳过)
   │   Step 2.5: 板块缺口发现 (web)│   └────────────────────────────────
-  │   Step 2.6: chain 档位更新     │   ← 2.7异动+2.5缺口为tier提供信号, 故先跑
+  │   Step 2.6: chain 档位更新     │   ← 2.7异动+2.5缺口+量价+资金流为tier提供信号, 故先跑
+  │   Step 2.8: 业绩预告拉取       │   ← surge 催化源, step3/9 评分前就绪
   │   Step 3: 彻底刷新 (研报触发)  │
   │   Step 4: capital (纯量化)     │
   │   Step 6: 冷股激活 (冷→热)     │

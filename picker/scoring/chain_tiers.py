@@ -274,7 +274,8 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
                 sector = _current_sector(code)  # attribution 优先 (多主业股归当前驱动板块)
                 if not sector:
                     continue
-                df = _pk.load(open(p, "rb"))
+                with open(p, "rb") as _fp:
+                    df = _pk.load(_fp)
                 if df is None or len(df) < min_bars:
                     continue
                 df = df.sort_values("trade_date").reset_index(drop=True)
@@ -304,6 +305,44 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
     return out
 
 
+def _fetch_sector_fund_flow(indicator="5日", sector_type="行业资金流"):
+    """板块主力资金净流入排名 (akshare 东财 stock_sector_fund_flow_rank)。
+
+    与 _compute_sector_price_momentum 互补: 量价看涨幅(结果), 资金流看主力资金选择(先行)。
+    两条 price-confirmed 信号并列, 资金流往往领先涨幅捕捉赛道热度切换。
+    东财接口间歇 ConnectionError, 内置 3 次重试 + 退避。
+
+    Returns:
+        (hot_list, cold_list): 各为 '板块名 主力N日净流入=X亿' 字符串列表;
+        hot=净流入TOP8(资金涌入), cold=净流出BOT5(资金撤退); 失败返回 ([], [])。
+    """
+    import time
+    import pandas as pd
+    for attempt in range(3):
+        try:
+            import akshare as ak
+            df = ak.stock_sector_fund_flow_rank(indicator=indicator, sector_type=sector_type)
+            col = next((c for c in df.columns if "主力净流入-净额" in c), None)
+            if col is None:
+                return [], []  # 列名缺失(schema变), 重试无用
+            name_col = "名称" if "名称" in df.columns else df.columns[1]
+            df = df[[name_col, col]].copy()
+            df.columns = ["名称", "净额"]
+            df["净额"] = pd.to_numeric(df["净额"], errors="coerce")
+            df = df.dropna(subset=["净额"])
+            hot = df.nlargest(8, "净额")
+            cold = df.nsmallest(5, "净额")
+            fmt = lambda d: [f"{r['名称']} 主力{indicator}净流入={r['净额'] / 1e8:+.1f}亿"
+                             for _, r in d.iterrows()]
+            return fmt(hot), fmt(cold)
+        except Exception:
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            return [], []
+    return [], []
+
+
 def _gather_research_signals(days=14):
     """从 research.db + 异动分析 + 世界知识 汇总最新主线信号, 供 LLM 调整 tier_map。
 
@@ -323,7 +362,8 @@ def _gather_research_signals(days=14):
            "top_viewpoints": [], "world_knowledge_theme": "",
            "price_confirmed_hot": [], "price_confirmed_cold": [],
            "gap_themes": [],
-           "sector_price_momentum_hot": [], "sector_price_momentum_cold": []}
+           "sector_price_momentum_hot": [], "sector_price_momentum_cold": [],
+           "sector_fund_flow_hot": [], "sector_fund_flow_cold": []}
 
     # 研报板块动量 (复用 consumer 的聚合)
     try:
@@ -413,6 +453,14 @@ def _gather_research_signals(days=14):
     except Exception:
         pass
 
+    # 板块主力资金净流入 (与量价互补: 资金先行信号, 往往领先涨幅捕捉热度切换)
+    try:
+        ff_hot, ff_cold = _fetch_sector_fund_flow(indicator="5日")
+        out["sector_fund_flow_hot"] = ff_hot
+        out["sector_fund_flow_cold"] = ff_cold
+    except Exception:
+        pass
+
     # 世界知识主线 (读首段/标题行)
     try:
         if os.path.exists(WORLD_KNOWLEDGE_MD):
@@ -480,6 +528,13 @@ def build_candidate_tier_map(days=14):
 实际下跌板块 (r20中位<0%, 资金撤退/见顶 → 倾向下移档位):
 {chr(10).join('- ' + v for v in signals['sector_price_momentum_cold']) if signals['sector_price_momentum_cold'] else '(暂无)'}
 
+## 💰 板块主力资金流 (5日净流入 — 资金正在选的方向, 与量价并列的 price-confirmed 双验证)
+主力持续净流入板块 (资金涌入 → 倾向上移档位):
+{chr(10).join('- ' + v for v in signals['sector_fund_flow_hot']) if signals['sector_fund_flow_hot'] else '(暂无)'}
+主力持续净流出板块 (资金撤退 → 倾向下移档位):
+{chr(10).join('- ' + v for v in signals['sector_fund_flow_cold']) if signals['sector_fund_flow_cold'] else '(暂无)'}
+注意: 东财分类有大类(电子/通信)与细分(半导体设备)混排, 细分信号更精准, 优先采信细分。
+
 ## 🔍 缺口发现信号 (热门但池未覆盖的主题 — 新兴赛道, 应加入tier_map对应热度档)
 {', '.join(signals['gap_themes']) if signals['gap_themes'] else '(暂无缺口数据)'}
 
@@ -492,6 +547,7 @@ def build_candidate_tier_map(days=14):
 3. 热度变化才移动: 赛道升温(冷→温/温→热)或降温才调档, 给出热度依据
 3.5. **量价验证(板块r20中位)**: 板块近20日实际涨幅中位 >+15% → 倾向上移一档; <0% → 下移。这是资金真实选择的硬信号
 3.6. **冲突仲裁(价格>研报count)**: 研报bullish密集但板块r20为负=资金撤退/见顶风险→优先信价格,下移到1-2档; 研报未提但板块r20显著正=资金先行研报滞后→可按价格归中高档
+3.7. **资金流验证(主力5日净流入)**: 板块主力持续净流入→上移; 持续净流出→下移。与量价冲突时资金流更前瞻(资金先行于涨幅); 量价+资金流双走弱=明确退潮,果断下移
 4. theme 一句话当前主线; theme_strength = 绝对主线(单一主线碾压)/主线(主导有副线)/多线均衡(无单一主线)
 5. sectors 用具体细分名 (如"1.6T光模块"非"光通信"); criteria 简述热度+龙头定位依据
 

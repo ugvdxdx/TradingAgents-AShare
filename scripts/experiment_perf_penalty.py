@@ -128,7 +128,7 @@ def main():
             if capital is None:
                 continue
             v = V3[code]
-            anchor = v.get("chain", 0) + capital * 2 - v.get("surge", 0) * 0.5
+            anchor = v.get("chain", 0) + capital * 2 + v.get("surge", 0)
             sd[code] = anchor
         base_anchors[cutoff] = sd
         if ci % 40 == 0:
