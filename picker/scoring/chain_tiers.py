@@ -259,10 +259,20 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
     import glob as _glob
     import statistics as _st
     try:
-        from picker.paths import KLINE_CACHE_DIR
+        from picker.paths import KLINE_CACHE_DIR, FUNDAMENTALS_DIR, COLD_FUNDAMENTALS_DIR
         from picker.scoring.v3_full_score import _current_sector
     except Exception:
         return []
+
+    # 底池 = fundamentals(热) ∪ cold_fundamentals(冷), 与异动判定 (attribution.
+    # _list_all_fundamental_codes) 对齐。旧逻辑 glob 全量 pkl(含退池残留股),
+    # 会用过期/无关数据污染板块中位数 → chain tier 档位误判。
+    pool_codes = set()
+    for _d in (FUNDAMENTALS_DIR, COLD_FUNDAMENTALS_DIR):
+        if os.path.isdir(_d):
+            for _f in os.listdir(_d):
+                if _f.endswith(".json"):
+                    pool_codes.add(_f[:-5])
 
     min_bars = days + 1
     sector_r20: Dict[str, list] = {}
@@ -271,6 +281,8 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
         for p in _glob.glob(os.path.join(KLINE_CACHE_DIR, f"*{suffix_pat}")):
             try:
                 code = os.path.basename(p).replace(suffix_pat, "")
+                if code not in pool_codes:  # 仅算热+冷底池内的股票
+                    continue
                 sector = _current_sector(code)  # attribution 优先 (多主业股归当前驱动板块)
                 if not sector:
                     continue
@@ -302,6 +314,33 @@ def _compute_sector_price_momentum(days=20, cutoff_date=""):
             "n_stocks": len(v20),
         })
     out.sort(key=lambda x: -x["r20_median"])
+
+    # 横截面排名 + 动量状态 + 市场宽度 (解决"只看r20绝对值、普涨失真、热度切换慢")
+    if out:
+        import bisect
+        sorted_r20 = sorted(s["r20_median"] for s in out)
+        sorted_r5 = sorted(s["r5_median"] for s in out)
+        n_sec = len(out)
+        market_r20_median = round(_st.median(sorted_r20), 1)  # 全市场板块r20中位的中位 (市场宽度)
+        for s in out:
+            # 百分位 (0-100, 100=最热): 该板块 r20/r5 在全板块里的排名
+            s["r20_pct"] = round(bisect.bisect_left(sorted_r20, s["r20_median"]) / n_sec * 100)
+            s["r5_pct"] = round(bisect.bisect_left(sorted_r5, s["r5_median"]) / n_sec * 100)
+            s["market_r20_median"] = market_r20_median
+            # 动量状态 (双窗口见顶检测, 复用个股 _compute_surge_signals 的 momentum_state 范式)
+            r20, r5 = s["r20_median"], s["r5_median"]
+            if r20 > 15 and r5 < 0:
+                s["momentum_state"] = "top_reversal"      # 高位回落 (最重要信号: r20高但近5日转跌)
+            elif r20 > 0 and r5 > r20:
+                s["momentum_state"] = "accelerating"      # 涨幅加速 (r5 > r20)
+            elif r20 > 15 and 0 < r5 < r20 * 0.3:
+                s["momentum_state"] = "decelerating"      # 涨幅趋缓
+            elif r20 > 15 and r5 >= r20 * 0.3:
+                s["momentum_state"] = "strong"            # 强势平稳
+            elif r20 < 0 and r5 < 0:
+                s["momentum_state"] = "weak"              # 退潮
+            else:
+                s["momentum_state"] = "flat"              # 其他
     return out
 
 
@@ -437,19 +476,25 @@ def _gather_research_signals(days=14):
     except Exception:
         pass
 
-    # 板块量价动量 (price-confirmed 热度: 各板块近20日实际涨幅中位数)
-    # 弥补研报 bullish count 滞后 + 爆发异动漏判"温和持续上涨"的缺陷
+    # 板块量价动量 (price-confirmed 热度: 各板块近20日实际涨幅中位数 + 横截面排名 + 动量状态)
+    # 弥补研报 bullish count 滞后 + r20绝对阈值在普涨/普跌时失真 + 热度切换反应慢
     try:
         spm = _compute_sector_price_momentum(days=20)
         if spm:
-            out["sector_price_momentum_hot"] = [
-                f"{s['sector']} r20={s['r20_median']}% r5={s['r5_median']}% n={s['n_stocks']}"
-                for s in spm[:8] if s["r20_median"] > 5
-            ]
-            out["sector_price_momentum_cold"] = [
-                f"{s['sector']} r20={s['r20_median']}% r5={s['r5_median']}% n={s['n_stocks']}"
-                for s in spm[-5:] if s["r20_median"] < 0
-            ]
+            mkt = spm[0].get("market_r20_median", 0)
+            out["market_r20_median"] = mkt  # 市场宽度 (普涨mkt>10%/普跌mkt<0%)
+            fmt = lambda s: (f"{s['sector']} r20={s['r20_median']}% r5={s['r5_median']}% "
+                             f"[排名 r20={s.get('r20_pct','?')}% r5={s.get('r5_pct','?')}%] "
+                             f"动量={s.get('momentum_state','?')} n={s['n_stocks']}")
+            # hot: r20强 OR r5爆发(刚启动) OR 加速 — 捕捉短期热度切换, 非只看r20绝对值
+            hot = [s for s in spm
+                   if s["r20_median"] > 5 or s.get("r5_median", 0) > 8
+                   or s.get("momentum_state") == "accelerating"]
+            out["sector_price_momentum_hot"] = [fmt(s) for s in hot[:8]]
+            # cold: r20负 OR 见顶回落(top_reversal: r20高但r5转负=资金撤退风险)
+            cold = [s for s in spm
+                    if s["r20_median"] < 0 or s.get("momentum_state") == "top_reversal"]
+            out["sector_price_momentum_cold"] = [fmt(s) for s in cold[:8]]
     except Exception:
         pass
 
@@ -475,6 +520,35 @@ def _gather_research_signals(days=14):
     return out
 
 
+def _normalize_sector_name(name: str) -> str:
+    """归一化赛道名为主干 (去括注/空格/标点/大小写), 用于稳定性比对。
+
+    只保留括号前的主干, 使"先进封装核心(玻璃基板)"与"(直写光刻)"判定为同名,
+    从而检测出 LLM 改括注但主干未变的伪变更。
+    """
+    import re
+    n = re.split(r'[（(]', name)[0]
+    return re.sub(r'[\s/、,，;；:：\-_.()（）]+', '', n).lower()
+
+
+def _check_sector_stability(candidate: dict, current: Optional[dict],
+                            min_overlap: float = 0.5) -> bool:
+    """校验候选 tier_map 赛道名稳定性: 归一化主干重叠率不低于阈值。
+
+    防 LLM 每次全量重写时擅改赛道名(改括注/缩写/扩写), 导致行业标签日级抖动。
+    允许新增赛道(新主题), 但延续赛道的主干必须保持; 重叠率 < min_overlap 判不稳定。
+    """
+    if not current:
+        return True
+    old = {_normalize_sector_name(s) for t in current.get("tiers", [])
+           for s in (t.get("sectors") or [])}
+    new = {_normalize_sector_name(s) for t in candidate.get("tiers", [])
+           for s in (t.get("sectors") or [])}
+    if not old:
+        return True
+    return len(new & old) / len(old) >= min_overlap
+
+
 def build_candidate_tier_map(days=14):
     """LLM 根据最新研报, 生成候选 tier_map (6档热度骨架, 档间可重叠)。
 
@@ -490,6 +564,9 @@ def build_candidate_tier_map(days=14):
 
     signals = _gather_research_signals(days=days)
     ranges = ", ".join(_TIER_SKELETON_RANGES)
+    # 提取当前所有赛道名, prompt 锁定用 (防 LLM 每次改名致标签抖动)
+    _cur_sectors = [s for t in current.get("tiers", []) for s in (t.get("sectors") or [])]
+    _locked_sectors = "\n".join(f"  {i+1}. {s}" for i, s in enumerate(_cur_sectors)) or "  (无历史)"
 
     prompt = f"""你是A股量化研究员, 为"预测股票收益"维护 chain 分档(赛道→热度档映射)。
 
@@ -522,10 +599,12 @@ def build_candidate_tier_map(days=14):
 实际下跌股 + 原因 (这些主题价格走弱, 可能降温):
 {chr(10).join('- ' + v for v in signals['price_confirmed_cold']) if signals['price_confirmed_cold'] else '(暂无)'}
 
-## 📊 板块量价动量 (price-confirmed — 各板块近20日实际涨幅中位数, 比研报count更硬的热度验证)
-实际涨幅领先板块 (r20中位>5%, 资金持续涌入 → 倾向上移档位):
+## 📊 板块量价动量 (price-confirmed — 各板块近20日实际涨幅中位数 + 横截面排名 + 动量状态)
+市场宽度: 全市场板块r20中位的中位 = {signals.get('market_r20_median', '?')}% (普涨>10%时用排名区分主线, 普跌<0%同理)
+排名=该板块r20/r5在全板块里的百分位(0-100, 100=最热); 动量: strong强势/accelerating加速/decelerating趋缓/top_reversal见顶回落/weak退潮
+实际热度领先板块 (r20强 或 r5爆发 或 加速 → 倾向上移档位):
 {chr(10).join('- ' + v for v in signals['sector_price_momentum_hot']) if signals['sector_price_momentum_hot'] else '(暂无)'}
-实际下跌板块 (r20中位<0%, 资金撤退/见顶 → 倾向下移档位):
+实际走弱/见顶板块 (r20负 或 top_reversal见顶 → 倾向下移档位):
 {chr(10).join('- ' + v for v in signals['sector_price_momentum_cold']) if signals['sector_price_momentum_cold'] else '(暂无)'}
 
 ## 💰 板块主力资金流 (5日净流入 — 资金正在选的方向, 与量价并列的 price-confirmed 双验证)
@@ -541,13 +620,29 @@ def build_candidate_tier_map(days=14):
 ## 世界知识主线
 {signals['world_knowledge_theme'][:600]}
 
+## ⚠ 赛道名锁定 (稳定性约束 — 极其重要)
+当前 tier_map 已有以下赛道, 必须【原样复用】, 一字不改:
+{_locked_sectors}
+
+只能做三件事:
+1. 移动赛道到不同档位 (需引用量价/资金流信号依据)
+2. 新增赛道 (仅当缺口发现/异动归因出现明确新主题)
+3. 删除赛道 (仅当彻底退潮且池中无代表性个股)
+禁止: 改名/缩写/扩写/调括注措辞/重新拆分合并。
+括注内子赛道描述也保持原样; 确有变化在 criteria 说明, 不改 sectors 名。
+
 ## 调整规则 (按【热度】归档, 非产业链位置)
 1. 6档 ranges/labels 不变 (热度带, 档间重叠是有意的)
 2. 赛道按【当前热度】归入对应带: 热主线→8.5-10/7-9带; 新升温主题(如金刚石散热/PCIe Retimer)→5.5-7.5温热带(够热就别压低); 中性→3.5-5.5; 退潮→0-2.5
 3. 热度变化才移动: 赛道升温(冷→温/温→热)或降温才调档, 给出热度依据
-3.5. **量价验证(板块r20中位)**: 板块近20日实际涨幅中位 >+15% → 倾向上移一档; <0% → 下移。这是资金真实选择的硬信号
-3.6. **冲突仲裁(价格>研报count)**: 研报bullish密集但板块r20为负=资金撤退/见顶风险→优先信价格,下移到1-2档; 研报未提但板块r20显著正=资金先行研报滞后→可按价格归中高档
+3.5. **量价验证(双窗口+排名+见顶检测)** — 用排名(r20_pct/r5_pct)而非绝对值定档, 解决普涨/普跌时绝对阈值失效:
+   - 主升: r20_pct>70 且 r5>0 → 上移档位
+   - 见顶回落(重要): r20_pct>70 但 r5<0 或 动量=top_reversal (板块r20高但近5日转跌=资金撤退) → 不上移, 已在高档则下移一档
+   - 加速启动: r5_pct>80 且 r20_pct<50 (短期爆发但中期还没起来) → 倾向上移 (捕捉刚启动的赛道)
+   - 退潮: r20_pct<20 且 r5_pct<20 → 下移
+3.6. **冲突仲裁(价格>研报count)**: 研报bullish密集但 动量=top_reversal 或 r5_pct<30 =资金撤退/见顶风险→优先信价格,下移; 研报未提但 r5_pct>80=资金先行研报滞后→可按价格归中高档
 3.7. **资金流验证(主力5日净流入)**: 板块主力持续净流入→上移; 持续净流出→下移。与量价冲突时资金流更前瞻(资金先行于涨幅); 量价+资金流双走弱=明确退潮,果断下移
+3.8. **市场宽度**: 全市场板块r20中位的中位 = {signals.get('market_r20_median', '?')}%。普涨(>10%)时必须用 r20_pct/r5_pct 排名区分主线, 不能只看r20绝对值(普涨时都>15%等于没阈值); 普跌(<0%)同理
 4. theme 一句话当前主线; theme_strength = 绝对主线(单一主线碾压)/主线(主导有副线)/多线均衡(无单一主线)
 5. sectors 用具体细分名 (如"1.6T光模块"非"光通信"); criteria 简述热度+龙头定位依据
 
@@ -555,11 +650,13 @@ def build_candidate_tier_map(days=14):
 输出完整 tier_map JSON: 最外层 theme/theme_strength/tiers, tiers 6个元素含 range/label/sectors/criteria。range 严格按顺序: {ranges}。"""
     # tier_map JSON 较大 + GLM 推理开销, 用 4096 防截断
     # 解析/骨架失败也重试 (GLM 偶发返回空/推理前缀/截断/擅改骨架, 串行重跑通常成功 — 与 v3._call 同范式)
+    # 首次 4096; 失败重试升级到 8192 (GLM 推理偶发占满 token 致 JSON 截断, 加大配额兜底)
     import re
     candidate = None
     last_raw = ""
     for _attempt in range(3):
-        raw = _llm(prompt, max_tokens=4096)
+        max_tok = 4096 if _attempt == 0 else 8192
+        raw = _llm(prompt, max_tokens=max_tok)
         if not raw:
             continue
         last_raw = raw
@@ -581,6 +678,9 @@ def build_candidate_tier_map(days=14):
         if cand_ranges != _TIER_SKELETON_RANGES:
             continue
         if not cand.get("theme") or not cand.get("tiers"):
+            continue
+        # 校验: 赛道名稳定性 (归一化主干重叠率, 防 LLM 擅改赛道名致标签抖动)
+        if not _check_sector_stability(cand, current):
             continue
         candidate = cand
         break

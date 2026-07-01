@@ -44,6 +44,8 @@ from picker import paths
 KLINE_DIR = paths.KLINE_CACHE_DIR
 # 失败率超过此阈值 → 退出码 1 (编排脚本据此判定 K线刷新失败, 终止选股)
 FAIL_RATE_THRESHOLD = 0.10
+# 每只热股至少保留的交易日天数 (用户要求: 至少存 30 个交易日)
+MIN_KLINE_DAYS = 30
 
 
 def _kline_path(code: str) -> str:
@@ -114,16 +116,22 @@ def detect_latest_trade_date(tf, reference_code: str = "000001", count: int = 10
 
 
 def get_hot_codes():
-    """热股池 = fundamentals/ 目录下所有股 (唯一真相源)。
+    """K线更新底池 = fundamentals/ (热股) ∪ cold_fundamentals/ (冷股)。
 
-    以 fundamentals/ 为准, 不再用 V3池 ∩ fundamentals: 刚进 fundamentals 但还没评
-    V3 的新股每天也要检测并补齐 K线 (用户要求: fundamentals 文件夹中才是全部热股)。
-    新股 (无 pkl) 会被 update_one 拉 count 根 (默认90 ≈ 4.5个月, 超过近两个月要求)。
+    与异动判定底池对齐 (attribution._list_all_fundamental_codes 同样读这两个目录):
+    冷股池里的股票一旦大涨触发 r20 异动会被识别 → 冷股激活(冷→热), 但若它的 K线
+    过期, r20 算出来是旧的 → 异动漏判、激活失准。故冷股池也必须每天刷新 K线。
+
+    Returns:
+        sorted [code, ...] 去重列表 (热+冷并集)。
     """
-    fdir = paths.FUNDAMENTALS_DIR
-    if not os.path.isdir(fdir):
-        return []
-    return sorted(f[:-5] for f in os.listdir(fdir) if f.endswith(".json"))
+    codes = set()
+    for fdir in (paths.FUNDAMENTALS_DIR, paths.COLD_FUNDAMENTALS_DIR):
+        if os.path.isdir(fdir):
+            for f in os.listdir(fdir):
+                if f.endswith(".json"):
+                    codes.add(f[:-5])
+    return sorted(codes)
 
 
 def update_one(code: str, ref_latest: str, count: int, tf) -> str:
@@ -135,14 +143,20 @@ def update_one(code: str, ref_latest: str, count: int, tf) -> str:
     """
     old = _load_existing(code)
     old_latest = _latest_date(old)
+    old_len = len(old) if old is not None else 0
 
-    # 已是最新 (>= 参考股最新日) → 跳过
-    if ref_latest and old_latest and old_latest >= ref_latest:
+    # 跳过条件: 最新日达标 且 数据深度>=30天 (用户要求: 至少存 30 个交易日)。
+    # 仅最新日达标但深度不足 → 仍触发拉取 (用更大 count 补齐历史)。
+    if ref_latest and old_latest and old_latest >= ref_latest and old_len >= MIN_KLINE_DAYS:
         return "uptodate"
+
+    # 拉取根数自适应: 数据严重不足 (<MIN_KLINE_DAYS) 时加大 count, 确保补齐到 >=30 天。
+    # 默认 count=90 约4.5个月; 不足时取 max(count, 60) 保证一次性补够。
+    need = max(count, MIN_KLINE_DAYS + 10) if old_len < MIN_KLINE_DAYS else count
 
     sym = _sym(code)
     try:
-        dfs = tf.klines.batch([sym], period="1d", count=count, as_dataframe=True)
+        dfs = tf.klines.batch([sym], period="1d", count=need, as_dataframe=True)
         new = dfs.get(sym)
         if new is None or len(new) == 0:
             return "fail:空数据"
@@ -152,7 +166,6 @@ def update_one(code: str, ref_latest: str, count: int, tf) -> str:
     merged = _merge(old, new)
     p = _kline_path(code)
     merged.to_pickle(p)
-    old_len = len(old) if old is not None else 0
     return f"done:{old_latest or '无'}→{_latest_date(merged)} ({old_len}→{len(merged)})"
 
 
@@ -225,6 +238,19 @@ def main():
         print("  失败明细 (前10):")
         for code, msg in fail_details:
             print(f"    {code}: {msg}")
+
+    # 数据深度校验: 统计仍 <30 个交易日的热股 (用户要求底线)
+    short_codes = []
+    for code in codes:
+        df = _load_existing(code)
+        if df is None or len(df) < MIN_KLINE_DAYS:
+            short_codes.append((code, len(df) if df is not None else 0))
+    if short_codes:
+        print(f"  ⚠ 仍有 {len(short_codes)} 只热股 K线 < {MIN_KLINE_DAYS} 天:")
+        for code, n in short_codes[:10]:
+            print(f"    {code}: {n} 天")
+    else:
+        print(f"  ✓ 全部热股 K线 >= {MIN_KLINE_DAYS} 天")
 
     # 退出码: 失败率 > 阈值 → 1 (编排脚本据此终止选股)
     if fail_rate > FAIL_RATE_THRESHOLD:

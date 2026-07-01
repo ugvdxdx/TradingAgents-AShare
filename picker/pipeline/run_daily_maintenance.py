@@ -289,7 +289,7 @@ def step7_update_klines():
 # ══════════════════════════════════════════════════════════
 
 def _probe_latest_trade_date():
-    """探测最新交易日 (建 mootdx 连接, 拉参考股000001)。失败返回 ''。"""
+    """探测最新交易日 (建 tickflow 连接, 拉参考股000001)。失败返回 ''。"""
     try:
         from tickflow import TickFlow
         from picker.pipeline.update_klines_daily import detect_latest_trade_date
@@ -300,33 +300,119 @@ def _probe_latest_trade_date():
         return ''
 
 
-def _klines_cache_latest():
-    """K线缓存里参考股的最新交易日。"""
+# 抽样新鲜度判定所需最小数据天数 (用户要求: 至少存 30 个交易日)
+MIN_KLINE_DAYS = 30
+
+
+def _sample_hot_codes(n: int = 10):
+    """从 fundamentals 池随机抽 n 只热股 (固定种子, 可复现)。
+
+    只在 fundamentals 目录存在且有股时返回非空列表; 否则回退 ['000001']。
+    固定种子保证每次抽样相同 (便于复现问题), 但通过散列让样本覆盖面广。
+    """
+    import random
+    fdir = paths.FUNDAMENTALS_DIR
+    if not os.path.isdir(fdir):
+        return ['000001']
+    codes = sorted(f[:-5] for f in os.listdir(fdir) if f.endswith('.json'))
+    if not codes:
+        return ['000001']
+    if len(codes) <= n:
+        return codes
+    # 固定种子: 同一天多次运行抽样一致 (避免预检结果抖动); 样本经散列分散
+    rng = random.Random(20260630)
+    return rng.sample(codes, n)
+
+
+def _sample_pool_freshness(ref_latest: str, n: int = 10):
+    """抽样判断 K线/资金流全池新鲜度 (避免只看参考股 000001 的误判)。
+
+    从 fundamentals 池抽 n 只, 分别读它们 K线 pkl 和资金流 mf.pkl 的最新日,
+    全部 == ref_latest 才判 fresh (任一落后即 false)。同时统计数据不足(<30天)的只数。
+
+    Returns:
+        dict: {klines_fresh, mf_fresh, klines_short, klines_detail, klines_ref}
+              klines_short = 抽样里 K线行数 < MIN_KLINE_DAYS 的只数 (数据不足告警)
+              klines_detail = [(code, latest, rows), ...] 抽样明细 (供打印)
+    """
     import pickle
+    sample = _sample_hot_codes(n)
+
+    # 参考股 000001 的缓存日 (仅作对照打印, 不参与判定)
+    ref_cache = ''
     for suf in ['_SZ.pkl', '_SH.pkl']:
         p = os.path.join(paths.KLINE_CACHE_DIR, f'000001{suf}')
         if os.path.exists(p):
             try:
                 df = pickle.load(open(p, 'rb'))
-                return sorted(df['trade_date'].unique())[-1]
+                ref_cache = sorted(df['trade_date'].unique())[-1]
             except Exception:
                 pass
-    return ''
+            break
+
+    # 抽样读每只 K线
+    kl_detail = []
+    kl_short = 0
+    for code in sample:
+        latest, rows = '', 0
+        for suf in ['_SH.pkl', '_SZ.pkl']:
+            p = os.path.join(paths.KLINE_CACHE_DIR, f'{code}{suf}')
+            if os.path.exists(p):
+                try:
+                    df = pickle.load(open(p, 'rb'))
+                    if df is not None and 'trade_date' in df.columns and len(df) > 0:
+                        latest = str(df['trade_date'].max())
+                        rows = len(df)
+                except Exception:
+                    pass
+                break
+        kl_detail.append((code, latest, rows))
+        if rows < MIN_KLINE_DAYS:
+            kl_short += 1
+
+    # 抽样读每只 资金流 (mf.pkl 是 {code: [rows]}, 每行有 date 字段 YYYYMMDD)
+    mf_latest_set = []
+    mf_p = os.path.join(paths.MF_CACHE_DIR, 'mf.pkl')
+    mf_cache = {}
+    if os.path.exists(mf_p):
+        try:
+            mf_cache = pickle.load(open(mf_p, 'rb')) or {}
+        except Exception:
+            mf_cache = {}
+    for code in sample:
+        rows = mf_cache.get(code) or []
+        if rows and isinstance(rows, list):
+            mf_latest_set.append(str(rows[-1].get('date', '')))
+        else:
+            mf_latest_set.append('')
+
+    # 判定: 抽样全部最新日 == ref_latest (K线日期格式 YYYY-MM-DD; 资金流 YYYYMMDD)
+    kl_fresh = bool(ref_latest) and all(l == ref_latest for _, l, _ in kl_detail)
+    ref_mf = ref_latest.replace('-', '')  # 资金流用无连字符格式比对
+    mf_fresh = bool(ref_mf) and all(l == ref_mf for l in mf_latest_set)
+
+    return {'klines_fresh': kl_fresh, 'mf_fresh': mf_fresh,
+            'klines_short': kl_short, 'klines_detail': kl_detail,
+            'klines_ref': ref_cache}
 
 
 def check_data_freshness():
     """检测 K线/资金流是否已是最新交易日。返回 dict (True=已最新可跳过)。
 
-    探测最新交易日 (1次网络), 与缓存最新日比较。
+    抽样判定 (非只看参考股): 从 fundamentals 池抽 N 只, 全部最新日 == 探测的最新交易日
+    才判 fresh。任一抽样股落后即判 false → 触发更新。避免"参考股 000001 最新但全池落后"
+    的误判 (历史 bug: 2626/3380 只落后两周但预检永远判最新→子进程不启动)。
     """
     ref = _probe_latest_trade_date()
     if not ref:
         return {'latest_date': '?', 'klines_fresh': False, 'moneyflow_fresh': False}
-    kl_latest = _klines_cache_latest()
-    klines_fresh = bool(kl_latest) and kl_latest >= ref
-    # 资金流新鲜度: 与K线同一交易日, K线最新则资金流大概率也最新
-    return {'latest_date': ref, 'klines_cache': kl_latest, 'klines_fresh': klines_fresh,
-            'moneyflow_fresh': klines_fresh}  # 近似: 同周期更新
+    s = _sample_pool_freshness(ref, n=10)
+    return {'latest_date': ref,
+            'klines_cache': s['klines_ref'],          # 000001 参考日 (对照打印)
+            'klines_fresh': s['klines_fresh'],         # 抽样判定
+            'moneyflow_fresh': s['mf_fresh'],           # 资金流独立判定 (已解耦)
+            'klines_short': s['klines_short'],          # 数据不足只数
+            'klines_detail': s['klines_detail']}        # 抽样明细
 
 
 def _launch_data_subprocs(do_klines, do_moneyflow):
@@ -372,27 +458,20 @@ def run_data_collection(do_klines=True, do_moneyflow=True, fresh_check=True):
     print(f'数据采集: K线 + 资金流 {"(并行)" if do_klines and do_moneyflow else ""}')
     print('=' * 60)
 
-    # 新鲜度预检
-    skip_klines, skip_mf = False, False
+    # 新鲜度预检 (抽样判定, 非硬跳过)
     if fresh_check:
         f = check_data_freshness()
-        print(f'  最新交易日: {f["latest_date"]} | K线缓存: {f.get("klines_cache","?")}'
-              f' | K线{"✓最新" if f["klines_fresh"] else "✗落后"}'
-              f' | 资金流{"✓最新" if f["moneyflow_fresh"] else "✗落后"}')
-        if do_klines and f['klines_fresh']:
-            print('  → K线已是最新, 跳过')
-            skip_klines = True
-        if do_moneyflow and f['moneyflow_fresh']:
-            print('  → 资金流已是最新, 跳过 (近似判定; 脚本内部仍会逐只确认)')
-            # 资金流不硬跳过 (内部逐只skip更准), 仅提示; K线硬跳过
-    if skip_klines and skip_mf:
-        print('  全部已最新, 无需采集')
-        return {'K线': True, '资金流': True}
+        short = f.get('klines_short', 0)
+        print(f'  最新交易日: {f["latest_date"]} | 参考股000001: {f.get("klines_cache","?")}'
+              f' | K线(抽样){"✓最新" if f["klines_fresh"] else "✗落后"}'
+              f' | 资金流(抽样){"✓最新" if f["moneyflow_fresh"] else "✗落后"}'
+              + (f' | ⚠抽样{short}只<30天' if short else ''))
+        # K线/资金流均改为软跳过: 即使预判 fresh 也启动子进程, 由脚本内部逐只精确判断
+        # (update_one 有 old_latest>=ref 逐只跳过; 历史bug: 硬跳过致全池冻结两周)
+        if f['klines_fresh'] and f['moneyflow_fresh'] and not short:
+            print('  → 预检全最新, 仍启动子进程逐只确认 (软跳过, 防漏更新)')
 
-    procs = _launch_data_subprocs(
-        do_klines=do_klines and not skip_klines,
-        do_moneyflow=do_moneyflow,
-    )
+    procs = _launch_data_subprocs(do_klines=do_klines, do_moneyflow=do_moneyflow)
     return _collect_data_subprocs(procs)
 
 
@@ -511,12 +590,12 @@ def main():
         print('=' * 60)
         if args.fresh_check:
             f = check_data_freshness()
-            print(f'  最新交易日: {f["latest_date"]} | K线缓存: {f.get("klines_cache","?")} '
-                  f'| K线{"✓最新" if f["klines_fresh"] else "✗落后"}')
-            if do_klines and f['klines_fresh']:
-                print('  → K线已是最新, 跳过启动')
-                do_klines = False
-            # 资金流不硬跳过 (内部逐只skip更准)
+            short = f.get('klines_short', 0)
+            print(f'  最新交易日: {f["latest_date"]} | 参考股000001: {f.get("klines_cache","?")} '
+                  f'| K线(抽样){"✓最新" if f["klines_fresh"] else "✗落后"}'
+                  f' | 资金流(抽样){"✓最新" if f["moneyflow_fresh"] else "✗落后"}'
+                  + (f' | ⚠抽样{short}只<30天' if short else ''))
+            # K线/资金流均软跳过: 即使预判 fresh 也启动子进程, 由内部逐只判断兜底
         data_procs = _launch_data_subprocs(do_klines=do_klines, do_moneyflow=do_moneyflow)
 
     # ── 研报链路 (Step 1-3, 主进程; 与数据子进程并行) ──

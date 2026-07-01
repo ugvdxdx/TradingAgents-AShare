@@ -741,14 +741,18 @@ def _compute_surge_signals(code, cutoff_date=""):
 
 
 # D2 因子缓存 (G 模式用: 每次更新 capital 时预算一次, 避免逐股重复算行业中位)
-_D2_SECTOR_MEDIAN_CACHE: Dict[str, float] = {}
+# 存板块内所有个股 r20 的升序列表 (供 _compute_d2_factor 用 bisect 算个股分位);
+# 旧版只存中位数(median), 现升级为完整分布以支持板块内排名。
+_D2_SECTOR_R20_CACHE: Dict[str, list] = {}
 
 
 def _compute_d2_factor(code: str, cutoff_date="") -> float:
-    """D2 行业相对强度因子: 个股 r20 相对同行业中位数的偏离 → 0.6~1.3。
+    """D2 行业相对强度因子: 个股 r20 在同板块内的百分位 → 连续映射 0.6~1.3。
 
-    G 模式专用。回测验证: 结构性行情(主线明确)时, D2 能区分板块内领涨股。
-    实现简化: 用 _D2_SECTOR_MEDIAN_CACHE (由 update_capital 预算), 无缓存则返回 1.0。
+    G 模式专用。升级自旧"粗3档(0.85/1.0/1.15)": 用板块内完整分布算精确分位,
+    区分板块内领涨股更细腻 (领涨pct→1.3, 滞涨pct→0.6)。
+    实现用 _D2_SECTOR_R20_CACHE (由 update_capital 预算板块内 r20 升序列表),
+    无缓存则返回 1.0。
 
     Args:
         cutoff_date: 回测截止日。非空时截断 K线到该日再算 r20。
@@ -771,15 +775,14 @@ def _compute_d2_factor(code: str, cutoff_date="") -> float:
                     r20 = (close.iloc[-1] / close.iloc[-21] - 1) * 100
                     industry = _get_industry(code)
                     sector = _current_sector(code, industry)  # attribution 优先 (多主业股归当前驱动板块)
-                    sector_median = _D2_SECTOR_MEDIAN_CACHE.get(sector)
-                    if sector_median is None:
+                    sector_r20s = _D2_SECTOR_R20_CACHE.get(sector)
+                    if not sector_r20s:
                         return 1.0
-                    # r20 显著高于行业中位 → 强(>1.0), 显著低于 → 弱(<1.0)
-                    if r20 > sector_median + 15:
-                        return 1.15
-                    elif r20 < sector_median - 10:
-                        return 0.85
-                    return 1.0
+                    # 板块内分位 (0-100): 用 bisect 在升序列表上算个股 r20 的位置
+                    import bisect
+                    pct = bisect.bisect_left(sector_r20s, r20) / len(sector_r20s) * 100
+                    # 连续映射到 [0.6, 1.3]: pct=0→0.6, pct=50→0.95, pct=100→1.3
+                    return round(0.6 + pct / 100 * 0.7, 3)
         return 1.0
     except Exception:
         return 1.0
@@ -812,19 +815,33 @@ def _classify_sector(industry: str) -> str:
 
 
 def _build_d2_sector_median_cache(cutoff_date=""):
-    """预算所有板块的 r20 中位数 (G 模式: 每次 update_capital 调一次)。
+    """预算所有板块的 r20 分布 (G 模式: 每次 update_capital 调一次)。
+
+    存板块内所有个股 r20 的升序列表到 _D2_SECTOR_R20_CACHE, 供 _compute_d2_factor
+    用 bisect 算个股分位。底池 = fundamentals(热) ∪ cold_fundamentals(冷), 与
+    chain_tiers._compute_sector_price_momentum 对齐 (旧版 glob 全量含退池残留股,
+    会污染板块分布)。
 
     Args:
         cutoff_date: 回测截止日。非空时截断 K线到该日再算 r20。
     """
     import pickle as _pk
-    import statistics as _st
-    _D2_SECTOR_MEDIAN_CACHE.clear()
+    _D2_SECTOR_R20_CACHE.clear()
+    # 底池过滤: 只算热+冷池内的股票 (与异动判定/chain_tiers 量价动量对齐)
+    from picker.paths import FUNDAMENTALS_DIR, COLD_FUNDAMENTALS_DIR
+    pool_codes = set()
+    for _d in (FUNDAMENTALS_DIR, COLD_FUNDAMENTALS_DIR):
+        if os.path.isdir(_d):
+            for _f in os.listdir(_d):
+                if _f.endswith(".json"):
+                    pool_codes.add(_f[:-5])
     sector_r20s: Dict[str, list] = {}
     for suffix_pat in ["_SZ.pkl", "_SH.pkl"]:
         import glob as _glob
         for p in _glob.glob(os.path.join(KLINE_CACHE_DIR, f"*{suffix_pat}")):
             code = os.path.basename(p).replace(suffix_pat, "")
+            if code not in pool_codes:  # 仅算热+冷底池内的股票
+                continue
             industry = _get_industry(code)
             sector = _current_sector(code, industry)  # attribution 优先 (与 D2/capital/valuation 一致)
             if not sector:
@@ -844,7 +861,7 @@ def _build_d2_sector_median_cache(cutoff_date=""):
                 continue
     for sec, vals in sector_r20s.items():
         if vals:
-            _D2_SECTOR_MEDIAN_CACHE[sec] = _st.median(vals)
+            _D2_SECTOR_R20_CACHE[sec] = sorted(vals)  # 升序, 供 bisect 算分位
 
 
 def _get_industry(code):
