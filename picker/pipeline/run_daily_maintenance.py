@@ -283,6 +283,69 @@ def step7_update_klines():
         return False
 
 
+def step7b_valuation_backfill():
+    """Step 7.5: 流通市值/估值字段低频回填 (每 7 天自动触发一次)。
+
+    circ_mv (流通市值) 是 capital 资金流折扣的分母 (main_net_5d/circ_mv), 需定期刷新。
+    但变化平缓且资金流折扣用板块内分位 (相对值), 不需每日更新 → 每 7 天一次。
+    自动判断新鲜度: 抽样 fundamentals 的 circ_mv_yi 最后回填日, <7天才跳过。
+    """
+    import json as _json
+    import random as _rnd
+    print('\n' + '=' * 60)
+    print('Step 7.5: 估值字段回填 (流通市值 circ_mv, 每7天一次)')
+    print('=' * 60)
+
+    # 新鲜度检查: 抽样 10 只看 circ_mv 是否存在 + 估值日是否 <7天
+    # backfill_valuation 不存 _vd_date, 用文件 mtime 近似 (backfill 会重写 JSON)
+    fdir = paths.FUNDAMENTALS_DIR
+    if not os.path.isdir(fdir):
+        print('  无 fundamentals 目录, 跳过'); return True
+    files = sorted(f for f in os.listdir(fdir) if f.endswith('.json'))
+    if not files:
+        print('  无热股, 跳过'); return True
+    sample = _rnd.Random(20260701).sample(files, min(10, len(files)))
+    from datetime import datetime as _dt, timedelta as _td
+    now = time.time()
+    stale_count = 0
+    missing_count = 0
+    for fn in sample:
+        try:
+            fp = os.path.join(fdir, fn)
+            d = _json.load(open(fp, encoding='utf-8'))
+            km = d.get('financial_health', {}).get('key_metrics', {})
+            if km.get('circ_mv_yi') is None:
+                missing_count += 1; continue
+            # 用文件 mtime 近似回填日 (backfill 会重写整个 JSON)
+            age_days = (now - os.path.getmtime(fp)) / 86400
+            if age_days > 7:
+                stale_count += 1
+        except Exception:
+            continue
+    # 决策: 缺失>30% 或 过期>50% 才跑 backfill
+    n = len(sample)
+    if missing_count / n < 0.3 and stale_count / n < 0.5:
+        print(f'  抽样{n}只: 缺失{missing_count} 过期{stale_count} → 新鲜, 跳过 (下次>7天再跑)')
+        return True
+
+    print(f'  抽样{n}只: 缺失{missing_count} 过期{stale_count} → 需回填, 启动 backfill_valuation...')
+    try:
+        import subprocess
+        p = subprocess.Popen(
+            [sys.executable, 'picker/pipeline/backfill_valuation.py'],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+            cwd=paths.PROJECT_ROOT,
+        )
+        out, _ = p.communicate(timeout=600)
+        rc = p.returncode
+        tail = (out or '')[-800:]
+        print(f'  backfill 完成 (exit={rc}):\n{tail}')
+        return rc == 0
+    except Exception as e:
+        print(f'  ⚠ backfill 失败: {e}')
+        return False
+
+
 # ══════════════════════════════════════════════════════════
 # 并行数据采集 (研报 + K线 + 资金流)
 # 三者都是独立网络 I/O, 子进程并行最快。更新前做新鲜度预检, 已最新则跳过。
@@ -662,6 +725,13 @@ def main():
             results['6.5'] = False
 
     # ── 世界知识 (Step 8); K线已前移到并行采集阶段 ──
+    # Step 7.5: 估值字段低频回填 (每7天, 在评分前刷新 circ_mv 供 capital 资金流折扣)
+    if step in (0,) and not args.skip_data:
+        try:
+            results['7.5'] = step7b_valuation_backfill()
+        except Exception as e:
+            print(f'\n✗ Step 7.5 异常: {type(e).__name__}: {e}')
+            results['7.5'] = False
     _run(8, step8_world_knowledge)
     _run(9, step9_rescore)  # V3 评分缓存刷新 (needs_run 重评); 快照由选股时写
 
