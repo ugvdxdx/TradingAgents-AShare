@@ -37,7 +37,13 @@
       "rd_expense_yi": null,
       "operating_cf_yi": 0.06,
       "eps": -0.3433,
-      "cf_to_profit": -0.01
+      "cf_to_profit": -0.01,
+      "pb": 4.9449,
+      "ps_ttm": 3.4999,
+      "turnover_rate": 9.5676,
+      "total_mv_yi": 129.6,
+      "circ_mv_yi": 129.6,
+      "netprofit_yoy": -384.4743
     },
     "health_rating": "较差",
     "benchmark_ref": "专用设备行业基准",

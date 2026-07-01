@@ -36,11 +36,12 @@
       "cf_to_profit": -0.35,
       "netprofit_yoy": -172.8869,
       "pe_ttm": null,
-      "pb": 6.4832,
-      "ps_ttm": 16.5902,
-      "total_mv_yi": 630.1,
-      "turnover_rate": 6.43,
-      "dv_ratio": 0.0865
+      "pb": 6.1827,
+      "ps_ttm": 15.8211,
+      "total_mv_yi": 600.9,
+      "turnover_rate": 5.5907,
+      "dv_ratio": 0.0907,
+      "circ_mv_yi": 468.4
     },
     "health_rating": "较差",
     "benchmark_ref": "半导体射频前端设计行业（唯捷创芯、飞骧科技等）",

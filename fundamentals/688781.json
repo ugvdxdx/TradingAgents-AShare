@@ -34,11 +34,12 @@
       "rd_expense_yi": 2.64,
       "operating_cf_yi": 4.56,
       "cf_to_profit": -2.15,
-      "pb": 12.0928,
-      "ps_ttm": 76.8373,
-      "turnover_rate": 11.6218,
-      "total_mv_yi": 490.5,
-      "netprofit_yoy": 13.9647
+      "pb": 13.4858,
+      "ps_ttm": 85.6881,
+      "turnover_rate": 12.9706,
+      "total_mv_yi": 547.0,
+      "netprofit_yoy": 13.9647,
+      "circ_mv_yi": 22.3
     },
     "health_rating": "较差",
     "benchmark_ref": "国际成熟显示面板/半导体巨头（如索尼半导体毛利率35%-45%）",

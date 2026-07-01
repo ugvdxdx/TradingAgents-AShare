@@ -20,8 +20,8 @@
  "000021": {
   "chain": 8.8,
   "surge": 7.5,
-  "capital": 8.6,
-  "sector_score": 24.9,
+  "capital": 6.9,
+  "sector_score": 23.2,
   "sector_score_model": 21.1,
   "brief": "国产存储封测绝对龙头，深度受益存储超级涨价周期与加工费上调，近端业绩弹性大。",
   "essence": {
@@ -310,8 +310,8 @@
  "000636": {
   "chain": 8.5,
   "surge": 4.5,
-  "capital": 7.7,
-  "sector_score": 20.7,
+  "capital": 7.9,
+  "sector_score": 20.9,
   "sector_score_model": 17.5,
   "brief": "MLCC属AI绝对主线且具唯一镍粉量产壁垒；但短期折旧压制利润，股价已涨282%透支部分预期，爆发受限。",
   "essence": {
@@ -1108,8 +1108,8 @@
  "002185": {
   "chain": 7.0,
   "surge": 5.0,
-  "capital": 6.1,
-  "sector_score": 18.1,
+  "capital": 5.5,
+  "sector_score": 17.5,
   "sector_score_model": 15.5,
   "brief": "封测前三受存储涨价带动，但缺席HBM高端先进封装，60日大涨92%后PEG极高承压。",
   "essence": {
@@ -1121,7 +1121,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "002230": {
   "chain": 3.5,
@@ -1217,8 +1218,8 @@
  "002281": {
   "chain": 7.2,
   "surge": 4.0,
-  "capital": 9.1,
-  "sector_score": 20.3,
+  "capital": 7.5,
+  "sector_score": 18.7,
   "sector_score_model": 14.7,
   "brief": "60日大涨205%面临极大price-in压力，且缺乏30天内可验证的近端硬催化。",
   "essence": {
@@ -1380,8 +1381,8 @@
  "002384": {
   "chain": 7.5,
   "surge": 5.5,
-  "capital": 6.4,
-  "sector_score": 19.4,
+  "capital": 5.3,
+  "sector_score": 18.3,
   "sector_score_model": 16.5,
   "brief": "AI算力PCB高景气带，但光通信面临龙头挤压且涨幅过大存price-in压力，缺乏近端硬催化。",
   "essence": {
@@ -1453,8 +1454,8 @@
  "002428": {
   "chain": 6.0,
   "surge": 4.0,
-  "capital": 6.9,
-  "sector_score": 16.9,
+  "capital": 5.4,
+  "sector_score": 15.4,
   "sector_score_model": 14.5,
   "brief": "传统锗企切入AI光纤与InP衬底受资金爆炒；然财务恶化且涨幅极度透支，中报窗口面临证伪风险。",
   "essence": {
@@ -1466,7 +1467,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "002422": {
   "chain": 7.5,
@@ -1489,8 +1491,8 @@
  "002436": {
   "chain": 7.5,
   "surge": 6.5,
-  "capital": 6.7,
-  "sector_score": 20.7,
+  "capital": 6.0,
+  "sector_score": 20.0,
   "sector_score_model": 18.5,
   "brief": "算力PCB及IC载板高景气带，测试板龙头；受定增加码ABF载板及昇腾概念催化股价加速主升，但财务偏弱且涨幅巨大。",
   "essence": {
@@ -1635,8 +1637,8 @@
  "002484": {
   "chain": 6.5,
   "surge": 4.5,
-  "capital": 8.1,
-  "sector_score": 19.1,
+  "capital": 6.6,
+  "sector_score": 17.6,
   "sector_score_model": 15.0,
   "brief": "超容切入AI电源获订单，但主业受光伏拖累且PEG极高，防高估。",
   "essence": {
@@ -1648,7 +1650,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "002555": {
   "chain": 4.2,
@@ -1761,8 +1764,8 @@
  "002600": {
   "chain": 7.0,
   "surge": 4.5,
-  "capital": 6.5,
-  "sector_score": 18.0,
+  "capital": 6.7,
+  "sector_score": 18.2,
   "sector_score_model": 15.0,
   "brief": "消费电子精密制造龙头跨界AI散热与机器人，强竞争力支撑温热档；但缺乏30天内硬催化且估值偏贵，爆发受限。",
   "essence": {
@@ -1816,8 +1819,8 @@
  "002653": {
   "chain": 6.5,
   "surge": 3.5,
-  "capital": 8.4,
-  "sector_score": 18.4,
+  "capital": 8.8,
+  "sector_score": 18.8,
   "sector_score_model": 12.5,
   "brief": "创新药赛道属温热，基本面现金流优；但缺近端硬催化且净利负增长，近期大涨存回调风险。",
   "essence": {
@@ -1829,7 +1832,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "002698": {
   "chain": 3.5,
@@ -1925,8 +1929,8 @@
  "002821": {
   "chain": 7.5,
   "surge": 8.0,
-  "capital": 8.3,
-  "sector_score": 23.8,
+  "capital": 7.8,
+  "sector_score": 23.3,
   "sector_score_model": 19.0,
   "brief": "CXO龙头常规业务恢复增长，避险资金抱团叠加动量加速主升，业绩兑现催化短期超额收益。",
   "essence": {
@@ -1938,13 +1942,14 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "002837": {
   "chain": 7.5,
   "surge": 4.5,
-  "capital": 8.9,
-  "sector_score": 20.9,
+  "capital": 7.1,
+  "sector_score": 19.1,
   "sector_score_model": 15.0,
   "brief": "液冷温热赛道龙头，但自低点涨280%且动量转整理，缺乏近端财报加速催化，估值高位压制爆发力。",
   "essence": {
@@ -1956,7 +1961,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "002831": {
   "chain": 4.8,
@@ -1998,8 +2004,8 @@
  "002851": {
   "chain": 6.0,
   "surge": 4.5,
-  "capital": 8.8,
-  "sector_score": 19.3,
+  "capital": 7.9,
+  "sector_score": 18.4,
   "sector_score_model": 14.5,
   "brief": "AI电源属温热升温带但主业占比不足且非绝对龙头，缺乏近端硬催化，现金流与盈利转化能力极弱拖累爆发预期。",
   "essence": {
@@ -2011,7 +2017,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "002850": {
   "chain": 7.0,
@@ -2290,8 +2297,8 @@
  "300223": {
   "chain": 8.5,
   "surge": 5.4,
-  "capital": 8.6,
-  "sector_score": 22.5,
+  "capital": 8.8,
+  "sector_score": 22.7,
   "sector_score_model": 18.4,
   "brief": "存储周期带动业绩暴增273%，60日涨139%且PEG极度偏高，催化偏远期。",
   "essence": {
@@ -2303,7 +2310,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "300274": {
   "chain": 4.5,
@@ -2381,8 +2389,8 @@
  "300373": {
   "chain": 7.0,
   "surge": 8.0,
-  "capital": 6.9,
-  "sector_score": 21.9,
+  "capital": 6.3,
+  "sector_score": 21.3,
   "sector_score_model": 19.5,
   "brief": "功率半导体周期反转且切入AI电源需求，龙头份额极高；7月中报窗口叠加涨价催化，动量加速且板块估值相对不贵。",
   "essence": {
@@ -2491,8 +2499,8 @@
  "300475": {
   "chain": 9.0,
   "surge": 8.5,
-  "capital": 8.8,
-  "sector_score": 26.3,
+  "capital": 7.5,
+  "sector_score": 25.0,
   "sector_score_model": 22.0,
   "brief": "SK海力士核心代理且绑定头部CSP，享HBM超级涨价红利；虽涨幅大但PEG0.71极便宜，动量加速主升。",
   "essence": {
@@ -2547,8 +2555,8 @@
  "300548": {
   "chain": 7.5,
   "surge": 6.0,
-  "capital": 9.2,
-  "sector_score": 22.7,
+  "capital": 8.6,
+  "sector_score": 22.1,
   "sector_score_model": 16.5,
   "brief": "卡位算力高密度MPO互连且现金流极佳，但60日涨82%遇中报验证面临兑现压力。",
   "essence": {
@@ -2560,7 +2568,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "300567": {
   "chain": 8.8,
@@ -2583,8 +2592,8 @@
  "300576": {
   "chain": 7.5,
   "surge": 5.5,
-  "capital": 8.7,
-  "sector_score": 21.7,
+  "capital": 7.0,
+  "sector_score": 20.0,
   "sector_score_model": 16.0,
   "brief": "算力PCB上游特种药水热门带，龙头卡位良好；受涨价与中报预期催化，但财务尚未印证且存Price-in压力。",
   "essence": {
@@ -2821,8 +2830,8 @@
  "300776": {
   "chain": 4.0,
   "surge": 3.5,
-  "capital": 7.0,
-  "sector_score": 14.5,
+  "capital": 7.2,
+  "sector_score": 14.7,
   "sector_score_model": 9.0,
   "brief": "光伏冷门出清期，BC新技术迭代与绝对龙头竞争力支撑档位；但60日暴涨195%且净利负增、现金流恶化，严重price-in",
   "essence": {
@@ -3078,8 +3087,8 @@
  "301217": {
   "chain": 7.0,
   "surge": 3.5,
-  "capital": 6.3,
-  "sector_score": 16.8,
+  "capital": 5.4,
+  "sector_score": 15.9,
   "sector_score_model": 15.0,
   "brief": "卡位AI高端铜箔获热门热度(7.0)，但60日暴涨340%且极度微利压制爆发分(3.5)。",
   "essence": {
@@ -3115,8 +3124,8 @@
  "301308": {
   "chain": 9.0,
   "surge": 8.5,
-  "capital": 8.0,
-  "sector_score": 25.5,
+  "capital": 7.8,
+  "sector_score": 25.3,
   "sector_score_model": 22.0,
   "brief": "存储涨价绝对主线第一梯队，中报业绩爆发催化近，PEG0.3极便宜，资金抱团主升。",
   "essence": {
@@ -3551,8 +3560,8 @@
  "600030": {
   "chain": 4.8,
   "surge": 4.2,
-  "capital": 6.7,
-  "sector_score": 15.7,
+  "capital": 6.4,
+  "sector_score": 15.4,
   "sector_score_model": 11.0,
   "brief": "券商板块迎阶段性轮动补涨，绝对龙头享高市占率与极低PEG，但缺乏个股级别基本面加速硬催化。",
   "essence": {
@@ -3564,7 +3573,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "600031": {
   "chain": 4.8,
@@ -4168,8 +4178,8 @@
  "600460": {
   "chain": 5.2,
   "surge": 5.5,
-  "capital": 6.9,
-  "sector_score": 17.6,
+  "capital": 7.2,
+  "sector_score": 17.9,
   "sector_score_model": 13.7,
   "brief": "功率半导体周期反转且切入AI电源，但短期涨幅巨大(60日+114%)且PEG偏贵限制爆发分。",
   "essence": {
@@ -4181,7 +4191,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "600482": {
   "chain": 4.5,
@@ -4223,8 +4234,8 @@
  "600497": {
   "chain": 3.5,
   "surge": 2.5,
-  "capital": 6.9,
-  "sector_score": 12.9,
+  "capital": 7.5,
+  "sector_score": 13.5,
   "sector_score_model": 9.5,
   "brief": "主业铅锌景气向下，锗占比极低。虽短期资金炒作推升股价，但缺乏业绩支撑且估值泡沫严重，回调风险大。",
   "essence": {
@@ -4236,7 +4247,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "600511": {
   "chain": 3.5,
@@ -4259,8 +4271,8 @@
  "600500": {
   "chain": 5.0,
   "surge": 4.5,
-  "capital": 6.7,
-  "sector_score": 16.2,
+  "capital": 6.1,
+  "sector_score": 15.6,
   "sector_score_model": 13.5,
   "brief": "央企重组剥离亏损资产引爆炒作，但主业巨亏且份额弱，短期涨幅透支爆发力极低。",
   "essence": {
@@ -4296,8 +4308,8 @@
  "600522": {
   "chain": 7.0,
   "surge": 4.0,
-  "capital": 9.6,
-  "sector_score": 20.6,
+  "capital": 8.4,
+  "sector_score": 19.4,
   "sector_score_model": 14.5,
   "brief": "传统海缆龙头切入AI算力MPO光连接斩获15亿大单，chain给7.0；但90日暴涨159%且净利增速仅2.25%，PE",
   "essence": {
@@ -4878,8 +4890,8 @@
  "600961": {
   "chain": 3.5,
   "surge": 3.5,
-  "capital": 6.9,
-  "sector_score": 13.9,
+  "capital": 6.2,
+  "sector_score": 13.2,
   "sector_score_model": 8.5,
   "brief": "纯冶炼加工无定价权，有色退潮期承压；前期涨幅巨大（60日86%）且缺乏近端催化，动量钝化。",
   "essence": {
@@ -4891,7 +4903,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "600988": {
   "chain": 3.5,
@@ -5112,8 +5125,8 @@
  "601066": {
   "chain": 4.8,
   "surge": 4.5,
-  "capital": 6.9,
-  "sector_score": 16.2,
+  "capital": 6.4,
+  "sector_score": 15.7,
   "sector_score_model": 11.3,
   "brief": "头部券商属中性补涨带投行前三；60日已涨36%存price-in压力，缺近端硬催化但PEG低。",
   "essence": {
@@ -5125,7 +5138,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "601100": {
   "chain": 4.5,
@@ -5292,8 +5306,8 @@
  "601211": {
   "chain": 5.5,
   "surge": 5.0,
-  "capital": 6.7,
-  "sector_score": 17.2,
+  "capital": 6.1,
+  "sector_score": 16.6,
   "sector_score_model": 12.5,
   "brief": "券商板块迎轮动补涨，合并后规模绝对第一，PEG极低，临近中报高增催化。",
   "essence": {
@@ -5305,7 +5319,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "601231": {
   "chain": 4.5,
@@ -6233,8 +6248,8 @@
  "603459": {
   "chain": 8.5,
   "surge": 8.8,
-  "capital": 6.2,
-  "sector_score": 23.5,
+  "capital": 6.7,
+  "sector_score": 24.0,
   "sector_score_model": 21.8,
   "brief": "算力PCB热门高景气带，毛利率26.4%居龙头；中报业绩预增叠加PEG极低，主升浪动能强劲。",
   "essence": {
@@ -6246,7 +6261,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "603501": {
   "chain": 7.5,
@@ -6668,8 +6684,8 @@
  "688017": {
   "chain": 7.5,
   "surge": 3.5,
-  "capital": 7.0,
-  "sector_score": 18.0,
+  "capital": 5.6,
+  "sector_score": 16.6,
   "sector_score_model": 15.5,
   "brief": "人形机器人/物理AI核心硬件龙头卡位，近期订单销量大增；但60日涨123%且PE极高透支预期，爆发受抑。",
   "essence": {
@@ -6870,8 +6886,8 @@
  "688126": {
   "chain": 8.8,
   "surge": 7.5,
-  "capital": 7.0,
-  "sector_score": 23.3,
+  "capital": 6.0,
+  "sector_score": 22.3,
   "sector_score_model": 20.8,
   "brief": "国内大硅片绝对龙头，深度受益海外供需紧缺与酝酿涨价预期。动量处加速主升且基本面迎拐点，尽管深度倒挂但涨价逻辑支撑短期爆发",
   "essence": {
@@ -6908,8 +6924,8 @@
  "688146": {
   "chain": 8.9,
   "surge": 5.5,
-  "capital": 9.7,
-  "sector_score": 24.1,
+  "capital": 8.2,
+  "sector_score": 22.6,
   "sector_score_model": 18.9,
   "brief": "六氟化钨为绝对主线，公司核心受益且财务达标；但自低点暴涨1170%后动量钝化，压制爆发分。",
   "essence": {
@@ -7236,8 +7252,8 @@
  "688375": {
   "chain": 4.5,
   "surge": 3.5,
-  "capital": 6.7,
-  "sector_score": 14.7,
+  "capital": 6.1,
+  "sector_score": 14.1,
   "sector_score_model": 9.5,
   "brief": "军工射频龙头处稳定需求带；30天缺近端硬催化，且估值极贵PEG28，爆发受抑。",
   "essence": {
@@ -7249,7 +7265,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688396": {
   "chain": 6.5,
@@ -7327,8 +7344,8 @@
  "688469": {
   "chain": 6.5,
   "surge": 7.5,
-  "capital": 6.5,
-  "sector_score": 20.5,
+  "capital": 5.2,
+  "sector_score": 19.2,
   "sector_score_model": 17.5,
   "brief": "特色代工6月起涨价10%，SiC及AI电源需求升温。处于减亏拐点且动量加速，板块PB33分位仍便宜。",
   "essence": {
@@ -7458,8 +7475,8 @@
  "688525": {
   "chain": 8.8,
   "surge": 8.5,
-  "capital": 8.6,
-  "sector_score": 25.9,
+  "capital": 7.7,
+  "sector_score": 25.0,
   "sector_score_model": 22.3,
   "brief": "存储涨价绝对主线，业绩爆发PEG极低，加速主升中受益近端涨价与中报催化。",
   "essence": {
@@ -7471,7 +7488,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688630": {
   "chain": 8.8,
@@ -7711,8 +7729,8 @@
  "688809": {
   "chain": 9.0,
   "surge": 6.5,
-  "capital": 8.8,
-  "sector_score": 24.3,
+  "capital": 9.1,
+  "sector_score": 24.6,
   "sector_score_model": 20.0,
   "brief": "光刻胶与先进封装核心龙头，毛利率极高且深度绑定龙头大厂；但短期60日翻倍透支预期且缺近端硬催化。",
   "essence": {
@@ -7724,7 +7742,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688820": {
   "chain": 8.0,
@@ -8147,8 +8166,8 @@
  "605358": {
   "chain": 8.5,
   "surge": 7.5,
-  "capital": 6.9,
-  "sector_score": 22.9,
+  "capital": 5.5,
+  "sector_score": 21.5,
   "sector_score_model": 20.5,
   "brief": "硅片赛道热度极高且发函涨价，基本面迎困境反转；短期涨幅巨大但动量仍强，爆发分较高。",
   "essence": {
@@ -8160,7 +8179,8 @@
    "catalyst_horizon": "near"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688313": {
   "chain": 7.5,
@@ -8237,8 +8257,8 @@
  "688818": {
   "chain": 6.5,
   "surge": 3.5,
-  "capital": 6.6,
-  "sector_score": 16.6,
+  "capital": 5.3,
+  "sector_score": 15.3,
   "sector_score_model": 12.5,
   "brief": "军工电源底座切入AI HVDC温热赛道，现金流极差且PE极高，7月财报期杀估值风险大。",
   "essence": {
@@ -8250,7 +8270,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "600026": {
   "chain": 4.5,
@@ -8364,8 +8385,8 @@
  "300497": {
   "chain": 5.5,
   "surge": 8.0,
-  "capital": 8.5,
-  "sector_score": 22.0,
+  "capital": 6.8,
+  "sector_score": 20.3,
   "sector_score_model": 17.0,
   "brief": "中报预告扭亏预增超2487%提供硬催化，锂电VC量价齐升;但非AI绝对主线且估值处极高分位。",
   "essence": {
@@ -8569,8 +8590,8 @@
  "000783": {
   "chain": 5.0,
   "surge": 3.5,
-  "capital": 6.9,
-  "sector_score": 15.4,
+  "capital": 5.5,
+  "sector_score": 14.0,
   "sector_score_model": 10.5,
   "brief": "中型券商享科技牛市补涨预期，虽PEG极低但60日涨48%已充分price-in，存量博弈缺乏近端硬催化。",
   "essence": {
@@ -8582,7 +8603,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "300085": {
   "chain": 3.5,
@@ -8660,8 +8682,8 @@
  "002023": {
   "chain": 5.0,
   "surge": 3.5,
-  "capital": 6.0,
-  "sector_score": 14.5,
+  "capital": 5.3,
+  "sector_score": 13.8,
   "sector_score_model": 10.5,
   "brief": "主业航空维修承压，半导体InP代工有概念但良率落后且严重亏损，缺乏近端催化。",
   "essence": {
@@ -8673,7 +8695,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688166": {
   "chain": 6.5,
@@ -8787,8 +8810,8 @@
  "600172": {
   "chain": 2.0,
   "surge": 0.5,
-  "capital": 8.6,
-  "sector_score": 11.1,
+  "capital": 8.2,
+  "sector_score": 10.7,
   "sector_score_model": 5.5,
   "brief": "培育钻石深度出清且债务压顶，半导体散热仅送样。纯资金重整博弈，基本面无催化。",
   "essence": {
@@ -8800,7 +8823,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "603738": {
   "chain": 6.0,
@@ -8969,8 +8993,8 @@
  "688055": {
   "chain": 5.5,
   "surge": 3.5,
-  "capital": 6.0,
-  "sector_score": 15.0,
+  "capital": 5.7,
+  "sector_score": 14.7,
   "sector_score_model": 11.5,
   "brief": "面板属热门赛道，但公司深度亏损且仅单一5代线规模弱势；大涨后缺近端硬催化，爆发力受限。",
   "essence": {
@@ -8982,7 +9006,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "600141": {
   "chain": 7.5,
@@ -9150,8 +9175,8 @@
  "688383": {
   "chain": 4.0,
   "surge": 1.5,
-  "capital": 6.2,
-  "sector_score": 11.7,
+  "capital": 5.8,
+  "sector_score": 11.3,
   "sector_score_model": 9.0,
   "brief": "传统LED设备周期下行致巨亏，半导体键合机无规模化营收。90日暴涨156%全靠概念炒作，财务与基本面严重反向，纯属虚假加",
   "essence": {
@@ -9163,7 +9188,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "603773": {
   "chain": 7.5,
@@ -9205,8 +9231,8 @@
  "002962": {
   "chain": 7.0,
   "surge": 4.5,
-  "capital": 8.1,
-  "sector_score": 19.6,
+  "capital": 8.4,
+  "sector_score": 19.9,
   "sector_score_model": 16.0,
   "brief": "TGV玻璃基板属8.5-10最热主线，但公司仅送样无营收，按边界规则扣1.5分至7.0；股价暴涨但财务恶化且缺近端催化，",
   "essence": {
@@ -9218,7 +9244,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688127": {
   "chain": 8.5,
@@ -9241,8 +9268,8 @@
  "601636": {
   "chain": 4.5,
   "surge": 2.5,
-  "capital": 8.8,
-  "sector_score": 15.8,
+  "capital": 9.6,
+  "sector_score": 16.6,
   "sector_score_model": 11.5,
   "brief": "主业光伏地产处退潮带，半导体基板仅送样无订单。估值处板块92分位极贵，催化落空，概念透支。",
   "essence": {
@@ -9254,7 +9281,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688170": {
   "chain": 8.6,
@@ -9350,8 +9378,8 @@
  "002741": {
   "chain": 5.5,
   "surge": 4.0,
-  "capital": 8.5,
-  "sector_score": 18.0,
+  "capital": 7.1,
+  "sector_score": 16.6,
   "sector_score_model": 13.0,
   "brief": "PCB药水属热门赛道，但高端先进封装占比不足5%扣1.5分；无近端硬催化且现金流极差压制爆发分。",
   "essence": {
@@ -9363,13 +9391,14 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688603": {
   "chain": 7.2,
   "surge": 6.0,
-  "capital": 6.6,
-  "sector_score": 19.8,
+  "capital": 6.8,
+  "sector_score": 20.0,
   "sector_score_model": 16.7,
   "brief": "算力PCB高景气带跟风股，资金极致推升但PE畸高且无近端硬催化，透支风险大。",
   "essence": {
@@ -9381,7 +9410,8 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "003019": {
   "chain": 4.2,
@@ -9477,8 +9507,8 @@
  "300706": {
   "chain": 7.0,
   "surge": 2.5,
-  "capital": 9.7,
-  "sector_score": 19.2,
+  "capital": 7.9,
+  "sector_score": 17.4,
   "sector_score_model": 14.0,
   "brief": "靶材受存储转单预期极致抱团暴涨，但公司产品低端、毛利率仅6.5%且巨亏，纯资金炒作。",
   "essence": {
@@ -9496,8 +9526,8 @@
  "600206": {
   "chain": 8.5,
   "surge": 6.5,
-  "capital": 10.1,
-  "sector_score": 25.1,
+  "capital": 8.4,
+  "sector_score": 23.4,
   "sector_score_model": 19.5,
   "brief": "半导体靶材最热主线龙头，直接承接海外转单；动能虽强但60日暴涨226%且PEG偏贵，缺乏近端日期催化致surge受限。",
   "essence": {
@@ -9515,8 +9545,8 @@
  "300263": {
   "chain": 7.0,
   "surge": 3.5,
-  "capital": 8.9,
-  "sector_score": 19.4,
+  "capital": 7.6,
+  "sector_score": 18.1,
   "sector_score_model": 13.0,
   "brief": "靶材业务受益半导体国产替代，但业务杂糅拉低净利率；短期暴涨74%后缺乏近端硬催化。",
   "essence": {
@@ -9528,7 +9558,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "000969": {
   "chain": 4.5,
@@ -9661,8 +9692,8 @@
  "688530": {
   "chain": 6.0,
   "surge": 2.5,
-  "capital": 9.9,
-  "sector_score": 18.4,
+  "capital": 9.3,
+  "sector_score": 17.8,
   "sector_score_model": 12.5,
   "brief": "半导体靶材赛道极热，但公司主业实为面板靶材，且因原料暴涨致巨亏，未现基本面加速，跟风炒作属性重。",
   "essence": {
@@ -9674,13 +9705,14 @@
    "catalyst_horizon": "mid"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "300821": {
   "chain": 4.8,
   "surge": 3.5,
-  "capital": 6.9,
-  "sector_score": 15.2,
+  "capital": 5.8,
+  "sector_score": 14.1,
   "sector_score_model": 12.3,
   "brief": "主业受地产光伏拖累亏损，AI散热仅概念且占比低，资金借势炒作但缺基本面支撑。",
   "essence": {
@@ -9692,7 +9724,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688233": {
   "chain": 9.0,
@@ -9716,8 +9749,8 @@
  "000566": {
   "chain": 2.0,
   "surge": 2.0,
-  "capital": 6.7,
-  "sector_score": 10.7,
+  "capital": 7.1,
+  "sector_score": 11.1,
   "sector_score_model": 5.5,
   "brief": "主业仿制药承压，人工耳蜗研发极低，濒临破产边缘；短炒系资金博弈，无近端基本面催化。",
   "essence": {
@@ -9729,7 +9762,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688689": {
   "chain": 4.0,
@@ -9904,8 +9938,8 @@
  "688549": {
   "chain": 7.0,
   "surge": 3.0,
-  "capital": 9.9,
-  "sector_score": 19.9,
+  "capital": 9.2,
+  "sector_score": 19.2,
   "sector_score_model": 14.0,
   "brief": "属六氟化钨热门高景气带，但财务极差且无实质订单，chain给7.0；drivers无公司端订单落点，60日涨330%纯蹭",
   "essence": {
@@ -9917,7 +9951,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "688106": {
   "chain": 8.5,
@@ -10052,8 +10087,8 @@
  "688711": {
   "chain": 4.0,
   "surge": 3.5,
-  "capital": 6.2,
-  "sector_score": 13.7,
+  "capital": 6.6,
+  "sector_score": 14.1,
   "sector_score_model": 10.5,
   "brief": "功率半导体中性带，市占率低且AI电源仅为导入期；60日大涨75%但缺30天硬催化，变现概率低。",
   "essence": {
@@ -10065,7 +10100,8 @@
    "catalyst_horizon": "far"
   },
   "chain_scored_date": "2026-07-01",
-  "surge_scored_date": "2026-07-01"
+  "surge_scored_date": "2026-07-01",
+  "capital_updated_date": "2026-07-01"
  },
  "301208": {
   "chain": 3.0,
@@ -10162,8 +10198,8 @@
  "300545": {
   "chain": 7.5,
   "surge": 4.5,
-  "capital": 9.2,
-  "sector_score": 21.2,
+  "capital": 9.9,
+  "sector_score": 21.9,
   "sector_score_model": 15.5,
   "brief": "面板设备主业承压，切入半导体封测测试设备享高估值溢价，短期情绪驱动大涨但缺乏近端业绩或订单硬催化。",
   "essence": {
@@ -10181,8 +10217,8 @@
  "003043": {
   "chain": 6.8,
   "surge": 4.5,
-  "capital": 9.5,
-  "sector_score": 20.8,
+  "capital": 10.0,
+  "sector_score": 21.3,
   "sector_score_model": 15.3,
   "brief": "半导体设备高景气带，但属代工且ROE<5%；受转债逼空推升动量，但PEG极高无业绩催化。",
   "essence": {
@@ -10238,8 +10274,8 @@
  "688035": {
   "chain": 7.0,
   "surge": 3.5,
-  "capital": 8.2,
-  "sector_score": 18.7,
+  "capital": 7.3,
+  "sector_score": 17.8,
   "sector_score_model": 13.5,
   "brief": "属先进封装热门赛道，但竞争力偏弱且大基金减持；PEG极高且现金流负，已严重price-in。",
   "essence": {

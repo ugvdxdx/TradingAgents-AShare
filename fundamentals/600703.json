@@ -37,11 +37,12 @@
       "cf_to_profit": -5.33,
       "netprofit_yoy": -239.6952,
       "pe_ttm": null,
-      "pb": 3.0334,
-      "ps_ttm": 6.3991,
-      "total_mv_yi": 1058.7,
-      "turnover_rate": 7.717,
-      "dv_ratio": 0.0889
+      "pb": 2.8362,
+      "ps_ttm": 5.9829,
+      "total_mv_yi": 989.8,
+      "turnover_rate": 9.3592,
+      "dv_ratio": 0.0951,
+      "circ_mv_yi": 989.8
     },
     "health_rating": "较差",
     "benchmark_ref": "半导体材料/化合物半导体行业（行业平均毛利率20-35%，净利率5-15%）",

@@ -37,11 +37,12 @@
       "rd_ratio_pct": 0.27,
       "cf_to_profit": 2.39,
       "pe_ttm": null,
-      "pb": 3.5316,
-      "ps_ttm": 2.9054,
-      "total_mv_yi": 151.1,
-      "turnover_rate": 1.7283,
-      "dv_ratio": 1.3542
+      "pb": 3.6052,
+      "ps_ttm": 2.9659,
+      "total_mv_yi": 154.3,
+      "turnover_rate": 1.2923,
+      "dv_ratio": 1.3265,
+      "circ_mv_yi": 152.3
     },
     "health_rating": "健康",
     "benchmark_ref": "生猪养殖行业头部企业（牧原股份、温氏股份等，行业平均资产负债率60%-70%）",

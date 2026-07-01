@@ -36,6 +36,7 @@ V3_CACHE = paths.V3_CACHE
 FUNDAMENTALS_DIR = paths.FUNDAMENTALS_DIR
 FUNDAMENTALS_COLD_DIR = paths.FUNDAMENTALS_COLD_DIR  # 冷股存储
 KLINE_CACHE_DIR = paths.KLINE_CACHE_DIR
+MF_CACHE_DIR = paths.MF_CACHE_DIR
 
 
 def _find_fundamental(code):
@@ -669,6 +670,225 @@ def _compute_price_factor(code, cutoff_date=""):
         return 1.0
 
 
+def _compute_main_pct_5d(code: str, cutoff_date=""):
+    """近5日主力净流入占成交额比率均值 (跨股可比的"资金背离程度")。
+
+    读 mf.pkl (Tushare/东财 moneyflow), 按 date<=cutoff 截断 (无前视)。
+    main_pct = 主力净额/成交额×100, 正=净流入, 负=净流出。
+    与 main_net(金额) 的区别: main_net 有市值偏置 (大市值股天然大额),
+    main_pct 是比率, 可跨股比较"资金流出相对成交的严重程度"。
+
+    Returns: main_pct 均值(float) 或 None(无数据/行数不足)。
+    """
+    try:
+        import pickle as _pk
+        mf_path = os.path.join(MF_CACHE_DIR, "mf.pkl")
+        if not os.path.exists(mf_path):
+            return None
+        mf = _pk.load(open(mf_path, "rb"))
+        rows = mf.get(code) or []
+        if not rows:
+            return None
+        # cutoff 截断 (无前视): date 格式 YYYYMMDD
+        if cutoff_date:
+            cutoff_nodash = cutoff_date.replace("-", "")
+            rows = [r for r in rows if str(r.get("date", "")) <= cutoff_nodash]
+        if len(rows) < 5:
+            return None
+        recent = rows[-5:]
+        pcts = [r.get("main_pct") for r in recent if r.get("main_pct") is not None]
+        if len(pcts) < 3:  # 至少3个有效值
+            return None
+        return round(sum(pcts) / len(pcts), 2)
+    except Exception:
+        return None
+
+
+def _fundflow_quality_penalty(code: str, price_factor: float, cutoff_date="") -> float:
+    """资金流质量折扣: 仅在'价格强但资金持续大幅流出'时给 capital 打折 (≤1.0)。
+
+    认知: capital 衡量价格动能强度, 但价格可能虚涨 (对倒出货)。
+    资金流 (主力大单净流出) 能揭示价格背后的力量对比 — 上涨时大单持续流出=出货。
+    A股认知不对称: 下跌时资金流出正常 (获利了结), 上涨时资金大幅流出才危险 (对倒出货)。
+    故只惩罚'价格强(price_factor>=1.1) 且 main_pct_5d 显著为负'的股, 其余不折扣。
+
+    乘性折扣 (永远≤1.0): 最坏只是不放大 capital, 绝不把差股排前。
+    无资金流数据返回 1.0 (容错, 不因数据缺失误判)。
+    """
+    if price_factor < 1.1:  # 非强势股不动 (弱势股 price_factor 已惩罚)
+        return 1.0
+    try:
+        main_pct_5d = _compute_main_pct_5d(code, cutoff_date)
+        if main_pct_5d is None:
+            return 1.0
+        if main_pct_5d < -6:
+            return 0.75   # 严重背离: 价格强但资金净流出占成交6%+
+        if main_pct_5d < -3:
+            return 0.85   # 明显出货: 价格强但资金净流出占成交3%+
+        return 1.0        # 资金支撑或中性, 不折扣 (流入不加分: 诱多/游资不可靠)
+    except Exception:
+        return 1.0
+
+
+# ══════════════════════════════════════════════════════════
+# 资金流质量折扣 v2: 主力净额/流通市值 + 板块内连续分位 + 非对称双向
+# 认知: main_pct(净额/成交额)会被换手率稀释; main_net/circ_mv 衡量真实抛压冲击力。
+#       板块内分位回答"同业里谁的资金背离最严重", 避免绝对值跨板块偏置。
+# 非对称: 惩罚侧果断(卖出可靠,0.8底), 奖励侧克制(买入可ornek诱多,1.08顶)。
+# ══════════════════════════════════════════════════════════
+
+# 板块内 main_net_5d/circ_mv 分布缓存 (update_capital 时预算一次, 供 _compute_fundflow_ratio 算分位)
+_SECTOR_FUNDFLOW_RATIO_CACHE: Dict[str, list] = {}
+
+
+def _read_circ_mv_yi(code: str):
+    """从 fundamentals JSON 的 key_metrics 读流通市值(亿元)。无则 None。"""
+    try:
+        path = _find_fundamental(code)
+        if not path:
+            return None
+        d = json.load(open(path, encoding="utf-8"))
+        return d.get("financial_health", {}).get("key_metrics", {}).get("circ_mv_yi")
+    except Exception:
+        return None
+
+
+def _compute_main_net_5d(code: str, cutoff_date=""):
+    """近5日主力净流入累计(元)。读 mf.pkl, date<=cutoff 截断(无前视)。
+
+    与 _compute_main_pct_5d 的区别: 这里返回绝对额累计(元), 用于除以 circ_mv 算冲击力;
+    main_pct_5d 返回的是比率(净额/成交额)。两者分母不同, 语义不同。
+    Returns: float(元) 或 None(无数据/不足5天)。
+    """
+    try:
+        import pickle as _pk
+        mf_path = os.path.join(MF_CACHE_DIR, "mf.pkl")
+        if not os.path.exists(mf_path):
+            return None
+        mf = _pk.load(open(mf_path, "rb"))
+        rows = mf.get(code) or []
+        if not rows:
+            return None
+        if cutoff_date:
+            cutoff_nodash = cutoff_date.replace("-", "")
+            rows = [r for r in rows if str(r.get("date", "")) <= cutoff_nodash]
+        if len(rows) < 5:
+            return None
+        recent = rows[-5:]
+        nets = [r.get("main_net") for r in recent if r.get("main_net") is not None]
+        if len(nets) < 3:
+            return None
+        return sum(nets)  # 元
+    except Exception:
+        return None
+
+
+def _build_sector_fundflow_ratio_cache(cutoff_date=""):
+    """预算各板块的 (main_net_5d / circ_mv) 分布, 供板块内资金流排名。
+
+    仿 _build_d2_sector_median_cache, 在 update_capital 时预算一次。底池=热+冷,
+    用 _current_sector 归类。ratio = main_net_5d(元) / (circ_mv_yi(亿)×1e8), 无量纲。
+    """
+    import pickle as _pk
+    _SECTOR_FUNDFLOW_RATIO_CACHE.clear()
+    from picker.paths import FUNDAMENTALS_DIR, COLD_FUNDAMENTALS_DIR
+    pool_codes = set()
+    for _d in (FUNDAMENTALS_DIR, COLD_FUNDAMENTALS_DIR):
+        if os.path.isdir(_d):
+            for _f in os.listdir(_d):
+                if _f.endswith(".json"):
+                    pool_codes.add(_f[:-5])
+    # mf.pkl 只读一次 (全池共享)
+    mf_path = os.path.join(MF_CACHE_DIR, "mf.pkl")
+    mf = {}
+    if os.path.exists(mf_path):
+        try:
+            mf = _pk.load(open(mf_path, "rb")) or {}
+        except Exception:
+            mf = {}
+    cutoff_nodash = cutoff_date.replace("-", "") if cutoff_date else ""
+    sector_ratios: Dict[str, list] = {}
+    for code in pool_codes:
+        circ_mv_yi = _read_circ_mv_yi(code)
+        if not circ_mv_yi or circ_mv_yi <= 0:
+            continue
+        rows = mf.get(code) or []
+        if cutoff_nodash:
+            rows = [r for r in rows if str(r.get("date", "")) <= cutoff_nodash]
+        if len(rows) < 5:
+            continue
+        nets = [r.get("main_net") for r in rows[-5:] if r.get("main_net") is not None]
+        if len(nets) < 3:
+            continue
+        main_net_5d = sum(nets)
+        ratio = main_net_5d / (circ_mv_yi * 1e8)  # 无量纲
+        industry = _get_industry(code)
+        sector = _current_sector(code, industry)
+        if sector:
+            sector_ratios.setdefault(sector, []).append(ratio)
+    for sec, vals in sector_ratios.items():
+        if len(vals) >= 3:  # 板块样本>=3 才存 (太少无统计意义)
+            _SECTOR_FUNDFLOW_RATIO_CACHE[sec] = sorted(vals)
+
+
+def _compute_fundflow_ratio(code: str, cutoff_date=""):
+    """算个股 main_net_5d/circ_mv 比率 + 该比率在板块内的分位。
+
+    Returns: (ratio, sector_pct) 或 (None, None)。sector_pct 0-100, 100=资金最强劲(流入最多)。
+    """
+    try:
+        circ_mv_yi = _read_circ_mv_yi(code)
+        if not circ_mv_yi or circ_mv_yi <= 0:
+            return None, None
+        main_net_5d = _compute_main_net_5d(code, cutoff_date)
+        if main_net_5d is None:
+            return None, None
+        ratio = main_net_5d / (circ_mv_yi * 1e8)
+        industry = _get_industry(code)
+        sector = _current_sector(code, industry)
+        sector_ratios = _SECTOR_FUNDFLOW_RATIO_CACHE.get(sector)
+        if not sector_ratios:
+            return ratio, None
+        import bisect
+        sector_pct = round(bisect.bisect_left(sector_ratios, ratio) / len(sector_ratios) * 100)
+        return round(ratio, 5), sector_pct
+    except Exception:
+        return None, None
+
+
+def _fundflow_quality_penalty_v2(code: str, price_factor: float, cutoff_date="") -> float:
+    """资金流质量折扣 v2: 主力净额/流通市值 + 板块内连续分位 + 非对称双向。
+
+    认知: capital 衡量价格动能, 但价格可能虚涨(对倒出货)。资金流揭示背后力量对比。
+    比值 main_net_5d/circ_mv 衡量"主力撼动了多少流通筹码"=真实抛压冲击力(优于main_pct)。
+    板块内分位回答"同业里谁背离最严重", 避免绝对值跨板块偏置。
+
+    非对称双向 (卖出比买入可靠):
+      惩罚侧(果断): ratio<0(确实流出) 且 板块分位<30% → penalty 线性 1.0→0.80
+      奖励侧(克制): ratio>0(确实流入) 且 板块分位>85% → penalty 线性 1.0→1.08
+    双条件避免板块整体流出时误伤相对较好的股(分位>30%不罚)。
+    无数据/非强势股返回 1.0 (容错)。
+    """
+    if price_factor < 1.1:  # 非强势股不参与 (弱势股 price_factor 已惩罚)
+        return 1.0
+    try:
+        ratio, sector_pct = _compute_fundflow_ratio(code, cutoff_date)
+        if ratio is None or sector_pct is None:
+            return 1.0
+        if ratio < 0:  # 惩罚侧: 确实净流出
+            if sector_pct < 30:
+                # 线性: 分位30→1.0, 分位0→0.80 (流出且板块内最差30%)
+                return round(1.0 - (30 - sector_pct) / 30 * 0.20, 3)
+            return 1.0  # 流出但相对板块不算差, 不惩罚
+        else:  # 奖励侧: 确实净流入 (克制, 幅度封顶1.08)
+            if sector_pct > 85:
+                # 线性: 分位85→1.0, 分位100→1.08 (流入且板块内最强15%)
+                return round(1.0 + (sector_pct - 85) / 15 * 0.08, 3)
+            return 1.0
+    except Exception:
+        return 1.0
+
+
 def _compute_surge_signals(code, cutoff_date=""):
     """surge 评分的 price-in / 剩余涨幅锚定数据 (三类信号: 涨幅幅度 + 动量状态之源)。
 
@@ -957,6 +1177,8 @@ def compute_capital_updates(cutoff_date=""):
 
     # 预算行业 r20 中位数缓存 (供 _compute_d2_factor 用, G 模式必需)
     _build_d2_sector_median_cache(cutoff_date=cutoff_date)
+    # 预算板块内资金流比率分布 (供 _fundflow_quality_penalty_v2 算板块分位)
+    _build_sector_fundflow_ratio_cache(cutoff_date=cutoff_date)
 
     updated = 0
     for code, entry in cache.items():
@@ -973,7 +1195,13 @@ def compute_capital_updates(cutoff_date=""):
         #   (回测: 无封顶 TOP10涨 +2.06pp, 最差期改善, Spearman 仅微降 -0.003)
         price_factor = _compute_price_factor(code, cutoff_date=cutoff_date)
         d2_factor = _compute_d2_factor(code, cutoff_date=cutoff_date)
-        new_capital = round(max(0, base_capital + d2_factor * 2 + price_factor * 2), 1)
+        # G 公式 (唯一模式): base + D2(行业相对强度)×2 + price_factor×2, 无封顶
+        raw_capital = max(0, base_capital + d2_factor * 2 + price_factor * 2)
+        # 资金流质量折扣: 价格强但资金持续大幅流出(对倒出货) → capital 乘性打折 (≤1.0)
+        # 认知: capital 衡量价格动能, 但价格可能虚涨; 资金流揭示背后力量对比。
+        # 只惩罚"价强资背离"的股, 弱势股不动, 无数据容错=1.0。
+        penalty = _fundflow_quality_penalty_v2(code, price_factor, cutoff_date=cutoff_date)
+        new_capital = round(raw_capital * penalty, 1)
 
         old_capital = entry.get("capital", 0)
         if abs(new_capital - old_capital) >= 0.2:

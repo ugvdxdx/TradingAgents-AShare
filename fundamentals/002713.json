@@ -35,7 +35,14 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": -0.64,
-      "cf_to_profit": -1.78
+      "cf_to_profit": -1.78,
+      "pe_ttm": 301.9508,
+      "pb": 13.3215,
+      "ps_ttm": 18.1842,
+      "turnover_rate": 2.4599,
+      "total_mv_yi": 115.7,
+      "circ_mv_yi": 64.0,
+      "netprofit_yoy": 103.1114
     },
     "health_rating": "较差",
     "benchmark_ref": "装修装饰",

@@ -34,11 +34,12 @@
       "cf_to_profit": 0.68,
       "netprofit_yoy": -372.293,
       "pe_ttm": null,
-      "pb": 4.0367,
-      "ps_ttm": 7.5818,
-      "total_mv_yi": 108.0,
-      "turnover_rate": 14.3523,
-      "dv_ratio": null
+      "pb": 3.7105,
+      "ps_ttm": 6.969,
+      "total_mv_yi": 99.3,
+      "turnover_rate": 11.2773,
+      "dv_ratio": null,
+      "circ_mv_yi": 99.3
     },
     "health_rating": "较差",
     "benchmark_ref": "精细化工行业（成熟期毛利率通常在15%-25%）",

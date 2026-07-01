@@ -35,11 +35,12 @@
       "cf_to_profit": -0.01,
       "netprofit_yoy": 50.9573,
       "pe_ttm": null,
-      "pb": 12.2062,
-      "ps_ttm": 14.651,
-      "total_mv_yi": 212.6,
-      "turnover_rate": 23.6341,
-      "dv_ratio": null
+      "pb": 11.9726,
+      "ps_ttm": 14.3706,
+      "total_mv_yi": 208.5,
+      "turnover_rate": 21.0565,
+      "dv_ratio": null,
+      "circ_mv_yi": 174.1
     },
     "health_rating": "较差",
     "benchmark_ref": "A股IC设计行业均值（毛利率约30-40%，资产负债率约20-30%）",

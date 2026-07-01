@@ -35,10 +35,11 @@
       "pe_ttm": 5.092,
       "pb": 0.3686,
       "ps_ttm": 1.4813,
-      "turnover_rate": 0.5189,
+      "turnover_rate": 0.4099,
       "dv_ratio": 6.4777,
       "total_mv_yi": 1044.5,
-      "netprofit_yoy": -23.726
+      "netprofit_yoy": -23.726,
+      "circ_mv_yi": 1044.5
     },
     "health_rating": "健康",
     "benchmark_ref": "城市商业银行平均水平",

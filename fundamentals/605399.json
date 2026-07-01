@@ -35,11 +35,12 @@
       "cf_to_profit": 0.74,
       "netprofit_yoy": -328.5492,
       "pe_ttm": null,
-      "pb": 2.1697,
-      "ps_ttm": 3.7041,
-      "total_mv_yi": 44.7,
-      "turnover_rate": 5.3977,
-      "dv_ratio": 0.6989
+      "pb": 2.2066,
+      "ps_ttm": 3.7672,
+      "total_mv_yi": 45.4,
+      "turnover_rate": 3.3721,
+      "dv_ratio": 0.6872,
+      "circ_mv_yi": 45.4
     },
     "health_rating": "较差",
     "benchmark_ref": "精细化工行业",

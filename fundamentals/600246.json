@@ -33,11 +33,12 @@
       "rd_expense_yi": 0.63,
       "operating_cf_yi": 1.63,
       "cf_to_profit": -0.25,
-      "pb": 8.4942,
-      "ps_ttm": 85.5184,
-      "turnover_rate": 9.2635,
-      "total_mv_yi": 388.0,
-      "netprofit_yoy": -43.2726
+      "pb": 7.5754,
+      "ps_ttm": 76.2685,
+      "turnover_rate": 9.4055,
+      "total_mv_yi": 346.0,
+      "netprofit_yoy": -43.2726,
+      "circ_mv_yi": 336.7
     },
     "health_rating": "较差",
     "benchmark_ref": "房地产开发/园区开发行业基准",

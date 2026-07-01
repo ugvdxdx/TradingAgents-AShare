@@ -35,11 +35,12 @@
       "cf_to_profit": -3.59,
       "netprofit_yoy": 38.1711,
       "pe_ttm": null,
-      "pb": 6.8577,
-      "ps_ttm": 10.5776,
-      "total_mv_yi": 889.4,
-      "turnover_rate": 5.5936,
-      "dv_ratio": null
+      "pb": 6.7156,
+      "ps_ttm": 10.3582,
+      "total_mv_yi": 871.0,
+      "turnover_rate": 6.7872,
+      "dv_ratio": null,
+      "circ_mv_yi": 609.9
     },
     "health_rating": "较差",
     "benchmark_ref": "华虹半导体等成熟特色工艺同业",

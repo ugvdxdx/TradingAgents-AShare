@@ -37,11 +37,12 @@
       "cf_to_profit": 0.11,
       "netprofit_yoy": -57.2439,
       "pe_ttm": null,
-      "pb": 2.6595,
-      "ps_ttm": 12.0167,
-      "total_mv_yi": 102.6,
-      "turnover_rate": 9.3365,
-      "dv_ratio": null
+      "pb": 2.6934,
+      "ps_ttm": 12.1698,
+      "total_mv_yi": 104.0,
+      "turnover_rate": 11.9362,
+      "dv_ratio": null,
+      "circ_mv_yi": 102.0
     },
     "health_rating": "较差",
     "benchmark_ref": "光伏设备行业",

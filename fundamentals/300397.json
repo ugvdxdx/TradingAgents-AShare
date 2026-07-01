@@ -32,11 +32,12 @@
       "rd_ratio_pct": 16.06,
       "rd_expense_yi": 0.8,
       "cf_to_profit": 0.9,
-      "pb": 5.3315,
-      "ps_ttm": 12.3279,
-      "turnover_rate": 9.8091,
-      "total_mv_yi": 76.4,
-      "netprofit_yoy": 4.7837
+      "pb": 5.4218,
+      "ps_ttm": 12.5367,
+      "turnover_rate": 11.7146,
+      "total_mv_yi": 77.7,
+      "netprofit_yoy": 4.7837,
+      "circ_mv_yi": 60.7
     },
     "health_rating": "较差",
     "benchmark_ref": "军工电子及半导体材料行业基准",

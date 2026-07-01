@@ -38,10 +38,11 @@
       "pe_ttm": 12.4421,
       "pb": 1.7497,
       "ps_ttm": 1.2377,
-      "turnover_rate": 2.68,
+      "turnover_rate": 2.2351,
       "dv_ratio": 1.8209,
       "total_mv_yi": 441.2,
-      "netprofit_yoy": 101.7708
+      "netprofit_yoy": 101.7708,
+      "circ_mv_yi": 441.2
     },
     "health_rating": "健康",
     "benchmark_ref": "A股火电及热力供应行业均值",

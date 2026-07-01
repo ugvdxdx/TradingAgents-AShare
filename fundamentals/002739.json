@@ -36,7 +36,13 @@
       "rd_ratio_pct": null,
       "rd_expense_yi": null,
       "operating_cf_yi": 28.11,
-      "cf_to_profit": 5.47
+      "cf_to_profit": 5.47,
+      "pb": 2.6395,
+      "ps_ttm": 1.8383,
+      "turnover_rate": 3.2446,
+      "total_mv_yi": 201.0,
+      "circ_mv_yi": 199.9,
+      "netprofit_yoy": 154.68
     },
     "health_rating": "一般",
     "benchmark_ref": "影视音像",

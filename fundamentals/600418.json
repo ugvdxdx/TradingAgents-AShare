@@ -33,11 +33,12 @@
       "rd_expense_yi": 18.09,
       "operating_cf_yi": 33.95,
       "cf_to_profit": -1.99,
-      "pb": 4.8132,
-      "ps_ttm": 1.2584,
-      "turnover_rate": 3.5873,
-      "total_mv_yi": 605.7,
-      "netprofit_yoy": 4.5728
+      "pb": 4.5911,
+      "ps_ttm": 1.2003,
+      "turnover_rate": 3.3363,
+      "total_mv_yi": 577.7,
+      "netprofit_yoy": 4.5728,
+      "circ_mv_yi": 559.8
     },
     "health_rating": "较差",
     "benchmark_ref": "整车制造行业",

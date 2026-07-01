@@ -622,7 +622,7 @@ def refresh_one(code: str, world_knowledge: str = "",
                "operating_cf_yi", "cf_to_profit", "netprofit_yoy"]:
         km.setdefault(k, None)
     # surge price-in 锚定估值字段 (Tushare daily_basic); 直接写入不经 LLM (估值水位仅供 surge 评分, 不进 growth 字段)
-    for k in ("pe_ttm", "pb", "ps_ttm", "total_mv_yi", "turnover_rate", "dv_ratio"):
+    for k in ("pe_ttm", "pb", "ps_ttm", "total_mv_yi", "circ_mv_yi", "turnover_rate", "dv_ratio"):
         km[k] = valuation.get(k) if valuation else None
     # 净利同比 (供 surge PEG 估值消化判断): 从财报写入, 不经 LLM
     if real_financials and real_financials.get("netprofit_yoy") is not None:

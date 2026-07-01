@@ -35,11 +35,12 @@
       "cf_to_profit": -11.18,
       "netprofit_yoy": -265.7104,
       "pe_ttm": null,
-      "pb": 18.0625,
-      "ps_ttm": 41.6019,
-      "total_mv_yi": 543.8,
-      "turnover_rate": 18.8243,
-      "dv_ratio": 0.0136
+      "pb": 19.9222,
+      "ps_ttm": 45.8853,
+      "total_mv_yi": 599.8,
+      "turnover_rate": 19.7926,
+      "dv_ratio": 0.0123,
+      "circ_mv_yi": 239.3
     },
     "health_rating": "一般",
     "benchmark_ref": "半导体材料行业龙头（毛利率通常在30%以上）",

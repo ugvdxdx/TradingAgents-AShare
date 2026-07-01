@@ -35,11 +35,12 @@
       "cf_to_profit": 0.55,
       "netprofit_yoy": -472.3381,
       "pe_ttm": null,
-      "pb": 3.9022,
-      "ps_ttm": 4.9342,
-      "total_mv_yi": 135.6,
-      "turnover_rate": 14.6853,
-      "dv_ratio": 0.1403
+      "pb": 4.0455,
+      "ps_ttm": 5.1154,
+      "total_mv_yi": 140.5,
+      "turnover_rate": 16.9808,
+      "dv_ratio": 0.1353,
+      "circ_mv_yi": 140.5
     },
     "health_rating": "较差",
     "benchmark_ref": "半导体设备及材料行业基准",

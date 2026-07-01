@@ -25,7 +25,7 @@ from picker.data.fundamentals_data import (
     _get_pro_api, _code_to_ts_code, _tushare_query, _safe_float,
 )
 
-DAILY_BASIC_FIELDS = "ts_code,pe_ttm,pb,ps_ttm,total_mv,turnover_rate,dv_ratio"
+DAILY_BASIC_FIELDS = "ts_code,pe_ttm,pb,ps_ttm,total_mv,circ_mv,turnover_rate,dv_ratio"
 YOY_SLEEP = 0.3  # fina_indicator 每股调用间隔, 规避 Tushare 速率限制
 
 
@@ -73,6 +73,9 @@ def backfill_one(code, market_db, pro, dry_run=False):
         total_mv = _safe_float(row.get("total_mv"))
         if total_mv is not None:
             km["total_mv_yi"] = round(total_mv / 1e4, 1)
+        circ_mv = _safe_float(row.get("circ_mv"))
+        if circ_mv is not None:
+            km["circ_mv_yi"] = round(circ_mv / 1e4, 1)  # 流通市值 万→亿 (供资金流折扣算主力净额/流通市值)
 
     # netprofit_yoy
     yoy = _fetch_netprofit_yoy(pro, code)

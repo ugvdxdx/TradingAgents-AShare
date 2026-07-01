@@ -150,7 +150,7 @@ def fetch_valuation(code, trade_date=""):
         return None
     ts_code = _code_to_ts_code(code)
     kwargs = {"ts_code": ts_code,
-              "fields": "trade_date,pe_ttm,pb,ps_ttm,total_mv,turnover_rate,dv_ratio"}
+              "fields": "trade_date,pe_ttm,pb,ps_ttm,total_mv,circ_mv,turnover_rate,dv_ratio"}
     if trade_date:
         kwargs["trade_date"] = trade_date  # 单日历史快照
     df = _tushare_query(pro.daily_basic, ts_code, 2, **kwargs)
@@ -158,11 +158,13 @@ def fetch_valuation(code, trade_date=""):
         return None
     row = df.iloc[0]  # trade_date 给定时单行; 不给时 daily_basic 按日期倒序, iloc[0]=最新
     total_mv = _safe_float(row.get("total_mv"))
+    circ_mv = _safe_float(row.get("circ_mv"))
     return {
         "pe_ttm": _safe_float(row.get("pe_ttm")),
         "pb": _safe_float(row.get("pb")),
         "ps_ttm": _safe_float(row.get("ps_ttm")),
         "total_mv_yi": round(total_mv / 1e4, 1) if total_mv is not None else None,  # 万→亿
+        "circ_mv_yi": round(circ_mv / 1e4, 1) if circ_mv is not None else None,  # 流通市值 万→亿 (供资金流折扣算主力净额/流通市值)
         "turnover_rate": _safe_float(row.get("turnover_rate")),
         "dv_ratio": _safe_float(row.get("dv_ratio")),
         "_vd_date": str(row.get("trade_date", "")),

@@ -37,11 +37,12 @@
       "cf_to_profit": -1.86,
       "netprofit_yoy": 34.4135,
       "pe_ttm": null,
-      "pb": 11.9487,
-      "ps_ttm": 3.6033,
-      "total_mv_yi": 129.8,
-      "turnover_rate": 6.8564,
-      "dv_ratio": null
+      "pb": 12.507,
+      "ps_ttm": 3.7717,
+      "total_mv_yi": 135.9,
+      "turnover_rate": 6.4487,
+      "dv_ratio": null,
+      "circ_mv_yi": 135.9
     },
     "health_rating": "较差",
     "benchmark_ref": "化工新材料同业（资产负债率普遍50-60%、毛利率15-20%、净利率5%+）",

@@ -36,11 +36,12 @@
       "cf_to_profit": -3.11,
       "netprofit_yoy": -1854.0997,
       "pe_ttm": null,
-      "pb": 9.424,
-      "ps_ttm": 5.5184,
-      "total_mv_yi": 96.9,
-      "turnover_rate": 6.3302,
-      "dv_ratio": null
+      "pb": 9.33,
+      "ps_ttm": 5.4634,
+      "total_mv_yi": 96.0,
+      "turnover_rate": 5.4398,
+      "dv_ratio": null,
+      "circ_mv_yi": 95.5
     },
     "health_rating": "较差",
     "benchmark_ref": "消费电子精密结构件及新材料行业（正常毛利率20%+、净利率5%+、资产负债率50%以下）",

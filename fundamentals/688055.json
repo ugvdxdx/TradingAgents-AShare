@@ -35,11 +35,12 @@
       "rd_expense_yi": 1.84,
       "operating_cf_yi": 2.04,
       "cf_to_profit": -0.98,
-      "pb": 4.5735,
-      "ps_ttm": 7.8032,
-      "turnover_rate": 1.4029,
-      "total_mv_yi": 183.3,
-      "netprofit_yoy": -9.4044
+      "pb": 4.8313,
+      "ps_ttm": 8.243,
+      "turnover_rate": 1.4085,
+      "total_mv_yi": 193.7,
+      "netprofit_yoy": -9.4044,
+      "circ_mv_yi": 193.7
     },
     "health_rating": "较差",
     "benchmark_ref": "中小尺寸LCD面板行业（对比京东方毛利率约15-20%、TCL科技毛利率约12-18%）",

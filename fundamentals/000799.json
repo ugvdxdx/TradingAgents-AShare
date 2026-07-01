@@ -35,11 +35,12 @@
       "cf_to_profit": 5.06,
       "netprofit_yoy": -371.7605,
       "pe_ttm": null,
-      "pb": 3.7651,
-      "ps_ttm": 13.1344,
-      "total_mv_yi": 142.0,
-      "turnover_rate": 5.0952,
-      "dv_ratio": 1.373
+      "pb": 3.7884,
+      "ps_ttm": 13.2155,
+      "total_mv_yi": 142.9,
+      "turnover_rate": 5.4694,
+      "dv_ratio": 1.3646,
+      "circ_mv_yi": 142.9
     },
     "health_rating": "较差",
     "benchmark_ref": "白酒行业平均净利率水平",

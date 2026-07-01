@@ -37,11 +37,12 @@
       "cf_to_profit": 0.42,
       "netprofit_yoy": 12.1599,
       "pe_ttm": null,
-      "pb": 62.0236,
-      "ps_ttm": 54.2413,
-      "total_mv_yi": 1951.9,
-      "turnover_rate": 4.7392,
-      "dv_ratio": null
+      "pb": 57.1705,
+      "ps_ttm": 49.9972,
+      "total_mv_yi": 1799.2,
+      "turnover_rate": 5.5212,
+      "dv_ratio": null,
+      "circ_mv_yi": 1799.2
     },
     "health_rating": "较差",
     "benchmark_ref": "半导体IP授权行业（全球头部IP企业毛利率80%+、ROE 15%+为基准）",

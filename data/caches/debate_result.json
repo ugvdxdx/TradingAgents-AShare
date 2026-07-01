@@ -1,7 +1,7 @@
 {
   "trade_date": "2026-07-01",
   "cutoff_date": null,
-  "generated_at": "2026-07-01T07:33:26.080528",
+  "generated_at": "2026-07-01T17:29:11.673457",
   "ranking": [
     {
       "rank": 1,
@@ -197,30 +197,6 @@
     },
     {
       "rank": 17,
-      "code": "600206",
-      "name": "有研新材",
-      "score": 35.2,
-      "confidence": 0.7,
-      "confidence_level": "高",
-      "key_thesis": "2025年净利同比+79%，直接受益日韩靶材转单及钨钼价格超级周期",
-      "key_risk": "造血能力极差，经营性现金流-0.79亿(CF净比-0.3)且毛利率仅9%",
-      "supporting_claim_ids": [],
-      "risk_flags": []
-    },
-    {
-      "rank": 18,
-      "code": "300475",
-      "name": "香农芯创",
-      "score": 35.1,
-      "confidence": 0.7,
-      "confidence_level": "高",
-      "key_thesis": "25年净利暴增106%，PEG0.71成长消化估值极便宜。",
-      "key_risk": "分销毛利率极薄仅3.97%，存储跌价易引发减值风险。",
-      "supporting_claim_ids": [],
-      "risk_flags": []
-    },
-    {
-      "rank": 19,
       "code": "600160",
       "name": "巨化股份",
       "score": 34.8,
@@ -232,7 +208,7 @@
       "risk_flags": []
     },
     {
-      "rank": 20,
+      "rank": 18,
       "code": "600141",
       "name": "兴发集团",
       "score": 34.8,
@@ -240,6 +216,30 @@
       "confidence_level": "高",
       "key_thesis": "PE处板块14分位极低估，高纯四氯化硅近期持续涨价",
       "key_risk": "草甘膦等周期业务拖累致净利同比-6.83%，盈利弹性弱",
+      "supporting_claim_ids": [],
+      "risk_flags": []
+    },
+    {
+      "rank": 19,
+      "code": "688037",
+      "name": "芯源微",
+      "score": 34.6,
+      "confidence": 0.7,
+      "confidence_level": "高",
+      "key_thesis": "独家国产替代标的，深度绑定中芯国际与长鑫存储",
+      "key_risk": "净利率跌至3.63%且利润同比大降64.6%，呈微利状态",
+      "supporting_claim_ids": [],
+      "risk_flags": []
+    },
+    {
+      "rank": 20,
+      "code": "300408",
+      "name": "三环集团",
+      "score": 34.6,
+      "confidence": 0.7,
+      "confidence_level": "高",
+      "key_thesis": "光纤插芯份额超40%，享800G光模块与AI基板放量",
+      "key_risk": "高端PKG落后京瓷，且中低端MLCC面临风华扩产战",
       "supporting_claim_ids": [],
       "risk_flags": []
     }
@@ -255,5 +255,5 @@
     "risk_flag_summary": {},
     "disclaimer": "本结果由多智能体辩论自动生成, 仅供研究参考, 不构成投资建议。市场有风险, 决策需谨慎。"
   },
-  "run_dir": "results/picker_v5/2026-07-01_20260701_0733"
+  "run_dir": "results/picker_v5/2026-07-01_20260701_1728"
 }

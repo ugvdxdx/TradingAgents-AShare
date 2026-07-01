@@ -35,11 +35,12 @@
       "cf_to_profit": -1.34,
       "netprofit_yoy": -29.4516,
       "pe_ttm": null,
-      "pb": 34.6845,
-      "ps_ttm": 14.1003,
-      "total_mv_yi": 366.3,
-      "turnover_rate": 13.2124,
-      "dv_ratio": 0.0303
+      "pb": 31.6049,
+      "ps_ttm": 12.8484,
+      "total_mv_yi": 333.8,
+      "turnover_rate": 15.0261,
+      "dv_ratio": 0.0332,
+      "circ_mv_yi": 333.6
     },
     "health_rating": "较差",
     "benchmark_ref": "光电显示及元件加工行业",

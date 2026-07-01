@@ -35,11 +35,12 @@
       "rd_expense_yi": 13.05,
       "operating_cf_yi": -29.56,
       "cf_to_profit": 2.95,
-      "pb": 27.4509,
-      "ps_ttm": 161.8109,
-      "turnover_rate": 8.272,
-      "total_mv_yi": 3162.2,
-      "netprofit_yoy": 38.1577
+      "pb": 27.4929,
+      "ps_ttm": 162.0586,
+      "turnover_rate": 12.4444,
+      "total_mv_yi": 3167.1,
+      "netprofit_yoy": 38.1577,
+      "circ_mv_yi": 203.7
     },
     "health_rating": "较差",
     "benchmark_ref": "A股半导体设计公司平均水平",
