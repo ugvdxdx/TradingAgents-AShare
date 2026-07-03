@@ -34,10 +34,12 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="跳过网络请求, 仅验证管道")
     args = ap.parse_args()
 
-    from datetime import datetime
-    today = datetime.now().strftime("%Y-%m-%d")
-    if args.date and args.date != today:
-        # 非今日 → 回测模式: trade_date=该日, cutoff_date=该日 (截断数据, 跳过capital重算)
+    from tradingagents.agents.picker.picker_graph import _resolve_effective_trade_date
+    # 用"数据归属日"(而非裸日历日)判断是否进入回测模式, 与 PickerGraph.run 内部
+    # 的归属判定保持一致 —— 避免入口算今天、内部算昨天的判定错位。
+    effective_today = _resolve_effective_trade_date()
+    if args.date and args.date != effective_today:
+        # 指定日 ≠ 归属日 → 回测模式: trade_date=该日, cutoff_date=该日 (截断数据, 跳过capital重算)
         g = PickerGraph(debate_top_k=args.top_k)
         g.run(trade_date=args.date, cutoff_date=args.date, dry_run=args.dry_run)
     else:

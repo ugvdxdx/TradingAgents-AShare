@@ -24,6 +24,8 @@
 
 ## 关键命令
 
+> **术语约定**:用户说"**更新研报**" = 全跑每日维护 `uv run python3 picker/pipeline/run_daily_maintenance.py`(全流程:研报采集→提取→缺口发现→chain tiers→fundamentals 刷新→capital→冷热池→K线→世界知识→快照)。默认无需再问,直接执行;Cookie 过期(code=23)时停下提示用户更新 `XIAOE_COOKIE`。
+
 ```bash
 # 单只股票分析
 tradingagents analyze 600519.SH --date 2026-05-26

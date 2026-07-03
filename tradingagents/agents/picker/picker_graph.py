@@ -18,11 +18,42 @@ from typing import Any, Dict
 
 from langgraph.graph import END, START, StateGraph
 
+from tradingagents.dataflows.trade_calendar import (
+    is_cn_trading_day,
+    now_cn,
+    previous_cn_trading_day,
+)
+
 from . import analysts as analyst_nodes
 from . import debaters as debater_nodes
 from . import reporter as reporter_nodes
 from .llm_helper import LLMHelper
 from .picker_state import PickerState
+
+# 当日收盘数据(日线/资金流/估值)在 17:00 后才完整可读,此前跑出的评分
+# 实际仍基于上一交易日数据 → 快照/信号/复盘应归到上一交易日,避免与盘后
+# 基于当日数据的评分同日覆盖、语义错位。
+MARKET_DATA_READY_HOUR = 17
+
+
+def _resolve_effective_trade_date(now=None) -> str:
+    """按运行时刻判定"数据归属日"(= 评分所基于数据的交易日)。
+
+    规则:
+      - 今日为交易日 且 运行时刻 ≥ 17:00 → 今日(当日收盘数据已完整)
+      - 其余(< 17:00,或今日非交易日)     → 上一交易日
+
+    Args:
+        now: 可选, 传入 datetime 用于测试(默认取上海当前时间)。
+
+    Returns:
+        "YYYY-MM-DD" 形式的归属交易日。
+    """
+    n = now or now_cn()
+    today = n.date().strftime("%Y-%m-%d")
+    if is_cn_trading_day(today) and n.hour >= MARKET_DATA_READY_HOUR:
+        return today
+    return previous_cn_trading_day(today)
 
 
 class PickerGraph:
@@ -86,7 +117,16 @@ class PickerGraph:
 
     def run(self, trade_date: str | None = None, cutoff_date: str | None = None,
             dry_run: bool = False) -> PickerState:
-        trade_date = trade_date or datetime.now().strftime("%Y-%m-%d")
+        # 实盘模式(cutoff_date 为空且未显式指定 trade_date): 用"数据归属日"
+        # 而非裸日历日 —— 开盘前/盘中(<17:00)或非交易日跑,数据仍属上一交易日,
+        # 归到上一交易日; 17:00 后交易日跑才归到当天。回测/手动指定不受影响。
+        auto_resolved = False
+        if trade_date is None:
+            if cutoff_date is None:
+                trade_date = _resolve_effective_trade_date()
+                auto_resolved = True
+            else:
+                trade_date = cutoff_date
         stamp = datetime.now().strftime("%Y%m%d_%H%M")
         sub = "backtest/" + (cutoff_date or trade_date) if cutoff_date else f"{trade_date}_{stamp}"
         run_dir = os.path.join("results", "picker_v5", sub)
@@ -101,8 +141,23 @@ class PickerGraph:
                 "debate_top_k": self.debate_top_k,
             },
         }
+        # 归属判定审计行(仅实盘自动判定时打印, 回测日期由用户指定无需说明)
+        resolve_line = ""
+        if auto_resolved:
+            n = now_cn()
+            hhmm = n.strftime("%H:%M")
+            today = n.date().strftime("%Y-%m-%d")
+            if trade_date == today:
+                resolve_line = (f"\n  数据归属日={trade_date} "
+                                f"(运行时刻 {hhmm} ≥ {MARKET_DATA_READY_HOUR}:00 且今日为交易日)")
+            else:
+                reason = "今日非交易日" if not is_cn_trading_day(today) else (
+                    f"运行时刻 {hhmm} < {MARKET_DATA_READY_HOUR}:00")
+                resolve_line = (f"\n  数据归属日={trade_date} "
+                                f"(上一交易日; {reason})")
         print(f"{'='*60}\n  debate_picker v5 — {trade_date}"
-              f"{' (回测 cutoff=' + cutoff_date + ')' if cutoff_date else ''}\n"
+              f"{' (回测 cutoff=' + cutoff_date + ')' if cutoff_date else ''}"
+              f"{resolve_line}\n"
               f"  架构: 纯量化基线 "
               f"(全池 → 量化锚排序 → TOP{self.debate_top_k}, 无LLM辩论)\n"
               f"  落盘: {run_dir}\n{'='*60}")
