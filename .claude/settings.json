@@ -38,7 +38,8 @@
       "Bash(echo \"EXIT=$?\")",
       "Bash(python3 -c \"import ast; ast.parse\\(open\\('picker/pipeline/refresh_fundamentals.py',encoding='utf-8'\\).read\\(\\)\\); print\\('refresh_fundamentals.py syntax OK'\\)\")",
       "Bash(python3 -m py_compile picker/scoring/v3_full_score.py)",
-      "Bash(python3 -c \"from picker.pipeline import refresh_fundamentals as r; print\\('✓ import OK, _is_rate_limited 可用:', hasattr\\(r, '_is_rate_limited'\\)\\)\")"
+      "Bash(python3 -c \"from picker.pipeline import refresh_fundamentals as r; print\\('✓ import OK, _is_rate_limited 可用:', hasattr\\(r, '_is_rate_limited'\\)\\)\")",
+      "Bash(uv run *)"
     ]
   }
 }

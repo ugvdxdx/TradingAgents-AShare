@@ -278,6 +278,8 @@ _SECTOR_VAL_DATE = ""
 # 业绩预告进程级缓存 (当日级失效, 避免每只股读盘; 磁盘源 forecast_fetcher.precompute_pool_forecast 每日刷新)
 _FORECAST_CACHE = None         # {code: [rec]}
 _FORECAST_DATE = ""
+_EXPRESS_CACHE = None          # {code: [rec]} 业绩快报(快报优先覆盖预告)
+_EXPRESS_DATE = ""
 
 
 def _current_sector(code, industry=None):
@@ -325,12 +327,58 @@ def _load_forecast_cache():
     return _FORECAST_CACHE
 
 
-def _compute_forecast_signals(code):
-    """读该股近期业绩预告 (FORECAST_CACHE) → surge 催化硬数据。返回 dict 或 None。
+def _load_express_cache():
+    """读 EXPRESS_CACHE (当日级进程缓存, 业绩快报)。返回 {code: [rec]} 或 {}。
 
-    业绩预告带公告日期 + 预增幅度 + 预告类型, 直接满足 surge "催化日期硬要求"
+    磁盘源由 express_fetcher.precompute_pool_express 每日维护刷新; 快报披露窗口在预告之后,
+    数据更准(初步核算值 vs 预告区间)。读失败容错同 _load_forecast_cache。
+    """
+    global _EXPRESS_CACHE, _EXPRESS_DATE
+    today = datetime.now().strftime("%Y-%m-%d")
+    if _EXPRESS_CACHE is not None and _EXPRESS_DATE == today:
+        return _EXPRESS_CACHE
+    try:
+        from picker.paths import EXPRESS_CACHE as _EX_PATH
+        if os.path.exists(_EX_PATH):
+            data = json.load(open(_EX_PATH, encoding="utf-8"))
+            _EXPRESS_CACHE = data.get("expresses", {}) or {}
+            _EXPRESS_DATE = data.get("_updated", "")
+            return _EXPRESS_CACHE
+    except Exception:
+        pass
+    _EXPRESS_CACHE = {}
+    _EXPRESS_DATE = today
+    return _EXPRESS_CACHE
+
+
+def _compute_forecast_signals(code):
+    """读该股近期业绩催化 (快报优先, 回退预告) → surge 催化硬数据。返回 dict 或 None。
+
+    快报(express)披露晚于预告但数据更准(初步核算值 vs 预告区间预测), 同一股同时有两者时
+    快报优先覆盖。预告/快报都带公告日期 + 增幅, 直接满足 surge "催化日期硬要求"
     (PROMPT_V3E 高分档催化必须含具体日期, LLM 原本只能从研报文本猜, 现在有真日历)。
     """
+    # 快报优先
+    ex_cache = _load_express_cache()
+    ex_recs = ex_cache.get(code) or ex_cache.get(str(code).zfill(6))
+    if ex_recs:
+        rec = ex_recs[0]
+        days_since = None
+        try:
+            days_since = (datetime.now() - datetime.strptime(rec.get("notice_date", "2000-01-01"), "%Y-%m-%d")).days
+        except Exception:
+            pass
+        return {
+            "type": rec.get("type", ""),
+            "change_pct": rec.get("change_pct"),
+            "notice_date": rec.get("notice_date", ""),
+            "summary": rec.get("summary", ""),
+            "days_since_notice": days_since,
+            "source": "express",  # 快报(数据更准)
+            "report_period": rec.get("report_period", ""),
+            "net_profit": rec.get("net_profit"),  # 快报绝对净利(元), forward PE 用
+        }
+    # 回退预告
     cache = _load_forecast_cache()
     recs = cache.get(code) or cache.get(str(code).zfill(6))
     if not recs:
@@ -347,7 +395,57 @@ def _compute_forecast_signals(code):
         "notice_date": rec.get("notice_date", ""),
         "summary": rec.get("summary", ""),
         "days_since_notice": days_since,
+        "source": "forecast",  # 预告(区间预测)
+        "report_period": rec.get("report_period", ""),
+        "net_profit": rec.get("net_profit"),
     }
+
+
+def _classify_catalyst_timing(notice_date, trade_date):
+    """判定业绩催化相对 K线的时间成熟度 (盘后公告时间差修复)。
+
+    数据精度限制: akshare stock_yjyg_em 的公告日期被 .dt.date 截断到天, 无法精确判 15:00。
+    用交易日逻辑近似: notice_date >= trade_date 即判 K线未充分反映 (保守做多逻辑——
+    同日盘后是最常见场景, 宁可信其未反映, 给催化更高权重)。
+
+    Returns:
+      "unreflected" — 公告日 >= K线最新交易日 (盘后/跨日, K线完全/大概率未反映)
+      "fresh"      — 公告后仅过1个交易日 (可能未充分反映, 需关注是否连续放量)
+      "digested"   — 公告后已过2+交易日 (K线已反映)
+      None         — 日期缺失或无法判定
+    """
+    if not notice_date or not trade_date:
+        return None
+    try:
+        from tradingagents.dataflows.trade_calendar import is_cn_trading_day, previous_cn_trading_day
+        # 公告日 >= K线最新交易日 → 未反映 (盘后或跨日)
+        if notice_date >= trade_date:
+            return "unreflected"
+        # 公告日 == K线前一交易日 → 仅过1日 (上一交易日盘后催化)
+        prev_td = previous_cn_trading_day(trade_date)
+        if notice_date == prev_td:
+            return "fresh"
+        # 否则: 公告日早于前一交易日, 已充分反映
+        return "digested"
+    except Exception:
+        # trade_calendar 不可用时退化为纯日期比较
+        if notice_date >= trade_date:
+            return "unreflected"
+        return "digested"
+
+
+def _enrich_forecast_timing(forecast_sig, surge_sig):
+    """给 forecast_sig 补充 catalyst_timing 字段 (盘后公告判定)。原地修改, 返回 forecast_sig。
+
+    用 surge_sig 的 trade_date (K线最新交易日) 与 forecast_sig 的 notice_date 比较。
+    surge_sig 为 None 或无 trade_date 时无法判定, timing 置 None (渲染块兼容跳过)。
+    """
+    if not forecast_sig:
+        return forecast_sig
+    notice_date = forecast_sig.get("notice_date", "")
+    trade_date = (surge_sig or {}).get("trade_date", "")
+    forecast_sig["catalyst_timing"] = _classify_catalyst_timing(notice_date, trade_date)
+    return forecast_sig
 
 
 def _load_sector_valuation(force=False):
@@ -422,11 +520,107 @@ def _sector_percentile(code, pe, pb):
     }
 
 
-def _compute_valuation_signals(code):
-    """surge 估值锚定: PE/PB 的板块相对分位 + PEG(增长消化)。读 fundamentals key_metrics。
+def _parse_forecast_profit(summary):
+    """从业绩预告 summary 正则提取预告净利绝对值(亿元)。
 
-    返回 {pe_ttm, pb, netprofit_yoy, peg, sector, pe_pct, pb_pct, pe_median, pb_median} 或 None。
+    预告 summary 典型格式: '预计...净利润盈利:920,000万元至1,100,000万元,同比...'
+    返回 (lower_yi, upper_yi) 亿为单位, 或 None。亏损('亏损:X万元')返回负数。
+    """
+    if not summary:
+        return None
+    s = str(summary)
+    # 优先匹配区间: 盈利/亏损 X万元至Y万元
+    m = re.search(r'(盈利|亏损)[:：]?\s*([\d,]+\.?\d*)\s*万元\s*至\s*([\d,\.]+)\s*万元', s)
+    if m:
+        sign = -1 if '亏损' in m.group(1) else 1
+        lo = sign * float(m.group(2).replace(',', '')) / 1e4
+        hi = sign * float(m.group(3).replace(',', '')) / 1e4
+        return (lo, hi)
+    # 兜底单值: 盈利/亏损 X万元
+    m = re.search(r'(盈利|亏损)[:：]?\s*([\d,]+\.?\d*)\s*万元', s)
+    if m:
+        sign = -1 if '亏损' in m.group(1) else 1
+        v = sign * float(m.group(2).replace(',', '')) / 1e4
+        return (v, v)
+    return None
+
+
+# 报告期 → 月数 (用于年化): 0331→3月, 0630→6月, 0930→9月, 1231→12月
+_PERIOD_MONTH = {"0331": 3, "0630": 6, "0930": 9, "1231": 12}
+
+
+def _annualize_profit(profit_yi, report_period):
+    """按报告期月数年化净利 (亿元)。report_period 形如 '20260630'。
+    中报×2 / 一季报×4 / 三季报×(4/3) / 年报×1。无法识别报告期则不年化(返回原值)。"""
+    p = str(report_period)[-4:]
+    months = _PERIOD_MONTH.get(p)
+    if not months or months <= 0 or profit_yi is None:
+        return profit_yi
+    return profit_yi * 12.0 / months
+
+
+def _compute_forward_valuation(code, forecast_sig, fund_data):
+    """用预告/快报利润计算 forward PE/PEG (解决 TTM PE 对预增股失真问题)。
+
+    forecast_sig: _compute_forecast_signals 返回值 (含 summary/notice_date/source, 及快报 net_profit)
+    fund_data: fundamentals JSON dict (读 total_mv_yi 总市值)
+    返回 {forward_pe, forward_peg, annualized_profit_yi, change_pct, source, is_approx} 或 None。
+    预亏/减亏(年化净利≤0) 不计算。
+    """
+    if not forecast_sig:
+        return None
+    mv_yi = ((fund_data.get('financial_health') or {}).get('key_metrics') or {}).get('total_mv_yi')
+    if not mv_yi or mv_yi <= 0:
+        return None
+    change_pct = forecast_sig.get('change_pct')
+    src = forecast_sig.get('source', 'forecast')
+    is_approx = False
+    annual_yi = None
+    # 快报优先: 有绝对净利字段 (元) → 直接年化
+    if src == 'express' and forecast_sig.get('net_profit') is not None:
+        np_yi = forecast_sig['net_profit'] / 1e8
+        if np_yi > 0:
+            annual_yi = _annualize_profit(np_yi, forecast_sig.get('report_period', ''))
+    # 预告/快报兜底: 从 summary 正则提取绝对利润
+    if annual_yi is None or annual_yi <= 0:
+        profit_range = _parse_forecast_profit(forecast_sig.get('summary', ''))
+        if profit_range:
+            mid = (profit_range[0] + profit_range[1]) / 2.0
+            if mid > 0:
+                annual_yi = _annualize_profit(mid, forecast_sig.get('report_period', ''))
+    # fallback: 用 TTM 净利 × (1 + 同比) 近似
+    if annual_yi is None or annual_yi <= 0:
+        np_yi = ((fund_data.get('financial_health') or {}).get('key_metrics') or {}).get('net_profit_yi')
+        if np_yi and np_yi > 0 and isinstance(change_pct, (int, float)):
+            annual_yi = np_yi * (1 + change_pct / 100.0)
+            is_approx = True
+    if not annual_yi or annual_yi <= 0:
+        return None
+    fwd_pe = round(mv_yi / annual_yi, 2)
+    # forward PEG: PE / 预告增速 (增速过大时定性而非定量)
+    fwd_peg = None
+    if isinstance(change_pct, (int, float)) and change_pct > 0:
+        if change_pct > 500:
+            fwd_peg = 0.01  # 定性: 极便宜 (避免数值失真)
+        else:
+            fwd_peg = round(fwd_pe / change_pct, 3)
+    return {
+        'forward_pe': fwd_pe,
+        'forward_peg': fwd_peg,
+        'annualized_profit_yi': round(annual_yi, 2),
+        'change_pct': change_pct,
+        'source': src,
+        'is_approx': is_approx,
+    }
+
+
+def _compute_valuation_signals(code, forecast_sig=None):
+    """surge 估值锚定: PE/PB 的板块相对分位 + PEG(增长消化) + forward PE(预告消化)。读 fundamentals key_metrics。
+
+    返回 {pe_ttm, pb, netprofit_yoy, peg, sector, pe_pct, pb_pct, pe_median, pb_median,
+          forward_pe?, forward_peg?, annualized_profit_yi?} 或 None。
     PEG=PE/净利同比: <1 便宜(成長能消化), >2 偏贵; 负增长/亏损时不计算。
+    当传 forecast_sig 时, 额外算 forward PE/PEG (用预告利润年化), 解决 TTM PE 对预增股失真。
     """
     fund_path = os.path.join(FUNDAMENTALS_DIR, f"{code}.json")
     if not os.path.exists(fund_path):
@@ -441,13 +635,24 @@ def _compute_valuation_signals(code):
     high_pe = pe is not None and pe > 200  # PE>200=当前微利/亏损边缘, PEG 会失真(分母极小, 任何增速都给巨大PEG)
     peg = round(pe / g, 2) if (pe and g and g > 0 and not high_pe) else None
     sp = _sector_percentile(code, pe, pb) or {}
-    if not any([pe, pb, peg, sp]):
-        return None
-    return {
+    out = {
         "pe_ttm": pe, "pb": pb, "ps_ttm": ps, "netprofit_yoy": g, "peg": peg, "high_pe": high_pe,
         "sector": sp.get("sector"), "pe_pct": sp.get("pe_pct"), "pb_pct": sp.get("pb_pct"),
         "pe_median": sp.get("pe_median"), "pb_median": sp.get("pb_median"),
     }
+    # forward PE/PEG: 用预告/快报利润年化 (TTM PE 对预增股失真时尤其关键)
+    if forecast_sig:
+        fwd = _compute_forward_valuation(code, forecast_sig, d)
+        if fwd:
+            out["forward_pe"] = fwd["forward_pe"]
+            out["forward_peg"] = fwd["forward_peg"]
+            out["forward_annualized_profit_yi"] = fwd["annualized_profit_yi"]
+            out["forward_source"] = fwd["source"]
+            out["forward_is_approx"] = fwd["is_approx"]
+            out["forward_change_pct"] = fwd["change_pct"]
+    if not any([pe, pb, peg, sp, out.get("forward_pe")]):
+        return None
+    return out
 
 
 def _render_surge_signals_block(sig, val_sig=None, forecast_sig=None):
@@ -479,6 +684,9 @@ def _render_surge_signals_block(sig, val_sig=None, forecast_sig=None):
         fl = r.get("from_low")
         fl_str = (f"自{r.get('low_date', '?')}低点 {_fmt(fl)}" if fl is not None else "自低点 N/A")
         lines.append(f"【surge 锚定数据 (截至 {sig.get('trade_date', '?')}, K线实测 非叙事)】")
+        # 盘后催化呼应: 若预告未反映, 提醒 LLM 以下K线是公告前价格
+        if forecast_sig and forecast_sig.get("catalyst_timing") == "unreflected":
+            lines.append(f"⚠ 注意: 以下K线数据是预告公告日({forecast_sig.get('notice_date', '?')})之前的价格, 未反映盘后催化(见下方预告段)——勿据此K线平淡而判 price-in 充分。")
         lines.append(f"价格水位: 近5日 {_fmt(r.get('r5'))} / 20日 {_fmt(r.get('r20'))} / "
                      f"60日 {_fmt(r.get('r60'))} / 90日 {_fmt(r.get('r90'))} / {fl_str} | "
                      f"最新收盘 {sig.get('latest_close')}")
@@ -499,22 +707,47 @@ def _render_surge_signals_block(sig, val_sig=None, forecast_sig=None):
         if val_sig.get("high_pe"):
             ps = val_sig.get("ps_ttm")
             ps_str = f"PS={ps}、" if ps else ""
-            lines.append(f"PE {pe} 极高(当前微利/亏损边缘, 远期产能/订单定价为主) → PEG不适用, 看{ps_str}营收增速/在手订单而非PE")
+            lines.append(f"PE {pe} 极高(当前微利/亏损边缘, 远期产能/订单定价为主) → TTM PEG不适用, 看{ps_str}营收增速/在手订单而非TTM PE")
         elif peg is not None and g is not None:
             tag = "便宜(成长能消化估值)" if peg < 1 else ("偏贵(增速消化不掉)" if peg > 2 else "中性")
-            lines.append(f"PEG={peg} (PE / 净利增速{g:.0f}%) → {tag}")
+            lines.append(f"TTM PEG={peg} (PE / 净利增速{g:.0f}%) → {tag}")
         elif g is not None and g <= 0:
-            lines.append(f"净利同比 {g:.0f}% (负增长, PEG 不适用, 盈利承压)")
-        lines.append("判估值贵否须看板块分位+PEG, 勿用绝对PE/PB (高增周期股PE天生高, 如PE52可能实为板块最便宜)。")
+            lines.append(f"净利同比 {g:.0f}% (负增长, TTM PEG 不适用, 盈利承压)")
+        # forward PE (预告消化后估值) — 解决预增股 TTM PE 失真
+        fwd_pe = val_sig.get("forward_pe")
+        if fwd_pe is not None:
+            fwd_peg = val_sig.get("forward_peg")
+            ann_yi = val_sig.get("forward_annualized_profit_yi")
+            approx = " (TTM净利×同比近似)" if val_sig.get("forward_is_approx") else ""
+            src_zh = "快报" if val_sig.get("forward_source") == "express" else "预告"
+            chg = val_sig.get("forward_change_pct") or val_sig.get("netprofit_yoy")
+            if fwd_peg is not None:
+                ptag = "便宜(预告增速完全消化)" if fwd_peg < 0.3 else ("便宜" if fwd_peg < 1 else ("偏贵" if fwd_peg > 2 else "中性"))
+                peg_part = f" | forward PEG≈{fwd_peg} → {ptag}"
+            else:
+                peg_part = " | forward PEG≈极便宜(预告增速过大)"
+            lines.append(f"⭐预告消化估值: forward PE≈{fwd_pe} (按{src_zh}年化净利{ann_yi}亿算{approx}){peg_part}")
+            lines.append(f"注意: TTM PE 对'{src_zh}大增'股失真(分母是历史微利), 真实估值看 forward PE — {src_zh}兑现后估值大幅下降。")
+        lines.append("判估值贵否须看板块分位+PEG+预告消化forward PE, 勿用绝对TTM PE/PB (高增周期股TTM PE天生高, 预告兑现后可能极便宜)。")
     if forecast_sig:
-        lines.append("【业绩预告 (硬催化, 含公告日期 — 直接满足'催化日期硬要求')】")
+        src = forecast_sig.get("source", "forecast")
+        src_zh = "业绩快报" if src == "express" else "业绩预告"
+        src_note = " (快报=初步核算值, 数据精度高于预告区间)" if src == "express" else ""
+        lines.append(f"【{src_zh} (硬催化, 含公告日期 — 直接满足'催化日期硬要求'){src_note}】")
         ftype = forecast_sig.get("type", "?")
         chg = forecast_sig.get("change_pct")
         chg_str = f"{chg:+.0f}%" if isinstance(chg, (int, float)) else "未披露幅度"
         dsn = forecast_sig.get("days_since_notice")
         dsn_str = f" ({dsn}天前公告)" if dsn is not None else ""
-        lines.append(f"预告类型: {ftype} | 业绩变动幅度: {chg_str} | 公告日期: {forecast_sig.get('notice_date', '?')}{dsn_str}")
+        lines.append(f"类型: {ftype} | 业绩变动幅度: {chg_str} | 公告日期: {forecast_sig.get('notice_date', '?')}{dsn_str}")
         lines.append(f"业绩变动: {forecast_sig.get('summary', '?')}")
+        # 盘后公告时间差提示 (catalyst_timing 由 _enrich_forecast_timing 注入)
+        timing = forecast_sig.get("catalyst_timing")
+        if timing == "unreflected":
+            lines.append(f"⚠️ 盘后催化(K线截至 {sig.get('trade_date', '?') if sig else '?'} 未反映): 该{src_zh}公告日晚于/等于最新K线交易日, 价格尚未消化此利好。")
+            lines.append(f"   首个交易日开盘大概率跳空高开, price-in 压力最小 → 预增/扭亏类 surge 应给档内上沿(8.0+), 不得因K线momentum平淡而压分(那是公告前的价格)。")
+        elif timing == "fresh":
+            lines.append(f"△ 该{src_zh}经1个交易日消化, 可能未充分反映 → surge 档内中上沿, 关注是否连续放量验证催化落地。")
         lines.append("带日期的硬催化: 预增/扭亏+近期公告 → surge 加速主升档强证据; 预减/续亏/增亏 → 失速风险。")
     return "\n\n" + "\n".join(lines) + "\n"
 
@@ -531,10 +764,12 @@ def _call(code):
     if wk_slim:
         wk_date_line = f" ({_WORLD_KNOWLEDGE_DATE})" if _WORLD_KNOWLEDGE_DATE else ""
         wk_section = f"\n\n【当前市场宏观背景 (来自世界知识{wk_date_line})】\n{wk_slim}\n请将以上宏观背景纳入 chain 产业链位置和 surge 爆发分(30天超额收益概率)的判断, 尤其注意催化时间节点(中报窗口/订单交付节点)对30天变现概率的影响, 以及需求性质(结构性景气vs投机周期)对现金流红线的解读。"
-    # surge price-in 锚定数据: 价格/动量 (K线) + 估值板块分位/PEG (Tushare)
+    # surge price-in 锚定数据: 价格/动量 (K线) + 估值板块分位/PEG + 预告消化forward PE
     surge_sig = _compute_surge_signals(code)
-    val_sig = _compute_valuation_signals(code)
     forecast_sig = _compute_forecast_signals(code)
+    # 盘后公告时间差: 用 surge trade_date 与 forecast notice_date 判定催化成熟度, 注入 forecast_sig
+    forecast_sig = _enrich_forecast_timing(forecast_sig, surge_sig)
+    val_sig = _compute_valuation_signals(code, forecast_sig=forecast_sig)
     surge_block = _render_surge_signals_block(surge_sig, val_sig, forecast_sig)
     # chain 信号: chain_tier_map + 世界知识 + fundamentals JSON(含异动回流) + surge 锚定段
     prompt = get_chain_prompt() + wk_section + sj[:8000] + surge_block

@@ -1,0 +1,3047 @@
+{
+ "date": "2026-07-07",
+ "scores": {
+  "688146": {
+   "chain": 9.2,
+   "surge": 2.5,
+   "capital": 9.1
+  },
+  "300666": {
+   "chain": 9.0,
+   "surge": 3.5,
+   "capital": 9.2
+  },
+  "002409": {
+   "chain": 9.0,
+   "surge": 4.0,
+   "capital": 9.1
+  },
+  "603186": {
+   "chain": 8.5,
+   "surge": 7.0,
+   "capital": 9.4
+  },
+  "688041": {
+   "chain": 8.5,
+   "surge": 4.5,
+   "capital": 9.3
+  },
+  "688519": {
+   "chain": 8.5,
+   "surge": 4.5,
+   "capital": 9.3
+  },
+  "600206": {
+   "chain": 8.5,
+   "surge": 3.5,
+   "capital": 9.3
+  },
+  "301611": {
+   "chain": 8.8,
+   "surge": 3.5,
+   "capital": 8.7
+  },
+  "688300": {
+   "chain": 8.8,
+   "surge": 2.5,
+   "capital": 8.7
+  },
+  "000938": {
+   "chain": 7.0,
+   "surge": 6.0,
+   "capital": 10.4
+  },
+  "688019": {
+   "chain": 8.5,
+   "surge": 4.5,
+   "capital": 8.8
+  },
+  "300442": {
+   "chain": 8.5,
+   "surge": 6.5,
+   "capital": 8.8
+  },
+  "688549": {
+   "chain": 8.2,
+   "surge": 3.5,
+   "capital": 9.1
+  },
+  "003031": {
+   "chain": 8.6,
+   "surge": 3.5,
+   "capital": 8.3
+  },
+  "688233": {
+   "chain": 7.5,
+   "surge": 2.5,
+   "capital": 9.4
+  },
+  "688072": {
+   "chain": 7.5,
+   "surge": 6.5,
+   "capital": 9.3
+  },
+  "688141": {
+   "chain": 7.8,
+   "surge": 6.5,
+   "capital": 9.0
+  },
+  "600584": {
+   "chain": 7.3,
+   "surge": 5.0,
+   "capital": 9.4
+  },
+  "688802": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 10.1
+  },
+  "603938": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 9.1
+  },
+  "688545": {
+   "chain": 8.0,
+   "surge": 3.5,
+   "capital": 8.6
+  },
+  "002407": {
+   "chain": 8.0,
+   "surge": 7.0,
+   "capital": 8.6
+  },
+  "300661": {
+   "chain": 8.5,
+   "surge": 3.5,
+   "capital": 8.0
+  },
+  "688012": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 9.0
+  },
+  "688017": {
+   "chain": 8.8,
+   "surge": 7.5,
+   "capital": 7.7
+  },
+  "688596": {
+   "chain": 7.0,
+   "surge": 4.5,
+   "capital": 9.5
+  },
+  "300285": {
+   "chain": 8.7,
+   "surge": 3.5,
+   "capital": 7.7
+  },
+  "300604": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 8.9
+  },
+  "688361": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 9.3
+  },
+  "688820": {
+   "chain": 7.0,
+   "surge": 4.5,
+   "capital": 9.3
+  },
+  "688106": {
+   "chain": 7.5,
+   "surge": 5.5,
+   "capital": 8.8
+  },
+  "002371": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 8.7
+  },
+  "600667": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 9.2
+  },
+  "688530": {
+   "chain": 7.0,
+   "surge": 1.5,
+   "capital": 9.2
+  },
+  "300054": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 8.6
+  },
+  "688200": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 9.1
+  },
+  "688729": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 9.1
+  },
+  "688783": {
+   "chain": 7.2,
+   "surge": 3.5,
+   "capital": 8.9
+  },
+  "300408": {
+   "chain": 8.8,
+   "surge": 4.0,
+   "capital": 7.2
+  },
+  "688037": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 9.0
+  },
+  "688120": {
+   "chain": 7.0,
+   "surge": 3.0,
+   "capital": 9.0
+  },
+  "688506": {
+   "chain": 7.5,
+   "surge": 5.0,
+   "capital": 8.5
+  },
+  "605376": {
+   "chain": 8.5,
+   "surge": 2.5,
+   "capital": 7.4
+  },
+  "002747": {
+   "chain": 7.0,
+   "surge": 6.0,
+   "capital": 8.8
+  },
+  "300857": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 9.3
+  },
+  "603986": {
+   "chain": 8.5,
+   "surge": 3.5,
+   "capital": 7.3
+  },
+  "600141": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 9.3
+  },
+  "002850": {
+   "chain": 7.5,
+   "surge": 6.5,
+   "capital": 8.2
+  },
+  "688235": {
+   "chain": 7.5,
+   "surge": 7.0,
+   "capital": 8.2
+  },
+  "688409": {
+   "chain": 6.5,
+   "surge": 3.0,
+   "capital": 9.2
+  },
+  "688630": {
+   "chain": 7.2,
+   "surge": 3.5,
+   "capital": 8.5
+  },
+  "300260": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 8.7
+  },
+  "688809": {
+   "chain": 7.2,
+   "surge": 3.5,
+   "capital": 8.4
+  },
+  "688035": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 9.1
+  },
+  "000636": {
+   "chain": 8.5,
+   "surge": 4.0,
+   "capital": 7.0
+  },
+  "600160": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 8.0
+  },
+  "600276": {
+   "chain": 7.0,
+   "surge": 6.5,
+   "capital": 8.5
+  },
+  "688796": {
+   "chain": 7.0,
+   "surge": 6.0,
+   "capital": 8.5
+  },
+  "002549": {
+   "chain": 7.2,
+   "surge": 3.5,
+   "capital": 8.3
+  },
+  "603690": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 9.0
+  },
+  "300765": {
+   "chain": 6.5,
+   "surge": 5.5,
+   "capital": 9.0
+  },
+  "002422": {
+   "chain": 7.5,
+   "surge": 6.0,
+   "capital": 7.9
+  },
+  "300576": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 8.4
+  },
+  "688082": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 7.9
+  },
+  "603800": {
+   "chain": 6.0,
+   "surge": 3.0,
+   "capital": 9.4
+  },
+  "002653": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 8.8
+  },
+  "300475": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 7.8
+  },
+  "688331": {
+   "chain": 7.0,
+   "surge": 7.0,
+   "capital": 8.3
+  },
+  "688525": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 7.7
+  },
+  "688766": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 8.2
+  },
+  "300706": {
+   "chain": 6.5,
+   "surge": 2.5,
+   "capital": 8.7
+  },
+  "003043": {
+   "chain": 6.0,
+   "surge": 3.5,
+   "capital": 9.2
+  },
+  "688584": {
+   "chain": 6.0,
+   "surge": 4.0,
+   "capital": 9.2
+  },
+  "002821": {
+   "chain": 7.2,
+   "surge": 4.0,
+   "capital": 7.9
+  },
+  "688629": {
+   "chain": 8.0,
+   "surge": 8.5,
+   "capital": 7.1
+  },
+  "688702": {
+   "chain": 8.5,
+   "surge": 3.5,
+   "capital": 6.6
+  },
+  "002602": {
+   "chain": 6.5,
+   "surge": 6.5,
+   "capital": 8.5
+  },
+  "300263": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 8.5
+  },
+  "000021": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 7.9
+  },
+  "002138": {
+   "chain": 8.0,
+   "surge": 4.0,
+   "capital": 6.9
+  },
+  "603738": {
+   "chain": 6.5,
+   "surge": 2.0,
+   "capital": 8.4
+  },
+  "002046": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 8.3
+  },
+  "001309": {
+   "chain": 7.2,
+   "surge": 3.5,
+   "capital": 7.5
+  },
+  "301308": {
+   "chain": 7.5,
+   "surge": 8.5,
+   "capital": 7.2
+  },
+  "603259": {
+   "chain": 7.0,
+   "surge": 7.0,
+   "capital": 7.7
+  },
+  "002378": {
+   "chain": 7.0,
+   "surge": 4.5,
+   "capital": 7.7
+  },
+  "300456": {
+   "chain": 6.8,
+   "surge": 3.0,
+   "capital": 7.9
+  },
+  "000725": {
+   "chain": 8.5,
+   "surge": 3.5,
+   "capital": 6.1
+  },
+  "000776": {
+   "chain": 7.5,
+   "surge": 5.0,
+   "capital": 7.1
+  },
+  "600176": {
+   "chain": 9.0,
+   "surge": 5.5,
+   "capital": 5.6
+  },
+  "688385": {
+   "chain": 7.5,
+   "surge": 9.5,
+   "capital": 7.1
+  },
+  "301392": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 9.1
+  },
+  "300223": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 8.0
+  },
+  "600183": {
+   "chain": 9.5,
+   "surge": 3.5,
+   "capital": 5.0
+  },
+  "688396": {
+   "chain": 8.5,
+   "surge": 4.5,
+   "capital": 6.0
+  },
+  "002837": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 7.4
+  },
+  "601138": {
+   "chain": 6.5,
+   "surge": 3.0,
+   "capital": 7.9
+  },
+  "000062": {
+   "chain": 7.5,
+   "surge": 7.0,
+   "capital": 6.9
+  },
+  "000988": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 8.8
+  },
+  "600196": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 7.8
+  },
+  "600378": {
+   "chain": 8.0,
+   "surge": 4.5,
+   "capital": 6.3
+  },
+  "603629": {
+   "chain": 6.2,
+   "surge": 4.5,
+   "capital": 8.1
+  },
+  "688234": {
+   "chain": 6.0,
+   "surge": 2.0,
+   "capital": 8.3
+  },
+  "688795": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 8.8
+  },
+  "688002": {
+   "chain": 7.5,
+   "surge": 7.5,
+   "capital": 6.7
+  },
+  "603283": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 7.7
+  },
+  "300373": {
+   "chain": 8.0,
+   "surge": 5.5,
+   "capital": 6.1
+  },
+  "601628": {
+   "chain": 7.5,
+   "surge": 7.5,
+   "capital": 6.6
+  },
+  "601688": {
+   "chain": 7.5,
+   "surge": 6.8,
+   "capital": 6.6
+  },
+  "603773": {
+   "chain": 6.5,
+   "surge": 2.5,
+   "capital": 7.6
+  },
+  "000100": {
+   "chain": 8.0,
+   "surge": 5.5,
+   "capital": 6.0
+  },
+  "002600": {
+   "chain": 6.5,
+   "surge": 4.0,
+   "capital": 7.5
+  },
+  "600580": {
+   "chain": 7.0,
+   "surge": 8.2,
+   "capital": 7.0
+  },
+  "603993": {
+   "chain": 7.5,
+   "surge": 7.0,
+   "capital": 6.5
+  },
+  "300179": {
+   "chain": 5.5,
+   "surge": 2.0,
+   "capital": 8.5
+  },
+  "002842": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 8.5
+  },
+  "000977": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 9.9
+  },
+  "688981": {
+   "chain": 8.5,
+   "surge": 4.5,
+   "capital": 5.4
+  },
+  "002430": {
+   "chain": 5.5,
+   "surge": 4.5,
+   "capital": 8.3
+  },
+  "600460": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 6.3
+  },
+  "601066": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 6.3
+  },
+  "601211": {
+   "chain": 7.5,
+   "surge": 8.5,
+   "capital": 6.3
+  },
+  "603256": {
+   "chain": 8.5,
+   "surge": 4.0,
+   "capital": 5.3
+  },
+  "688347": {
+   "chain": 8.0,
+   "surge": 4.0,
+   "capital": 5.8
+  },
+  "688469": {
+   "chain": 7.8,
+   "surge": 3.5,
+   "capital": 6.0
+  },
+  "300870": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 7.3
+  },
+  "600172": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 10.3
+  },
+  "688669": {
+   "chain": 4.5,
+   "surge": 1.5,
+   "capital": 9.3
+  },
+  "300433": {
+   "chain": 5.5,
+   "surge": 4.5,
+   "capital": 8.2
+  },
+  "300972": {
+   "chain": 7.0,
+   "surge": 8.0,
+   "capital": 6.7
+  },
+  "301269": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 6.2
+  },
+  "600549": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 6.2
+  },
+  "002429": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 8.7
+  },
+  "688598": {
+   "chain": 7.5,
+   "surge": 2.0,
+   "capital": 6.2
+  },
+  "688302": {
+   "chain": 6.0,
+   "surge": 3.5,
+   "capital": 7.7
+  },
+  "002261": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 9.2
+  },
+  "300545": {
+   "chain": 6.0,
+   "surge": 2.5,
+   "capital": 7.7
+  },
+  "300748": {
+   "chain": 7.5,
+   "surge": 8.5,
+   "capital": 6.1
+  },
+  "301217": {
+   "chain": 7.5,
+   "surge": 2.5,
+   "capital": 6.1
+  },
+  "301511": {
+   "chain": 8.0,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "688249": {
+   "chain": 7.0,
+   "surge": 4.0,
+   "capital": 6.6
+  },
+  "600563": {
+   "chain": 7.5,
+   "surge": 3.0,
+   "capital": 6.1
+  },
+  "601336": {
+   "chain": 6.5,
+   "surge": 5.5,
+   "capital": 7.0
+  },
+  "601698": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 6.0
+  },
+  "603019": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 7.0
+  },
+  "600999": {
+   "chain": 6.5,
+   "surge": 8.5,
+   "capital": 6.9
+  },
+  "603939": {
+   "chain": 6.0,
+   "surge": 4.0,
+   "capital": 7.4
+  },
+  "600498": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 8.9
+  },
+  "000960": {
+   "chain": 7.0,
+   "surge": 4.0,
+   "capital": 6.3
+  },
+  "000963": {
+   "chain": 5.5,
+   "surge": 4.5,
+   "capital": 7.8
+  },
+  "002126": {
+   "chain": 6.5,
+   "surge": 6.5,
+   "capital": 6.8
+  },
+  "002484": {
+   "chain": 6.5,
+   "surge": 2.5,
+   "capital": 6.8
+  },
+  "301696": {
+   "chain": 7.0,
+   "surge": 7.5,
+   "capital": 6.3
+  },
+  "600961": {
+   "chain": 7.0,
+   "surge": 4.5,
+   "capital": 6.3
+  },
+  "603823": {
+   "chain": 6.0,
+   "surge": 2.0,
+   "capital": 7.3
+  },
+  "002050": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 5.7
+  },
+  "002142": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 5.7
+  },
+  "002273": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 7.7
+  },
+  "300059": {
+   "chain": 7.0,
+   "surge": 4.0,
+   "capital": 6.2
+  },
+  "601208": {
+   "chain": 7.2,
+   "surge": 2.8,
+   "capital": 6.0
+  },
+  "688110": {
+   "chain": 5.8,
+   "surge": 3.5,
+   "capital": 7.4
+  },
+  "688126": {
+   "chain": 7.0,
+   "surge": 3.0,
+   "capital": 6.2
+  },
+  "000066": {
+   "chain": 5.5,
+   "surge": 3.0,
+   "capital": 7.6
+  },
+  "300567": {
+   "chain": 6.8,
+   "surge": 3.5,
+   "capital": 6.3
+  },
+  "600030": {
+   "chain": 7.0,
+   "surge": 4.0,
+   "capital": 6.1
+  },
+  "600050": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 8.6
+  },
+  "601319": {
+   "chain": 6.8,
+   "surge": 4.0,
+   "capital": 6.3
+  },
+  "002080": {
+   "chain": 7.5,
+   "surge": 4.0,
+   "capital": 5.5
+  },
+  "600111": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 5.5
+  },
+  "688256": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 9.0
+  },
+  "605358": {
+   "chain": 7.6,
+   "surge": 4.0,
+   "capital": 5.4
+  },
+  "603233": {
+   "chain": 5.0,
+   "surge": 4.0,
+   "capital": 8.0
+  },
+  "300499": {
+   "chain": 5.5,
+   "surge": 3.0,
+   "capital": 7.5
+  },
+  "002736": {
+   "chain": 6.5,
+   "surge": 6.0,
+   "capital": 6.4
+  },
+  "300751": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 8.9
+  },
+  "600601": {
+   "chain": 6.5,
+   "surge": 7.0,
+   "capital": 6.4
+  },
+  "600036": {
+   "chain": 7.5,
+   "surge": 3.0,
+   "capital": 5.4
+  },
+  "000783": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 6.4
+  },
+  "300397": {
+   "chain": 4.5,
+   "surge": 2.0,
+   "capital": 8.4
+  },
+  "300395": {
+   "chain": 7.8,
+   "surge": 4.0,
+   "capital": 5.1
+  },
+  "689009": {
+   "chain": 5.8,
+   "surge": 6.5,
+   "capital": 7.1
+  },
+  "002056": {
+   "chain": 6.0,
+   "surge": 2.5,
+   "capital": 6.8
+  },
+  "002851": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 7.3
+  },
+  "301200": {
+   "chain": 7.5,
+   "surge": 6.0,
+   "capital": 5.3
+  },
+  "603893": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 6.3
+  },
+  "600353": {
+   "chain": 6.5,
+   "surge": 1.5,
+   "capital": 6.3
+  },
+  "002741": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 6.3
+  },
+  "002428": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 6.2
+  },
+  "301377": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 5.2
+  },
+  "601995": {
+   "chain": 7.0,
+   "surge": 5.5,
+   "capital": 5.7
+  },
+  "605589": {
+   "chain": 6.5,
+   "surge": 4.0,
+   "capital": 6.2
+  },
+  "688375": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 6.2
+  },
+  "688498": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 9.2
+  },
+  "688521": {
+   "chain": 6.5,
+   "surge": 3.0,
+   "capital": 6.2
+  },
+  "002155": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 6.1
+  },
+  "301526": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "600246": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 9.1
+  },
+  "600392": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 6.1
+  },
+  "300014": {
+   "chain": 6.5,
+   "surge": 7.8,
+   "capital": 6.1
+  },
+  "000657": {
+   "chain": 7.5,
+   "surge": 4.5,
+   "capital": 5.0
+  },
+  "000973": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 8.5
+  },
+  "002156": {
+   "chain": 7.5,
+   "surge": 5.5,
+   "capital": 5.0
+  },
+  "002916": {
+   "chain": 7.5,
+   "surge": 5.0,
+   "capital": 5.0
+  },
+  "600522": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 8.0
+  },
+  "601881": {
+   "chain": 6.0,
+   "surge": 4.0,
+   "capital": 6.5
+  },
+  "603989": {
+   "chain": 5.0,
+   "surge": 2.5,
+   "capital": 7.5
+  },
+  "000831": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 4.9
+  },
+  "001257": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 5.9
+  },
+  "301638": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 7.9
+  },
+  "600482": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 5.4
+  },
+  "603083": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 8.9
+  },
+  "002249": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 5.9
+  },
+  "301095": {
+   "chain": 6.8,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "001389": {
+   "chain": 7.5,
+   "surge": 8.5,
+   "capital": 4.8
+  },
+  "002475": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 5.3
+  },
+  "601456": {
+   "chain": 6.5,
+   "surge": 4.0,
+   "capital": 5.8
+  },
+  "601838": {
+   "chain": 6.8,
+   "surge": 3.5,
+   "capital": 5.5
+  },
+  "603459": {
+   "chain": 8.0,
+   "surge": 5.5,
+   "capital": 4.3
+  },
+  "300037": {
+   "chain": 6.0,
+   "surge": 3.0,
+   "capital": 6.2
+  },
+  "300803": {
+   "chain": 6.5,
+   "surge": 4.0,
+   "capital": 5.7
+  },
+  "600118": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 6.7
+  },
+  "688313": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 8.2
+  },
+  "688166": {
+   "chain": 6.0,
+   "surge": 2.5,
+   "capital": 6.2
+  },
+  "688689": {
+   "chain": 7.2,
+   "surge": 4.5,
+   "capital": 5.0
+  },
+  "688122": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 5.2
+  },
+  "300308": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 8.1
+  },
+  "600998": {
+   "chain": 4.5,
+   "surge": 5.5,
+   "capital": 7.6
+  },
+  "601059": {
+   "chain": 6.0,
+   "surge": 5.5,
+   "capital": 6.1
+  },
+  "601169": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "601318": {
+   "chain": 6.8,
+   "surge": 3.8,
+   "capital": 5.3
+  },
+  "601607": {
+   "chain": 4.8,
+   "surge": 4.8,
+   "capital": 7.3
+  },
+  "601901": {
+   "chain": 6.0,
+   "surge": 6.5,
+   "capital": 6.1
+  },
+  "600552": {
+   "chain": 6.5,
+   "surge": 2.5,
+   "capital": 5.6
+  },
+  "300269": {
+   "chain": 7.0,
+   "surge": 1.5,
+   "capital": 5.1
+  },
+  "600511": {
+   "chain": 4.5,
+   "surge": 4.0,
+   "capital": 7.5
+  },
+  "600926": {
+   "chain": 6.5,
+   "surge": 5.5,
+   "capital": 5.5
+  },
+  "601061": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 5.5
+  },
+  "601788": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 6.5
+  },
+  "601869": {
+   "chain": 3.8,
+   "surge": 3.0,
+   "capital": 8.2
+  },
+  "603308": {
+   "chain": 7.0,
+   "surge": 4.0,
+   "capital": 5.0
+  },
+  "002636": {
+   "chain": 6.5,
+   "surge": 2.5,
+   "capital": 5.5
+  },
+  "688008": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 4.5
+  },
+  "603667": {
+   "chain": 5.8,
+   "surge": 3.5,
+   "capital": 6.2
+  },
+  "002281": {
+   "chain": 3.0,
+   "surge": 2.5,
+   "capital": 8.9
+  },
+  "601231": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 7.4
+  },
+  "688635": {
+   "chain": 4.5,
+   "surge": 1.5,
+   "capital": 7.4
+  },
+  "300502": {
+   "chain": 3.8,
+   "surge": 3.2,
+   "capital": 8.1
+  },
+  "000166": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 6.3
+  },
+  "002463": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 4.3
+  },
+  "300620": {
+   "chain": 3.5,
+   "surge": 8.5,
+   "capital": 8.3
+  },
+  "688183": {
+   "chain": 7.0,
+   "surge": 4.5,
+   "capital": 4.8
+  },
+  "002179": {
+   "chain": 6.0,
+   "surge": 3.5,
+   "capital": 5.7
+  },
+  "002436": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 5.2
+  },
+  "300548": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 8.2
+  },
+  "600406": {
+   "chain": 5.5,
+   "surge": 4.5,
+   "capital": 6.2
+  },
+  "600570": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 4.7
+  },
+  "600885": {
+   "chain": 4.8,
+   "surge": 3.8,
+   "capital": 6.9
+  },
+  "603979": {
+   "chain": 6.0,
+   "surge": 7.0,
+   "capital": 5.7
+  },
+  "300476": {
+   "chain": 7.5,
+   "surge": 7.5,
+   "capital": 4.1
+  },
+  "600707": {
+   "chain": 5.5,
+   "surge": 2.0,
+   "capital": 6.1
+  },
+  "000566": {
+   "chain": 4.5,
+   "surge": 5.5,
+   "capital": 7.1
+  },
+  "000999": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 7.0
+  },
+  "002049": {
+   "chain": 6.0,
+   "surge": 3.5,
+   "capital": 5.5
+  },
+  "002074": {
+   "chain": 6.5,
+   "surge": 6.0,
+   "capital": 5.0
+  },
+  "002185": {
+   "chain": 5.5,
+   "surge": 5.0,
+   "capital": 6.0
+  },
+  "002384": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 6.0
+  },
+  "301165": {
+   "chain": 7.0,
+   "surge": 8.5,
+   "capital": 4.5
+  },
+  "600901": {
+   "chain": 6.0,
+   "surge": 4.0,
+   "capital": 5.5
+  },
+  "601236": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 6.0
+  },
+  "688322": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 4.5
+  },
+  "600363": {
+   "chain": 6.5,
+   "surge": 4.5,
+   "capital": 5.0
+  },
+  "002979": {
+   "chain": 7.0,
+   "surge": 8.5,
+   "capital": 4.5
+  },
+  "301071": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 7.9
+  },
+  "688383": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 5.9
+  },
+  "601939": {
+   "chain": 6.0,
+   "surge": 1.5,
+   "capital": 5.3
+  },
+  "300497": {
+   "chain": 5.0,
+   "surge": 6.0,
+   "capital": 6.3
+  },
+  "000426": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 5.7
+  },
+  "600487": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 7.7
+  },
+  "002831": {
+   "chain": 5.0,
+   "surge": 3.0,
+   "capital": 6.1
+  },
+  "300866": {
+   "chain": 5.0,
+   "surge": 4.0,
+   "capital": 6.1
+  },
+  "600690": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 6.1
+  },
+  "000969": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "688143": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 7.6
+  },
+  "002698": {
+   "chain": 4.0,
+   "surge": 4.0,
+   "capital": 7.0
+  },
+  "300394": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 7.5
+  },
+  "300759": {
+   "chain": 7.2,
+   "surge": 7.3,
+   "capital": 3.8
+  },
+  "600105": {
+   "chain": 3.0,
+   "surge": 3.5,
+   "capital": 8.0
+  },
+  "600150": {
+   "chain": 7.5,
+   "surge": 8.0,
+   "capital": 3.5
+  },
+  "601021": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 6.5
+  },
+  "601689": {
+   "chain": 7.5,
+   "surge": 5.0,
+   "capital": 3.5
+  },
+  "603288": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 6.5
+  },
+  "688818": {
+   "chain": 5.8,
+   "surge": 3.0,
+   "capital": 5.2
+  },
+  "002962": {
+   "chain": 3.5,
+   "surge": 1.5,
+   "capital": 7.5
+  },
+  "300821": {
+   "chain": 7.5,
+   "surge": 9.0,
+   "capital": 3.5
+  },
+  "300757": {
+   "chain": 6.5,
+   "surge": 2.5,
+   "capital": 4.4
+  },
+  "302132": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 5.9
+  },
+  "600085": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 6.9
+  },
+  "600332": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 7.4
+  },
+  "601009": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 5.4
+  },
+  "688036": {
+   "chain": 4.2,
+   "surge": 2.5,
+   "capital": 6.7
+  },
+  "688195": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 7.4
+  },
+  "688700": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 3.9
+  },
+  "002709": {
+   "chain": 4.8,
+   "surge": 3.5,
+   "capital": 6.1
+  },
+  "002064": {
+   "chain": 4.5,
+   "surge": 8.5,
+   "capital": 6.3
+  },
+  "688170": {
+   "chain": 6.0,
+   "surge": 3.0,
+   "capital": 4.8
+  },
+  "002558": {
+   "chain": 3.5,
+   "surge": 9.0,
+   "capital": 7.2
+  },
+  "300750": {
+   "chain": 5.5,
+   "surge": 4.5,
+   "capital": 5.2
+  },
+  "600000": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 5.2
+  },
+  "601919": {
+   "chain": 5.0,
+   "surge": 3.0,
+   "capital": 5.7
+  },
+  "603228": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 4.2
+  },
+  "603895": {
+   "chain": 5.0,
+   "surge": 4.5,
+   "capital": 5.7
+  },
+  "002414": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 6.1
+  },
+  "300316": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 6.1
+  },
+  "603501": {
+   "chain": 5.0,
+   "surge": 4.5,
+   "capital": 5.6
+  },
+  "000538": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 7.0
+  },
+  "002594": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 5.5
+  },
+  "600309": {
+   "chain": 4.5,
+   "surge": 9.0,
+   "capital": 6.0
+  },
+  "600372": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 6.5
+  },
+  "603929": {
+   "chain": 7.0,
+   "surge": 3.5,
+   "capital": 3.5
+  },
+  "688808": {
+   "chain": 7.0,
+   "surge": 4.0,
+   "capital": 3.5
+  },
+  "601985": {
+   "chain": 4.8,
+   "surge": 3.0,
+   "capital": 5.7
+  },
+  "300042": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 6.5
+  },
+  "002728": {
+   "chain": 4.5,
+   "surge": 4.0,
+   "capital": 6.0
+  },
+  "002028": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 5.4
+  },
+  "600388": {
+   "chain": 4.5,
+   "surge": 5.5,
+   "capital": 5.9
+  },
+  "600497": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 6.4
+  },
+  "300077": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.9
+  },
+  "002083": {
+   "chain": 4.5,
+   "surge": 7.5,
+   "capital": 5.9
+  },
+  "688158": {
+   "chain": 2.5,
+   "surge": 2.0,
+   "capital": 7.9
+  },
+  "000338": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.8
+  },
+  "300136": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 5.8
+  },
+  "600500": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 6.3
+  },
+  "601601": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 5.3
+  },
+  "603799": {
+   "chain": 5.0,
+   "surge": 4.5,
+   "capital": 5.3
+  },
+  "300033": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 6.3
+  },
+  "600399": {
+   "chain": 5.5,
+   "surge": 3.0,
+   "capital": 4.8
+  },
+  "603906": {
+   "chain": 3.5,
+   "surge": 6.0,
+   "capital": 6.8
+  },
+  "688603": {
+   "chain": 6.5,
+   "surge": 2.0,
+   "capital": 3.8
+  },
+  "601288": {
+   "chain": 5.5,
+   "surge": 1.5,
+   "capital": 4.7
+  },
+  "603155": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.7
+  },
+  "002001": {
+   "chain": 4.5,
+   "surge": 6.5,
+   "capital": 5.6
+  },
+  "300115": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "600893": {
+   "chain": 5.0,
+   "surge": 2.0,
+   "capital": 5.1
+  },
+  "600919": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "688411": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 6.1
+  },
+  "688585": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 7.6
+  },
+  "688781": {
+   "chain": 5.0,
+   "surge": 3.0,
+   "capital": 5.1
+  },
+  "300533": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.6
+  },
+  "301391": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 4.6
+  },
+  "000792": {
+   "chain": 4.0,
+   "surge": 6.0,
+   "capital": 6.0
+  },
+  "001267": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 7.5
+  },
+  "002352": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.5
+  },
+  "002555": {
+   "chain": 3.5,
+   "surge": 4.0,
+   "capital": 6.5
+  },
+  "300001": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 4.5
+  },
+  "300672": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 4.5
+  },
+  "300919": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 5.0
+  },
+  "600426": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.5
+  },
+  "600875": {
+   "chain": 4.5,
+   "surge": 5.5,
+   "capital": 5.5
+  },
+  "600900": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 6.0
+  },
+  "601633": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.5
+  },
+  "002805": {
+   "chain": 5.0,
+   "surge": 2.5,
+   "capital": 5.0
+  },
+  "000837": {
+   "chain": 5.5,
+   "surge": 3.0,
+   "capital": 4.5
+  },
+  "000893": {
+   "chain": 4.5,
+   "surge": 6.0,
+   "capital": 5.4
+  },
+  "600233": {
+   "chain": 3.5,
+   "surge": 8.5,
+   "capital": 6.4
+  },
+  "600760": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.4
+  },
+  "600988": {
+   "chain": 3.5,
+   "surge": 6.5,
+   "capital": 6.4
+  },
+  "601179": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 5.4
+  },
+  "601398": {
+   "chain": 4.5,
+   "surge": 2.0,
+   "capital": 5.4
+  },
+  "301188": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 7.4
+  },
+  "300570": {
+   "chain": 3.8,
+   "surge": 2.5,
+   "capital": 6.1
+  },
+  "000408": {
+   "chain": 3.8,
+   "surge": 9.0,
+   "capital": 6.0
+  },
+  "600018": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 6.3
+  },
+  "601168": {
+   "chain": 4.0,
+   "surge": 4.0,
+   "capital": 5.8
+  },
+  "002241": {
+   "chain": 4.8,
+   "surge": 3.5,
+   "capital": 5.0
+  },
+  "601727": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 5.3
+  },
+  "300085": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 6.3
+  },
+  "002324": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.3
+  },
+  "002648": {
+   "chain": 4.0,
+   "surge": 8.0,
+   "capital": 5.7
+  },
+  "600089": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 5.2
+  },
+  "601038": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.2
+  },
+  "601166": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 5.2
+  },
+  "603568": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.2
+  },
+  "688048": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 6.2
+  },
+  "603688": {
+   "chain": 2.0,
+   "surge": 1.5,
+   "capital": 7.7
+  },
+  "688220": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 5.7
+  },
+  "002843": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 6.2
+  },
+  "601636": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 6.2
+  },
+  "301205": {
+   "chain": 2.0,
+   "surge": 2.0,
+   "capital": 7.6
+  },
+  "600012": {
+   "chain": 3.0,
+   "surge": 2.0,
+   "capital": 6.6
+  },
+  "600025": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 6.1
+  },
+  "600143": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 5.1
+  },
+  "600703": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 5.6
+  },
+  "600887": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.1
+  },
+  "603605": {
+   "chain": 5.0,
+   "surge": 3.0,
+   "capital": 4.6
+  },
+  "000630": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.1
+  },
+  "002222": {
+   "chain": 7.5,
+   "surge": 4.0,
+   "capital": 2.0
+  },
+  "301603": {
+   "chain": 6.5,
+   "surge": 6.5,
+   "capital": 3.0
+  },
+  "301656": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 5.5
+  },
+  "601117": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 6.0
+  },
+  "603659": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.0
+  },
+  "300811": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 3.0
+  },
+  "600886": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 6.0
+  },
+  "300241": {
+   "chain": 5.0,
+   "surge": 3.0,
+   "capital": 4.5
+  },
+  "688127": {
+   "chain": 7.5,
+   "surge": 4.0,
+   "capital": 2.0
+  },
+  "688785": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 2.0
+  },
+  "000060": {
+   "chain": 4.0,
+   "surge": 8.0,
+   "capital": 5.4
+  },
+  "000768": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 5.9
+  },
+  "002203": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 5.4
+  },
+  "300835": {
+   "chain": 5.0,
+   "surge": 1.5,
+   "capital": 4.4
+  },
+  "601018": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 5.9
+  },
+  "601328": {
+   "chain": 4.0,
+   "surge": 2.0,
+   "capital": 5.4
+  },
+  "601899": {
+   "chain": 3.5,
+   "surge": 4.8,
+   "capital": 5.9
+  },
+  "601963": {
+   "chain": 5.0,
+   "surge": 2.5,
+   "capital": 4.4
+  },
+  "605399": {
+   "chain": 3.2,
+   "surge": 2.5,
+   "capital": 6.2
+  },
+  "605296": {
+   "chain": 2.5,
+   "surge": 4.5,
+   "capital": 6.9
+  },
+  "600222": {
+   "chain": 2.5,
+   "surge": 2.5,
+   "capital": 6.9
+  },
+  "001872": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 5.8
+  },
+  "002353": {
+   "chain": 2.5,
+   "surge": 3.5,
+   "capital": 6.8
+  },
+  "600226": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 5.8
+  },
+  "600869": {
+   "chain": 4.5,
+   "surge": 2.0,
+   "capital": 4.8
+  },
+  "688111": {
+   "chain": 3.8,
+   "surge": 2.5,
+   "capital": 5.5
+  },
+  "300832": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 4.7
+  },
+  "603025": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 5.2
+  },
+  "603920": {
+   "chain": 5.5,
+   "surge": 3.0,
+   "capital": 3.7
+  },
+  "001965": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 5.7
+  },
+  "002023": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 5.7
+  },
+  "002607": {
+   "chain": 2.5,
+   "surge": 4.0,
+   "capital": 6.7
+  },
+  "000975": {
+   "chain": 3.5,
+   "surge": 4.5,
+   "capital": 5.6
+  },
+  "002714": {
+   "chain": 2.4,
+   "surge": 2.5,
+   "capital": 6.7
+  },
+  "300450": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 4.6
+  },
+  "301358": {
+   "chain": 3.0,
+   "surge": 4.0,
+   "capital": 6.1
+  },
+  "600236": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 5.6
+  },
+  "600795": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 5.1
+  },
+  "600956": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 4.6
+  },
+  "601991": {
+   "chain": 3.5,
+   "surge": 6.5,
+   "capital": 5.6
+  },
+  "688711": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 5.6
+  },
+  "300353": {
+   "chain": 3.8,
+   "surge": 3.5,
+   "capital": 5.3
+  },
+  "002311": {
+   "chain": 2.5,
+   "surge": 3.5,
+   "capital": 6.5
+  },
+  "002460": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 5.5
+  },
+  "300806": {
+   "chain": 6.5,
+   "surge": 2.0,
+   "capital": 2.5
+  },
+  "600009": {
+   "chain": 3.0,
+   "surge": 3.0,
+   "capital": 6.0
+  },
+  "601958": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 1.5
+  },
+  "688301": {
+   "chain": 6.5,
+   "surge": 3.5,
+   "capital": 2.5
+  },
+  "688775": {
+   "chain": 4.5,
+   "surge": 1.5,
+   "capital": 4.5
+  },
+  "600489": {
+   "chain": 3.5,
+   "surge": 7.0,
+   "capital": 5.5
+  },
+  "600845": {
+   "chain": 6.5,
+   "surge": 5.0,
+   "capital": 2.5
+  },
+  "605117": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 5.5
+  },
+  "002158": {
+   "chain": 5.5,
+   "surge": 3.0,
+   "capital": 3.5
+  },
+  "601069": {
+   "chain": 2.8,
+   "surge": 4.5,
+   "capital": 6.2
+  },
+  "603031": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 4.5
+  },
+  "000958": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 5.4
+  },
+  "002625": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 4.4
+  },
+  "301666": {
+   "chain": 4.5,
+   "surge": 2.0,
+   "capital": 4.4
+  },
+  "600547": {
+   "chain": 3.5,
+   "surge": 5.0,
+   "capital": 5.4
+  },
+  "600268": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 5.4
+  },
+  "300782": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 4.8
+  },
+  "600096": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 5.3
+  },
+  "605198": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 4.8
+  },
+  "300498": {
+   "chain": 2.4,
+   "surge": 4.0,
+   "capital": 6.4
+  },
+  "002416": {
+   "chain": 4.0,
+   "surge": 1.5,
+   "capital": 4.7
+  },
+  "300124": {
+   "chain": 4.0,
+   "surge": 3.0,
+   "capital": 4.7
+  },
+  "600362": {
+   "chain": 3.2,
+   "surge": 2.5,
+   "capital": 5.5
+  },
+  "688187": {
+   "chain": 3.5,
+   "surge": 4.0,
+   "capital": 5.2
+  },
+  "002928": {
+   "chain": 2.5,
+   "surge": 2.5,
+   "capital": 6.2
+  },
+  "002299": {
+   "chain": 2.5,
+   "surge": 5.0,
+   "capital": 6.1
+  },
+  "002938": {
+   "chain": 4.8,
+   "surge": 2.0,
+   "capital": 3.8
+  },
+  "601868": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 5.1
+  },
+  "000876": {
+   "chain": 2.5,
+   "surge": 4.0,
+   "capital": 6.1
+  },
+  "002008": {
+   "chain": 6.5,
+   "surge": 2.5,
+   "capital": 2.0
+  },
+  "600995": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 4.5
+  },
+  "601127": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 4.5
+  },
+  "601816": {
+   "chain": 3.0,
+   "surge": 3.0,
+   "capital": 5.5
+  },
+  "003816": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 5.0
+  },
+  "603757": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 3.0
+  },
+  "688559": {
+   "chain": 6.0,
+   "surge": 3.5,
+   "capital": 2.5
+  },
+  "603195": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 4.9
+  },
+  "600023": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 4.9
+  },
+  "003019": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 4.4
+  },
+  "000807": {
+   "chain": 3.8,
+   "surge": 3.5,
+   "capital": 4.5
+  },
+  "001280": {
+   "chain": 7.5,
+   "surge": 3.5,
+   "capital": 0.8
+  },
+  "300274": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.8
+  },
+  "601598": {
+   "chain": 3.0,
+   "surge": 2.8,
+   "capital": 5.3
+  },
+  "600026": {
+   "chain": 3.0,
+   "surge": 2.5,
+   "capital": 5.3
+  },
+  "688055": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 4.8
+  },
+  "002897": {
+   "chain": 3.0,
+   "surge": 3.5,
+   "capital": 5.3
+  },
+  "002929": {
+   "chain": 3.0,
+   "surge": 1.0,
+   "capital": 5.3
+  },
+  "000301": {
+   "chain": 2.0,
+   "surge": 8.5,
+   "capital": 6.3
+  },
+  "002568": {
+   "chain": 3.5,
+   "surge": 4.5,
+   "capital": 4.7
+  },
+  "600011": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.7
+  },
+  "600219": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 4.7
+  },
+  "688800": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 4.7
+  },
+  "002532": {
+   "chain": 3.5,
+   "surge": 8.5,
+   "capital": 4.6
+  },
+  "300776": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 5.6
+  },
+  "600930": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.6
+  },
+  "600989": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 4.6
+  },
+  "601988": {
+   "chain": 3.0,
+   "surge": 1.5,
+   "capital": 5.1
+  },
+  "000539": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.5
+  },
+  "001391": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 4.5
+  },
+  "002379": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 4.5
+  },
+  "002415": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 2.5
+  },
+  "300957": {
+   "chain": 3.0,
+   "surge": 3.0,
+   "capital": 5.0
+  },
+  "301345": {
+   "chain": 5.5,
+   "surge": 9.0,
+   "capital": 2.5
+  },
+  "600292": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 5.5
+  },
+  "600415": {
+   "chain": 5.5,
+   "surge": 6.5,
+   "capital": 2.5
+  },
+  "600418": {
+   "chain": 3.5,
+   "surge": 1.5,
+   "capital": 4.5
+  },
+  "601126": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.5
+  },
+  "000811": {
+   "chain": 5.5,
+   "surge": 3.0,
+   "capital": 2.5
+  },
+  "002738": {
+   "chain": 5.0,
+   "surge": 6.5,
+   "capital": 3.0
+  },
+  "002624": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 4.5
+  },
+  "000933": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.4
+  },
+  "600578": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.4
+  },
+  "600863": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.4
+  },
+  "688668": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 4.4
+  },
+  "300328": {
+   "chain": 3.5,
+   "surge": 1.5,
+   "capital": 4.4
+  },
+  "000625": {
+   "chain": 3.0,
+   "surge": 2.5,
+   "capital": 4.8
+  },
+  "600027": {
+   "chain": 3.0,
+   "surge": 1.0,
+   "capital": 4.8
+  },
+  "603198": {
+   "chain": 2.0,
+   "surge": 2.5,
+   "capital": 5.8
+  },
+  "600642": {
+   "chain": 2.5,
+   "surge": 2.5,
+   "capital": 5.2
+  },
+  "601877": {
+   "chain": 2.5,
+   "surge": 2.5,
+   "capital": 5.2
+  },
+  "600517": {
+   "chain": 2.5,
+   "surge": 2.5,
+   "capital": 5.1
+  },
+  "600733": {
+   "chain": 3.0,
+   "surge": 2.5,
+   "capital": 4.6
+  },
+  "600803": {
+   "chain": 2.5,
+   "surge": 3.0,
+   "capital": 5.1
+  },
+  "300769": {
+   "chain": 1.5,
+   "surge": 2.0,
+   "capital": 6.1
+  },
+  "000001": {
+   "chain": 2.0,
+   "surge": 1.5,
+   "capital": 5.5
+  },
+  "002595": {
+   "chain": 5.5,
+   "surge": 5.0,
+   "capital": 2.0
+  },
+  "600021": {
+   "chain": 3.0,
+   "surge": 2.5,
+   "capital": 4.5
+  },
+  "601012": {
+   "chain": 2.0,
+   "surge": 2.0,
+   "capital": 5.5
+  },
+  "603129": {
+   "chain": 5.0,
+   "surge": 5.5,
+   "capital": 2.5
+  },
+  "688172": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 2.0
+  },
+  "688387": {
+   "chain": 4.0,
+   "surge": 3.5,
+   "capital": 3.5
+  },
+  "002396": {
+   "chain": 4.5,
+   "surge": 8.0,
+   "capital": 3.0
+  },
+  "300043": {
+   "chain": 3.0,
+   "surge": 2.0,
+   "capital": 4.4
+  },
+  "600010": {
+   "chain": 2.5,
+   "surge": 2.0,
+   "capital": 4.8
+  },
+  "688271": {
+   "chain": 4.8,
+   "surge": 4.0,
+   "capital": 2.5
+  },
+  "002927": {
+   "chain": 2.5,
+   "surge": 2.0,
+   "capital": 4.8
+  },
+  "600468": {
+   "chain": 2.5,
+   "surge": 3.0,
+   "capital": 4.8
+  },
+  "001289": {
+   "chain": 2.5,
+   "surge": 2.0,
+   "capital": 4.7
+  },
+  "601952": {
+   "chain": 2.5,
+   "surge": 2.5,
+   "capital": 4.7
+  },
+  "600438": {
+   "chain": 2.2,
+   "surge": 1.0,
+   "capital": 4.9
+  },
+  "605366": {
+   "chain": 1.2,
+   "surge": 0.5,
+   "capital": 5.9
+  },
+  "300015": {
+   "chain": 5.0,
+   "surge": 2.5,
+   "capital": 2.0
+  },
+  "300083": {
+   "chain": 4.5,
+   "surge": 4.0,
+   "capital": 2.5
+  },
+  "300760": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 1.5
+  },
+  "600941": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 2.5
+  },
+  "601298": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 4.5
+  },
+  "603298": {
+   "chain": 4.5,
+   "surge": 4.0,
+   "capital": 2.5
+  },
+  "002706": {
+   "chain": 6.0,
+   "surge": 3.5,
+   "capital": 1.0
+  },
+  "301191": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 2.0
+  },
+  "600726": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 4.4
+  },
+  "300846": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 4.4
+  },
+  "601872": {
+   "chain": 5.8,
+   "surge": 9.0,
+   "capital": 1.0
+  },
+  "603806": {
+   "chain": 1.5,
+   "surge": 1.0,
+   "capital": 5.3
+  },
+  "600004": {
+   "chain": 1.5,
+   "surge": 3.0,
+   "capital": 5.2
+  },
+  "000799": {
+   "chain": 1.5,
+   "surge": 1.0,
+   "capital": 5.2
+  },
+  "000559": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 2.0
+  },
+  "000708": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 1.0
+  },
+  "002236": {
+   "chain": 4.5,
+   "surge": 4.0,
+   "capital": 2.0
+  },
+  "300628": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 1.5
+  },
+  "601100": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 2.0
+  },
+  "605099": {
+   "chain": 5.5,
+   "surge": 4.0,
+   "capital": 1.0
+  },
+  "601965": {
+   "chain": 5.0,
+   "surge": 4.0,
+   "capital": 1.5
+  },
+  "600895": {
+   "chain": 5.5,
+   "surge": 3.5,
+   "capital": 1.0
+  },
+  "000917": {
+   "chain": 5.5,
+   "surge": 2.5,
+   "capital": 1.0
+  },
+  "600702": {
+   "chain": 1.8,
+   "surge": 1.5,
+   "capital": 4.6
+  },
+  "000333": {
+   "chain": 4.8,
+   "surge": 5.5,
+   "capital": 1.5
+  },
+  "600779": {
+   "chain": 1.5,
+   "surge": 1.0,
+   "capital": 4.8
+  },
+  "300012": {
+   "chain": 4.5,
+   "surge": 3.5,
+   "capital": 1.5
+  },
+  "301498": {
+   "chain": 4.5,
+   "surge": 2.0,
+   "capital": 1.5
+  },
+  "600660": {
+   "chain": 5.0,
+   "surge": 4.5,
+   "capital": 1.0
+  },
+  "601728": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 1.5
+  },
+  "603268": {
+   "chain": 4.5,
+   "surge": 6.5,
+   "capital": 1.5
+  },
+  "603296": {
+   "chain": 5.0,
+   "surge": 3.5,
+   "capital": 1.0
+  },
+  "603766": {
+   "chain": 4.5,
+   "surge": 6.5,
+   "capital": 1.5
+  },
+  "688188": {
+   "chain": 4.0,
+   "surge": 4.5,
+   "capital": 2.0
+  },
+  "688777": {
+   "chain": 4.5,
+   "surge": 2.5,
+   "capital": 1.5
+  },
+  "600066": {
+   "chain": 4.5,
+   "surge": 4.5,
+   "capital": 1.5
+  },
+  "002779": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 2.5
+  },
+  "000425": {
+   "chain": 4.5,
+   "surge": 5.0,
+   "capital": 1.0
+  },
+  "600031": {
+   "chain": 4.5,
+   "surge": 6.5,
+   "capital": 1.0
+  },
+  "605499": {
+   "chain": 4.5,
+   "surge": 4.5,
+   "capital": 1.0
+  },
+  "000063": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 1.5
+  },
+  "000651": {
+   "chain": 3.5,
+   "surge": 2.0,
+   "capital": 1.5
+  },
+  "600741": {
+   "chain": 4.5,
+   "surge": 3.0,
+   "capital": 0.5
+  },
+  "603733": {
+   "chain": 4.0,
+   "surge": 2.5,
+   "capital": 1.0
+  },
+  "002739": {
+   "chain": 3.0,
+   "surge": 6.5,
+   "capital": 2.0
+  },
+  "688295": {
+   "chain": 3.5,
+   "surge": 2.5,
+   "capital": 1.5
+  },
+  "002318": {
+   "chain": 3.5,
+   "surge": 3.0,
+   "capital": 1.0
+  },
+  "002444": {
+   "chain": 3.5,
+   "surge": 4.5,
+   "capital": 1.0
+  },
+  "002920": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 1.0
+  },
+  "688698": {
+   "chain": 3.5,
+   "surge": 3.5,
+   "capital": 1.0
+  },
+  "603260": {
+   "chain": 3.0,
+   "surge": 2.0,
+   "capital": 1.2
+  },
+  "002466": {
+   "chain": 3.0,
+   "surge": 2.0,
+   "capital": 1.0
+  },
+  "301208": {
+   "chain": 3.0,
+   "surge": 1.5,
+   "capital": 1.0
+  },
+  "301048": {
+   "chain": 3.0,
+   "surge": 3.0,
+   "capital": 0.5
+  },
+  "688570": {
+   "chain": 2.5,
+   "surge": 1.5,
+   "capital": 0.5
+  },
+  "600410": {
+   "chain": 2.0,
+   "surge": 1.0,
+   "capital": 1.0
+  }
+ },
+ "ranking": [
+  {
+   "rank": 1,
+   "code": "603186",
+   "name": "华正新材",
+   "score": 34.3,
+   "confidence": 0.7,
+   "confidence_level": "高",
+   "key_thesis": "2025年归母净利润2.77亿同增384%，CF净利比1.28",
+   "key_risk": "60日大涨162%后近5日急跌18%，见顶抛压大",
+   "supporting_claim_ids": [],
+   "risk_flags": []
+  },
+  {
+   "rank": 2,
+   "code": "000938",
+   "name": "紫光股份",
+   "score": 33.8,
+   "confidence": 0.7,
+   "confidence_level": "高",
+   "key_thesis": "高端交换机份额稳居前二深度绑定三大运营商集采",
+   "key_risk": "举债收购致资产负债率畸高至81.85%吞噬净利",
+   "supporting_claim_ids": [],
+   "risk_flags": []
+  },
+  {
+   "rank": 3,
+   "code": "300442",
+   "name": "润泽科技",
+   "score": 32.6,
+   "confidence": 0.7,
+   "confidence_level": "高",
+   "key_thesis": "毛利率46%远超行业均值，高功率液冷机柜具强定价溢价",
+   "key_risk": "净利率89%含大额非经常性损益，现金流净利比仅0.65",
+   "supporting_claim_ids": [],
+   "risk_flags": []
+  },
+  {
+   "rank": 4,
+   "code": "688072",
+   "name": "XD拓荆科",
+   "score": 32.6,
+   "confidence": 0.7,
+   "confidence_level": "高",
+   "key_thesis": "研发费率11.8%绑死长存/中芯，获扩产大单",
+   "key_risk": "TTM PEG达4.13偏贵，60日涨121%承压",
+   "supporting_claim_ids": [],
+   "risk_flags": []
+  },
+  {
+   "rank": 5,
+   "code": "688141",
+   "name": "杰华特",
+   "score": 32.3,
+   "confidence": 0.7,
+   "confidence_level": "高",
+   "key_thesis": "研发费9.57亿占收36%，深度绑定头部代工厂攻坚高端算力电源",
+   "key_risk": "深陷价格战2025年净亏7.17亿，经营现金流持续净流出3.24亿",
+   "supporting_claim_ids": [],
+   "risk_flags": []
+  }
+ ]
+}

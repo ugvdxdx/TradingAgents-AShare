@@ -10,6 +10,9 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
   Step 2: 知识提取        (LLM extract → research.db)
   Step 2.5: 板块缺口发现  (热但池未覆盖的主题 → web search找股 → 生成+V3评分入池) [池子边界: 加热]
   Step 2.6: chain tier更新 (用最新研报调赛道→热度档映射, 6档可重叠骨架不变; manual/auto)
+  Step 2.7: 异动分析      (movement attribution, web search 涨跌原因 → 预填 movement driver 缓存)
+  Step 2.8: 业绩预告拉取  (akshare 东财 stock_yjyg_em → forecast 缓存, surge 催化源)
+  Step 2.9: 业绩快报拉取  (akshare 东财 stock_yjkb_em → express 缓存, 快报优先覆盖预告, surge 催化源)
   Step 3: 研报触发刷新    (refresh_fundamentals.py — Web+Tushare+研报 → 彻底重写)
   Step 4: capital 更新    (纯量化, 0 LLM)
   Step 5: 过热股检测      (高分滞涨搜索验证)
@@ -17,7 +20,8 @@ update_fundamentals_from_research.py / v3_full_score.py 等各自独立执行）
   Step 6.5: 冷门清理      (V3<7+chain<4+cap<3+r20<5+无研报 → 移入冷池) [池子边界: 热→冷]
   Step 7: K 线增量更新    (update_klines_daily)
   Step 8: 世界知识更新    (update_world_knowledge)
-  Step 9: 每日快照        (snapshot)
+  Step 9: V3 评分缓存刷新  (v3_full_score, needs_run 重评)
+  Step 10: 选股效果跟踪    (track_picks — 近30交易日打分TOP20涨跌幅, 每日一份)
 
 用法:
   uv run python3 run_daily_maintenance.py                  # 全部步骤
@@ -193,6 +197,22 @@ def step2e_fetch_forecast():
     return result.get("n_records", 0) > 0
 
 
+def step2f_fetch_express():
+    """Step 2.9: 业绩快报拉取 — akshare 拉近期快报写缓存, 供 v3 surge 催化判断。
+
+    快报披露窗口在预告之后、正式财报之前, 数据比预告更准(初步核算值 vs 预告区间)。
+    消费端 _compute_forecast_signals 按"快报优先覆盖预告"合并: 同一股同时有两者时用快报。
+    必须在 step9 rescore 前跑 (评分时 _call 读缓存注入 surge_block)。
+    """
+    print('\n' + '=' * 60)
+    print('Step 2.9: 业绩快报拉取 (预填 express 缓存)')
+    print('=' * 60)
+
+    from picker.data.express_fetcher import precompute_pool_express
+    result = precompute_pool_express()
+    return result.get("n_records", 0) > 0
+
+
 def step2b_discover_gap(v3_threshold: float = 8.0):
     """Step 2.5: 板块缺口发现 — 研报热但池未覆盖的主题, web search 找股入池。
 
@@ -209,20 +229,27 @@ def step2b_discover_gap(v3_threshold: float = 8.0):
     return len(admitted) > 0
 
 
-def step3_refresh_fundamentals(date_from: str, dry_run: bool = False, workers: int = 5):
-    """Step 3: 研报触发 fundamentals 彻底重写（替代旧增量追加）
+def step3_refresh_fundamentals(date_from: str, dry_run: bool = False, workers: int = 5,
+                               resume: bool = True):
+    """Step 3: 研报触发 fundamentals 彻底重写（仅 fundamentals, 不评 V3）。
+
+    V3 评分统一交 Step 9 (needs_run 全池重评, 用当日新世界知识)。此处刷新成功后由
+    refresh_one(do_v3_rescore=False) 清空该股 *_scored_date, 确保 Step 9 重评跟进。
 
     Args:
         workers: 并发线程数 (LLM 为 IO 密集, 线程池并行刷新; 默认 5, 串行用 1)。
+        resume: 断点续跑。中断重跑自动跳过本 run 已成功的股; --step3-restart 置 False。
     """
     print('\n' + '=' * 60)
-    print(f'Step 3: 研报触发 fundamentals 彻底重写 (since {date_from}, workers={workers})')
+    print(f'Step 3: 研报触发 fundamentals 彻底重写 (since {date_from}, workers={workers}'
+          f'{", 断点续跑" if resume else ", 忽略checkpoint从头算"})')
     print('=' * 60)
 
     from picker.pipeline.refresh_fundamentals import refresh_from_research
 
     days = (datetime.now() - datetime.strptime(date_from, '%Y-%m-%d')).days
-    result = refresh_from_research(days=days, dry_run=dry_run, workers=workers)
+    result = refresh_from_research(days=days, dry_run=dry_run, workers=workers,
+                                   do_v3_rescore=False, resume=resume)
     print(f'刷新完成: 更新 {result["updated"]}, 失败 {result["failed"]}')
     return result['updated'] > 0
 
@@ -579,9 +606,35 @@ def step9_rescore():
         return False
 
 
+def step10_track_picks():
+    """Step 10: 选股效果跟踪 — 闭市后汇总近30交易日各日打分TOP20到当前的涨跌幅。
+
+    读 v3_snapshots/ 各日快照 (打分=chain+surge+capital) + kline_cache 价格,
+    产出 data/caches/pick_tracking/<as_of>.json (每交易日一份)。
+    依赖当日 K线已更新 (Step 7) 且当日选股快照已写 (由选股流水线产出)。
+    """
+    print('\n' + '=' * 60)
+    print('Step 10: 选股效果跟踪 (近30交易日打分TOP20涨跌幅)')
+    print('=' * 60)
+
+    try:
+        from picker.pipeline.track_picks import run_tracking
+        results = run_tracking()
+        if not results:
+            print('⚠ 跟踪生成失败 (无交易日历或快照)')
+            return False
+        as_of = results[-1]['as_of_date']
+        print(f'  ✓ 已保存至 {paths.PICK_TRACKING_DIR} '
+              f'(as_of={as_of}, 生成选股日文件 {len(results)} 个)')
+        return True
+    except Exception as e:
+        print(f'⚠ 选股效果跟踪失败: {e}')
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(description='每日维护统一编排器')
-    parser.add_argument('--step', type=int, default=0, help='只执行指定步骤 (1-9, 0=全部)')
+    parser.add_argument('--step', type=int, default=0, help='只执行指定步骤 (1-10, 0=全部)')
     parser.add_argument('--from', dest='date_from', default='', help='采集起始日 (YYYY-MM-DD，默认近3天)')
     parser.add_argument('--to', dest='date_to', default='', help='采集结束日 (YYYY-MM-DD，默认今天)')
     parser.add_argument('--skip-research', action='store_true', help='跳过整个研报链路 (step1-3 含缺口发现)')
@@ -590,6 +643,7 @@ def main():
     parser.add_argument('--skip-movement', action='store_true', help='跳过异动分析 (step2.7)')
     parser.add_argument('--skip-chain-tiers', action='store_true', help='跳过 chain tier_map 更新 (step2.6)')
     parser.add_argument('--skip-forecast', action='store_true', help='跳过业绩预告拉取 (step2.8)')
+    parser.add_argument('--skip-express', action='store_true', help='跳过业绩快报拉取 (step2.9)')
     parser.add_argument('--chain-tiers-mode', dest='chain_tiers_mode', default='auto',
                         choices=['manual', 'auto'],
                         help='chain tier 更新模式: manual=只输出diff不写 / auto=diff有变化即写入(归档可回滚, 默认)')
@@ -607,6 +661,8 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='只输出不写文件')
     parser.add_argument('--workers', '-w', type=int, default=5,
                         help='Step 3 fundamentals 刷新并发线程数 (默认5; LLM为IO密集, 串行用1)')
+    parser.add_argument('--step3-restart', action='store_true',
+                        help='Step 3 忽略断点续跑 checkpoint, 从头刷新 (默认自动续跑)')
     args = parser.parse_args()
 
     today = datetime.now().strftime('%Y-%m-%d')
@@ -703,7 +759,20 @@ def main():
                 import traceback
                 traceback.print_exc()
                 results['2.8'] = False
-        _run(3, step3_refresh_fundamentals, date_from, args.dry_run, args.workers)
+        # Step 2.9: 业绩快报拉取 (预告之后, step3/step9 评分前 — express 快报优先覆盖预告, surge 催化输入)
+        if not args.skip_express and step in (0,):
+            try:
+                results['2.9'] = step2f_fetch_express()
+            except Exception as e:
+                print(f'\n✗ Step 2.9 异常: {type(e).__name__}: {e}')
+                import traceback
+                traceback.print_exc()
+                results['2.9'] = False
+        # Step 8: 世界知识更新 (前移至 Step 3 前 — fundamentals 重写 & Step9 V3 评分都依赖
+        # 当日新世界知识; 仅依赖 Step 2 研报提取 + Step 2.7 异动归因, 不依赖 Step 3)
+        _run(8, step8_world_knowledge)
+        _run(3, step3_refresh_fundamentals, date_from, args.dry_run, args.workers,
+              resume=not args.step3_restart)
 
     # ── 收集数据采集子进程结果 (研报跑完后join) ──
     if data_procs:
@@ -724,7 +793,7 @@ def main():
             traceback.print_exc()
             results['6.5'] = False
 
-    # ── 世界知识 (Step 8); K线已前移到并行采集阶段 ──
+    # ── 评分链路 (Step 8 世界知识已前移至 Step 3 前; K线已前移到并行采集阶段) ──
     # Step 7.5: 估值字段低频回填 (每7天, 在评分前刷新 circ_mv 供 capital 资金流折扣)
     if step in (0,) and not args.skip_data:
         try:
@@ -732,8 +801,8 @@ def main():
         except Exception as e:
             print(f'\n✗ Step 7.5 异常: {type(e).__name__}: {e}')
             results['7.5'] = False
-    _run(8, step8_world_knowledge)
-    _run(9, step9_rescore)  # V3 评分缓存刷新 (needs_run 重评); 快照由选股时写
+    _run(9, step9_rescore)  # V3 全池重评 (needs_run; 含 Step 3 刷新股, 用当日新世界知识); 快照由选股时写
+    _run(10, step10_track_picks)  # 选股效果跟踪 (近30交易日打分TOP20涨跌幅)
 
     elapsed = time.time() - t0
     print(f"\n{'='*60}")

@@ -88,9 +88,16 @@ NEED_GENERATE_PATH = _cache("need_generate.json")
 # 每日选股快照目录: 每天一份, 含全池分数 + TOP5/10推荐结果 + 理由
 # 回测按 cutoff 取最近快照, 消除 chain/surge 前视偏差
 V3_SNAPSHOT_DIR = os.path.join(CACHES_DIR, "v3_snapshots")
+
+# 选股效果跟踪目录: 每交易日闭市后一份, 汇总近 30 个交易日各日打分 TOP20
+# 到当前收盘为止的涨跌幅 (见 picker/pipeline/track_picks.py)
+PICK_TRACKING_DIR = os.path.join(CACHES_DIR, "pick_tracking")
 V3_FULL_BACKTEST_PATH = _cache("v3_full_backtest.json")
 BACKTEST_CORRELATION_PATH = _cache("backtest_correlation.json")
 FORECAST_CACHE = _cache("earnings_forecast_cache.json")  # 业绩预告缓存(每日刷新, surge催化源)
+EXPRESS_CACHE = _cache("earnings_express_cache.json")   # 业绩快报缓存(每日刷新, surge催化源, 快报优先覆盖预告)
+# Step3 fundamentals 刷新断点续跑 checkpoint (key=scope: refresh_from_research/refresh_all)
+STEP3_REFRESH_CHECKPOINT = _cache("step3_refresh_checkpoint.json")
 
 # 旧名兼容: 部分模块用 LLM_CACHE_FILE 变量名
 LLM_CACHE_FILE = FUNDAMENTAL_LLM_SCORES_PATH

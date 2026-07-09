@@ -30,9 +30,10 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
-# 并发安全: V3_CACHE 读-改-写 & LLM client 初始化的全局锁
+# 并发安全: V3_CACHE 读-改-写 & LLM client 初始化 & checkpoint 写入的全局锁
 _V3_LOCK = threading.Lock()
 _LLM_LOCK = threading.Lock()
+_CKPT_LOCK = threading.Lock()
 
 # 项目根加进 sys.path (兼容从子目录直接运行)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -644,6 +645,11 @@ def refresh_one(code: str, world_knowledge: str = "",
                 print(f"    ⚠ V3 未重评: _call 失败 (LLM 空/解析失败/重试耗尽, 旧分保留)")
         except Exception as e:
             print(f"    ⚠ V3 重评失败: {e}")
+    else:
+        # V3 评分统一交 Step 9 (run_daily_maintenance 主链路, 世界知识已就绪);
+        # 此处仅标记该股 V3 待重评, 避免 needs_run 因 scored_date=今天 跳过
+        # (fundamentals 已彻底重写, V3 分必须跟进)
+        _mark_v3_stale(code)
 
     return new_data
 
@@ -687,6 +693,129 @@ def _trigger_v3_rescore(code: str, fund_data: dict):
             json.dump(cache, f, ensure_ascii=False, indent=1)
         os.replace(tmp, v3.V3_CACHE)  # 原子替换
     return "ok"
+
+
+def _mark_v3_stale(code: str):
+    """标记单只股票 V3 chain/surge 过期 (清空 *_scored_date), 使 Step 9 needs_run 重评。
+
+    用于 refresh_one(do_v3_rescore=False) 路径: fundamentals 已彻底重写, V3 分必须跟进,
+    但评分动作统一交 Step 9 (世界知识在该链路已更新就绪)。此处仅置 chain/surge 的
+    scored_date 为空 → needs_run 判过期。保留 capital(G量化值) 等其他字段; entry 不存在
+    则跳过 (Step 9 会因"缺分"重评)。
+    """
+    from picker.scoring import v3_full_score as v3
+    with _V3_LOCK:
+        if not os.path.exists(v3.V3_CACHE):
+            return
+        try:
+            with open(v3.V3_CACHE, "r", encoding="utf-8") as f:
+                cache = json.load(f)
+        except Exception:
+            return
+        entry = cache.get(code)
+        if not isinstance(entry, dict):
+            return
+        entry["chain_scored_date"] = ""
+        entry["surge_scored_date"] = ""
+        tmp = v3.V3_CACHE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=1)
+        os.replace(tmp, v3.V3_CACHE)
+
+
+# ═══════════════════════════════════════════════════════════
+# 断点续跑 checkpoint (Step3 fundamentals 刷新)
+# ═══════════════════════════════════════════════════════════
+
+# checkpoint 文件结构: {scope: {version, scope, days, do_web_search, do_v3_rescore,
+#   started_at, todo_total, done:[code,...]}}
+# 两 scope (refresh_from_research / refresh_all) 共用同一文件, 互不干扰。
+_SCOPE_RESEARCH = "refresh_from_research"
+_SCOPE_ALL = "refresh_all"
+
+
+def _ckpt_read_all() -> dict:
+    """读整个 checkpoint 文件; 不存在/损坏返回 {}。"""
+    path = paths.STEP3_REFRESH_CHECKPOINT
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f) or {}
+    except Exception:
+        return {}
+
+
+def _ckpt_write_all(data: dict) -> None:
+    """原子写整个 checkpoint 文件 (tmp + os.replace)。调用方需持 _CKPT_LOCK。"""
+    path = paths.STEP3_REFRESH_CHECKPOINT
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, path)
+
+
+def _load_matching_checkpoint(scope: str, **fingerprint) -> Optional[dict]:
+    """读取并校验 checkpoint 条目: scope + 入参指纹全匹配且 done 非空才返回, 否则 None。
+
+    fingerprint: refresh_from_research 传 days/do_web_search/do_v3_rescore;
+                 refresh_all 不传 (仅 scope 匹配)。
+    """
+    entry = _ckpt_read_all().get(scope)
+    if not isinstance(entry, dict):
+        return None
+    for k, v in fingerprint.items():
+        if entry.get(k) != v:
+            return None
+    if not entry.get("done"):
+        return None
+    return entry
+
+
+def _init_checkpoint(scope: str, todo_total: int, **fingerprint) -> None:
+    """初始化/覆盖一个 scope 的 checkpoint 条目 (done=[], 从头开始)。"""
+    with _CKPT_LOCK:
+        data = _ckpt_read_all()
+        data[scope] = {
+            "version": 1,
+            "scope": scope,
+            "started_at": datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+            "todo_total": todo_total,
+            "done": [],
+            **fingerprint,
+        }
+        _ckpt_write_all(data)
+
+
+def _mark_done(scope: str, code: str) -> None:
+    """把 code 追加到该 scope 的 done 列表并立即持久化 (并发安全, 每只成功后调用)。"""
+    with _CKPT_LOCK:
+        data = _ckpt_read_all()
+        entry = data.get(scope)
+        if not isinstance(entry, dict):
+            return  # scope 未初始化 (resume=False 路径), 忽略
+        done = entry.setdefault("done", [])
+        if code in done:
+            return
+        done.append(code)
+        _ckpt_write_all(data)
+
+
+def _clear_checkpoint(scope: str) -> None:
+    """删除该 scope 条目 (全部跑完调用); 文件空则删文件保持干净。"""
+    with _CKPT_LOCK:
+        data = _ckpt_read_all()
+        if scope not in data:
+            return
+        data.pop(scope, None)
+        if data:
+            _ckpt_write_all(data)
+        else:
+            try:
+                os.remove(paths.STEP3_REFRESH_CHECKPOINT)
+            except OSError:
+                pass
 
 
 # ═══════════════════════════════════════════════════════════
@@ -738,12 +867,16 @@ def refresh_from_research(days: int = 3, dry_run: bool = False,
                           max_stocks: int = 0,
                           do_web_search: bool = True,
                           do_v3_rescore: bool = True,
-                          workers: int = 5) -> dict:
+                          workers: int = 5,
+                          resume: bool = True) -> dict:
     """对近期有研报提及的个股批量刷新 fundamentals。
 
     Args:
         workers: 并发线程数（LLM 为 IO 密集，线程池即可）。>1 时并行刷新。
                  V3_CACHE 写入已用全局锁+原子写保证并发安全。
+        resume: 断点续跑。True 时记录已成功落盘的 code 到 checkpoint, 中断重跑
+                自动跳过已完成的; 入参指纹 (days/do_web_search/do_v3_rescore) 变化
+                则视为新任务从头算。False 时忽略并清除旧 checkpoint。
 
     Returns:
         {updated: int, failed: int, stocks: [(code, name, success)]}
@@ -800,11 +933,34 @@ def refresh_from_research(days: int = 3, dry_run: bool = False,
         return {'updated': 0, 'failed': 0, 'stocks': [(c, n, False) for c, n in stocks]}
 
     todo = stocks[:max_stocks] if max_stocks > 0 else stocks
+
+    # ── 断点续跑: 剔除已完成 (refresh_one 成功落盘的 code 记在 checkpoint) ──
+    # 重新算 todo 再减 done: 已完成→跳过, 失败→重试, 断点期间新增研报股→纳入
+    if not resume:
+        _clear_checkpoint(_SCOPE_RESEARCH)  # --ignore-checkpoint: 清旧残留, 从头算
+    scope = _SCOPE_RESEARCH if resume else None
+    if resume:
+        ckpt = _load_matching_checkpoint(scope, days=days,
+                                         do_web_search=do_web_search,
+                                         do_v3_rescore=do_v3_rescore)
+        if ckpt:
+            done = set(ckpt.get("done", []))
+            n_before = len(todo)
+            todo = [(c, n) for c, n in todo if c not in done]
+            if not todo:
+                print(f"📥 断点续跑: {len(done)} 只已全部完成, 清除 checkpoint")
+                _clear_checkpoint(scope)
+                return {'updated': 0, 'failed': 0, 'stocks': []}
+            print(f"📥 断点续跑: 跳过已完成 {n_before - len(todo)} 只, 剩余 {len(todo)} 只")
+        else:
+            _init_checkpoint(scope, len(todo), days=days,
+                             do_web_search=do_web_search, do_v3_rescore=do_v3_rescore)
+
     world_knowledge = _load_world_knowledge()
     n_total = len(todo)
 
     if workers > 1:
-        return _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, workers)
+        return _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, workers, scope)
 
     # ── 串行模式 ──
     updated = failed = 0
@@ -817,6 +973,8 @@ def refresh_from_research(days: int = 3, dry_run: bool = False,
                                 do_v3_rescore=do_v3_rescore)
             if result:
                 updated += 1
+                if scope:
+                    _mark_done(scope, code)
                 results.append((code, name, True))
             else:
                 failed += 1
@@ -830,11 +988,17 @@ def refresh_from_research(days: int = 3, dry_run: bool = False,
 
     print(f"\n{'='*60}")
     print(f"刷新完成: 成功 {updated}, 失败 {failed}, 共 {n_total}")
+    if scope:
+        _clear_checkpoint(scope)
     return {'updated': updated, 'failed': failed, 'stocks': results}
 
 
-def _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, workers):
-    """多线程并行刷新。每只股票互相独立，V3_CACHE 写入靠全局锁串行化。"""
+def _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, workers, scope=None):
+    """多线程并行刷新。每只股票互相独立，V3_CACHE 写入靠全局锁串行化。
+
+    Args:
+        scope: 非空时每只成功后 _mark_done 记入断点续跑 checkpoint, 全部完成后清除。
+    """
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     n_total = len(todo)
@@ -855,6 +1019,8 @@ def _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, worke
         except Exception as e:
             print(f"  [{code}] ✗ 异常: {type(e).__name__}: {e}")
             ok = False
+        if ok and scope:
+            _mark_done(scope, code)  # 立即持久化, 保证任意断点可续
         with count_lock:
             done[0] += 1
             if ok:
@@ -875,11 +1041,14 @@ def _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, worke
 
     print(f"\n{'='*60}")
     print(f"刷新完成: 成功 {updated[0]}, 失败 {failed[0]}, 共 {n_total}")
+    if scope:
+        _clear_checkpoint(scope)
     return {'updated': updated[0], 'failed': failed[0], 'stocks': results}
 
 
 def refresh_all(workers: int = 5, do_web_search: bool = True,
-                do_v3_rescore: bool = True, skip_recent_hours: int = 0) -> dict:
+                do_v3_rescore: bool = True, skip_recent_hours: int = 0,
+                resume: bool = True) -> dict:
     """全量重写所有热股 fundamentals (~537只)。
 
     新逻辑上线后的一次性全量刷新。仅遍历 fundamentals/ 热股目录;
@@ -887,6 +1056,8 @@ def refresh_all(workers: int = 5, do_web_search: bool = True,
 
     Args:
         skip_recent_hours: >0 时跳过 fetch_date 在最近N小时内的 (避免重复刷新刚跑完的)。
+        resume: 断点续跑。True 时跳过本 run 已成功落盘的股 (checkpoint 指纹:
+                skip_recent_hours/do_web_search/do_v3_rescore)。False 忽略并清除旧 checkpoint。
     """
     fund_dir = paths.FUNDAMENTALS_DIR
     cutoff = (datetime.now() - timedelta(hours=skip_recent_hours)
@@ -918,9 +1089,31 @@ def refresh_all(workers: int = 5, do_web_search: bool = True,
     print(msg, flush=True)
     if not todo:
         return {'updated': 0, 'failed': 0, 'stocks': []}
+
+    # ── 断点续跑: 剔除已完成 (指纹 = skip_recent_hours/do_web_search/do_v3_rescore) ──
+    if not resume:
+        _clear_checkpoint(_SCOPE_ALL)  # --ignore-checkpoint: 清旧残留, 从头算
+    scope = _SCOPE_ALL if resume else None
+    if resume:
+        ckpt = _load_matching_checkpoint(scope, skip_recent_hours=skip_recent_hours,
+                                         do_web_search=do_web_search,
+                                         do_v3_rescore=do_v3_rescore)
+        if ckpt:
+            done = set(ckpt.get("done", []))
+            n_before = len(todo)
+            todo = [(c, n) for c, n in todo if c not in done]
+            if not todo:
+                print(f"📥 断点续跑: {len(done)} 只已全部完成, 清除 checkpoint")
+                _clear_checkpoint(scope)
+                return {'updated': 0, 'failed': 0, 'stocks': []}
+            print(f"📥 断点续跑: 跳过已完成 {n_before - len(todo)} 只, 剩余 {len(todo)} 只")
+        else:
+            _init_checkpoint(scope, len(todo), skip_recent_hours=skip_recent_hours,
+                             do_web_search=do_web_search, do_v3_rescore=do_v3_rescore)
+
     world_knowledge = _load_world_knowledge()
     if workers > 1:
-        return _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, workers)
+        return _refresh_parallel(todo, world_knowledge, do_web_search, do_v3_rescore, workers, scope)
     updated = failed = 0
     results = []
     for i, (code, name) in enumerate(todo, 1):
@@ -929,6 +1122,8 @@ def refresh_all(workers: int = 5, do_web_search: bool = True,
             r = refresh_one(code, world_knowledge, do_web_search, do_v3_rescore)
             if r:
                 updated += 1
+                if scope:
+                    _mark_done(scope, code)
                 results.append((code, name, True))
             else:
                 failed += 1
@@ -938,6 +1133,8 @@ def refresh_all(workers: int = 5, do_web_search: bool = True,
             print(f"  ✗ {e}")
             results.append((code, name, False))
     print(f"\n{'='*60}\n全量完成: 成功 {updated}, 失败 {failed}, 共 {len(todo)}")
+    if scope:
+        _clear_checkpoint(scope)
     return {'updated': updated, 'failed': failed, 'stocks': results}
 
 
@@ -959,7 +1156,11 @@ def main():
     parser.add_argument('--no-v3', action='store_true', help='不触发 V3 重评')
     parser.add_argument('--dry-run', action='store_true', help='只看不写')
     parser.add_argument('--workers', '-w', type=int, default=5, help='并发线程数 (默认5并行; LLM为IO密集, _ZHIPU_LIMITER 兜底防429)')
+    parser.add_argument('--ignore-checkpoint', action='store_true',
+                        help='忽略断点续跑 checkpoint, 从头刷新并清除旧记录 (默认自动续跑)')
     args = parser.parse_args()
+
+    resume = not args.ignore_checkpoint
 
     if args.stock:
         # 单股模式
@@ -981,6 +1182,7 @@ def main():
             do_web_search=not args.no_web,
             do_v3_rescore=not args.no_v3,
             skip_recent_hours=args.skip_recent_hours,
+            resume=resume,
         )
     else:
         # 研报触发批量模式
@@ -991,6 +1193,7 @@ def main():
             do_web_search=not args.no_web,
             do_v3_rescore=not args.no_v3,
             workers=max(1, args.workers),
+            resume=resume,
         )
 
 

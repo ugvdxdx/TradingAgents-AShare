@@ -24,7 +24,7 @@
 
 ## 关键命令
 
-> **术语约定**:用户说"**更新研报**" = 全跑每日维护 `uv run python3 picker/pipeline/run_daily_maintenance.py`(全流程:研报采集→提取→缺口发现→chain tiers→fundamentals 刷新→capital→冷热池→K线→世界知识→快照)。默认无需再问,直接执行;Cookie 过期(code=23)时停下提示用户更新 `XIAOE_COOKIE`。
+> **术语约定**:用户说"**更新研报**" = 全跑每日维护 `uv run python3 picker/pipeline/run_daily_maintenance.py`(全流程:研报采集→提取→缺口发现→chain tiers→世界知识→fundamentals 刷新→capital→冷热池→V3 全池重评)。默认无需再问,直接执行;Cookie 过期(code=23)时停下提示用户更新 `XIAOE_COOKIE`。
 
 ```bash
 # 单只股票分析
@@ -158,7 +158,7 @@ docs/                   # 设计文档
 | 层级 | 触发方式 | 模块 | 操作 | 成本 |
 |---|---|---|---|---|
 | **L0 每日量化** | 每日自动 | `v3_full_score.py:update_capital()` | 纯量价+板块动量重算 capital | 秒级，0 LLM |
-| **L1 研报触发** | 研报有新提及 | `refresh_fundamentals.py:refresh_one()` | Web+Tushare+研报 → LLM 完整重写 JSON + V3 重评(`_trigger_v3_rescore` 统一走 `v3._call`，与 step9 同链路含 surge_block forecast+锚定) | ~30s/只 |
+| **L1 研报触发** | 研报有新提及 | `refresh_fundamentals.py:refresh_one()` | Web+Tushare+研报 → LLM 完整重写 JSON；**不评 V3**，仅清 `*_scored_date` 标记待重评(`_mark_v3_stale`)，评分统一交 Step 9(`v3._call` 同链路含 surge_block forecast+锚定+当日世界知识) | ~30s/只 |
 | **L2 每交易日盘后全量** | 每交易日盘后(step9) | `v3_full_score.py:main()` | 全部 537 只重评 chain/surge/essence | ~10-25min/天 |
 | **L3 冷启动** | 手动/新入池 | `refresh_fundamentals.py:refresh_one(name_hint=...)` | 无现有 JSON 时用 hint 兜底生成新 JSON | 按需 |
 
@@ -200,13 +200,13 @@ run_daily_maintenance.py (统一编排器)
   │   Step 2.7: 异动归因 (web)    │   │   (两者带新鲜度预检, 已最新则跳过)
   │   Step 2.5: 板块缺口发现 (web)│   └────────────────────────────────
   │   Step 2.6: chain 档位更新     │   ← 2.7异动+2.5缺口+量价+资金流为tier提供信号, 故先跑
-  │   Step 2.8: 业绩预告拉取       │   ← surge 催化源, step3/9 评分前就绪
-  │   Step 3: 彻底刷新 (研报触发)  │
+  │   Step 2.8: 业绩预告拉取       │   ← surge 催化源, 评分前就绪
+  │   Step 8: 世界知识更新         │   ← 前移至 Step3 前: fundamentals重写 & Step9 V3评分都依赖当日新世界知识
+  │   Step 3: fundamentals 刷新   │   ← 仅重写 JSON + 标记 V3 待重评(清 *_scored_date), 不评 V3
   │   Step 4: capital (纯量化)     │
   │   Step 6: 冷股激活 (冷→热)     │
   │   Step 6.5: 冷门清理 (热→冷)   │
-  │   Step 8: 世界知识             │
-  └─ Step 9: 每日快照 (snapshot)
+  └─ Step 9: V3 全池重评 (needs_run; 含 Step3 刷新股, 用当日新世界知识; 选股快照由 debate_picker_v5 写)
 ```
 
 **子任务单独跑**（`--step N` 控制单步, `0=全流程`）：
@@ -396,7 +396,7 @@ load_top_n 的 n 参数仅供测试脚本(scripts/test_deep_rank.py)做召回实
 
 | 缓存文件 | 内容 | TTL |
 |---|---|---|
-| `data/caches/fundamental_v3_scores.json` | V3 评分 (chain/surge/capital/essence) | 每交易日盘后全量+研报触发+每日capital |
+| `data/caches/fundamental_v3_scores.json` | V3 评分 (chain/surge/capital/essence) | 每交易日盘后全量(Step9)+每日capital；研报触发(Step3)仅清 `*_scored_date` 标记待重评 |
 | `data/caches/v3_snapshots/YYYY-MM-DD.json` | **每日选股快照** (全池分数+TOP5/10推荐+理由) | 每日(同日覆盖) |
 | `data/caches/mispriced_attribution_cache.json` | 统一异动归因 (原ATTR+surg合并, 双向; = UNIFIED_ATTR_CACHE) | 14天 |
 | `data/caches/movement_blacklist.json` | 异动黑名单 (概念炒作/错归因股, 冷却期拦截scan/precompute/refresh) | 30天到期自动解除 |
